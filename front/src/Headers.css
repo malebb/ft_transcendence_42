@@ -1,0 +1,15 @@
+.Headers{
+    display: flex;
+    margin: 0px;
+    padding: 0px;
+    font-size: 48px;
+    align-items: center;
+}
+
+.Header-Link{
+    text-decoration: none;
+}
+
+.Header-Link:checked{
+    text-decoration: none;
+}

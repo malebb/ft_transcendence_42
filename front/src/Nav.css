@@ -1,0 +1,11 @@
+.Nav{
+    width: 300px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.Nav-Link {
+    margin: 10 px;
+    padding: 10 px;
+    text-decoration: none;
+}
