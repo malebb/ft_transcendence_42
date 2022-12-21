@@ -1,8 +1,8 @@
 import React from 'react';
-import './App.css';
+import '../styles/App.css';
 import { Route, Routes } from 'react-router-dom';
-import Headers from './Headers';
-import Nav from './Nav';
+import Headers from '../components/Headers';
+import Nav from '../components/Nav';
 
 function App() {
   return (
