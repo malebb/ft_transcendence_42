@@ -3,6 +3,7 @@ import '../styles/App.css';
 import { Route, Routes } from 'react-router-dom';
 import Headers from '../components/Headers';
 import Nav from '../components/Nav';
+import Canvas from '../components/Canvas'
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
       <Route path='/history'/>
       <Route path='/friends'/>
       </Routes>
+	  <Canvas/>
     </div>
   );
 }
