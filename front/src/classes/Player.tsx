@@ -42,4 +42,10 @@ export default class Player
 		if (this.posY + this.vel <= this.ctx!.canvas.height - this.height)
 			this.posY += this.vel;
 	}
+
+	update_pos(player_properties : any)
+	{
+		this.posX = player_properties.posX;
+		this.posY = player_properties.posY;
+	}
 }

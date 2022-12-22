@@ -2,6 +2,7 @@ import {useRef, useEffect} from "react";
 
 import Ball from "../classes/Ball";
 import Player from "../classes/Player";
+import io   from "socket.io-client"
 
 export default function Canvas()
 {
@@ -12,14 +13,24 @@ export default function Canvas()
 	const playerA				= useRef<Player | null>(null);
 	const playerB				= useRef<Player | null>(null);
 	const animationFrameId		= useRef<number>(0);
-	const kd = useRef(require('keydrown'));
+	const kd					= useRef(require('keydrown'));
+	const socket				= useRef(io(`ws://localhost:3333`, {transports: ["websocket"]}));
 
-	useEffect(() => {
+	useEffect(() =>
+	{
 		ctx.current = canvasRef.current.getContext("2d");
 		
 		playerA.current = new Player(75, 100, size.current.width / 60, size.current.height / 5, 2, "white", ctx.current);
 		playerB.current = new Player(size.current.width - 100, size.current.height - 100, size.current.width / 60, size.current.height / 5, 2, "white", ctx.current);
+
 		ball.current = new Ball(size.current.width / 2, size.current.height / 2, 10, "white", ctx.current!);
+
+		socket.current.on("ball", (arg : string) => {
+		ball.current!.update_pos(JSON.parse(arg).current)});
+		socket.current.on("playerA", (arg : string) => {
+		playerA.current!.update_pos(JSON.parse(arg).current)});
+		socket.current.on("playerB", (arg : string) => {
+		playerB.current!.update_pos(JSON.parse(arg).current);});
 
 		function draw()
 		{
@@ -38,6 +49,7 @@ export default function Canvas()
 			playerB.current?.draw_score(size.current.width - (size.current.width / 3 ) - 30, size.current.height / 4);
 			ball.current?.move([playerA.current, playerB.current]);
 			ball.current?.draw();
+			socket.current.emit("ball", ball);
 		}
 
 		function render()
@@ -49,26 +61,31 @@ export default function Canvas()
 		kd.current.W.down(function()
 		{
 			playerA.current!.moveUp();
+			socket.current.emit("playerA", playerA);
 		});
 
 		kd.current.S.down(function()
 		{
 			playerA.current!.moveDown();
+			socket.current.emit("playerA", playerA);
 		})
 
 		kd.current.O.down(function()
 		{
 			playerB.current!.moveUp();
+			socket.current.emit("playerB", playerB);
 		});
 
 		kd.current.L.down(function()
 		{
 			playerB.current!.moveDown();
+			socket.current.emit("playerB", playerB);
 		})
 
 		kd.current.run(function () {
 				kd.current.tick();
-				});
+		});
+
 		render();
 		return () => { window.cancelAnimationFrame(animationFrameId.current) }
 
