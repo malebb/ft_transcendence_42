@@ -2,7 +2,7 @@ import {useRef, useEffect} from "react";
 
 import Ball from "../classes/Ball";
 import Player from "../classes/Player";
-import io   from "socket.io-client"
+import {io, Socket} from "socket.io-client"
 
 export default function Canvas()
 {
@@ -14,10 +14,12 @@ export default function Canvas()
 	const playerB				= useRef<Player | null>(null);
 	const animationFrameId		= useRef<number>(0);
 	const kd					= useRef(require('keydrown'));
-	const socket				= useRef(io(`ws://localhost:3333`, {transports: ["websocket"]}));
+	const socket				= useRef<Socket | null>(null);
+	const roomId				= useRef<string | null>(null);
 
 	useEffect(() =>
 	{
+		// link text
 		interface TextZone{
 			posX : number;
 			posY : number;
@@ -98,11 +100,82 @@ export default function Canvas()
 			return (textZone);
 		}
 
+		function launchGame()
+		{
+			playerA.current = new Player(75, 100, size.current.width / 60, size.current.height / 5, 4, "white", ctx.current);
+			playerB.current = new Player(size.current.width - 100, size.current.height - 100, size.current.width / 60, size.current.height / 5, 4, "white", ctx.current);
+
+			ball.current = new Ball(size.current.width / 2, size.current.height / 2, 10, "white", ctx.current!);
+
+			socket.current!.on("ball", (arg : string) => {
+					ball.current!.update_pos(JSON.parse(arg))});
+			socket.current!.on("playerA", (arg : string) => {
+					console.log(JSON.parse(arg));
+					playerA.current!.update_pos(JSON.parse(arg))});
+			socket.current!.on("playerB", (arg : string) => {
+					playerB.current!.update_pos(JSON.parse(arg));});
+
+			kd.current.W.down(function()
+			{
+				playerA.current!.moveUp();
+				socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
+			});
+
+			kd.current.S.down(function()
+			{
+				playerA.current!.moveDown();
+				socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
+			})
+
+			kd.current.O.down(function()
+			{
+				playerB.current!.moveUp();
+				socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
+			});
+
+			kd.current.L.down(function()
+			{
+				playerB.current!.moveDown();
+				socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
+			})
+
+			kd.current.run(function () {
+				kd.current.tick();
+			});
+			render();
+		}
+
+		function findRoom() : Promise<string>
+		{
+			return (new Promise(resolve => {
+				console.log(socket.current!.id + " is looking for player...");
+				socket.current!.on(socket.current!.id, (roomId) => {
+				console.log("trouve lol");
+					socket.current!.emit('joinRoom', roomId)
+					resolve(roomId);
+				});
+			}));
+		}
+
 		function drawMatchmaking()
 		{
 			ctx.current!.fillStyle = 'black';
 			ctx.current!.fillRect(0, 0, size.current.width, size.current.height);
 			drawText("looking for player...", size.current.width / 2, size.current.height / 2, 35);
+		}
+
+		async function matchmaking()
+		{
+			drawMatchmaking();
+			socket.current = io(`ws://localhost:3333`, {transports: ["websocket"]});
+			socket.current!.on("connect", async () => {
+			console.log("connection established ! " + socket.current!.id)
+			await findRoom().then(id => {
+				roomId.current = id;
+			});
+			console.log("Room found : " + roomId.current);
+			launchGame();
+			});
 		}
 
 		function drawMenu()
@@ -117,7 +190,7 @@ export default function Canvas()
 //			ctx.current!.fillStyle = "rgba(255, 0, 0, 0.5)";
 //			ctx.current!.fillRect(newGameZone.posX, newGameZone.posY, newGameZone.width, newGameZone.height);
 //			console.log("width = ", newGameZone!.width);
-			addLink(newGameZone, drawMatchmaking);
+			addLink(newGameZone, matchmaking);
 //			menuElem.map((zone) => {addLink(zone!)})
 		}
 
@@ -138,7 +211,7 @@ export default function Canvas()
 			playerB.current?.draw_score(size.current.width - (size.current.width / 3 ) - 30, size.current.height / 4);
 			ball.current?.move([playerA.current, playerB.current]);
 			ball.current?.draw();
-			socket.current.emit("ball", ball);
+			socket.current!.emit("ball", {ball : ball.current, roomId: roomId.current});
 		}
 
 		function render()
@@ -149,47 +222,6 @@ export default function Canvas()
 
 		ctx.current = canvasRef.current.getContext("2d");
 		drawMenu();
-		playerA.current = new Player(75, 100, size.current.width / 60, size.current.height / 5, 4, "white", ctx.current);
-		playerB.current = new Player(size.current.width - 100, size.current.height - 100, size.current.width / 60, size.current.height / 5, 4, "white", ctx.current);
-
-		ball.current = new Ball(size.current.width / 2, size.current.height / 2, 10, "white", ctx.current!);
-
-		socket.current.on("ball", (arg : string) => {
-		ball.current!.update_pos(JSON.parse(arg).current)});
-		socket.current.on("playerA", (arg : string) => {
-		playerA.current!.update_pos(JSON.parse(arg).current)});
-		socket.current.on("playerB", (arg : string) => {
-		playerB.current!.update_pos(JSON.parse(arg).current);});
-
-
-		kd.current.W.down(function()
-		{
-			playerA.current!.moveUp();
-			socket.current.emit("playerA", playerA);
-		});
-
-		kd.current.S.down(function()
-		{
-			playerA.current!.moveDown();
-			socket.current.emit("playerA", playerA);
-		})
-
-		kd.current.O.down(function()
-		{
-			playerB.current!.moveUp();
-			socket.current.emit("playerB", playerB);
-		});
-
-		kd.current.L.down(function()
-		{
-			playerB.current!.moveDown();
-			socket.current.emit("playerB", playerB);
-		})
-
-		kd.current.run(function () {
-				kd.current.tick();
-		});
-
 		return () => { window.cancelAnimationFrame(animationFrameId.current) }
 
 	}, []);

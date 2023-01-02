@@ -4,40 +4,61 @@ import { SubscribeMessage,
 		MessageBody}
 from '@nestjs/websockets';
 
-import { Socket, Server} from "socket.io"
+import { PongService } from './pong.service'
+
+import { Socket, Server } from "socket.io"
+
+import { Room } from "./pong.interface"
 
 @WebSocketGateway({
 	cors: {
 		origin: 'http://localhost:3333',
 	}
 })
+
 export class GatewayPong {
+
+	constructor(private readonly pongService : PongService) {}
 
 	@WebSocketServer()
 	server: Server;
 
 	handleConnection(client: Socket)
 	{
+		let room : Room;
+
 		console.log("New client ! id = " + client.id);
+		this.pongService.addPlayer(client.id);
+		room = this.pongService.checkQueue(client.id);
+		if (room.id.length)
+		{
+			this.server.emit(room.opponentId, room.id);
+			this.server.emit(client.id, room.id);
+		}
 	}
 
 	handleDisConnect(client: Socket)
 	{
 		console.log("client left ! id = " + client.id);
 	}
+
+	@SubscribeMessage('joinRoom')
+	handleMatchmaking(client: Socket, roomId : string) {
+		client.join(roomId);
+    }
 	
 	@SubscribeMessage('ball')
 	handleBall(@MessageBody() data : any) {
-		this.server.emit('ball', JSON.stringify(data));
+		this.server.to(data.roomId).emit('ball', JSON.stringify(data.ball));
     }
 
 	@SubscribeMessage('playerA')
 	handlePlayerA(@MessageBody() data : any) {
-		this.server.emit('playerA', JSON.stringify(data));
+		this.server.to(data.roomId).emit('playerA', JSON.stringify(data.playerA));
   	}
 
 	@SubscribeMessage('playerB')
 	handlePlayerB(@MessageBody() data : any) {
-		this.server.emit('playerB', JSON.stringify(data));
+		this.server.to(data.roomId).emit('playerB', JSON.stringify(data.playerB));
   	}
 }
