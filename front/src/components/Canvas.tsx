@@ -2,6 +2,7 @@ import {useRef, useEffect} from "react";
 
 import Ball from "../classes/Ball";
 import Player from "../classes/Player";
+import Draw from "../classes/Draw";
 import {io, Socket} from "socket.io-client"
 
 export default function Canvas()
@@ -17,10 +18,11 @@ export default function Canvas()
 	const socket				= useRef<Socket | null>(null);
 	const roomId				= useRef<string | null>(null);
 	const player				= useRef<string | null>(null);
+	const draw					= useRef<Draw | null>(null);
 
 	useEffect(() =>
 	{
-		// link text
+
 		interface TextZone{
 			posX : number;
 			posY : number;
@@ -79,28 +81,6 @@ export default function Canvas()
 			canvas!.addEventListener('mousemove', drawMousePointer);
 		}
 
-		function getTextZone(text: string, posX : number, posY : number)
-		{
-			let	gamezone : TextMetrics = ctx.current!.measureText(text);
-
-			return ({posX : posX - gamezone.actualBoundingBoxLeft, posY : posY - gamezone.fontBoundingBoxAscent,
-			height: gamezone.fontBoundingBoxAscent + gamezone.fontBoundingBoxDescent,
-			width : gamezone.width});
-		}
-
-		function drawText(text : string, posX : number, posY : number, size : number)
-		{
-			let	textZone : TextZone | undefined;
-
-			ctx.current!.beginPath();
-			ctx.current!.fillStyle = "pink";
-			ctx.current!.font = size + "px Courier New";
-			ctx.current!.textAlign = 'center';
-			ctx.current!.fillText(text, posX, posY);
-			textZone = getTextZone(text, posX, posY);
-			return (textZone);
-		}
-
 		function launchGame()
 		{
 			playerA.current = new Player(75, 100, size.current.width / 60, size.current.height / 5, 4, "white", ctx.current);
@@ -111,7 +91,6 @@ export default function Canvas()
 			socket.current!.on("ball", (arg : string) => {
 					ball.current!.update_pos(JSON.parse(arg))});
 			socket.current!.on("playerA", (arg : string) => {
-					console.log(JSON.parse(arg));
 					playerA.current!.update_pos(JSON.parse(arg))});
 			socket.current!.on("playerB", (arg : string) => {
 					playerB.current!.update_pos(JSON.parse(arg));});
@@ -122,7 +101,7 @@ export default function Canvas()
 
 			kd.current.UP.down(function()
 			{
-				if (player.current == "playerA")
+				if (player.current === "playerA")
 				{
 					playerA.current!.moveUp();
 					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
@@ -136,7 +115,7 @@ export default function Canvas()
 
 			kd.current.DOWN.down(function()
 			{
-				if (player.current == "playerA")
+				if (player.current === "playerA")
 				{
 					playerA.current!.moveDown();
 					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
@@ -157,52 +136,42 @@ export default function Canvas()
 		function findRoom() : Promise<string>
 		{
 			return (new Promise(resolve => {
-				console.log(socket.current!.id + " is looking for player...");
 				socket.current!.on(socket.current!.id, (data) => {
-				console.log("trouve lol");
 					socket.current!.emit('joinRoom', data.roomId)
-					console.log("YOU ARE " + data.player);
 					player.current = data.player;
 					resolve(data.roomId);
 				});
 			}));
 		}
 
-		function drawMatchmaking()
-		{
-			ctx.current!.fillStyle = 'black';
-			ctx.current!.fillRect(0, 0, size.current.width, size.current.height);
-			drawText("looking for player...", size.current.width / 2, size.current.height / 2, 35);
-		}
 
 		async function matchmaking()
 		{
-			drawMatchmaking();
+			draw.current.matchmakingPage();
 			socket.current = io(`ws://localhost:3333`, {transports: ["websocket"]});
 			socket.current!.on("connect", async () => {
-			console.log("connection established ! " + socket.current!.id)
 			await findRoom().then(id => {
 				roomId.current = id;
 			});
-			console.log("Room found : " + roomId.current);
 			launchGame();
 			});
 		}
 
-		function drawMenu()
+		function skins()
 		{
-			ctx.current!.fillStyle = 'black';
-			ctx.current!.fillRect(0, 0, size.current.width, size.current.height);
+			draw.current.skinsPage();
+		}
 
-			let newGameZone = drawText("new game", size.current.width / 2, size.current.height / 2, 35);
-			let skinsZone = drawText("skins", size.current.width / 4, size.current.height / 1.3, 20);
-			let mapsZone = drawText("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
-			//let menuElem = [newGameZone, skinsZone, mapsZone];
-//			ctx.current!.fillStyle = "rgba(255, 0, 0, 0.5)";
-//			ctx.current!.fillRect(newGameZone.posX, newGameZone.posY, newGameZone.width, newGameZone.height);
-//			console.log("width = ", newGameZone!.width);
+		function createMenu()
+		{
+			draw.current.menuBackground();
+
+			let newGameZone = draw.current.text("new game", size.current.width / 2, size.current.height / 2, 35);
+			let skinsZone = draw.current.text("skins", size.current.width / 4, size.current.height / 1.3, 20);
+			let mapsZone = draw.current.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
+
 			addLink(newGameZone, matchmaking);
-//			menuElem.map((zone) => {addLink(zone!)})
+			addLink(skinsZone, skins);
 		}
 
 		function draw()
@@ -237,7 +206,8 @@ export default function Canvas()
 		}
 
 		ctx.current = canvasRef.current.getContext("2d");
-		drawMenu();
+		draw.current = new Draw(ctx.current);
+		createMenu();
 		return () => { window.cancelAnimationFrame(animationFrameId.current) }
 
 	}, []);
