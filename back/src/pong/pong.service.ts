@@ -26,27 +26,4 @@ export class PongService
 		}
 		return (room);
 	}
-/*
-	checkQueue(clientId : string)
-	{
-		return (new Promise(resolve => {
-			console.log("check for opponent ... Queue size = " + this.queue.length);
-			const intervalId = setInterval(() => {
-			for (let i = 0; i < this.queue.length; ++i)
-			{
-				if (this.queue[i] === clientId)
-					continue ;
-				console.log("clientId = " + clientId + "this.queue[i]", this.queue[i]);
-				clearInterval(intervalId);
-				this.queue[i] < clientId ? resolve(this.queue[i] + clientId) : resolve(clientId + this.queue[i]);
-			}
-			}, 2000);
-		}));
-	}
-
-	async findRoom(clientId : string)
-	{
-		return (await this.checkQueue(clientId));
-	}
-	*/
 }

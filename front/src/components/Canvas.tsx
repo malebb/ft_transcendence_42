@@ -16,6 +16,7 @@ export default function Canvas()
 	const kd					= useRef(require('keydrown'));
 	const socket				= useRef<Socket | null>(null);
 	const roomId				= useRef<string | null>(null);
+	const player				= useRef<string | null>(null);
 
 	useEffect(() =>
 	{
@@ -117,26 +118,58 @@ export default function Canvas()
 
 			kd.current.W.down(function()
 			{
-				playerA.current!.moveUp();
-				socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
+				if (player.current == "playerA")
+				{
+					playerA.current!.moveUp();
+					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
+				}
+				else
+				{
+					playerB.current!.moveUp();
+					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
+				}
 			});
 
 			kd.current.S.down(function()
 			{
-				playerA.current!.moveDown();
-				socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
+				if (player.current == "playerA")
+				{
+					playerA.current!.moveDown();
+					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
+				}
+				else
+				{
+					playerB.current!.moveDown();
+					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
+				}
 			})
 
-			kd.current.O.down(function()
+			kd.current.UP.down(function()
 			{
-				playerB.current!.moveUp();
-				socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
+				if (player.current == "playerA")
+				{
+					playerA.current!.moveUp();
+					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
+				}
+				else
+				{
+					playerB.current!.moveUp();
+					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
+				}
 			});
 
-			kd.current.L.down(function()
+			kd.current.DOWN.down(function()
 			{
-				playerB.current!.moveDown();
-				socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
+				if (player.current == "playerA")
+				{
+					playerA.current!.moveDown();
+					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
+				}
+				else
+				{
+					playerB.current!.moveDown();
+					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
+				}
 			})
 
 			kd.current.run(function () {
@@ -149,10 +182,12 @@ export default function Canvas()
 		{
 			return (new Promise(resolve => {
 				console.log(socket.current!.id + " is looking for player...");
-				socket.current!.on(socket.current!.id, (roomId) => {
+				socket.current!.on(socket.current!.id, (data) => {
 				console.log("trouve lol");
-					socket.current!.emit('joinRoom', roomId)
-					resolve(roomId);
+					socket.current!.emit('joinRoom', data.roomId)
+					console.log("YOU ARE " + data.player);
+					player.current = data.player;
+					resolve(data.roomId);
 				});
 			}));
 		}

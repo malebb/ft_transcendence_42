@@ -32,8 +32,8 @@ export class GatewayPong {
 		room = this.pongService.checkQueue(client.id);
 		if (room.id.length)
 		{
-			this.server.emit(room.opponentId, room.id);
-			this.server.emit(client.id, room.id);
+			this.server.emit(room.opponentId, {roomId : room.id, player : "playerB"});
+			this.server.emit(client.id, {roomId : room.id, player: "playerA"});
 		}
 	}
 
