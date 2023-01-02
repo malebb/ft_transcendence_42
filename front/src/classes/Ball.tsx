@@ -5,7 +5,7 @@ export default class Ball
 	velX = 3;
 	velY = 3;
 
-	constructor(private posX: number, private posY: number, private radius: number,
+	constructor(public posX: number, private posY: number, private radius: number,
 	private color: string, private ctx: CanvasRenderingContext2D )
 	{
 	}
@@ -52,12 +52,15 @@ export default class Ball
 		return (false);
 	}
 
-	move(players : (Player | null)[])
+	move(players : (Player | null)[]) : boolean
 	{
+		let goal : boolean = false;
+
 		if (!this.playerCollision(players))
 		{
 			if (this.posX + this.velX >= this.ctx.canvas.width - this.radius || this.posX + this.velX <= this.radius)
 			{
+				goal = true;
 				if (this.velX > 0)
 					players[0]!.score++;
 				else
@@ -71,5 +74,14 @@ export default class Ball
 		}
 		this.posX += this.velX;
 		this.posY += this.velY;
+		return (goal);
+	}
+
+	update_pos(ball_properties : any)
+	{
+		this.posX = ball_properties.posX;
+		this.posY = ball_properties.posY;
+		this.velX = ball_properties.velX;
+		this.velY = ball_properties.velY;
 	}
 }
