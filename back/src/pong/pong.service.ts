@@ -11,6 +11,11 @@ export class PongService
 		this.queue.push(clientId);
 	}
 
+	removePlayer(clientId : string)
+	{
+		this.queue.splice(this.queue.indexOf(clientId), 1);
+	}
+
 	checkQueue(clientId : string) : Room
 	{
 		let room : Room = {id :  "", opponentId : ""};

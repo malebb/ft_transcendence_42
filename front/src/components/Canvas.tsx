@@ -116,34 +116,6 @@ export default function Canvas()
 			socket.current!.on("playerB", (arg : string) => {
 					playerB.current!.update_pos(JSON.parse(arg));});
 
-			kd.current.W.down(function()
-			{
-				if (player.current == "playerA")
-				{
-					playerA.current!.moveUp();
-					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
-				}
-				else
-				{
-					playerB.current!.moveUp();
-					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
-				}
-			});
-
-			kd.current.S.down(function()
-			{
-				if (player.current == "playerA")
-				{
-					playerA.current!.moveDown();
-					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
-				}
-				else
-				{
-					playerB.current!.moveDown();
-					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
-				}
-			})
-
 			kd.current.UP.down(function()
 			{
 				if (player.current == "playerA")

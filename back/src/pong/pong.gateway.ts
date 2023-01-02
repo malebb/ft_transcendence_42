@@ -1,12 +1,16 @@
 import { SubscribeMessage,
 		WebSocketGateway,
 		WebSocketServer,
-		MessageBody}
-from '@nestjs/websockets';
+		MessageBody,
+		OnGatewayConnection,
+		OnGatewayDisconnect
+		} from '@nestjs/websockets';
 
 import { PongService } from './pong.service'
 
-import { Socket, Server } from "socket.io"
+import { Socket,
+		Server
+		} from "socket.io"
 
 import { Room } from "./pong.interface"
 
@@ -16,7 +20,8 @@ import { Room } from "./pong.interface"
 	}
 })
 
-export class GatewayPong {
+export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
+{
 
 	constructor(private readonly pongService : PongService) {}
 
@@ -27,7 +32,7 @@ export class GatewayPong {
 	{
 		let room : Room;
 
-		console.log("New client ! id = " + client.id);
+		console.log('Player ' + client.id + ' joined');
 		this.pongService.addPlayer(client.id);
 		room = this.pongService.checkQueue(client.id);
 		if (room.id.length)
@@ -37,9 +42,10 @@ export class GatewayPong {
 		}
 	}
 
-	handleDisConnect(client: Socket)
+	handleDisconnect(client: Socket)
 	{
-		console.log("client left ! id = " + client.id);
+		console.log('Player ' + client.id + " left");
+		this.pongService.removePlayer(client.id);
 	}
 
 	@SubscribeMessage('joinRoom')
