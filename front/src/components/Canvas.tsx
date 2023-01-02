@@ -115,6 +115,10 @@ export default function Canvas()
 					playerA.current!.update_pos(JSON.parse(arg))});
 			socket.current!.on("playerB", (arg : string) => {
 					playerB.current!.update_pos(JSON.parse(arg));});
+			socket.current!.on("updateScore", (score : string) => {
+					playerA.current!.updateScore(JSON.parse(score).playerA);
+					playerB.current!.updateScore(JSON.parse(score).playerB);
+					});
 
 			kd.current.UP.down(function()
 			{
@@ -216,7 +220,12 @@ export default function Canvas()
 			playerB.current?.draw_paddle();
 			playerA.current?.draw_score(size.current.width / 3, size.current.height / 4);
 			playerB.current?.draw_score(size.current.width - (size.current.width / 3 ) - 30, size.current.height / 4);
-			ball.current?.move([playerA.current, playerB.current]);
+			
+			if (ball.current?.move([playerA.current, playerB.current]))
+			{
+				socket.current!.emit("updateScore", {score : {playerA : playerA.current!.score, playerB : playerB.current!.score}, roomId : roomId.current});
+			}
+			
 			ball.current?.draw();
 			socket.current!.emit("ball", {ball : ball.current, roomId: roomId.current});
 		}

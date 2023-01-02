@@ -49,22 +49,27 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 	}
 
 	@SubscribeMessage('joinRoom')
-	handleMatchmaking(client: Socket, roomId : string) {
+	joinRoom(client: Socket, roomId : string) {
 		client.join(roomId);
     }
 	
 	@SubscribeMessage('ball')
-	handleBall(@MessageBody() data : any) {
+	updateBall(@MessageBody() data : any) {
 		this.server.to(data.roomId).emit('ball', JSON.stringify(data.ball));
     }
 
 	@SubscribeMessage('playerA')
-	handlePlayerA(@MessageBody() data : any) {
+	updatePlayerA(@MessageBody() data : any) {
 		this.server.to(data.roomId).emit('playerA', JSON.stringify(data.playerA));
   	}
 
 	@SubscribeMessage('playerB')
-	handlePlayerB(@MessageBody() data : any) {
+	updatePlayerB(@MessageBody() data : any) {
 		this.server.to(data.roomId).emit('playerB', JSON.stringify(data.playerB));
+  	}
+
+	@SubscribeMessage('updateScore')
+	updateScore(@MessageBody() data : any) {
+		this.server.to(data.roomId).emit('updateScore', JSON.stringify(data.score));
   	}
 }

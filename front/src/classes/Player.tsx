@@ -48,4 +48,9 @@ export default class Player
 		this.posX = player_properties.posX;
 		this.posY = player_properties.posY;
 	}
+
+	updateScore(scoreUpdated: number)
+	{
+		this.score = scoreUpdated;
+	}
 }

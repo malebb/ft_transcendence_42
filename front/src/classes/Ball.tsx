@@ -52,12 +52,15 @@ export default class Ball
 		return (false);
 	}
 
-	move(players : (Player | null)[])
+	move(players : (Player | null)[]) : boolean
 	{
+		let goal : boolean = false;
+
 		if (!this.playerCollision(players))
 		{
 			if (this.posX + this.velX >= this.ctx.canvas.width - this.radius || this.posX + this.velX <= this.radius)
 			{
+				goal = true;
 				if (this.velX > 0)
 					players[0]!.score++;
 				else
@@ -71,6 +74,7 @@ export default class Ball
 		}
 		this.posX += this.velX;
 		this.posY += this.velY;
+		return (goal);
 	}
 
 	update_pos(ball_properties : any)
