@@ -23,14 +23,14 @@ export default function Canvas()
 	useEffect(() =>
 	{
 
-		interface TextZone{
+		interface LinkZone{
 			posX : number;
 			posY : number;
 			width : number;
 			height : number;
 		}
 
-		function mouseOnZone(e : MouseEvent, textZone : TextZone) : boolean
+		function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
 		{
 			var canvas = document.getElementById('canvas');
 			var clickZone = canvas!.getBoundingClientRect();
@@ -47,7 +47,7 @@ export default function Canvas()
 			return (false);
 		}
 
-		function addLink(textZone : TextZone, linkAction : Function, zones : TextZone[])
+		function addLink(textZone : LinkZone, linkAction : Function, zones : LinkZone[])
 		{
 			var canvas = document.getElementById('canvas');
 			var executeLink = (e : MouseEvent) =>
@@ -167,9 +167,29 @@ export default function Canvas()
 			});
 		}
 
+		function changeSkin()
+		{
+			draw.current.skins = [];
+			createMenu();
+		}
+
 		function skins()
 		{
-			draw.current.skinsPage();
+			let colouredSkins : string[] = ["white", "blue", "yellow", "orange", "pink", "purple", "green", "grey", "red", "cyan"];
+			let skinLinkZones : LinkZone[] = [];
+
+			draw.current!.skinsBackground();
+			colouredSkins.map(
+			color => {
+				let skinLinkZone = draw.current!.skin(color)
+				skinLinkZones.push(skinLinkZone);
+			}
+			);
+			skinLinkZones.map(
+			skinLinkZone => {
+				addLink(skinLinkZone, changeSkin, skinLinkZones);
+			}
+			);
 		}
 
 		function createMenu()
