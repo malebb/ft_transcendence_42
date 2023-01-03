@@ -30,51 +30,62 @@ export default function Canvas()
 			height : number;
 		}
 
-		function addLink(textZone : TextZone, linkAction : Function)
+		function mouseOnZone(e : MouseEvent, textZone : TextZone) : boolean
 		{
 			var canvas = document.getElementById('canvas');
-			var	mouseOnZone : TextZone | null = null;
+			var clickZone = canvas!.getBoundingClientRect();
+
+			if (e.clientX - clickZone.left >= textZone.posX &&
+				e.clientX - clickZone.left <= textZone.posX + textZone.width)
+			{
+				if (e.clientY - clickZone.top >= textZone.posY &&
+				e.clientY - clickZone.top <= textZone.posY + textZone.height)
+				{
+					return (true);
+				}
+			}
+			return (false);
+		}
+
+		function addLink(textZone : TextZone, linkAction : Function, zones : TextZone[])
+		{
+			var canvas = document.getElementById('canvas');
 			var executeLink = (e : MouseEvent) =>
 			{
-
-				var clickZone = canvas!.getBoundingClientRect();
-
-				if (e.clientX - clickZone.left >= textZone.posX &&
-				e.clientX - clickZone.left <= textZone.posX + textZone.width)
+				if (mouseOnZone(e, textZone))
 				{
-					if (e.clientY - clickZone.top >= textZone.posY &&
-					e.clientY - clickZone.top <= textZone.posY + textZone.height)
+					canvas!.removeEventListener('click', executeLink);
+					canvas!.removeEventListener('mousemove', drawMousePointer);
+					canvas!.style.cursor = 'default';
+					linkAction();
+				}
+				else
+				{
+					zones.map(zone => {
+					if (mouseOnZone(e, zone))
 					{
 						canvas!.removeEventListener('click', executeLink);
 						canvas!.removeEventListener('mousemove', drawMousePointer);
 						canvas!.style.cursor = 'default';
-						linkAction();
 					}
+					});
 				}
 			};
+
 			var drawMousePointer = (e : MouseEvent) =>
 			{
-				var clickZone = canvas!.getBoundingClientRect();
-
-				if (e.clientX - clickZone.left >= textZone.posX &&
-				e.clientX - clickZone.left <= textZone.posX + textZone.width)
-				{
-					if (e.clientY - clickZone.top >= textZone.posY &&
-					e.clientY - clickZone.top <= textZone.posY + textZone.height)
-					{
-						canvas!.style.cursor = 'pointer';
-						mouseOnZone = textZone;
-					}
-					else
-					{
-						if (mouseOnZone && mouseOnZone === textZone)
-							canvas!.style.cursor = 'default';
-					}
-				}
+				if (mouseOnZone(e, textZone))
+					canvas!.style.cursor = 'pointer';
 				else
 				{
-						if (mouseOnZone && mouseOnZone === textZone)
-							canvas!.style.cursor = 'default';
+					var		mouseOnOtherZone : boolean = false;
+	
+					zones.map(zone => {
+					if (mouseOnZone(e, zone))
+						mouseOnOtherZone = true;
+					});
+					if (!mouseOnOtherZone)
+						canvas!.style.cursor = 'default';
 				}
 			}
 			canvas!.addEventListener('click', executeLink)
@@ -144,7 +155,6 @@ export default function Canvas()
 			}));
 		}
 
-
 		async function matchmaking()
 		{
 			draw.current.matchmakingPage();
@@ -169,9 +179,10 @@ export default function Canvas()
 			let newGameZone = draw.current.text("new game", size.current.width / 2, size.current.height / 2, 35);
 			let skinsZone = draw.current.text("skins", size.current.width / 4, size.current.height / 1.3, 20);
 			let mapsZone = draw.current.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
+			let zones = [newGameZone, skinsZone, mapsZone];
 
-			addLink(newGameZone, matchmaking);
-			addLink(skinsZone, skins);
+			addLink(newGameZone, matchmaking, zones);
+			addLink(skinsZone, skins, zones);
 		}
 
 		function draw()
