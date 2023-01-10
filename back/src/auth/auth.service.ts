@@ -6,6 +6,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import {JwtService} from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { access } from 'fs';
+import { Tokens } from './types';
 
 @Injectable()
 export class AuthService {
@@ -42,6 +43,7 @@ export class AuthService {
 
     async signin(dto: AuthDto)
     {
+        console.log('sigin');
         const user = await this.prismaService.user.findUnique({
             where:{
                 email: dto.email,
@@ -49,6 +51,7 @@ export class AuthService {
         });
         if(!user)
         {
+            console.log('!user');
             throw new ForbiddenException('Credentials incorrect',);
         }
         const pwMatches = await argon.verify(
@@ -57,6 +60,7 @@ export class AuthService {
             );
         if(!pwMatches)
         {
+            console.log('!pwmatch');
             throw new ForbiddenException('Credentials incorrect',);
         }
         return this.signToken(user.id, user.email);
@@ -81,5 +85,24 @@ export class AuthService {
         return {
             access_token: token,
         };
+    }
+
+    logout()
+    {}
+
+    refreshToken()
+    {}
+
+    verify(token: string)
+    {
+        try{
+        const secret = this.config.get('JWT_SECRET');
+        const jet = this.jwt.verify(token, {secret : secret});
+        console.log(jet);
+        }catch(err: any)
+        {
+            console.log(err);
+        }
+        return;
     }
 }
