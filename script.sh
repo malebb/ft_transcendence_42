@@ -17,6 +17,9 @@ npm install passport
 npm install passport-jwt
 npm install prisma
 npm install -D pactum
+npm i --save @nestjs/websockets
+npm i --save @nestjs/platform-socket.io
+
 cd ../front
 npm i @fortawesome/fontawesome-svg-core
 npm i @fortawesome/free-solid-svg-icons
@@ -27,4 +30,5 @@ npm i @types/react
 npm i @types/react-dom
 npm i react-router-dom
 npm i typescript
-
+npm i keydrown
+npm i socket.io-client
