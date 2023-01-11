@@ -120,7 +120,7 @@ export default function Canvas()
 				opponent.current = new Player(leftPlayerPos.posX, leftPlayerPos.posY, size.current.width / 60, size.current.height / 5, 4, "white", "left", ctx.current);
 
 			}
-			socket.current!.on("ball", (arg : string) => {
+			socket.current!.on("moveBall", (arg : string) => {
 					ball.current!.update_pos(JSON.parse(arg))});
 			socket.current!.on("moveOpponent", (arg : string) => {
 					opponent.current!.update_pos(JSON.parse(arg))
@@ -133,13 +133,13 @@ export default function Canvas()
 			kd.current.UP.down(function()
 			{
 				currentPlayer.current!.moveUp();
-				socket.current!.emit("movePlayer", {currentPlayer : currentPlayer.current, roomId : roomId.current});
+				socket.current!.emit("movePlayer", {player : currentPlayer.current, roomId : roomId.current});
 			});
 
 			kd.current.DOWN.down(function()
 			{
 				currentPlayer.current!.moveDown();
-				socket.current!.emit("movePlayer", {currentPlayer : currentPlayer.current, roomId : roomId.current});
+				socket.current!.emit("movePlayer", {player : currentPlayer.current, roomId : roomId.current});
 			})
 
 			kd.current.run(function () {
@@ -218,18 +218,10 @@ export default function Canvas()
 
 		function draw()
 		{
-			ctx.current!.fillStyle = 'black';
-			ctx.current?.fillRect(0, 0, size.current.width, size.current.height);
-			ctx.current?.beginPath();
-			ctx.current!.fillStyle = 'white';
-			ctx.current?.moveTo(size.current.width / 2, 0);
-			ctx.current?.lineTo(size.current.width / 2, size.current.height);
-			ctx.current?.moveTo(0, 0);
-			ctx.current?.lineTo(80, 80);
-			ctx.current?.stroke();
+			draw.current!.map();
 			currentPlayer.current?.draw_paddle();
-			opponent.current?.draw_paddle();
 			currentPlayer.current?.draw_score();
+			opponent.current?.draw_paddle();
 			opponent.current?.draw_score();
 			
 			if (ball.current?.move([currentPlayer.current, opponent.current]))
@@ -238,7 +230,7 @@ export default function Canvas()
 			}
 			
 			ball.current?.draw();
-			socket.current!.emit("ball", {ball : ball.current, roomId: roomId.current});
+			socket.current!.emit("moveBall", {ball : ball.current, roomId: roomId.current});
 		}
 
 		function render()

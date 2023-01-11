@@ -5,13 +5,6 @@ export default class Player
 	constructor(public posX: number, public posY: number, public width: number,
 	public height: number, public vel: number, public color: string, public readonly position : string, public readonly ctx : CanvasRenderingContext2D | null)
 	{
-//		this.posX = posX;
-//		this.posY = posY
-//		this.width = width;
-//		this.height = height;
-//		this.vel = vel;
-//		this.color = color;
-//		this.ctx = ctx;
 	}
 
 	draw_paddle()

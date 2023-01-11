@@ -15,6 +15,7 @@ export default class Draw
 	{
 	}
 
+
 	menuBackground()
 	{
 		this.ctx!.fillStyle = 'black';
@@ -71,5 +72,18 @@ export default class Draw
 //		, skin.width, skin.height);
 		this.skins!.push(skin);
 		return (skinZone);
+	}
+
+	map()
+	{
+		this.ctx!.fillStyle = 'black';
+		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
+		this.ctx!.beginPath();
+		this.ctx!.fillStyle = 'white';
+		this.ctx!.moveTo(this.ctx!.canvas.width / 2, 0);
+		this.ctx!.lineTo(this.ctx!.canvas.width / 2, this.ctx!.canvas.height);
+		this.ctx!.moveTo(0, 0);
+		this.ctx!.lineTo(80, 80);
+		this.ctx!.stroke();
 	}
 }
