@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import axios from "axios";
 import {AxiosResponse} from 'axios';
-import { axiosMain } from '../api/axios';
+import { axiosMain } from '../../api/axios';
 import Loading from '../Loading';
 
 const VERIF_PATH='/auth/verify'

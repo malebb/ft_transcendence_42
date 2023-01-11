@@ -1,11 +1,11 @@
 import React from 'react';
-import './App.css';
+import '../styles/App.css';
 import { BrowserRouter, Route, Routes} from 'react-router-dom';
 import Headers from './Headers';
 import Nav from './Nav';
 import Main from './Main';
 import PrivateRoutes from './PrivateRoute/PrivateRoutes';
-import AuthContext, { AuthProvider } from './context/TokenContext';
+import AuthContext, { AuthProvider } from '../context/TokenContext';
 import Signup from './Login/signup';
 import Signin from './Login/signin';
 import Friends from './Friends';

@@ -1,13 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import Main from './Main';
-import Signin from './Login/signin';
+import './styles/index.css';
+import App from './components/App';
+import Main from './components/Main';
+import Signin from './components/Login/signin';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Route, Routes} from 'react-router-dom';
-import PrivateRoutes from './PrivateRoute/PrivateRoutes';
-import Signup from './Login/signup';
+import PrivateRoutes from './components/PrivateRoute/PrivateRoutes';
+import Signup from './components/Login/signup';
 import { AuthProvider } from './context/TokenContext';
 
 const root = ReactDOM.createRoot(

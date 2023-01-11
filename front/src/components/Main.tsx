@@ -1,6 +1,6 @@
 import React from 'react';
 import logo from './logo.svg';
-import './App.css';
+import '../styles/App.css';
 import Headers from './Headers';
 import Nav from './Nav';
 import Log from './Log';
