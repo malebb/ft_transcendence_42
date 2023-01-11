@@ -1,3 +1,4 @@
+#!bin/bash
 
 cd back
 npm install @babel/core

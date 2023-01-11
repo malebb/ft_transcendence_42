@@ -7,32 +7,21 @@ import Canvas from '../components/Canvas'
 
 function App() {
   return (
-    <div className="App">
-      {/* <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header> */}
-      <div className='static'>
-      <Headers/>
-      <Nav/>
-      </div>
+    <AuthProvider>
+    <BrowserRouter>
       <Routes>
-      <Route path='/user'/>
-      <Route path='/history'/>
-      <Route path='/friends'/>
+        <Route element={<PrivateRoutes /> } >
+          <Route path='/user' element={<User/>} />
+          <Route path='/history' element={<History/>}/>
+          <Route path='/friends'element={<Friends/>}/>
+        </Route>
+        <Route path='/' element={<Main/>} />
+        <Route path='/signin' element={<Signin/>}/>
+        <Route path='/signup' element={<Signup/>}/>
       </Routes>
-	  <Canvas/>
-    </div>
+      <Canvas/>
+    </BrowserRouter>
+  </AuthProvider> 
   );
 }
 
