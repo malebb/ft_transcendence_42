@@ -1,9 +1,17 @@
 import React from 'react';
 import '../styles/App.css';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, BrowserRouter } from 'react-router-dom';
 import Headers from '../components/Headers';
 import Nav from '../components/Nav';
 import Canvas from '../components/Canvas'
+import { AuthProvider } from '../context/TokenContext';
+import Main from './Main';
+import Signin from './Login/signin';
+import Signup from './Login/signup';
+import User from './User';
+import History from './History';
+import Friends from './Friends';
+import PrivateRoutes from './PrivateRoute/PrivateRoutes';
 
 function App() {
   return (
@@ -19,7 +27,6 @@ function App() {
         <Route path='/signin' element={<Signin/>}/>
         <Route path='/signup' element={<Signup/>}/>
       </Routes>
-      <Canvas/>
     </BrowserRouter>
   </AuthProvider> 
   );
