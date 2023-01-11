@@ -11,23 +11,35 @@ export default function Canvas()
 	const size					= useRef({width: 600, height: 350});
 	const ctx					= useRef<CanvasRenderingContext2D | null>(null);
 	const ball					= useRef<Ball>();
-	const playerA				= useRef<Player | null>(null);
-	const playerB				= useRef<Player | null>(null);
+	const currentPlayer			= useRef<Player | null>(null);
+	const opponent				= useRef<Player | null>(null);
 	const animationFrameId		= useRef<number>(0);
 	const kd					= useRef(require('keydrown'));
 	const socket				= useRef<Socket | null>(null);
 	const roomId				= useRef<string | null>(null);
-	const player				= useRef<string | null>(null);
 	const draw					= useRef<Draw | null>(null);
 
 	useEffect(() =>
 	{
 
-		interface LinkZone{
+		interface LinkZone
+		{
 			posX : number;
 			posY : number;
 			width : number;
 			height : number;
+		}
+
+		interface Player
+		{
+			id : string;
+			skin : string;
+		}
+
+		interface Position
+		{
+			posX : number;
+			posY : number;
 		}
 
 		function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
@@ -47,7 +59,7 @@ export default function Canvas()
 			return (false);
 		}
 
-		function addLink(textZone : LinkZone, linkAction : Function, zones : LinkZone[])
+		function addLink(textZone : LinkZone, linkAction : Function, zones : LinkZone[], data : any)
 		{
 			var canvas = document.getElementById('canvas');
 			var executeLink = (e : MouseEvent) =>
@@ -57,7 +69,7 @@ export default function Canvas()
 					canvas!.removeEventListener('click', executeLink);
 					canvas!.removeEventListener('mousemove', drawMousePointer);
 					canvas!.style.cursor = 'default';
-					linkAction();
+					linkAction(data);
 				}
 				else
 				{
@@ -92,50 +104,42 @@ export default function Canvas()
 			canvas!.addEventListener('mousemove', drawMousePointer);
 		}
 
-		function launchGame()
+		function launchGame(position : string)
 		{
-			playerA.current = new Player(75, 100, size.current.width / 60, size.current.height / 5, 4, "white", ctx.current);
-			playerB.current = new Player(size.current.width - 100, size.current.height - 100, size.current.width / 60, size.current.height / 5, 4, "white", ctx.current);
+			let leftPlayerPos : Position = {posX : 75, posY : 100};
+			let rightPlayerPos : Position = {posX : size.current.width - 100, posY : size.current.height - 100};
 
-			ball.current = new Ball(size.current.width / 2, size.current.height / 2, 10, "white", ctx.current!);
+			if (position == "left")
+			{
+				currentPlayer.current = new Player(leftPlayerPos.posX, leftPlayerPos.posY, size.current.width / 60, size.current.height / 5, 4, "white", "left", ctx.current);
+				opponent.current = new Player(rightPlayerPos.posX, rightPlayerPos.posY, size.current.width / 60, size.current.height / 5, 4, "white", "right", ctx.current);
+			}
+			else
+			{
+				currentPlayer.current = new Player(rightPlayerPos.posX, rightPlayerPos.posY, size.current.width / 60, size.current.height / 5, 4, "white", "right", ctx.current);
+				opponent.current = new Player(leftPlayerPos.posX, leftPlayerPos.posY, size.current.width / 60, size.current.height / 5, 4, "white", "left", ctx.current);
 
+			}
 			socket.current!.on("ball", (arg : string) => {
 					ball.current!.update_pos(JSON.parse(arg))});
-			socket.current!.on("playerA", (arg : string) => {
-					playerA.current!.update_pos(JSON.parse(arg))});
-			socket.current!.on("playerB", (arg : string) => {
-					playerB.current!.update_pos(JSON.parse(arg));});
-			socket.current!.on("updateScore", (score : string) => {
-					playerA.current!.updateScore(JSON.parse(score).playerA);
-					playerB.current!.updateScore(JSON.parse(score).playerB);
+			socket.current!.on("moveOpponent", (arg : string) => {
+					opponent.current!.update_pos(JSON.parse(arg))
+					});
+			socket.current!.on("updateScore", (data : string) => {
+					currentPlayer.current!.updateScore(JSON.parse(data).score.currentPlayer);
+					opponent.current!.updateScore(JSON.parse(data).score.opponent);
 					});
 
 			kd.current.UP.down(function()
 			{
-				if (player.current === "playerA")
-				{
-					playerA.current!.moveUp();
-					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
-				}
-				else
-				{
-					playerB.current!.moveUp();
-					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
-				}
+				currentPlayer.current!.moveUp();
+				socket.current!.emit("movePlayer", {currentPlayer : currentPlayer.current, roomId : roomId.current});
 			});
 
 			kd.current.DOWN.down(function()
 			{
-				if (player.current === "playerA")
-				{
-					playerA.current!.moveDown();
-					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
-				}
-				else
-				{
-					playerB.current!.moveDown();
-					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
-				}
+				currentPlayer.current!.moveDown();
+				socket.current!.emit("movePlayer", {currentPlayer : currentPlayer.current, roomId : roomId.current});
 			})
 
 			kd.current.run(function () {
@@ -148,28 +152,35 @@ export default function Canvas()
 		{
 			return (new Promise(resolve => {
 				socket.current!.on(socket.current!.id, (data) => {
-					socket.current!.emit('joinRoom', data.roomId)
-					player.current = data.player;
-					resolve(data.roomId);
+					socket.current!.emit('joinRoom', JSON.parse(data).roomId)
+					resolve(data);
 				});
 			}));
 		}
 
 		async function matchmaking()
 		{
+			let position : string = "";
+
 			draw.current.matchmakingPage();
-			socket.current = io(`ws://localhost:3333`, {transports: ["websocket"]});
+			socket.current = io(`ws://localhost:3333`, {transports: ["websocket"], /*query: { skin: (player.current === "playerA" ? playerA.current!.color : playerB.current!.color)}*/});
 			socket.current!.on("connect", async () => {
-			await findRoom().then(id => {
-				roomId.current = id;
+			await findRoom().then(data => {
+				roomId.current = JSON.parse(data).roomId;
+				position = JSON.parse(data).position;
 			});
-			launchGame();
+			launchGame(position);
 			});
 		}
 
-		function changeSkin()
+		function changeSkin(name : string)
 		{
 			draw.current.skins = [];
+
+			// TODO : update skin in database
+			// ...
+
+			console.log('You\'ve selected ' + name + ' skin');
 			createMenu();
 		}
 
@@ -187,7 +198,7 @@ export default function Canvas()
 			);
 			skinLinkZones.map(
 			skinLinkZone => {
-				addLink(skinLinkZone, changeSkin, skinLinkZones);
+				addLink(skinLinkZone, changeSkin, skinLinkZones, colouredSkins[skinLinkZones.indexOf(skinLinkZone)]);
 			}
 			);
 		}
@@ -201,8 +212,8 @@ export default function Canvas()
 			let mapsZone = draw.current.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
 			let zones = [newGameZone, skinsZone, mapsZone];
 
-			addLink(newGameZone, matchmaking, zones);
-			addLink(skinsZone, skins, zones);
+			addLink(newGameZone, matchmaking, zones, 0);
+			addLink(skinsZone, skins, zones, 0);
 		}
 
 		function draw()
@@ -216,14 +227,14 @@ export default function Canvas()
 			ctx.current?.moveTo(0, 0);
 			ctx.current?.lineTo(80, 80);
 			ctx.current?.stroke();
-			playerA.current?.draw_paddle();
-			playerB.current?.draw_paddle();
-			playerA.current?.draw_score(size.current.width / 3, size.current.height / 4);
-			playerB.current?.draw_score(size.current.width - (size.current.width / 3 ) - 30, size.current.height / 4);
+			currentPlayer.current?.draw_paddle();
+			opponent.current?.draw_paddle();
+			currentPlayer.current?.draw_score();
+			opponent.current?.draw_score();
 			
-			if (ball.current?.move([playerA.current, playerB.current]))
+			if (ball.current?.move([currentPlayer.current, opponent.current]))
 			{
-				socket.current!.emit("updateScore", {score : {playerA : playerA.current!.score, playerB : playerB.current!.score}, roomId : roomId.current});
+				socket.current!.emit("updateScore", {score : {currentPlayer : currentPlayer.current!.score, opponent : opponent.current!.score}, roomId : roomId.current});
 			}
 			
 			ball.current?.draw();
@@ -237,6 +248,7 @@ export default function Canvas()
 		}
 
 		ctx.current = canvasRef.current.getContext("2d");
+		ball.current = new Ball(size.current.width / 2, size.current.height / 2, 10, "white", ctx.current!);
 		draw.current = new Draw(ctx.current);
 		createMenu();
 		return () => { window.cancelAnimationFrame(animationFrameId.current) }

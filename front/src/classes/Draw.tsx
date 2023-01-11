@@ -54,7 +54,7 @@ export default class Draw
 	{
 		this.ctx!.fillStyle = 'black';
 		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
-		this.text("Skins", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 5, 35);
+		this.text("Skins", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35);
 	}
 
 	skin(name : string) : LinkZone

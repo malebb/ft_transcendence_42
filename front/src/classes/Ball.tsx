@@ -30,9 +30,9 @@ export default class Ball
 				if (((this.posY + this.velY) >= players[i]!.posY)
 					&& ((this.posY + this.velY) <= (players[i]!.posY + players[i]!.height)))
 				{
-					if (i === 0 && this.velX < 0)
+					if (players[i]!.position == "left" && this.velX < 0)
 						this.velX *= -1;
-					else if (i === 1 && this.velX > 0)
+					else if (players[i]!.position == "right" && this.velX > 0)
 						this.velX *= -1;
 
 					if (this.posY + this.velY < players[i]!.posY + players[i]!.height / 2)
@@ -62,9 +62,19 @@ export default class Ball
 			{
 				goal = true;
 				if (this.velX > 0)
-					players[0]!.score++;
+				{
+					if (players[0]!.position == "left")
+						players[0]!.score++;
+					else
+						players[1]!.score++;
+				}
 				else
-					players[1]!.score++;
+				{
+					if (players[0]!.position == "right")
+						players[0]!.score++;
+					else
+						players[1]!.score++;
+				}
 				this.velX *= -1;
 				this.posX = this.ctx.canvas.width / 2;
 			}

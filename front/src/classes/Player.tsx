@@ -3,15 +3,15 @@ export default class Player
 	score : number = 0;
 
 	constructor(public posX: number, public posY: number, public width: number,
-	public height: number, public vel: number, public color: string, public readonly ctx : CanvasRenderingContext2D | null)
+	public height: number, public vel: number, public color: string, public readonly position : string, public readonly ctx : CanvasRenderingContext2D | null)
 	{
-		this.posX = posX;
-		this.posY = posY
-		this.width = width;
-		this.height = height;
-		this.vel = vel;
-		this.color = color;
-		this.ctx = ctx;
+//		this.posX = posX;
+//		this.posY = posY
+//		this.width = width;
+//		this.height = height;
+//		this.vel = vel;
+//		this.color = color;
+//		this.ctx = ctx;
 	}
 
 	draw_paddle()
@@ -21,12 +21,16 @@ export default class Player
 		this.ctx?.fillRect(this.posX, this.posY, this.width, this.height);
 	}
 
-	draw_score(posx : number, posy : number)
+	draw_score()
 	{
 		this.ctx?.beginPath();
 		this.ctx!.fillStyle = "white";
 		this.ctx!.font = "70px Arial";
-		this.ctx?.fillText(this.score.toString(), posx, posy);
+		if (this.position == "left")
+			this.ctx?.fillText(this.score.toString(), this.ctx!.canvas.width / 3, this.ctx!.canvas.height / 4);
+		else
+			this.ctx?.fillText(this.score.toString(), this.ctx!.canvas.width - (this.ctx!.canvas.width / 3) - 30, this.ctx!.canvas.height / 4);
+			
 	}
 
 	moveUp()
@@ -43,10 +47,10 @@ export default class Player
 			this.posY += this.vel;
 	}
 
-	update_pos(player_properties : any)
+	update_pos(player : Player)
 	{
-		this.posX = player_properties.posX;
-		this.posY = player_properties.posY;
+		this.posX = player.posX;
+		this.posY = player.posY;
 	}
 
 	updateScore(scoreUpdated: number)
