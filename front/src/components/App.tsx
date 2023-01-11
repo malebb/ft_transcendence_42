@@ -1,38 +1,34 @@
 import React from 'react';
 import '../styles/App.css';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, BrowserRouter } from 'react-router-dom';
 import Headers from '../components/Headers';
 import Nav from '../components/Nav';
 import Canvas from '../components/Canvas'
+import { AuthProvider } from '../context/TokenContext';
+import Main from './Main';
+import Signin from './Login/signin';
+import Signup from './Login/signup';
+import User from './User';
+import History from './History';
+import Friends from './Friends';
+import PrivateRoutes from './PrivateRoute/PrivateRoutes';
 
 function App() {
   return (
-    <div className="App">
-      {/* <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header> */}
-      <div className='static'>
-      <Headers/>
-      <Nav/>
-      </div>
+    <AuthProvider>
+    <BrowserRouter>
       <Routes>
-      <Route path='/user'/>
-      <Route path='/history'/>
-      <Route path='/friends'/>
+        <Route element={<PrivateRoutes /> } >
+          <Route path='/user' element={<User/>} />
+          <Route path='/history' element={<History/>}/>
+          <Route path='/friends'element={<Friends/>}/>
+        </Route>
+        <Route path='/' element={<Main/>} />
+        <Route path='/signin' element={<Signin/>}/>
+        <Route path='/signup' element={<Signup/>}/>
       </Routes>
-	  <Canvas/>
-    </div>
+    </BrowserRouter>
+  </AuthProvider> 
   );
 }
 
