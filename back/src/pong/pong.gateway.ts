@@ -37,7 +37,7 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 	handleDisconnect(player: Socket)
 	{
 		console.log('Player ' + player.id + " left");
-		this.pongService.removePlayer(player.id);
+		this.pongService.removeFromQueue(player.id);
 	}
 
 	@SubscribeMessage('joinRoom')

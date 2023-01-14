@@ -9,14 +9,15 @@ export class PongService
 	rooms = [];
 	sizeCanvas : Size = {width : 600, height : 350};
 
-	addPlayer(playerId : string)
+	addToQueue(playerId : string)
 	{
 		this.queue.push(playerId);
 	}
 
-	removePlayer(playerId : string)
+	removeFromQueue(playerId : string)
 	{
-		this.queue.splice(this.queue.indexOf(playerId), 1);
+		if (this.queue.includes(playerId))
+			this.queue.splice(this.queue.indexOf(playerId), 1);
 	}
 
 	checkQueue(playerId : string)
@@ -30,8 +31,8 @@ export class PongService
 				continue ;
 			roomId = this.queue[i] < playerId ? this.queue[i] + playerId : playerId + this.queue[i];
 			opponentId = this.queue[i];
-			this.queue.splice(this.queue.indexOf(playerId), 1);
-			this.queue.splice(this.queue.indexOf(opponentId), 1);
+			this.removeFromQueue(playerId);
+			this.removeFromQueue(opponentId);
 		}
 		return ({roomId : roomId, opponentId : opponentId});
 	}
@@ -55,7 +56,7 @@ export class PongService
 		let room : Room;
 		let queueResearch = {roomId: null, opponentId: ""};
 
-		this.addPlayer(player.id);
+		this.addToQueue(player.id);
 		queueResearch = this.checkQueue(player.id);
 		if (queueResearch.roomId.length)
 		{
@@ -110,7 +111,7 @@ export class PongService
 	{
 		let scorer: string = "";
 		let interval: ReturnType<typeof setInterval>;
-		
+
 		this.rooms[roomId].running = true;
 		interval = setInterval(() => {
 			if (!this.rooms[roomId].running)
