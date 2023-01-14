@@ -48,7 +48,7 @@ export default function Canvas()
 			return (false);
 		}
 
-		function addLink(textZone : LinkZone, linkAction : Function, zones : LinkZone[], data : any)
+		function addLink(textZone : LinkZone, linkAction : Function, zones : LinkZone[], data : any) : Function []
 		{
 			var canvas = document.getElementById('canvas');
 			var executeLink = (e : MouseEvent) =>
@@ -91,6 +91,15 @@ export default function Canvas()
 			}
 			canvas!.addEventListener('click', executeLink)
 			canvas!.addEventListener('mousemove', drawMousePointer);
+			return ([executeLink, drawMousePointer]);
+		}
+
+		function destroyLink(link : any[])
+		{
+			var canvas = document.getElementById('canvas');
+
+			canvas!.removeEventListener('click', link[0]);
+			canvas!.removeEventListener('mousemove', link[1]);
 		}
 
 		function opponentDisconnection()
@@ -173,15 +182,30 @@ export default function Canvas()
 			}));
 		}
 
+		function cancelMatchmaking()
+		{
+			socket.current!.disconnect();
+			menu();
+		}
+
 		async function matchmaking()
 		{
+			let cancelLink: Function[];
+
 			draw.current!.matchmakingPage();
+
+			let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20);
+
+			let zones = [cancelZone];
+
 			socket.current = io(`ws://localhost:3333`, {transports: ["websocket"]});
+			cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
 			socket.current!.on("connect", async () => {
 			await findRoom().then(data => {
 				room.current = JSON.parse(data).room;
 				position.current = JSON.parse(data).position;
 			});
+			destroyLink(cancelLink);
 			launchGame();
 			});
 		}
