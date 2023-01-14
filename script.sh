@@ -18,6 +18,7 @@ npm install prisma
 npm install -D pactum
 npm i --save @nestjs/websockets
 npm i --save @nestjs/platform-socket.io
+npm install ../lib/
 
 cd ../front
 npm i @fortawesome/fontawesome-svg-core
@@ -31,3 +32,4 @@ npm i react-router-dom
 npm i typescript
 npm i keydrown
 npm i socket.io-client
+npm install ../lib/
