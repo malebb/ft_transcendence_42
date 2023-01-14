@@ -1,0 +1,8 @@
+{
+  "name": "ft_transcendence",
+  "version": "1.0.0",
+  "description": "ft_transcendence's library",
+  "files": ["dist/"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts"
+}

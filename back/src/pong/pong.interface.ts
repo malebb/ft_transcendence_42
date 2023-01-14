@@ -1,4 +1,6 @@
+import { Ball } from "ft_transcendence";
+
 export interface Room {
 	id : string;
-	opponentId : string;
+	ball : Ball;
 }

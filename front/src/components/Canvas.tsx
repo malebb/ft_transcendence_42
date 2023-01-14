@@ -1,9 +1,10 @@
 import {useRef, useEffect} from "react";
 
-import Ball from "../classes/Ball";
-import Player from "../classes/Player";
+import { Ball } from "ft_transcendence";
+import { Player } from "ft_transcendence";
 import Draw from "../classes/Draw";
-import {io, Socket} from "socket.io-client"
+import { io, Socket } from "socket.io-client"
+import { Room } from "ft_transcendence" 
 
 export default function Canvas()
 {
@@ -11,13 +12,14 @@ export default function Canvas()
 	const size					= useRef({width: 600, height: 350});
 	const ctx					= useRef<CanvasRenderingContext2D | null>(null);
 	const ball					= useRef<Ball>();
-	const currentPlayer			= useRef<Player | null>(null);
-	const opponent				= useRef<Player | null>(null);
+	const leftPlayer			= useRef<Player | null>(null);
+	const rightPlayer			= useRef<Player | null>(null);
 	const animationFrameId		= useRef<number>(0);
 	const kd					= useRef(require('keydrown'));
 	const socket				= useRef<Socket | null>(null);
-	const roomId				= useRef<string | null>(null);
 	const draw					= useRef<Draw | null>(null);
+	const room					= useRef<Room | null>(null);
+	const position				= useRef<string>("");
 
 	useEffect(() =>
 	{
@@ -104,47 +106,53 @@ export default function Canvas()
 			canvas!.addEventListener('mousemove', drawMousePointer);
 		}
 
-		function launchGame(position : string)
+		function launchGame()
 		{
-			let leftPlayerPos : Position = {posX : 75, posY : 100};
-			let rightPlayerPos : Position = {posX : size.current.width - 100, posY : size.current.height - 100};
+			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.leftPlayer);
+			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.rightPlayer);
 
-			if (position == "left")
-			{
-				currentPlayer.current = new Player(leftPlayerPos.posX, leftPlayerPos.posY, size.current.width / 60, size.current.height / 5, 4, "white", "left", ctx.current);
-				opponent.current = new Player(rightPlayerPos.posX, rightPlayerPos.posY, size.current.width / 60, size.current.height / 5, 4, "white", "right", ctx.current);
-			}
-			else
-			{
-				currentPlayer.current = new Player(rightPlayerPos.posX, rightPlayerPos.posY, size.current.width / 60, size.current.height / 5, 4, "white", "right", ctx.current);
-				opponent.current = new Player(leftPlayerPos.posX, leftPlayerPos.posY, size.current.width / 60, size.current.height / 5, 4, "white", "left", ctx.current);
+			leftPlayer.current.setCtx(ctx.current!);
+			rightPlayer.current.setCtx(ctx.current!);
 
-			}
+			ball.current = Object.assign(new Ball(0, 0, 0, "white", null, null), room.current!.ball);
+			ball.current.setCtx(ctx.current!);
+
 			socket.current!.on("moveBall", (arg : string) => {
-					ball.current!.update_pos(JSON.parse(arg))});
-			socket.current!.on("moveOpponent", (arg : string) => {
-					opponent.current!.update_pos(JSON.parse(arg))
-					});
-			socket.current!.on("updateScore", (data : string) => {
-					currentPlayer.current!.updateScore(JSON.parse(data).score.currentPlayer);
-					opponent.current!.updateScore(JSON.parse(data).score.opponent);
-					});
+					ball.current!.update_pos(JSON.parse(arg))
+			});
+
+			socket.current!.on("movePlayer", (arg : string) => {
+				let data = JSON.parse(arg);
+
+				if (data.position == "left")
+					leftPlayer.current!.update_pos(data.player)
+				else if (data.position == "right")
+					rightPlayer.current!.update_pos(data.player)
+			});
+
+			socket.current!.on("updateScore", (scoreData: string) => {
+				let scoreDataObj = JSON.parse(scoreData);
+
+				if (scoreDataObj.scorer == "left")
+					leftPlayer.current!.updateScore(scoreDataObj.score);
+				else if (scoreDataObj.scorer == "right")
+					rightPlayer.current!.updateScore(scoreDataObj.score);
+			});
 
 			kd.current.UP.down(function()
 			{
-				currentPlayer.current!.moveUp();
-				socket.current!.emit("movePlayer", {player : currentPlayer.current, roomId : roomId.current});
+				socket.current!.emit("movePlayer", {roomId : room.current!.id, position: position.current, key: "UP"});
 			});
 
 			kd.current.DOWN.down(function()
 			{
-				currentPlayer.current!.moveDown();
-				socket.current!.emit("movePlayer", {player : currentPlayer.current, roomId : roomId.current});
+				socket.current!.emit("movePlayer", {roomId : room.current!.id, position: position.current, key: "DOWN"});
 			})
 
 			kd.current.run(function () {
 				kd.current.tick();
 			});
+
 			render();
 		}
 
@@ -152,7 +160,7 @@ export default function Canvas()
 		{
 			return (new Promise(resolve => {
 				socket.current!.on(socket.current!.id, (data) => {
-					socket.current!.emit('joinRoom', JSON.parse(data).roomId)
+					socket.current!.emit('joinRoom', JSON.parse(data).room.id)
 					resolve(data);
 				});
 			}));
@@ -160,16 +168,14 @@ export default function Canvas()
 
 		async function matchmaking()
 		{
-			let position : string = "";
-
 			draw.current.matchmakingPage();
-			socket.current = io(`ws://localhost:3333`, {transports: ["websocket"], /*query: { skin: (player.current === "playerA" ? playerA.current!.color : playerB.current!.color)}*/});
+			socket.current = io(`ws://localhost:3333`, {transports: ["websocket"]});
 			socket.current!.on("connect", async () => {
 			await findRoom().then(data => {
-				roomId.current = JSON.parse(data).roomId;
-				position = JSON.parse(data).position;
+				room.current = JSON.parse(data).room;
+				position.current = JSON.parse(data).position;
 			});
-			launchGame(position);
+			launchGame();
 			});
 		}
 
@@ -219,18 +225,11 @@ export default function Canvas()
 		function draw()
 		{
 			draw.current!.map();
-			currentPlayer.current?.draw_paddle();
-			currentPlayer.current?.draw_score();
-			opponent.current?.draw_paddle();
-			opponent.current?.draw_score();
-			
-			if (ball.current?.move([currentPlayer.current, opponent.current]))
-			{
-				socket.current!.emit("updateScore", {score : {currentPlayer : currentPlayer.current!.score, opponent : opponent.current!.score}, roomId : roomId.current});
-			}
-			
+			leftPlayer.current?.draw_paddle();
+			leftPlayer.current?.draw_score();
+			rightPlayer.current?.draw_paddle();
+			rightPlayer.current?.draw_score();
 			ball.current?.draw();
-			socket.current!.emit("moveBall", {ball : ball.current, roomId: roomId.current});
 		}
 
 		function render()
@@ -240,7 +239,6 @@ export default function Canvas()
 		}
 
 		ctx.current = canvasRef.current.getContext("2d");
-		ball.current = new Ball(size.current.width / 2, size.current.height / 2, 10, "white", ctx.current!);
 		draw.current = new Draw(ctx.current);
 		createMenu();
 		return () => { window.cancelAnimationFrame(animationFrameId.current) }

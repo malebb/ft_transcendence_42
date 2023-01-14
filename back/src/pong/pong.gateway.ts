@@ -13,7 +13,7 @@ import { Socket,
 		Server
 		} from "socket.io"
 
-import { Room } from "./pong.interface"
+import { Player } from "ft_transcendence"
 
 @WebSocketGateway({
 	cors: {
@@ -31,16 +31,8 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 
 	handleConnection(player: Socket)
 	{
-		let room : Room;
-
 		console.log('Player ' + player.id + ' joined');
-		this.pongService.addPlayer(player.id);
-		room = this.pongService.checkQueue(player.id);
-		if (room.id.length)
-		{
-			this.server.emit(room.opponentId, JSON.stringify({roomId : room.id, position : "left"}));
-			this.server.emit(player.id, JSON.stringify({roomId : room.id, position: "right"}));
-		}
+		this.pongService.findRoom(this.server, player);
 	}
 
 	handleDisconnect(client: Socket)
@@ -50,18 +42,16 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 	}
 
 	@SubscribeMessage('joinRoom')
-	joinRoom(player : Socket, roomId : string) {
-		player.join(roomId);
-    }
-	
-	@SubscribeMessage('moveBall')
-	updateBall(@ConnectedSocket() player : Socket, @MessageBody() data : any) {
-		this.server.to(data.roomId).emit('moveBall', JSON.stringify(data.ball));
+	joinRoom(player : Socket, roomId : string)
+	{
+		this.pongService.joinRoom(player, roomId);
     }
 
 	@SubscribeMessage('movePlayer')
-	movePlayer(@ConnectedSocket() player : Socket, @MessageBody() data : any) {
-		player.to(data.roomId).emit('moveOpponent', JSON.stringify(data.player));
+	movePlayer(@MessageBody() data : any) {
+		let playerMoved : Player = this.pongService.movePlayer(data.roomId, data.position, data.key);
+
+		this.server.to(data.roomId).emit('movePlayer', JSON.stringify({player: playerMoved, position: data.position}));
   	}
 
 	@SubscribeMessage('updateScore')
