@@ -97,6 +97,7 @@ export default function Canvas()
 		{
 			window.cancelAnimationFrame(animationFrameId.current)
 			socket.current!.disconnect();
+			kd.current.stop();
 			draw.current!.opponentDisconnectionPage();
 
 			let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20);
