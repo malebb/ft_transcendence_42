@@ -3,6 +3,7 @@ import { Player } from "./Player"
 
 export interface Room {
 	id:					string;
+	running:			boolean;
 	ball:				Ball;
 	leftPlayer:			Player;
 	rightPlayer:		Player;

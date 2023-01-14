@@ -1,4 +1,4 @@
-import {useRef, useEffect} from "react";
+import { useRef, useEffect } from "react";
 
 import { Ball } from "ft_transcendence";
 import { Player } from "ft_transcendence";
@@ -29,18 +29,6 @@ export default function Canvas()
 			posY : number;
 			width : number;
 			height : number;
-		}
-
-		interface Player
-		{
-			id : string;
-			skin : string;
-		}
-
-		interface Position
-		{
-			posX : number;
-			posY : number;
 		}
 
 		function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
@@ -74,7 +62,7 @@ export default function Canvas()
 				}
 				else
 				{
-					zones.map(zone => {
+					zones.forEach(zone => {
 					if (mouseOnZone(e, zone))
 					{
 						canvas!.removeEventListener('click', executeLink);
@@ -93,7 +81,7 @@ export default function Canvas()
 				{
 					var		mouseOnOtherZone : boolean = false;
 	
-					zones.map(zone => {
+					zones.forEach(zone => {
 					if (mouseOnZone(e, zone))
 						mouseOnOtherZone = true;
 					});
@@ -103,6 +91,20 @@ export default function Canvas()
 			}
 			canvas!.addEventListener('click', executeLink)
 			canvas!.addEventListener('mousemove', drawMousePointer);
+		}
+
+		function opponentDisconnection()
+		{
+			window.cancelAnimationFrame(animationFrameId.current)
+			socket.current!.disconnect();
+			draw.current!.opponentDisconnectionPage();
+
+			let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20);
+			let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20);
+			let zones = [newGameZone, menuZone];
+
+			addLink(newGameZone, matchmaking, zones, 0);
+			addLink(menuZone, menu, zones, 0);
 		}
 
 		function launchGame()
@@ -123,19 +125,24 @@ export default function Canvas()
 			socket.current!.on("movePlayer", (arg : string) => {
 				let data = JSON.parse(arg);
 
-				if (data.position == "left")
+				if (data.position === "left")
 					leftPlayer.current!.update_pos(data.player)
-				else if (data.position == "right")
+				else if (data.position === "right")
 					rightPlayer.current!.update_pos(data.player)
 			});
 
 			socket.current!.on("updateScore", (scoreData: string) => {
 				let scoreDataObj = JSON.parse(scoreData);
 
-				if (scoreDataObj.scorer == "left")
+				if (scoreDataObj.scorer === "left")
 					leftPlayer.current!.updateScore(scoreDataObj.score);
-				else if (scoreDataObj.scorer == "right")
+				else if (scoreDataObj.scorer === "right")
 					rightPlayer.current!.updateScore(scoreDataObj.score);
+			});
+
+			socket.current!.on("opponentDisconnection", () =>
+			{
+				opponentDisconnection();
 			});
 
 			kd.current.UP.down(function()
@@ -167,7 +174,7 @@ export default function Canvas()
 
 		async function matchmaking()
 		{
-			draw.current.matchmakingPage();
+			draw.current!.matchmakingPage();
 			socket.current = io(`ws://localhost:3333`, {transports: ["websocket"]});
 			socket.current!.on("connect", async () => {
 			await findRoom().then(data => {
@@ -180,13 +187,13 @@ export default function Canvas()
 
 		function changeSkin(name : string)
 		{
-			draw.current.skins = [];
+			draw.current!.skins = [];
 
 			// TODO : update skin in database
 			// ...
 
 			console.log('You\'ve selected ' + name + ' skin');
-			createMenu();
+			menu();
 		}
 
 		function skins()
@@ -195,33 +202,31 @@ export default function Canvas()
 			let skinLinkZones : LinkZone[] = [];
 
 			draw.current!.skinsBackground();
-			colouredSkins.map(
-			color => {
+			colouredSkins.forEach(color => {
 				let skinLinkZone = draw.current!.skin(color)
 				skinLinkZones.push(skinLinkZone);
 			}
 			);
-			skinLinkZones.map(
-			skinLinkZone => {
+			skinLinkZones.forEach(skinLinkZone => {
 				addLink(skinLinkZone, changeSkin, skinLinkZones, colouredSkins[skinLinkZones.indexOf(skinLinkZone)]);
 			}
 			);
 		}
 
-		function createMenu()
+		function menu()
 		{
-			draw.current.menuBackground();
+			draw.current!.menuBackground();
 
-			let newGameZone = draw.current.text("new game", size.current.width / 2, size.current.height / 2, 35);
-			let skinsZone = draw.current.text("skins", size.current.width / 4, size.current.height / 1.3, 20);
-			let mapsZone = draw.current.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
+			let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35);
+			let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20);
+			let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
 			let zones = [newGameZone, skinsZone, mapsZone];
 
 			addLink(newGameZone, matchmaking, zones, 0);
 			addLink(skinsZone, skins, zones, 0);
 		}
 
-		function draw()
+		function game()
 		{
 			draw.current!.map();
 			leftPlayer.current?.draw_paddle();
@@ -233,14 +238,16 @@ export default function Canvas()
 
 		function render()
 		{
-			draw();
+			game();
 			animationFrameId.current = window.requestAnimationFrame(render)
 		}
 
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
-		createMenu();
-		return () => { window.cancelAnimationFrame(animationFrameId.current) }
+		menu();
+		return () => { 
+		window.cancelAnimationFrame(animationFrameId.current)
+		}
 
 	}, []);
 

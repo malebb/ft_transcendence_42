@@ -4,7 +4,6 @@ import { SubscribeMessage,
 		MessageBody,
 		OnGatewayConnection,
 		OnGatewayDisconnect,
-		ConnectedSocket
 		} from '@nestjs/websockets';
 
 import { PongService } from './pong.service'
@@ -35,10 +34,10 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 		this.pongService.findRoom(this.server, player);
 	}
 
-	handleDisconnect(client: Socket)
+	handleDisconnect(player: Socket)
 	{
-		console.log('Player ' + client.id + " left");
-		this.pongService.removePlayer(client.id);
+		console.log('Player ' + player.id + " left");
+		this.pongService.removePlayer(player.id);
 	}
 
 	@SubscribeMessage('joinRoom')
@@ -52,10 +51,5 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 		let playerMoved : Player = this.pongService.movePlayer(data.roomId, data.position, data.key);
 
 		this.server.to(data.roomId).emit('movePlayer', JSON.stringify({player: playerMoved, position: data.position}));
-  	}
-
-	@SubscribeMessage('updateScore')
-	updateScore(@ConnectedSocket() player : Socket, @MessageBody() data : any) {
-		player.to(data.roomId).emit('updateScore', JSON.stringify({score : {currentPlayer : data.score.opponent, opponent : data.score.currentPlayer}}));
   	}
 }

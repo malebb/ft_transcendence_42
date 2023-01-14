@@ -36,7 +36,7 @@ export default class Draw
 			let	textZone : LinkZone| undefined;
 
 			this.ctx!.beginPath();
-			this.ctx!.fillStyle = "pink";
+			this.ctx!.fillStyle = "white";
 			this.ctx!.font = size + "px Courier New";
 			this.ctx!.textAlign = 'center';
 			this.ctx!.fillText(text, posX, posY);
@@ -49,6 +49,13 @@ export default class Draw
 		this.ctx!.fillStyle = 'black';
 		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
 		this.text("looking for player...", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
+	}
+
+	opponentDisconnectionPage()
+	{
+		this.ctx!.fillStyle = 'black';
+		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
+		this.text("Opponent's left", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
 	}
 	
 	skinsBackground()

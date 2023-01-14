@@ -41,6 +41,7 @@ export class PongService
 		return (
 			{
 				id: roomId,
+				running: false,
 				ball: new Ball(this.sizeCanvas.width / 2,
 							   this.sizeCanvas.height / 2, 10, "white", null, this.sizeCanvas),
 				leftPlayer: new Player(75, 100, this.sizeCanvas.width / 60, this.sizeCanvas.height / 5, 4, "white", "left", null, this.sizeCanvas),
@@ -63,6 +64,26 @@ export class PongService
 			server.emit(queueResearch.opponentId, JSON.stringify({room: room, position: "left"}));
 			server.emit(player.id, JSON.stringify({room: room, position: "right"}));
 			this.runRoom(room.id, server);
+		}
+	  	player.on("disconnecting", () => {
+			this.stopRoom(player);
+  		});
+	}
+
+	stopRoom(player: Socket)
+	{
+		let roomToLeave: string | undefined;
+
+		roomToLeave = Array.from(player.rooms)[1];
+		if (roomToLeave != undefined)
+		{
+			if (this.rooms[roomToLeave].running == false)
+				this.rooms.splice(this.rooms.indexOf(roomToLeave), 1);
+			else
+			{
+				this.rooms[roomToLeave].running = false;
+				player.to(roomToLeave).emit("opponentDisconnection");
+			}
 		}
 	}
 
@@ -88,8 +109,12 @@ export class PongService
 	runRoom(roomId: string, server: Server)
 	{
 		let scorer: string = "";
-
-		setInterval(() => {
+		let interval: ReturnType<typeof setInterval>;
+		
+		this.rooms[roomId].running = true;
+		interval = setInterval(() => {
+			if (!this.rooms[roomId].running)
+				clearInterval(interval);
 			if ((scorer = this.rooms[roomId].ball.move([this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer])).length)
 			{
 				if (scorer == "left")
