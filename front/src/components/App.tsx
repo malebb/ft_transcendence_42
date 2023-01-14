@@ -12,6 +12,7 @@ import User from './User';
 import History from './History';
 import Friends from './Friends';
 import PrivateRoutes from './PrivateRoute/PrivateRoutes';
+import {useEffect} from 'react';
 
 function App() {
   return (

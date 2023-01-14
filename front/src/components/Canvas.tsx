@@ -1,9 +1,10 @@
 import {useRef, useEffect} from "react";
 
-import Ball from "../classes/Ball";
-import Player from "../classes/Player";
+import { Ball } from "ft_transcendence";
+import { Player } from "ft_transcendence";
 import Draw from "../classes/Draw";
-import {io, Socket} from "socket.io-client"
+import { io, Socket } from "socket.io-client"
+import { Room } from "ft_transcendence" 
 
 export default function Canvas()
 {
@@ -11,70 +12,93 @@ export default function Canvas()
 	const size					= useRef({width: 600, height: 350});
 	const ctx					= useRef<CanvasRenderingContext2D | null>(null);
 	const ball					= useRef<Ball>();
-	const playerA				= useRef<Player | null>(null);
-	const playerB				= useRef<Player | null>(null);
+	const leftPlayer			= useRef<Player | null>(null);
+	const rightPlayer			= useRef<Player | null>(null);
 	const animationFrameId		= useRef<number>(0);
 	const kd					= useRef(require('keydrown'));
 	const socket				= useRef<Socket | null>(null);
-	const roomId				= useRef<string | null>(null);
-	const player				= useRef<string | null>(null);
 	const draw					= useRef<Draw | null>(null);
+	const room					= useRef<Room | null>(null);
+	const position				= useRef<string>("");
 
 	useEffect(() =>
 	{
-
-		interface TextZone{
+		interface LinkZone
+		{
 			posX : number;
 			posY : number;
 			width : number;
 			height : number;
 		}
 
-		function addLink(textZone : TextZone, linkAction : Function)
+		interface Player
+		{
+			id : string;
+			skin : string;
+		}
+
+		interface Position
+		{
+			posX : number;
+			posY : number;
+		}
+
+		function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
 		{
 			var canvas = document.getElementById('canvas');
-			var	mouseOnZone : TextZone | null = null;
+			var clickZone = canvas!.getBoundingClientRect();
+
+			if (e.clientX - clickZone.left >= textZone.posX &&
+				e.clientX - clickZone.left <= textZone.posX + textZone.width)
+			{
+				if (e.clientY - clickZone.top >= textZone.posY &&
+				e.clientY - clickZone.top <= textZone.posY + textZone.height)
+				{
+					return (true);
+				}
+			}
+			return (false);
+		}
+
+		function addLink(textZone : LinkZone, linkAction : Function, zones : LinkZone[], data : any)
+		{
+			var canvas = document.getElementById('canvas');
 			var executeLink = (e : MouseEvent) =>
 			{
-
-				var clickZone = canvas!.getBoundingClientRect();
-
-				if (e.clientX - clickZone.left >= textZone.posX &&
-				e.clientX - clickZone.left <= textZone.posX + textZone.width)
+				if (mouseOnZone(e, textZone))
 				{
-					if (e.clientY - clickZone.top >= textZone.posY &&
-					e.clientY - clickZone.top <= textZone.posY + textZone.height)
+					canvas!.removeEventListener('click', executeLink);
+					canvas!.removeEventListener('mousemove', drawMousePointer);
+					canvas!.style.cursor = 'default';
+					linkAction(data);
+				}
+				else
+				{
+					zones.map(zone => {
+					if (mouseOnZone(e, zone))
 					{
 						canvas!.removeEventListener('click', executeLink);
 						canvas!.removeEventListener('mousemove', drawMousePointer);
 						canvas!.style.cursor = 'default';
-						linkAction();
 					}
+					});
 				}
 			};
+
 			var drawMousePointer = (e : MouseEvent) =>
 			{
-				var clickZone = canvas!.getBoundingClientRect();
-
-				if (e.clientX - clickZone.left >= textZone.posX &&
-				e.clientX - clickZone.left <= textZone.posX + textZone.width)
-				{
-					if (e.clientY - clickZone.top >= textZone.posY &&
-					e.clientY - clickZone.top <= textZone.posY + textZone.height)
-					{
-						canvas!.style.cursor = 'pointer';
-						mouseOnZone = textZone;
-					}
-					else
-					{
-						if (mouseOnZone && mouseOnZone === textZone)
-							canvas!.style.cursor = 'default';
-					}
-				}
+				if (mouseOnZone(e, textZone))
+					canvas!.style.cursor = 'pointer';
 				else
 				{
-						if (mouseOnZone && mouseOnZone === textZone)
-							canvas!.style.cursor = 'default';
+					var		mouseOnOtherZone : boolean = false;
+	
+					zones.map(zone => {
+					if (mouseOnZone(e, zone))
+						mouseOnOtherZone = true;
+					});
+					if (!mouseOnOtherZone)
+						canvas!.style.cursor = 'default';
 				}
 			}
 			canvas!.addEventListener('click', executeLink)
@@ -83,53 +107,51 @@ export default function Canvas()
 
 		function launchGame()
 		{
-			playerA.current = new Player(75, 100, size.current.width / 60, size.current.height / 5, 4, "white", ctx.current);
-			playerB.current = new Player(size.current.width - 100, size.current.height - 100, size.current.width / 60, size.current.height / 5, 4, "white", ctx.current);
+			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.leftPlayer);
+			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.rightPlayer);
 
-			ball.current = new Ball(size.current.width / 2, size.current.height / 2, 10, "white", ctx.current!);
+			leftPlayer.current.setCtx(ctx.current!);
+			rightPlayer.current.setCtx(ctx.current!);
 
-			socket.current!.on("ball", (arg : string) => {
-					ball.current!.update_pos(JSON.parse(arg))});
-			socket.current!.on("playerA", (arg : string) => {
-					playerA.current!.update_pos(JSON.parse(arg))});
-			socket.current!.on("playerB", (arg : string) => {
-					playerB.current!.update_pos(JSON.parse(arg));});
-			socket.current!.on("updateScore", (score : string) => {
-					playerA.current!.updateScore(JSON.parse(score).playerA);
-					playerB.current!.updateScore(JSON.parse(score).playerB);
-					});
+			ball.current = Object.assign(new Ball(0, 0, 0, "white", null, null), room.current!.ball);
+			ball.current.setCtx(ctx.current!);
+
+			socket.current!.on("moveBall", (arg : string) => {
+					ball.current!.update_pos(JSON.parse(arg))
+			});
+
+			socket.current!.on("movePlayer", (arg : string) => {
+				let data = JSON.parse(arg);
+
+				if (data.position == "left")
+					leftPlayer.current!.update_pos(data.player)
+				else if (data.position == "right")
+					rightPlayer.current!.update_pos(data.player)
+			});
+
+			socket.current!.on("updateScore", (scoreData: string) => {
+				let scoreDataObj = JSON.parse(scoreData);
+
+				if (scoreDataObj.scorer == "left")
+					leftPlayer.current!.updateScore(scoreDataObj.score);
+				else if (scoreDataObj.scorer == "right")
+					rightPlayer.current!.updateScore(scoreDataObj.score);
+			});
 
 			kd.current.UP.down(function()
 			{
-				if (player.current === "playerA")
-				{
-					playerA.current!.moveUp();
-					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
-				}
-				else
-				{
-					playerB.current!.moveUp();
-					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
-				}
+				socket.current!.emit("movePlayer", {roomId : room.current!.id, position: position.current, key: "UP"});
 			});
 
 			kd.current.DOWN.down(function()
 			{
-				if (player.current === "playerA")
-				{
-					playerA.current!.moveDown();
-					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
-				}
-				else
-				{
-					playerB.current!.moveDown();
-					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
-				}
+				socket.current!.emit("movePlayer", {roomId : room.current!.id, position: position.current, key: "DOWN"});
 			})
 
 			kd.current.run(function () {
 				kd.current.tick();
 			});
+
 			render();
 		}
 
@@ -137,29 +159,53 @@ export default function Canvas()
 		{
 			return (new Promise(resolve => {
 				socket.current!.on(socket.current!.id, (data) => {
-					socket.current!.emit('joinRoom', data.roomId)
-					player.current = data.player;
-					resolve(data.roomId);
+					socket.current!.emit('joinRoom', JSON.parse(data).room.id)
+					resolve(data);
 				});
 			}));
 		}
-
 
 		async function matchmaking()
 		{
 			draw.current.matchmakingPage();
 			socket.current = io(`ws://localhost:3333`, {transports: ["websocket"]});
 			socket.current!.on("connect", async () => {
-			await findRoom().then(id => {
-				roomId.current = id;
+			await findRoom().then(data => {
+				room.current = JSON.parse(data).room;
+				position.current = JSON.parse(data).position;
 			});
 			launchGame();
 			});
 		}
 
+		function changeSkin(name : string)
+		{
+			draw.current.skins = [];
+
+			// TODO : update skin in database
+			// ...
+
+			console.log('You\'ve selected ' + name + ' skin');
+			createMenu();
+		}
+
 		function skins()
 		{
-			draw.current.skinsPage();
+			let colouredSkins : string[] = ["white", "blue", "yellow", "orange", "pink", "purple", "green", "grey", "red", "cyan"];
+			let skinLinkZones : LinkZone[] = [];
+
+			draw.current!.skinsBackground();
+			colouredSkins.map(
+			color => {
+				let skinLinkZone = draw.current!.skin(color)
+				skinLinkZones.push(skinLinkZone);
+			}
+			);
+			skinLinkZones.map(
+			skinLinkZone => {
+				addLink(skinLinkZone, changeSkin, skinLinkZones, colouredSkins[skinLinkZones.indexOf(skinLinkZone)]);
+			}
+			);
 		}
 
 		function createMenu()
@@ -169,34 +215,20 @@ export default function Canvas()
 			let newGameZone = draw.current.text("new game", size.current.width / 2, size.current.height / 2, 35);
 			let skinsZone = draw.current.text("skins", size.current.width / 4, size.current.height / 1.3, 20);
 			let mapsZone = draw.current.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
+			let zones = [newGameZone, skinsZone, mapsZone];
 
-			addLink(newGameZone, matchmaking);
-			addLink(skinsZone, skins);
+			addLink(newGameZone, matchmaking, zones, 0);
+			addLink(skinsZone, skins, zones, 0);
 		}
 
 		function draw()
 		{
-			ctx.current!.fillStyle = 'black';
-			ctx.current?.fillRect(0, 0, size.current.width, size.current.height);
-			ctx.current?.beginPath();
-			ctx.current!.fillStyle = 'white';
-			ctx.current?.moveTo(size.current.width / 2, 0);
-			ctx.current?.lineTo(size.current.width / 2, size.current.height);
-			ctx.current?.moveTo(0, 0);
-			ctx.current?.lineTo(80, 80);
-			ctx.current?.stroke();
-			playerA.current?.draw_paddle();
-			playerB.current?.draw_paddle();
-			playerA.current?.draw_score(size.current.width / 3, size.current.height / 4);
-			playerB.current?.draw_score(size.current.width - (size.current.width / 3 ) - 30, size.current.height / 4);
-			
-			if (ball.current?.move([playerA.current, playerB.current]))
-			{
-				socket.current!.emit("updateScore", {score : {playerA : playerA.current!.score, playerB : playerB.current!.score}, roomId : roomId.current});
-			}
-			
+			draw.current!.map();
+			leftPlayer.current?.draw_paddle();
+			leftPlayer.current?.draw_score();
+			rightPlayer.current?.draw_paddle();
+			rightPlayer.current?.draw_score();
 			ball.current?.draw();
-			socket.current!.emit("ball", {ball : ball.current, roomId: roomId.current});
 		}
 
 		function render()

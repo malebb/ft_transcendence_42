@@ -1,21 +1,22 @@
-import Player from './Player'
+import { Player } from './Player';
+import { Size } from './Size';
 
-export default class Ball
+export class Ball
 {
 	velX = 3;
 	velY = 3;
 
 	constructor(public posX: number, private posY: number, private radius: number,
-	private color: string, private ctx: CanvasRenderingContext2D )
+	public color: string, private ctx: CanvasRenderingContext2D | null, private readonly canvasSize: Size | null)
 	{
 	}
 
 	draw()
 	{
-		this.ctx.beginPath();
-		this.ctx.fillStyle = this.color;
-		this.ctx.arc(this.posX, this.posY, this.radius, 0, 2 * Math.PI);
-		this.ctx.fill();
+		this.ctx!.beginPath();
+		this.ctx!.fillStyle = this.color;
+		this.ctx!.arc(this.posX, this.posY, this.radius, 0, 2 * Math.PI);
+		this.ctx!.fill();
 	}
 	
 	playerCollision(players: (Player | null)[])
@@ -52,39 +53,34 @@ export default class Ball
 		return (false);
 	}
 
-	move(players : (Player | null)[]) : boolean
+	move(players : (Player | null)[]) : string
 	{
-		let goal : boolean = false;
+		let scorer : string = "";
 
 		if (!this.playerCollision(players))
 		{
-			if (this.posX + this.velX >= this.ctx.canvas.width - this.radius || this.posX + this.velX <= this.radius)
+			if (this.posX + this.velX >= this.canvasSize!.width - this.radius || this.posX + this.velX <= this.radius)
 			{
-				goal = true;
 				if (this.velX > 0)
 				{
-					if (players[0]!.position == "left")
-						players[0]!.score++;
-					else
-						players[1]!.score++;
+					players[0]!.score++;
+					scorer = "left";
 				}
 				else
 				{
-					if (players[0]!.position == "right")
-						players[0]!.score++;
-					else
-						players[1]!.score++;
+					players[1]!.score++;
+					scorer = "right";
 				}
 				this.velX *= -1;
-				this.posX = this.ctx.canvas.width / 2;
+				this.posX = this.canvasSize!.width / 2;
 			}
-			if (this.posY + this.velY >= this.ctx.canvas.height - this.radius
+			if (this.posY + this.velY >= this.canvasSize!.height - this.radius
 				|| this.posY + this.velY <= this.radius)
 				this.velY *= -1;
 		}
 		this.posX += this.velX;
 		this.posY += this.velY;
-		return (goal);
+		return (scorer);
 	}
 
 	update_pos(ball_properties : any)
@@ -93,5 +89,10 @@ export default class Ball
 		this.posY = ball_properties.posY;
 		this.velX = ball_properties.velX;
 		this.velY = ball_properties.velY;
+	}
+
+	setCtx(ctx: CanvasRenderingContext2D)
+	{
+		this.ctx = ctx;
 	}
 }

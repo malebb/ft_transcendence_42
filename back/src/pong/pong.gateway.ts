@@ -4,10 +4,8 @@ import { SubscribeMessage,
 		MessageBody,
 		OnGatewayConnection,
 		OnGatewayDisconnect,
-		ConnectedSocket,
+		ConnectedSocket
 		} from '@nestjs/websockets';
-
-import { Query } from '@nestjs/common'
 
 import { PongService } from './pong.service'
 
@@ -15,7 +13,7 @@ import { Socket,
 		Server
 		} from "socket.io"
 
-import { Room } from "./pong.interface"
+import { Player } from "ft_transcendence"
 
 @WebSocketGateway({
 	cors: {
@@ -31,18 +29,10 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 	@WebSocketServer()
 	server: Server;
 
-	handleConnection(client: Socket)
+	handleConnection(player: Socket)
 	{
-		let room : Room;
-
-		console.log('Player ' + client.id + " arrived");
-		this.pongService.addPlayer(client.id);
-		room = this.pongService.checkQueue(client.id);
-		if (room.id.length)
-		{
-			this.server.emit(room.opponentId, JSON.stringify({roomId : room.id, position : "left"}));
-			this.server.emit(client.id, JSON.stringify({roomId : room.id, position: "right"}));
-		}
+		console.log('Player ' + player.id + ' joined');
+		this.pongService.findRoom(this.server, player);
 	}
 
 	handleDisconnect(client: Socket)
@@ -52,22 +42,20 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 	}
 
 	@SubscribeMessage('joinRoom')
-	joinRoom(client: Socket, roomId : string) {
-		client.join(roomId);
-    }
-	
-	@SubscribeMessage('ball')
-	updateBall(@MessageBody() data : any) {
-		this.server.to(data.roomId).emit('ball', JSON.stringify(data.ball));
+	joinRoom(player : Socket, roomId : string)
+	{
+		this.pongService.joinRoom(player, roomId);
     }
 
 	@SubscribeMessage('movePlayer')
-	movePlayer(@ConnectedSocket() client: Socket, @MessageBody() data : any) {
-		client.to(data.roomId).emit('moveOpponent', JSON.stringify(data.currentPlayer));
+	movePlayer(@MessageBody() data : any) {
+		let playerMoved : Player = this.pongService.movePlayer(data.roomId, data.position, data.key);
+
+		this.server.to(data.roomId).emit('movePlayer', JSON.stringify({player: playerMoved, position: data.position}));
   	}
 
 	@SubscribeMessage('updateScore')
-	updateScore(@ConnectedSocket() client : Socket, @MessageBody() data : any) {
-		client.to(data.roomId).emit('updateScore', JSON.stringify({score : {opponent : data.score.currentPlayer, currentPlayer : data.score.opponent}}));
+	updateScore(@ConnectedSocket() player : Socket, @MessageBody() data : any) {
+		player.to(data.roomId).emit('updateScore', JSON.stringify({score : {currentPlayer : data.score.opponent, opponent : data.score.currentPlayer}}));
   	}
 }

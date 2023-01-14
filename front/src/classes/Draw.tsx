@@ -1,5 +1,6 @@
+import Skin from "../classes/Skin";
 
-interface TextZone{
+interface LinkZone{
 	posX : number;
 	posY : number;
 	width : number;
@@ -8,9 +9,12 @@ interface TextZone{
 
 export default class Draw
 {
+	skins : Skin[] = [];
+
 	constructor(public readonly ctx : CanvasRenderingContext2D | null)
 	{
 	}
+
 
 	menuBackground()
 	{
@@ -29,7 +33,7 @@ export default class Draw
 
 	text(text : string, posX : number, posY : number, size : number)
 	{
-			let	textZone : TextZone | undefined;
+			let	textZone : LinkZone| undefined;
 
 			this.ctx!.beginPath();
 			this.ctx!.fillStyle = "pink";
@@ -47,10 +51,39 @@ export default class Draw
 		this.text("looking for player...", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
 	}
 	
-	skinsPage()
+	skinsBackground()
 	{
 		this.ctx!.fillStyle = 'black';
 		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
-		this.text("Skins", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 5, 35);
+		this.text("Skins", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35);
+	}
+
+	skin(name : string) : LinkZone
+	{
+		let margin : number = 100;
+		let nbInRow : number = 5;
+		let skin : Skin = new Skin(name, this.ctx!.canvas.width / 60, this.ctx!.canvas.height / nbInRow);
+		let skinZone : LinkZone = {posX : (this.ctx!.canvas.width / nbInRow) * (this.skins!.length % nbInRow) + this.ctx!.canvas.width / (nbInRow * 2), posY : (skin.height * 2) * Math.floor(this.skins.length / nbInRow) + margin, width : skin.width, height : skin.height};
+
+		this.ctx!.fillStyle = name;
+		this.ctx!.fillRect(skinZone.posX, skinZone.posY, skinZone.width, skinZone.height);
+//		this.ctx!.fillRect((this.ctx!.canvas.width / nbInRow) * (this.skins!.length % nbInRow) + this.ctx!.canvas.width / (nbInRow * 2),
+//		(skin.height * 2) * Math.floor(this.skins.length / nbInRow) + margin
+//		, skin.width, skin.height);
+		this.skins!.push(skin);
+		return (skinZone);
+	}
+
+	map()
+	{
+		this.ctx!.fillStyle = 'black';
+		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
+		this.ctx!.beginPath();
+		this.ctx!.fillStyle = 'white';
+		this.ctx!.moveTo(this.ctx!.canvas.width / 2, 0);
+		this.ctx!.lineTo(this.ctx!.canvas.width / 2, this.ctx!.canvas.height);
+		this.ctx!.moveTo(0, 0);
+		this.ctx!.lineTo(80, 80);
+		this.ctx!.stroke();
 	}
 }
