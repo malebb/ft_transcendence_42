@@ -74,9 +74,6 @@ export default class Draw
 
 		this.ctx!.fillStyle = name;
 		this.ctx!.fillRect(skinZone.posX, skinZone.posY, skinZone.width, skinZone.height);
-//		this.ctx!.fillRect((this.ctx!.canvas.width / nbInRow) * (this.skins!.length % nbInRow) + this.ctx!.canvas.width / (nbInRow * 2),
-//		(skin.height * 2) * Math.floor(this.skins.length / nbInRow) + margin
-//		, skin.width, skin.height);
 		this.skins!.push(skin);
 		return (skinZone);
 	}
@@ -92,5 +89,12 @@ export default class Draw
 		this.ctx!.moveTo(0, 0);
 		this.ctx!.lineTo(80, 80);
 		this.ctx!.stroke();
+	}
+
+	mapsBackground()
+	{
+		this.ctx!.fillStyle = 'black';
+		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
+		this.text("Maps", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35);
 	}
 }

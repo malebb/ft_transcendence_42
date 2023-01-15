@@ -238,6 +238,11 @@ export default function Canvas()
 			);
 		}
 
+		function maps()
+		{
+			draw.current!.mapsBackground();
+		}
+
 		function menu()
 		{
 			draw.current!.menuBackground();
@@ -249,6 +254,7 @@ export default function Canvas()
 
 			addLink(newGameZone, matchmaking, zones, 0);
 			addLink(skinsZone, skins, zones, 0);
+			addLink(mapsZone, maps, zones, 0);
 		}
 
 		function game()
