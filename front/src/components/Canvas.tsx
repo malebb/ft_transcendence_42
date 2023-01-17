@@ -205,7 +205,7 @@ export default function Canvas()
 
 			// TODO fetch user selected map in database
 
-			map.current = draw.current!.initGameMap('city');
+			map.current = draw.current!.initGameMap('basic');
 			map.current!.onload = function()
 			{
 				render();

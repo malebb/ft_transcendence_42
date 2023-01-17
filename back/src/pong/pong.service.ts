@@ -52,7 +52,7 @@ export class PongService
 									this.sizeCanvas),
 
 				leftPlayer:	new Player(this.sizeCanvas.width / 30,
-									   this.sizeCanvas.height / 30,
+									   this.sizeCanvas.height / 23,
 									   this.sizeCanvas.width / 60, 
 									   this.sizeCanvas.height / 6,
 									   3,
@@ -64,7 +64,7 @@ export class PongService
 				rightPlayer: new Player(this.sizeCanvas.width - this.sizeCanvas.width / 30
 									   - (this.sizeCanvas.width / 60),
 									   this.sizeCanvas.height -
-										(this.sizeCanvas.height / 30 + (this.sizeCanvas.height / 6)),
+										(this.sizeCanvas.height / 23 + (this.sizeCanvas.height / 6)),
 									   this.sizeCanvas.width / 60,
 									   this.sizeCanvas.height / 6,
 									   3,
@@ -158,6 +158,6 @@ export class PongService
 				scorer = "";
 			}
 			server.to(roomId).emit('moveBall', JSON.stringify(this.rooms[roomId].ball));
-		}, 20);
+		}, 15);
 	}
 }
