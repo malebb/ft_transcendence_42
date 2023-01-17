@@ -8,6 +8,7 @@ export class PongService
 	queue : string[] = [];
 	rooms = [];
 	sizeCanvas : Size = {width : 600, height : 350};
+	scoreToWin: number = 5;
 
 	addToQueue(playerId : string)
 	{
@@ -119,9 +120,17 @@ export class PongService
 			if ((scorer = this.rooms[roomId].ball.move([this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer])).length)
 			{
 				if (scorer == "left")
+				{
 					server.to(roomId).emit('updateScore', JSON.stringify({scorer: scorer, score: this.rooms[roomId].leftPlayer.score}));
+					if (this.rooms[roomId].leftPlayer.score == this.scoreToWin)
+						server.to(roomId).emit('endGame', scorer);
+				}
 				else if (scorer == "right")
+				{
 					server.to(roomId).emit('updateScore', JSON.stringify({scorer: scorer, score: this.rooms[roomId].rightPlayer.score}));
+					if (this.rooms[roomId].rightPlayer.score == this.scoreToWin)
+						server.to(roomId).emit('endGame', scorer);
+				}
 				scorer = "";
 			}
 			server.to(roomId).emit('moveBall', JSON.stringify(this.rooms[roomId].ball));

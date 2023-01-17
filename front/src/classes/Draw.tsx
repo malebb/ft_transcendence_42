@@ -81,7 +81,7 @@ export default class Draw
 		this.text("looking for player...", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
 	}
 
-	opponentDisconnectionPage()
+	opponentDisconnection()
 	{
 		this.text("Opponent has left", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
 	}
@@ -152,5 +152,15 @@ export default class Draw
 			mapImg.src = map.path;
 		});
 		return (mapZones);
+	}
+
+	youWon()
+	{
+		this.text("You won!", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
+	}
+
+	youLost()
+	{
+		this.text("You lost!", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
 	}
 }

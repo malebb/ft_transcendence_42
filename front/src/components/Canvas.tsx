@@ -95,17 +95,43 @@ export default function Canvas()
 			canvas!.removeEventListener('mousemove', link[1]);
 		}
 
-		function opponentDisconnection()
+		function stopGame()
 		{
 			window.cancelAnimationFrame(animationFrameId.current)
 			socket.current!.disconnect();
 			kd.current.stop();
+		}
+
+		function opponentDisconnection()
+		{
+			stopGame();
 			let background: HTMLImageElement = draw.current!.initOutGameBackground();
 
 			background.onload = function()
 			{
 				draw.current!.outGameBackground(background);
-				draw.current!.opponentDisconnectionPage();
+				draw.current!.opponentDisconnection();
+
+				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20);
+				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20);
+				let zones = [newGameZone, menuZone];
+
+				addLink(newGameZone, matchmaking, zones, 0);
+				addLink(menuZone, menu, zones, 0);
+			}
+		}
+
+		function result(status: string)
+		{
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
+
+			background.onload = function()
+			{
+				draw.current!.outGameBackground(background);
+				if (status === "won")
+					draw.current!.youWon();
+				else
+					draw.current!.youLost();
 
 				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20);
 				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20);
@@ -152,6 +178,15 @@ export default function Canvas()
 			socket.current!.on("opponentDisconnection", () =>
 			{
 				opponentDisconnection();
+			});
+
+			socket.current!.on("endGame", (winner: string) =>
+			{
+				stopGame();
+				if (winner === position.current)
+					result("won");
+				else
+					result("lost");
 			});
 
 			kd.current.UP.down(function()
