@@ -1,20 +1,30 @@
 import Skin from "../classes/Skin";
-
-interface LinkZone{
-	posX : number;
-	posY : number;
-	width : number;
-	height : number;
-}
+import MapData from "../interfaces/MapData";
+import LinkZone from '../interfaces/LinkZone'; 
 
 export default class Draw
 {
 	skins : Skin[] = [];
+	mapList = [{name: "basic", path: "./images/basic.png"},
+			{name: "beach", path: "./images/beach.jpg"},
+			{name: "city", path: "./images/city.jpg"},
+			{name: "desert", path: "./images/desert.jpg"},
+			{name: "lava", path: "./images/lava.jpg"},
+			{name: "nature", path: "./images/nature.jpg"},
+			{name: "snow", path: "./images/snow.jpg"},
+			{name: "space", path: "./images/space.jpg"}];
 
 	constructor(public readonly ctx : CanvasRenderingContext2D | null)
 	{
 	}
 
+	outGameBackground() : HTMLImageElement
+	{
+		const img = new Image();
+
+		img.src = './images/purple.png';
+		return (img);
+	}
 
 	menuBackground()
 	{
@@ -36,7 +46,7 @@ export default class Draw
 			let	textZone : LinkZone| undefined;
 
 			this.ctx!.beginPath();
-			this.ctx!.fillStyle = "white";
+			this.ctx!.fillStyle = "black";
 			this.ctx!.font = size + "px Courier New";
 			this.ctx!.textAlign = 'center';
 			this.ctx!.fillText(text, posX, posY);
@@ -58,10 +68,8 @@ export default class Draw
 		this.text("Opponent's left", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
 	}
 	
-	skinsBackground()
+	skinsTitle()
 	{
-		this.ctx!.fillStyle = 'black';
-		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
 		this.text("Skins", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35);
 	}
 
@@ -70,15 +78,15 @@ export default class Draw
 		let margin : number = 100;
 		let nbInRow : number = 5;
 		let skin : Skin = new Skin(name, this.ctx!.canvas.width / 60, this.ctx!.canvas.height / nbInRow);
-		let skinZone : LinkZone = {posX : (this.ctx!.canvas.width / nbInRow) * (this.skins!.length % nbInRow) + this.ctx!.canvas.width / (nbInRow * 2), posY : (skin.height * 2) * Math.floor(this.skins.length / nbInRow) + margin, width : skin.width, height : skin.height};
+		let skinZone : LinkZone = {posX : (this.ctx!.canvas.width / nbInRow) * (this.skins.length % nbInRow) + this.ctx!.canvas.width / (nbInRow * 2), posY : (skin.height * 2) * Math.floor(this.skins.length / nbInRow) + margin, width : skin.width, height : skin.height};
 
 		this.ctx!.fillStyle = name;
 		this.ctx!.fillRect(skinZone.posX, skinZone.posY, skinZone.width, skinZone.height);
-		this.skins!.push(skin);
+		this.skins.push(skin);
 		return (skinZone);
 	}
 
-	map()
+	gameMap()
 	{
 		this.ctx!.fillStyle = 'black';
 		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
@@ -91,10 +99,53 @@ export default class Draw
 		this.ctx!.stroke();
 	}
 
-	mapsBackground()
+	mapsTitle()
 	{
-		this.ctx!.fillStyle = 'black';
-		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
 		this.text("Maps", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35);
+	}
+
+	map(): LinkZone[]
+	{
+		let margin : number = 100;
+		let nbInRow : number = 4;
+		let width = this.ctx!.canvas.width / 6;
+		let height = this.ctx!.canvas.height / 5;
+		const ctx: CanvasRenderingContext2D = this.ctx!;
+		let loaded: number = 0;
+
+		let maps: MapData[] = [];
+ 		let mapZones: LinkZone[] = [];
+
+		let loadImg = () =>
+		{
+			loaded++;
+			if (loaded === this.mapList.length)
+			{
+				maps.forEach((map) => {
+
+					ctx!.drawImage(map.mapImg, map.mapZone.posX, map.mapZone.posY, map.mapZone.width, map.mapZone.height);
+				})
+			}
+		}
+
+		this.mapList.forEach((map) =>
+		{
+			const mapImg: HTMLImageElement = new Image();
+
+			mapImg.onload = loadImg;
+			let mapData: MapData =
+			{
+				mapImg: mapImg,
+				mapZone: {posX: ((this.ctx!.canvas.width / nbInRow) * (maps.length % nbInRow)
+					+ this.ctx!.canvas.width / (nbInRow * 2)) - width / 2,
+					posY: (height * 2) * Math.floor(maps.length / nbInRow) + margin,
+					width: width,
+					height: height}
+			}
+			maps.push(mapData)
+			mapZones.push(mapData.mapZone);
+			mapImg.src = map.path;
+		});
+		return (mapZones);
 	}
 }

@@ -1,10 +1,9 @@
 import { useRef, useEffect } from "react";
-
 import { Ball } from "ft_transcendence";
 import { Player } from "ft_transcendence";
 import Draw from "../classes/Draw";
-import { io, Socket } from "socket.io-client"
-import { Room } from "ft_transcendence" 
+import { io, Socket } from "socket.io-client";
+import { Room } from "ft_transcendence";
 
 export default function Canvas()
 {
@@ -225,41 +224,68 @@ export default function Canvas()
 		{
 			let colouredSkins : string[] = ["white", "blue", "yellow", "orange", "pink", "purple", "green", "grey", "red", "cyan"];
 			let skinLinkZones : LinkZone[] = [];
+			let background: HTMLImageElement = draw.current!.outGameBackground();
 
-			draw.current!.skinsBackground();
-			colouredSkins.forEach(color => {
-				let skinLinkZone = draw.current!.skin(color)
-				skinLinkZones.push(skinLinkZone);
-			}
-			);
-			skinLinkZones.forEach(skinLinkZone => {
+			background.onload = function()
+			{
+				ctx.current!.drawImage(background, 0, 0, size.current.width, size.current.height);
+				draw.current!.skinsTitle();
+				colouredSkins.forEach(color => {
+					let skinLinkZone = draw.current!.skin(color)
+					skinLinkZones.push(skinLinkZone);
+				});
+				skinLinkZones.forEach(skinLinkZone => {
 				addLink(skinLinkZone, changeSkin, skinLinkZones, colouredSkins[skinLinkZones.indexOf(skinLinkZone)]);
+			});
 			}
-			);
+		}
+
+		function changeMap(name: string)
+		{
+			// TODO : update map in database
+			// ...
+
+			console.log("you've selected ", name, " map");
+			menu();
 		}
 
 		function maps()
 		{
-			draw.current!.mapsBackground();
+			let background: HTMLImageElement = draw.current!.outGameBackground();
+			let mapLinkZones: LinkZone[] = [];
+
+			background.onload = function ()
+			{
+				ctx.current!.drawImage(background, 0, 0, size.current.width, size.current.height);
+				draw.current!.mapsTitle();
+				mapLinkZones = draw.current!.map();
+				mapLinkZones.forEach((mapLinkZone: LinkZone) => {
+					addLink(mapLinkZone, changeMap, mapLinkZones, draw.current!.mapList[mapLinkZones.indexOf(mapLinkZone)].name);
+				});
+			}
 		}
 
 		function menu()
 		{
-			draw.current!.menuBackground();
+			let background: HTMLImageElement = draw.current!.outGameBackground();
 
-			let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35);
-			let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20);
-			let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
-			let zones = [newGameZone, skinsZone, mapsZone];
+			background.onload = function()
+			{
+				ctx.current!.drawImage(background, 0, 0, size.current.width, size.current.height);
+				let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35);
+				let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20);
+				let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
+				let zones = [newGameZone, skinsZone, mapsZone];
 
-			addLink(newGameZone, matchmaking, zones, 0);
-			addLink(skinsZone, skins, zones, 0);
-			addLink(mapsZone, maps, zones, 0);
+				addLink(newGameZone, matchmaking, zones, 0);
+				addLink(skinsZone, skins, zones, 0);
+				addLink(mapsZone, maps, zones, 0);
+			}
 		}
 
 		function game()
 		{
-			draw.current!.map();
+			draw.current!.gameMap();
 			leftPlayer.current?.draw_paddle();
 			leftPlayer.current?.draw_score();
 			rightPlayer.current?.draw_paddle();
@@ -282,5 +308,9 @@ export default function Canvas()
 
 	}, []);
 
-	return (<center><canvas id="canvas" style={{marginTop: 150}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>);
+	return (
+	<center>
+		<canvas id="canvas" style={{marginTop: 150}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas>
+	</center>
+	);
 }

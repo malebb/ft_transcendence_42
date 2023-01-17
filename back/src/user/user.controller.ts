@@ -10,7 +10,8 @@ import { UserService } from './user.service';
 export class UserController {
 
     constructor(private userService: UserService)
-    {}
+    {
+	}
 
     @Get('me')
     getMe(@GetUser() user: User)
@@ -21,6 +22,7 @@ export class UserController {
     @Patch()
     editUser(@GetUser() userId: number, @Body() dto: EditUserDto)
     {
-        return this.userService.editUser(userId, dto);
+		return this.userService.editUser(userId, dto);
     }
+
 }
