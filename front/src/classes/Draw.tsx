@@ -63,13 +63,13 @@ export default class Draw
 			width : textzone.width});
 	}
 
-	text(text : string, posX : number, posY : number, size : number)
+	text(text : string, posX : number, posY : number, size : number, color: string, font: string)
 	{
 			let	textZone : LinkZone| undefined;
 
 			this.ctx!.beginPath();
-			this.ctx!.fillStyle = "black";
-			this.ctx!.font = size + "px Courier New";
+			this.ctx!.fillStyle = color;
+			this.ctx!.font = size + "px " + font;
 			this.ctx!.textAlign = 'center';
 			this.ctx!.fillText(text, posX, posY);
 			textZone = this.getTextZone(text, posX, posY);
@@ -78,17 +78,17 @@ export default class Draw
 
 	matchmaking()
 	{
-		this.text("looking for player...", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
+		this.text("looking for player...", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New");
 	}
 
 	opponentDisconnection()
 	{
-		this.text("Opponent has left", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
+		this.text("Opponent has left", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New");
 	}
 	
 	skinsTitle()
 	{
-		this.text("Skins", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35);
+		this.text("Skins", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35, "black", "Courier New");
 	}
 
 	skin(name : string) : LinkZone
@@ -106,7 +106,7 @@ export default class Draw
 
 	mapsTitle()
 	{
-		this.text("Maps", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35);
+		this.text("Maps", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35, "black", "Courier New");
 	}
 
 	map(): LinkZone[]
@@ -156,17 +156,17 @@ export default class Draw
 
 	youWon()
 	{
-		this.text("You won!", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
+		this.text("You won!", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New");
 	}
 
 	youLost()
 	{
-		this.text("You lost!", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
+		this.text("You lost!", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New");
 	}
 
 	score(scoreLeft: number, scoreRight: number)
 	{
-		this.text(scoreLeft.toString(), this.ctx!.canvas.width / 3.03, this.ctx!.canvas.height / 5, 60);
-		this.text(scoreRight.toString(), this.ctx!.canvas.width / 1.51, this.ctx!.canvas.height / 5, 60);
+		this.text(scoreLeft.toString(), this.ctx!.canvas.width / 3.03, this.ctx!.canvas.height / 5, 55, "white", "Verdana");
+		this.text(scoreRight.toString(), this.ctx!.canvas.width / 1.51, this.ctx!.canvas.height / 5, 55, "white", "Verdana");
 	}
 }

@@ -112,8 +112,8 @@ export default function Canvas()
 				draw.current!.outGameBackground(background);
 				draw.current!.opponentDisconnection();
 
-				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20);
-				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20);
+				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
+				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
 				let zones = [newGameZone, menuZone];
 
 				addLink(newGameZone, matchmaking, zones, 0);
@@ -133,8 +133,8 @@ export default function Canvas()
 				else
 					draw.current!.youLost();
 
-				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20);
-				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20);
+				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
+				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
 				let zones = [newGameZone, menuZone];
 
 				addLink(newGameZone, matchmaking, zones, 0);
@@ -238,7 +238,7 @@ export default function Canvas()
 				draw.current!.outGameBackground(background);
 				draw.current!.matchmaking();
 
-				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20);
+				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, "black", "Courier New");
 
 				let zones = [cancelZone];
 	
@@ -318,9 +318,9 @@ export default function Canvas()
 			background.onload = function()
 			{
 				draw.current!.outGameBackground(background);
-				let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35);
-				let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20);
-				let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
+				let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35, "black", "Courier New");
+				let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
+				let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
 				let zones = [newGameZone, skinsZone, mapsZone];
 
 				addLink(newGameZone, matchmaking, zones, 0);
