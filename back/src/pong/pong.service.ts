@@ -8,7 +8,7 @@ export class PongService
 	queue : string[] = [];
 	rooms = [];
 	sizeCanvas : Size = {width : 600, height : 350};
-	scoreToWin: number = 5;
+	scoreToWin: number = 11;
 
 	addToQueue(playerId : string)
 	{
