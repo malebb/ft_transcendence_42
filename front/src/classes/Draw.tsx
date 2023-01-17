@@ -163,4 +163,10 @@ export default class Draw
 	{
 		this.text("You lost!", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
 	}
+
+	score(scoreLeft: number, scoreRight: number)
+	{
+		this.text(scoreLeft.toString(), this.ctx!.canvas.width / 3.03, this.ctx!.canvas.height / 5, 60);
+		this.text(scoreRight.toString(), this.ctx!.canvas.width / 1.51, this.ctx!.canvas.height / 5, 60);
+	}
 }

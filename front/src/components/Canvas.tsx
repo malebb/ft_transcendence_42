@@ -332,10 +332,9 @@ export default function Canvas()
 		function game()
 		{
 			draw.current!.gameMap(map.current!);
-			leftPlayer.current?.draw_paddle();
-			leftPlayer.current?.draw_score();
-			rightPlayer.current?.draw_paddle();
-			rightPlayer.current?.draw_score();
+			leftPlayer.current!.draw_paddle();
+			rightPlayer.current!.draw_paddle();
+			draw.current!.score(leftPlayer.current!.score, rightPlayer.current!.score);
 			ball.current?.draw();
 		}
 

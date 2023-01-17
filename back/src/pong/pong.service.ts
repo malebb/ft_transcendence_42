@@ -44,10 +44,34 @@ export class PongService
 			{
 				id: roomId,
 				running: false,
-				ball: new Ball(this.sizeCanvas.width / 2,
-							   this.sizeCanvas.height / 2, 10, "white", null, this.sizeCanvas),
-				leftPlayer: new Player(75, 100, this.sizeCanvas.width / 60, this.sizeCanvas.height / 5, 4, "white", "left", null, this.sizeCanvas),
-				rightPlayer: new Player(this.sizeCanvas.width - 100, this.sizeCanvas.height - 100, this.sizeCanvas.width / 60, this.sizeCanvas.height / 5, 4, "white", "right", null, this.sizeCanvas)
+				ball:		new Ball(this.sizeCanvas.width / 2,
+									this.sizeCanvas.height / 2,
+									7,
+							 		"white",
+							  		null,
+									this.sizeCanvas),
+
+				leftPlayer:	new Player(this.sizeCanvas.width / 30,
+									   this.sizeCanvas.height / 30,
+									   this.sizeCanvas.width / 60, 
+									   this.sizeCanvas.height / 6,
+									   3,
+									   "white",
+									   "left",
+									   null,
+									   this.sizeCanvas),
+
+				rightPlayer: new Player(this.sizeCanvas.width - this.sizeCanvas.width / 30
+									   - (this.sizeCanvas.width / 60),
+									   this.sizeCanvas.height -
+										(this.sizeCanvas.height / 30 + (this.sizeCanvas.height / 6)),
+									   this.sizeCanvas.width / 60,
+									   this.sizeCanvas.height / 6,
+									   3,
+									   "white",
+									   "right",
+									   null,
+									   this.sizeCanvas)
 			}
 		);
 	}
