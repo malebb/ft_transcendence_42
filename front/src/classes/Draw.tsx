@@ -61,7 +61,7 @@ export default class Draw
 
 	opponentDisconnectionPage()
 	{
-		this.text("Opponent's left", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
+		this.text("Opponent has left", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
 	}
 	
 	skinsTitle()
