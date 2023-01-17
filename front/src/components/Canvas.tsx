@@ -4,6 +4,7 @@ import { Player } from "ft_transcendence";
 import Draw from "../classes/Draw";
 import { io, Socket } from "socket.io-client";
 import { Room } from "ft_transcendence";
+import LinkZone from "../interfaces/LinkZone";
 
 export default function Canvas()
 {
@@ -22,14 +23,6 @@ export default function Canvas()
 
 	useEffect(() =>
 	{
-		interface LinkZone
-		{
-			posX : number;
-			posY : number;
-			width : number;
-			height : number;
-		}
-
 		function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
 		{
 			var canvas = document.getElementById('canvas');
@@ -106,14 +99,20 @@ export default function Canvas()
 			window.cancelAnimationFrame(animationFrameId.current)
 			socket.current!.disconnect();
 			kd.current.stop();
-			draw.current!.opponentDisconnectionPage();
+			let background: HTMLImageElement = draw.current!.outGameBackground();
 
-			let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20);
-			let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20);
-			let zones = [newGameZone, menuZone];
+			background.onload = function()
+			{
+				ctx.current!.drawImage(background, 0, 0, size.current.width, size.current.height);
+				draw.current!.opponentDisconnectionPage();
 
-			addLink(newGameZone, matchmaking, zones, 0);
-			addLink(menuZone, menu, zones, 0);
+				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20);
+				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20);
+				let zones = [newGameZone, menuZone];
+
+				addLink(newGameZone, matchmaking, zones, 0);
+				addLink(menuZone, menu, zones, 0);
+			}
 		}
 
 		function launchGame()
@@ -190,23 +189,28 @@ export default function Canvas()
 		async function matchmaking()
 		{
 			let cancelLink: Function[];
+			let background: HTMLImageElement = draw.current!.outGameBackground();
 
-			draw.current!.matchmakingPage();
+			background.onload = function()
+			{
+				ctx.current!.drawImage(background, 0, 0, size.current.width, size.current.height);
+				draw.current!.matchmaking();
 
-			let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20);
+				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20);
 
-			let zones = [cancelZone];
-
-			socket.current = io(`ws://localhost:3333`, {transports: ["websocket"]});
-			cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
-			socket.current!.on("connect", async () => {
-			await findRoom().then(data => {
-				room.current = JSON.parse(data).room;
-				position.current = JSON.parse(data).position;
-			});
-			destroyLink(cancelLink);
-			launchGame();
-			});
+				let zones = [cancelZone];
+	
+				socket.current = io(`ws://localhost:3333`, {transports: ["websocket"]});
+				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
+				socket.current!.on("connect", async () => {
+					await findRoom().then(data => {
+						room.current = JSON.parse(data).room;
+						position.current = JSON.parse(data).position;
+					});
+					destroyLink(cancelLink);
+					launchGame();
+				});
+			}
 		}
 
 		function changeSkin(name : string)

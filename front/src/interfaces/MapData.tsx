@@ -5,4 +5,3 @@ export default interface MapData
 	mapImg: HTMLImageElement;
 	mapZone: LinkZone;
 }
-

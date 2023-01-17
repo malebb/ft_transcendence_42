@@ -54,17 +54,13 @@ export default class Draw
 			return (textZone);
 	}
 
-	matchmakingPage()
+	matchmaking()
 	{
-		this.ctx!.fillStyle = 'black';
-		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
 		this.text("looking for player...", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
 	}
 
 	opponentDisconnectionPage()
 	{
-		this.ctx!.fillStyle = 'black';
-		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
 		this.text("Opponent's left", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35);
 	}
 	
