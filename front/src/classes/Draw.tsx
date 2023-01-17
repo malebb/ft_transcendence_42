@@ -18,12 +18,34 @@ export default class Draw
 	{
 	}
 
-	outGameBackground() : HTMLImageElement
+	initOutGameBackground() : HTMLImageElement
 	{
 		const img = new Image();
 
 		img.src = './images/purple.png';
 		return (img);
+	}
+
+	outGameBackground(background: HTMLImageElement)
+	{
+		this.ctx!.drawImage(background, 0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
+	}
+
+	initGameMap(mapName: string) : HTMLImageElement
+	{
+		const img = new Image();
+
+		this.mapList.forEach(map => {
+			if (map.name === mapName)
+				img.src = map.path;
+		});
+		return (img);
+	}
+
+	gameMap(map: HTMLImageElement)
+	{
+		this.ctx!.drawImage(map, 0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
+
 	}
 
 	menuBackground()
@@ -80,19 +102,6 @@ export default class Draw
 		this.ctx!.fillRect(skinZone.posX, skinZone.posY, skinZone.width, skinZone.height);
 		this.skins.push(skin);
 		return (skinZone);
-	}
-
-	gameMap()
-	{
-		this.ctx!.fillStyle = 'black';
-		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
-		this.ctx!.beginPath();
-		this.ctx!.fillStyle = 'white';
-		this.ctx!.moveTo(this.ctx!.canvas.width / 2, 0);
-		this.ctx!.lineTo(this.ctx!.canvas.width / 2, this.ctx!.canvas.height);
-		this.ctx!.moveTo(0, 0);
-		this.ctx!.lineTo(80, 80);
-		this.ctx!.stroke();
 	}
 
 	mapsTitle()

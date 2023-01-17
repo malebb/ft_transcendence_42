@@ -20,6 +20,7 @@ export default function Canvas()
 	const draw					= useRef<Draw | null>(null);
 	const room					= useRef<Room | null>(null);
 	const position				= useRef<string>("");
+	const map					= useRef<HTMLImageElement | null>(null);
 
 	useEffect(() =>
 	{
@@ -99,11 +100,11 @@ export default function Canvas()
 			window.cancelAnimationFrame(animationFrameId.current)
 			socket.current!.disconnect();
 			kd.current.stop();
-			let background: HTMLImageElement = draw.current!.outGameBackground();
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
 
 			background.onload = function()
 			{
-				ctx.current!.drawImage(background, 0, 0, size.current.width, size.current.height);
+				draw.current!.outGameBackground(background);
 				draw.current!.opponentDisconnectionPage();
 
 				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20);
@@ -167,7 +168,13 @@ export default function Canvas()
 				kd.current.tick();
 			});
 
-			render();
+			// TODO fetch user selected map in database
+
+			map.current = draw.current!.initGameMap('city');
+			map.current!.onload = function()
+			{
+				render();
+			}
 		}
 
 		function findRoom() : Promise<string>
@@ -189,11 +196,11 @@ export default function Canvas()
 		async function matchmaking()
 		{
 			let cancelLink: Function[];
-			let background: HTMLImageElement = draw.current!.outGameBackground();
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
 
 			background.onload = function()
 			{
-				ctx.current!.drawImage(background, 0, 0, size.current.width, size.current.height);
+				draw.current!.outGameBackground(background);
 				draw.current!.matchmaking();
 
 				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20);
@@ -228,11 +235,11 @@ export default function Canvas()
 		{
 			let colouredSkins : string[] = ["white", "blue", "yellow", "orange", "pink", "purple", "green", "grey", "red", "cyan"];
 			let skinLinkZones : LinkZone[] = [];
-			let background: HTMLImageElement = draw.current!.outGameBackground();
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
 
 			background.onload = function()
 			{
-				ctx.current!.drawImage(background, 0, 0, size.current.width, size.current.height);
+				draw.current!.outGameBackground(background);
 				draw.current!.skinsTitle();
 				colouredSkins.forEach(color => {
 					let skinLinkZone = draw.current!.skin(color)
@@ -255,12 +262,12 @@ export default function Canvas()
 
 		function maps()
 		{
-			let background: HTMLImageElement = draw.current!.outGameBackground();
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
 			let mapLinkZones: LinkZone[] = [];
 
 			background.onload = function ()
 			{
-				ctx.current!.drawImage(background, 0, 0, size.current.width, size.current.height);
+				draw.current!.outGameBackground(background);
 				draw.current!.mapsTitle();
 				mapLinkZones = draw.current!.map();
 				mapLinkZones.forEach((mapLinkZone: LinkZone) => {
@@ -271,11 +278,11 @@ export default function Canvas()
 
 		function menu()
 		{
-			let background: HTMLImageElement = draw.current!.outGameBackground();
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
 
 			background.onload = function()
 			{
-				ctx.current!.drawImage(background, 0, 0, size.current.width, size.current.height);
+				draw.current!.outGameBackground(background);
 				let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35);
 				let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20);
 				let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
@@ -289,7 +296,7 @@ export default function Canvas()
 
 		function game()
 		{
-			draw.current!.gameMap();
+			draw.current!.gameMap(map.current!);
 			leftPlayer.current?.draw_paddle();
 			leftPlayer.current?.draw_score();
 			rightPlayer.current?.draw_paddle();
@@ -307,7 +314,7 @@ export default function Canvas()
 		draw.current = new Draw(ctx.current);
 		menu();
 		return () => { 
-		window.cancelAnimationFrame(animationFrameId.current)
+			window.cancelAnimationFrame(animationFrameId.current)
 		}
 
 	}, []);
