@@ -150,7 +150,7 @@ export default function Canvas()
 			leftPlayer.current.setCtx(ctx.current!);
 			rightPlayer.current.setCtx(ctx.current!);
 
-			ball.current = Object.assign(new Ball(0, 0, 0, "white", null, null), room.current!.ball);
+			ball.current = Object.assign(new Ball(0, 0, 0, "white", 0, null, null), room.current!.ball);
 			ball.current.setCtx(ctx.current!);
 
 			socket.current!.on("moveBall", (arg : string) => {
