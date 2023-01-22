@@ -133,15 +133,28 @@ export class PongService
 		player.join(roomId);
 	}
 
+
 	runRoom(roomId: string, server: Server)
 	{
 		let scorer: string = "";
-		let interval: ReturnType<typeof setInterval>;
+		let roomInterval: ReturnType<typeof setInterval>;
+		let speedPowerUpInterval: ReturnType<typeof setInterval>;
 
 		this.rooms[roomId].running = true;
-		interval = setInterval(() => {
+
+		speedPowerUpInterval = setInterval(() =>
+		{
+			server.to(roomId).emit('updateSpeedPowerUp', true, "left");
+			server.to(roomId).emit('updateSpeedPowerUp', true, "right");
+		}, 5000);
+
+		roomInterval = setInterval(() =>
+		{
 			if (!this.rooms[roomId].running)
-				clearInterval(interval);
+			{
+				clearInterval(roomInterval);
+				clearInterval(speedPowerUpInterval);
+			}
 			if ((scorer = this.rooms[roomId].ball.move([this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer])).length)
 			{
 				if (scorer == "left")
@@ -160,5 +173,10 @@ export class PongService
 			}
 			server.to(roomId).emit('moveBall', JSON.stringify(this.rooms[roomId].ball));
 		}, 15);
+	}
+
+	useSpeedPowerUp(roomId: string, position: string, server: Server)
+	{
+		server.to(roomId).emit('updateSpeedPowerUp', false, position);
 	}
 }
