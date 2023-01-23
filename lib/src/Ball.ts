@@ -21,17 +21,15 @@ export class Ball
 
 	bounceOff(player: Player)
 	{
-		const maxDegreeBounceAngle = 75;
-		const relativeIntersectY: number = (player.posY + (player.height / 2)) - (this.posY + this.speed);
+		const maxDegreeBounceAngle = 40;
+		const relativeIntersectY: number = (player.posY + (player.height / 2)) - (this.posY);
 		const normalizedRelativeIntersectY: number = (relativeIntersectY / (player.height / 2));
 		const bounceAngle = normalizedRelativeIntersectY * (maxDegreeBounceAngle* Math.PI / 180)
 
 		this.velX = this.speed * Math.cos(bounceAngle);
 		this.velY = this.speed * -1 * Math.sin(bounceAngle);
-
 		if (this.velX < 0 && player.position === "left" || this.velX > 0 && player.position == "right")
 			this.velX *= -1;
-
 	}
 
 	playerCollision(players: (Player | null)[])
@@ -39,13 +37,18 @@ export class Ball
 		for (let i = 0; i < players.length; i++)
 		{
 			// check collision X
-			if (this.posX + this.speed >= players[i]!.posX
-				&& this.posX + this.speed <= players[i]!.posX + players[i]!.width + this.radius)
+			//if (this.posX + this.speed >= players[i]!.posX - this.radius
+			//	&& this.posX - this.speed <= players[i]!.posX + players[i]!.width + this.radius)
+			if (this.posX >= players[i]!.posX - this.radius
+				&& this.posX <= players[i]!.posX + players[i]!.width + this.radius)
 			{
 				// check collision Y
-				if (this.posY + this.speed >= players[i]!.posY
-					&& this.posY + this.speed <= players[i]!.posY + players[i]!.height)
+				//if (this.posY + this.speed >= players[i]!.posY - this.radius
+				//	&& this.posY + this.speed <= players[i]!.posY + players[i]!.height + this.radius)
+				if (this.posY >= players[i]!.posY - this.radius
+					&& this.posY <= players[i]!.posY + players[i]!.height + this.radius)
 				{
+					console.log("speed");
 					this.bounceOff(players[i]!);
 					return (true);
 				}
@@ -65,7 +68,7 @@ export class Ball
 
 		if (!this.playerCollision(players))
 		{
-			if (this.posX + this.speed >= this.canvasSize!.width - this.radius || this.posX + this.speed <= this.radius)
+			if (this.posX >= this.canvasSize!.width - this.radius || this.posX <= this.radius)
 			{
 				if (this.velX > 0)
 				{
@@ -86,8 +89,8 @@ export class Ball
 				this.posX = this.canvasSize!.width / 2;
 				this.posY = this.canvasSize!.height / 2;
 			}
-			if (this.posY + this.speed >= this.canvasSize!.height - this.radius
-				|| this.posY + this.speed <= this.radius)
+			if (this.posY >= this.canvasSize!.height - this.radius
+				|| this.posY <= this.radius)
 				this.velY *= -1;
 		}
 		this.posX += this.velX;

@@ -48,7 +48,7 @@ export class PongService
 									this.sizeCanvas.height / 2,
 									7,
 							 		"white",
-									6,
+									7,
 							  		null,
 									this.sizeCanvas),
 
@@ -159,6 +159,6 @@ export class PongService
 				scorer = "";
 			}
 			server.to(roomId).emit('moveBall', JSON.stringify(this.rooms[roomId].ball));
-		}, 15);
+		}, 40);
 	}
 }
