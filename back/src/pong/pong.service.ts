@@ -146,7 +146,6 @@ export class PongService
 		{
 			server.to(roomId).emit('updateSpeedPowerUp', true, "left");
 			server.to(roomId).emit('updateSpeedPowerUp', true, "right");
-			console.log("speedPowerUP");
 		}, 10000);
 
 		roomInterval = setInterval(() =>
@@ -182,7 +181,6 @@ export class PongService
 		{
 			server.to(roomId).emit('updateSpeedPowerUp', true, "left");
 			server.to(roomId).emit('updateSpeedPowerUp', true, "right");
-			console.log("speedPowerUP");
 		}, 10000);
 
 		this.rooms[roomId].ball.speedPowerUp();

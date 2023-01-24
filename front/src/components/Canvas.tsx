@@ -399,7 +399,6 @@ export default function Canvas()
 		return () => { 
 			window.cancelAnimationFrame(animationFrameId.current)
 		}
-
 	}, []);
 
 	return (
