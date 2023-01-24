@@ -16,11 +16,13 @@ export default function Canvas()
 	const rightPlayer			= useRef<Player | null>(null);
 	const animationFrameId		= useRef<number>(0);
 	const kd					= useRef(require('keydrown'));
+	const keyPressed			= useRef<boolean>(false);
 	const socket				= useRef<Socket | null>(null);
 	const draw					= useRef<Draw | null>(null);
 	const room					= useRef<Room | null>(null);
 	const position				= useRef<string>("");
 	const map					= useRef<HTMLImageElement | null>(null);
+	const speedPowerUp			= useRef<HTMLImageElement | null>(null);
 
 	useEffect(() =>
 	{
@@ -100,6 +102,8 @@ export default function Canvas()
 			window.cancelAnimationFrame(animationFrameId.current)
 			socket.current!.disconnect();
 			kd.current.stop();
+			document!.removeEventListener('keypress', powerUp);
+			document!.removeEventListener('keyup', notifyKeyReleased);
 		}
 
 		function opponentDisconnection()
@@ -142,8 +146,40 @@ export default function Canvas()
 			}
 		}
 
+		function notifyKeyReleased()
+		{
+			keyPressed.current = false;
+		}
+
+		function powerUpEnabled()
+		{
+			return ((position.current == "left" && leftPlayer.current!.speedPowerUp) ||
+			(position.current == "right" && rightPlayer.current!.speedPowerUp))
+		}
+
+		function powerUp(e: KeyboardEvent)
+		{
+			if (keyPressed.current)
+				return;
+			if (e.key == ' ' && powerUpEnabled())
+			{
+				socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
+				keyPressed.current = true;
+			}
+		}
+
+		function updateSpeedPowerUp(status: boolean, position: string)
+		{
+			if (position == "left")
+				leftPlayer.current!.speedPowerUp = status;
+			else if (position == "right")
+				rightPlayer.current!.speedPowerUp = status;
+		}
+
 		function launchGame()
 		{
+			let canvas = document.getElementById('canvas');
+
 			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.leftPlayer);
 			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.rightPlayer);
 
@@ -189,6 +225,11 @@ export default function Canvas()
 					result("lost");
 			});
 
+			socket.current!.on("updateSpeedPowerUp", (status: boolean, position: string) =>
+			{
+				updateSpeedPowerUp(status, position);
+			});
+
 			kd.current.UP.down(function()
 			{
 				socket.current!.emit("movePlayer", {roomId : room.current!.id, position: position.current, key: "UP"});
@@ -203,12 +244,19 @@ export default function Canvas()
 				kd.current.tick();
 			});
 
+			document.addEventListener('keypress', powerUp);
+			document.addEventListener('keyup', notifyKeyReleased);
+
 			// TODO fetch user selected map in database
 
 			map.current = draw.current!.initGameMap('basic');
 			map.current!.onload = function()
 			{
-				render();
+				speedPowerUp.current = draw.current!.initSpeedPowerUp();
+				speedPowerUp.current!.onload = function()
+				{
+					render();
+				}
 			}
 		}
 
@@ -335,6 +383,7 @@ export default function Canvas()
 			leftPlayer.current!.draw_paddle();
 			rightPlayer.current!.draw_paddle();
 			draw.current!.score(leftPlayer.current!.score, rightPlayer.current!.score);
+			draw.current!.speedPowerUp(speedPowerUp.current!, leftPlayer.current!.speedPowerUp, rightPlayer.current!.speedPowerUp);
 			ball.current?.draw();
 		}
 
@@ -350,7 +399,6 @@ export default function Canvas()
 		return () => { 
 			window.cancelAnimationFrame(animationFrameId.current)
 		}
-
 	}, []);
 
 	return (

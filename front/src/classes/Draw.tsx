@@ -48,6 +48,14 @@ export default class Draw
 
 	}
 
+	initSpeedPowerUp()
+	{
+		const img = new Image();
+
+		img.src = './images/speedPowerUp.png';
+		return (img);
+	}
+
 	menuBackground()
 	{
 		this.ctx!.fillStyle = 'black';
@@ -168,5 +176,13 @@ export default class Draw
 	{
 		this.text(scoreLeft.toString(), this.ctx!.canvas.width / 3.03, this.ctx!.canvas.height / 5, 55, "white", "Verdana");
 		this.text(scoreRight.toString(), this.ctx!.canvas.width / 1.51, this.ctx!.canvas.height / 5, 55, "white", "Verdana");
+	}
+
+	speedPowerUp(logo: HTMLImageElement, leftSpeedPowerUp: boolean, rightSpeedPowerUp: boolean)
+	{
+		if (leftSpeedPowerUp)
+			this.ctx!.drawImage(logo, this.ctx!.canvas.width / 3.03, this.ctx!.canvas.height / 1.20, 40, 40);
+		if (rightSpeedPowerUp)
+			this.ctx!.drawImage(logo, this.ctx!.canvas.width / 1.60, this.ctx!.canvas.height / 1.20, 40, 40);
 	}
 }

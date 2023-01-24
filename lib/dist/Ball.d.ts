@@ -8,6 +8,7 @@ export declare class Ball {
     speed: number;
     private ctx;
     private readonly canvasSize;
+    initialSpeed: number;
     velX: number;
     velY: number;
     constructor(posX: number, posY: number, radius: number, color: string, speed: number, ctx: CanvasRenderingContext2D | null, canvasSize: Size | null);
@@ -18,5 +19,6 @@ export declare class Ball {
     move(players: (Player | null)[]): string;
     update_pos(ball_properties: any): void;
     setCtx(ctx: CanvasRenderingContext2D): void;
+    speedPowerUp(): void;
 }
 //# sourceMappingURL=Ball.d.ts.map

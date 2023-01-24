@@ -4,6 +4,7 @@ export class Player
 {
 	score: number = 0;
 	margin: number = 15;
+	speedPowerUp: boolean = false;
 
 	constructor(public posX: number, public posY: number, public width: number,
 	public height: number, public vel: number, public color: string, public readonly position: string, public ctx: CanvasRenderingContext2D | null, private canvasSize: Size | null)

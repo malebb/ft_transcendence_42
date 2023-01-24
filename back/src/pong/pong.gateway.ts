@@ -52,4 +52,9 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 
 		this.server.to(data.roomId).emit('movePlayer', JSON.stringify({player: playerMoved, position: data.position}));
   	}
+
+	@SubscribeMessage('speedPowerUp')
+	speedPowerUp(@MessageBody() data : any) {
+		this.pongService.useSpeedPowerUp(data.roomId, data.position, this.server);
+  	}
 }
