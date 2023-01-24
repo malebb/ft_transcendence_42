@@ -3,12 +3,14 @@ import { Size } from './Size';
 
 export class Ball
 {
+	initialSpeed = 0;
 	velX = this.speed / 2;
 	velY = this.speed / 2;
 
 	constructor(public posX: number, private posY: number, private radius: number,
 	public color: string, public speed: number, private ctx: CanvasRenderingContext2D | null, private readonly canvasSize: Size | null)
 	{
+		this.initialSpeed = speed;
 	}
 
 	draw()
@@ -106,5 +108,11 @@ export class Ball
 	setCtx(ctx: CanvasRenderingContext2D)
 	{
 		this.ctx = ctx;
+	}
+
+	speedPowerUp()
+	{
+		this.velX *= 1.5;
+		this.velY *= 1.5;
 	}
 }

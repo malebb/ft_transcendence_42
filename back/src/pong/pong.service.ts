@@ -177,6 +177,7 @@ export class PongService
 
 	useSpeedPowerUp(roomId: string, position: string, server: Server)
 	{
+		this.rooms[roomId].ball.speedPowerUp();
 		server.to(roomId).emit('updateSpeedPowerUp', false, position);
 	}
 }

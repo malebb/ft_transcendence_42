@@ -104,7 +104,6 @@ export default function Canvas()
 			kd.current.stop();
 			document!.removeEventListener('keypress', powerUp);
 			document!.removeEventListener('keyup', notifyKeyReleased);
-			console.log("oui pourtant");
 		}
 
 		function opponentDisconnection()
@@ -150,7 +149,6 @@ export default function Canvas()
 		function notifyKeyReleased()
 		{
 			keyPressed.current = false;
-			console.log("OUIIIIIIIIIIIIIII");
 		}
 
 		function powerUp(e: KeyboardEvent)
