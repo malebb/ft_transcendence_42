@@ -6,5 +6,6 @@ export interface Room {
     ball: Ball;
     leftPlayer: Player;
     rightPlayer: Player;
+    speedPowerUpInterval: ReturnType<typeof setTimeout>;
 }
 //# sourceMappingURL=Room.d.ts.map

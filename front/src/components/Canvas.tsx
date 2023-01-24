@@ -151,11 +151,17 @@ export default function Canvas()
 			keyPressed.current = false;
 		}
 
+		function powerUpEnabled()
+		{
+			return ((position.current == "left" && leftPlayer.current!.speedPowerUp) ||
+			(position.current == "right" && rightPlayer.current!.speedPowerUp))
+		}
+
 		function powerUp(e: KeyboardEvent)
 		{
 			if (keyPressed.current)
 				return;
-			if (e.key == ' ')
+			if (e.key == ' ' && powerUpEnabled())
 			{
 				socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
 				keyPressed.current = true;
