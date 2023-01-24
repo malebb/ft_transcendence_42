@@ -68,7 +68,7 @@ export class PongService
 										(this.sizeCanvas.height / 23 + (this.sizeCanvas.height / 6)),
 									   this.sizeCanvas.width / 60,
 									   this.sizeCanvas.height / 6,
-									   3,
+									   5,
 									   "white",
 									   "right",
 									   null,
