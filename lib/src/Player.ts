@@ -3,6 +3,7 @@ import { Size } from './Size'
 export class Player
 {
 	score: number = 0;
+	margin: number = 15;
 
 	constructor(public posX: number, public posY: number, public width: number,
 	public height: number, public vel: number, public color: string, public readonly position: string, public ctx: CanvasRenderingContext2D | null, private canvasSize: Size | null)
@@ -32,12 +33,12 @@ export class Player
 	{
 		if (key == "UP")
 		{
-			if (this.posY - this.vel >= 0 && this.posY - this.vel <= this.canvasSize!.height)
+			if (this.posY - this.vel >= 0 + this.margin)
 				this.posY -= this.vel;
 		}
 		else if (key == "DOWN")
 		{
-			if (this.posY + this.vel <= this.canvasSize!.height - this.height)
+			if (this.posY + this.vel <= this.canvasSize!.height - (this.height + this.margin))
 				this.posY += this.vel;
 		}
 	}

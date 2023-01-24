@@ -159,6 +159,6 @@ export class PongService
 				scorer = "";
 			}
 			server.to(roomId).emit('moveBall', JSON.stringify(this.rooms[roomId].ball));
-		}, 15);
+		}, 20);
 	}
 }
