@@ -5,6 +5,8 @@ import Draw from "../classes/Draw";
 import { io, Socket } from "socket.io-client";
 import { Room } from "ft_transcendence";
 import LinkZone from "../interfaces/LinkZone";
+import { axiosToken, getToken } from '../api/axios';
+import { AxiosResponse } from 'axios';
 
 export default function Canvas()
 {
@@ -23,9 +25,14 @@ export default function Canvas()
 	const position				= useRef<string>("");
 	const map					= useRef<HTMLImageElement | null>(null);
 	const speedPowerUp			= useRef<HTMLImageElement | null>(null);
+	const user					= useRef<AxiosResponse | null>(null);
 
 	useEffect(() =>
 	{
+		const pong = async () => 
+		{
+
+
 		function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
 		{
 			var canvas = document.getElementById('canvas');
@@ -392,15 +399,37 @@ export default function Canvas()
 			game();
 			animationFrameId.current = window.requestAnimationFrame(render)
 		}
+		
+		function signInToPlay()
+		{
+			
+		}
+
+		async function initUser()
+		{
+			user.current = await axiosToken().get('/users/me', {});
+			console.log("le susnomme user = ", user.current);
+		}
 
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
-		menu();
+		if (getToken() == null)
+		{
+			console.log("You need to sign in");
+			//signInToPlayer();
+		}
+		else
+		{
+			await initUser();
+			menu();
+		}
+		}
+		pong().catch(console.error);
 		return () => { 
 			window.cancelAnimationFrame(animationFrameId.current)
 		}
-	}, []);
 
+	}, []);
 	return (
 	<center>
 		<canvas id="canvas" style={{marginTop: 150}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas>

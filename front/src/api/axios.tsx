@@ -6,13 +6,22 @@ export const axiosMain =  axios.create({
     baseURL,
 })
 
-export const getToken = () => {
+export function getToken()
+{
     return JSON.parse(sessionStorage.getItem('token')!);
 }
 
-export const getAuthorizationHeader = () => `Bearer ${getToken()}`;
+export function getAuthorizationHeader()
+{
+	if (!getToken())
+		return (null);
+	return (`Bearer ${getToken().access_token}`);
+}
 
-export const axiosToken = axios.create({
-  baseURL,
-  headers: { Authorization: getAuthorizationHeader() },
-});
+export function axiosToken()
+{
+	return (axios.create({
+		baseURL,
+		headers: { Authorization: getAuthorizationHeader() },
+		}));
+}
