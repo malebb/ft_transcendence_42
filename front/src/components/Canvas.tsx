@@ -343,12 +343,9 @@ export default function Canvas()
 			}
 		}
 
-		function changeMap(name: string)
+		async function changeMap(name: string)
 		{
-			// TODO : update map in database
-			// ...
-
-			console.log("you've selected ", name, " map");
+			axiosInstance.current!.patch('/users/', {map: name});
 			menu();
 		}
 
