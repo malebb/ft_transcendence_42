@@ -8,6 +8,7 @@ CREATE TABLE "users" (
     "firstName" TEXT,
     "lastName" TEXT,
     "skin" TEXT NOT NULL DEFAULT 'blue',
+    "map" TEXT NOT NULL DEFAULT 'basic',
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );

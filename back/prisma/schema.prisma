@@ -20,10 +20,10 @@ model User {
 
   firstName String?
   lastName  String?
-  thirdName String?
 
   bookmarks  Bookmark[]
   skin String @default("blue")
+  map String @default("basic")
 
   @@map("users")
 }

@@ -6,7 +6,7 @@ import { io, Socket } from "socket.io-client";
 import { Room } from "ft_transcendence";
 import LinkZone from "../interfaces/LinkZone";
 import { axiosToken, getToken } from '../api/axios';
-import { AxiosResponse } from 'axios';
+import { AxiosResponse, AxiosInstance} from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function Canvas()
@@ -26,8 +26,8 @@ export default function Canvas()
 	const position				= useRef<string>("");
 	const map					= useRef<HTMLImageElement | null>(null);
 	const speedPowerUp			= useRef<HTMLImageElement | null>(null);
-	const user					= useRef<AxiosResponse | null>(null);
-		const navigate = useNavigate();
+	const axiosInstance			= useRef<AxiosInstance | null>(null);
+	const navigate 				= useNavigate();
 
 	useEffect(() =>
 	{
@@ -185,7 +185,7 @@ export default function Canvas()
 				rightPlayer.current!.speedPowerUp = status;
 		}
 
-		function launchGame()
+		async function launchGame()
 		{
 			let canvas = document.getElementById('canvas');
 
@@ -258,7 +258,7 @@ export default function Canvas()
 
 			// TODO fetch user selected map in database
 
-			map.current = draw.current!.initGameMap('basic');
+			map.current = draw.current!.initGameMap((await axiosInstance.current!.get('/users/me', {})).data.map);
 			map.current!.onload = function()
 			{
 				speedPowerUp.current = draw.current!.initSpeedPowerUp();
@@ -307,7 +307,7 @@ export default function Canvas()
 						position.current = JSON.parse(data).position;
 					});
 					destroyLink(cancelLink);
-					launchGame();
+					await launchGame();
 				});
 			}
 		}
@@ -404,7 +404,7 @@ export default function Canvas()
 
 		async function initUser()
 		{
-			user.current = await axiosToken().get('/users/me', {});
+			await axiosInstance.current!.get('/users/me', {});
 		}
 
 		function redirectSignInPage()
@@ -429,6 +429,7 @@ export default function Canvas()
 
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
+		axiosInstance.current = axiosToken();
 		if (getToken() == null)
 		{
 			signInToPlay();
