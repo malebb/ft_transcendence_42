@@ -185,4 +185,9 @@ export default class Draw
 		if (rightSpeedPowerUp)
 			this.ctx!.drawImage(logo, this.ctx!.canvas.width / 1.60, this.ctx!.canvas.height / 1.20, 40, 40);
 	}
+
+	signInToPlay() : LinkZone
+	{
+		return (this.text("Sign in to play", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New"));
+	}
 }

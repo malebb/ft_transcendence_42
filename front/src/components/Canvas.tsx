@@ -7,6 +7,7 @@ import { Room } from "ft_transcendence";
 import LinkZone from "../interfaces/LinkZone";
 import { axiosToken, getToken } from '../api/axios';
 import { AxiosResponse } from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function Canvas()
 {
@@ -26,6 +27,7 @@ export default function Canvas()
 	const map					= useRef<HTMLImageElement | null>(null);
 	const speedPowerUp			= useRef<HTMLImageElement | null>(null);
 	const user					= useRef<AxiosResponse | null>(null);
+		const navigate = useNavigate();
 
 	useEffect(() =>
 	{
@@ -399,32 +401,49 @@ export default function Canvas()
 			game();
 			animationFrameId.current = window.requestAnimationFrame(render)
 		}
-		
-		function signInToPlay()
-		{
-			
-		}
 
 		async function initUser()
 		{
 			user.current = await axiosToken().get('/users/me', {});
-			console.log("le susnomme user = ", user.current);
+		}
+
+		function redirectSignInPage()
+		{
+			navigate('/signin', { replace: true});
+		}
+
+		function signInToPlay()
+		{
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
+
+			background.onload = function()
+			{
+				draw.current!.outGameBackground(background);
+				let signInZone : LinkZone = draw.current!.signInToPlay();
+				let zones = [signInZone];
+
+				addLink(signInZone, redirectSignInPage, zones, 0);
+			}
+
 		}
 
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
 		if (getToken() == null)
 		{
-			console.log("You need to sign in");
-			//signInToPlayer();
+			signInToPlay();
+			return (false);
 		}
 		else
 		{
 			await initUser();
 			menu();
+			return (true);
 		}
 		}
-		pong().catch(console.error);
+
+		pong();
+
 		return () => { 
 			window.cancelAnimationFrame(animationFrameId.current)
 		}
