@@ -1,44 +1,47 @@
 import { Injectable } from '@nestjs/common'
-import { Ball, Player, Size, Room } from 'ft_transcendence';
+import { Ball, Player, Size, Room, PlayerData} from 'ft_transcendence';
 import { Socket, Server } from 'socket.io'
 
 @Injectable()
 export class PongService
 {
-	queue : string[] = [];
+	queue : PlayerData[] = [];
 	rooms = [];
 	sizeCanvas : Size = {width : 600, height : 350};
 	scoreToWin: number = 11;
 
-	addToQueue(playerId : string)
+	addToQueue(player : PlayerData)
 	{
-		this.queue.push(playerId);
+		this.queue.push(player);
 	}
 
 	removeFromQueue(playerId : string)
 	{
-		if (this.queue.includes(playerId))
-			this.queue.splice(this.queue.indexOf(playerId), 1);
+		for (let i = 0; i < this.queue.length; ++i)
+		{
+			if (this.queue[i].id == playerId)
+				this.queue.splice(i, 1);
+		}
 	}
 
-	checkQueue(playerId : string)
+	checkQueue(player : PlayerData)
 	{
 		let roomId: string =  "";
-		let opponentId = "";
+		let opponent: PlayerData;
 
 		for (let i = 0; i < this.queue.length; ++i)
 		{
-			if (this.queue[i] === playerId)
+			if (this.queue[i] === player)
 				continue ;
-			roomId = this.queue[i] < playerId ? this.queue[i] + playerId : playerId + this.queue[i];
-			opponentId = this.queue[i];
-			this.removeFromQueue(playerId);
-			this.removeFromQueue(opponentId);
+			roomId = this.queue[i].id < player.id ? this.queue[i] + player.id : player.id + this.queue[i];
+			opponent = this.queue[i];
+			this.removeFromQueue(player.id);
+			this.removeFromQueue(opponent.id);
 		}
-		return ({roomId : roomId, opponentId : opponentId});
+		return ({roomId : roomId, opponent : opponent});
 	}
 
-	initRoom(roomId: string) : Room
+	initRoom(roomId: string, leftPlayer: PlayerData, rightPlayer: PlayerData) : Room
 	{
 		return (
 			{
@@ -57,7 +60,7 @@ export class PongService
 									   this.sizeCanvas.width / 60, 
 									   this.sizeCanvas.height / 6,
 									   5,
-									   "white",
+									   leftPlayer.skin,
 									   "left",
 									   null,
 									   this.sizeCanvas),
@@ -69,7 +72,7 @@ export class PongService
 									   this.sizeCanvas.width / 60,
 									   this.sizeCanvas.height / 6,
 									   5,
-									   "white",
+									   rightPlayer.skin,
 									   "right",
 									   null,
 									   this.sizeCanvas),
@@ -78,18 +81,19 @@ export class PongService
 		);
 	}
 
-	findRoom(server: Server, player: Socket)
+	findRoom(server: Server, player: Socket, playerData: PlayerData)
 	{
-		let room : Room;
-		let queueResearch = {roomId: null, opponentId: ""};
+		let room: Room;
+		let queueResearch = {roomId: null, opponent: null};
 
-		this.addToQueue(player.id);
-		queueResearch = this.checkQueue(player.id);
+		playerData.id = player.id;
+		this.addToQueue(playerData);
+		queueResearch = this.checkQueue(playerData);
 		if (queueResearch.roomId.length)
 		{
-			room = this.initRoom(queueResearch.roomId);
+			room = this.initRoom(queueResearch.roomId, queueResearch.opponent, playerData);
 			this.rooms[room.id] = room;
-			server.emit(queueResearch.opponentId, JSON.stringify({room: room, position: "left"}));
+			server.emit(queueResearch.opponent.id, JSON.stringify({room: room, position: "left"}));
 			server.emit(player.id, JSON.stringify({room: room, position: "right"}));
 			this.runRoom(room.id, server);
 		}
@@ -138,10 +142,8 @@ export class PongService
 	{
 		let scorer: string = "";
 		let roomInterval: ReturnType<typeof setInterval>;
-		let speedPowerUpInterval: ReturnType<typeof setInterval>;
 
 		this.rooms[roomId].running = true;
-
 		this.rooms[roomId].speedPowerUpInterval = setTimeout(() =>
 		{
 			server.to(roomId).emit('updateSpeedPowerUp', true, "left");

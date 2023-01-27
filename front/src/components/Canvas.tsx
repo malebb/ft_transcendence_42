@@ -1,12 +1,10 @@
 import { useRef, useEffect } from "react";
-import { Ball } from "ft_transcendence";
-import { Player } from "ft_transcendence";
 import Draw from "../classes/Draw";
 import { io, Socket } from "socket.io-client";
-import { Room } from "ft_transcendence";
+import { Ball, Room, Player, PlayerData } from "ft_transcendence";
 import LinkZone from "../interfaces/LinkZone";
 import { axiosToken, getToken } from '../api/axios';
-import { AxiosResponse, AxiosInstance} from 'axios';
+import { AxiosInstance} from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function Canvas()
@@ -27,14 +25,12 @@ export default function Canvas()
 	const map					= useRef<HTMLImageElement | null>(null);
 	const speedPowerUp			= useRef<HTMLImageElement | null>(null);
 	const axiosInstance			= useRef<AxiosInstance | null>(null);
-	const navigate 				= useNavigate();
+	const navigate 				= useRef(useNavigate());
 
 	useEffect(() =>
 	{
 		const pong = async () => 
 		{
-
-
 		function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
 		{
 			var canvas = document.getElementById('canvas');
@@ -162,15 +158,15 @@ export default function Canvas()
 
 		function powerUpEnabled()
 		{
-			return ((position.current == "left" && leftPlayer.current!.speedPowerUp) ||
-			(position.current == "right" && rightPlayer.current!.speedPowerUp))
+			return ((position.current === "left" && leftPlayer.current!.speedPowerUp) ||
+			(position.current === "right" && rightPlayer.current!.speedPowerUp))
 		}
 
 		function powerUp(e: KeyboardEvent)
 		{
 			if (keyPressed.current)
 				return;
-			if (e.key == ' ' && powerUpEnabled())
+			if (e.key === ' ' && powerUpEnabled())
 			{
 				socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
 				keyPressed.current = true;
@@ -179,16 +175,14 @@ export default function Canvas()
 
 		function updateSpeedPowerUp(status: boolean, position: string)
 		{
-			if (position == "left")
+			if (position === "left")
 				leftPlayer.current!.speedPowerUp = status;
-			else if (position == "right")
+			else if (position === "right")
 				rightPlayer.current!.speedPowerUp = status;
 		}
 
 		async function launchGame()
 		{
-			let canvas = document.getElementById('canvas');
-
 			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.leftPlayer);
 			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.rightPlayer);
 
@@ -290,7 +284,7 @@ export default function Canvas()
 			let cancelLink: Function[];
 			let background: HTMLImageElement = draw.current!.initOutGameBackground();
 
-			background.onload = function()
+			background.onload = async function()
 			{
 				draw.current!.outGameBackground(background);
 				draw.current!.matchmaking();
@@ -298,8 +292,16 @@ export default function Canvas()
 				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, "black", "Courier New");
 
 				let zones = [cancelZone];
-	
-				socket.current = io(`ws://localhost:3333`, {transports: ["websocket"]});
+				let playerData: PlayerData = {id: "", skin: ""};
+
+				playerData.skin = (await axiosInstance.current!.get('/users/me', {})).data.skin;
+				socket.current = io(`ws://localhost:3333`,
+				{
+					transports: ["websocket"],
+					query:	{
+								playerData: JSON.stringify(playerData)
+							}
+				});
 				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
 				socket.current!.on("connect", async () => {
 					await findRoom().then(data => {
@@ -309,17 +311,13 @@ export default function Canvas()
 					destroyLink(cancelLink);
 					await launchGame();
 				});
-			}
+			} 
 		}
 
 		function changeSkin(name : string)
 		{
 			draw.current!.skins = [];
-
-			// TODO : update skin in database
-			// ...
-
-			console.log('You\'ve selected ' + name + ' skin');
+			axiosInstance.current!.patch('/users/', {skin: name});
 			menu();
 		}
 
@@ -406,7 +404,7 @@ export default function Canvas()
 
 		function redirectSignInPage()
 		{
-			navigate('/signin', { replace: true});
+			navigate.current('/signin', { replace: true});
 		}
 
 		function signInToPlay()
@@ -421,7 +419,6 @@ export default function Canvas()
 
 				addLink(signInZone, redirectSignInPage, zones, 0);
 			}
-
 		}
 
 		ctx.current = canvasRef.current.getContext("2d");

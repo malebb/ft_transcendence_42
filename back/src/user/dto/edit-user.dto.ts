@@ -16,4 +16,8 @@ export class EditUserDto {
     @IsString()
     @IsOptional()
     map?: string
+
+    @IsString()
+    @IsOptional()
+    skin?: string
 }

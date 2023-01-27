@@ -22,7 +22,7 @@ model User {
   lastName  String?
 
   bookmarks  Bookmark[]
-  skin String @default("blue")
+  skin String @default("white")
   map String @default("basic")
 
   @@map("users")
