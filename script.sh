@@ -31,5 +31,7 @@ npm i react-router-dom
 npm i typescript
 npm i keydrown
 npm i socket.io-client
+npm i --save @types/styled-components 
+# --save-dev ??? pas obligatoire checker
 npm install ../lib/
 npm install axios
