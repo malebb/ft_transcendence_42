@@ -3,7 +3,7 @@ import { SubscribeMessage,
 		WebSocketServer,
 		MessageBody,
 		OnGatewayConnection,
-		OnGatewayDisconnect
+		OnGatewayDisconnect,
 		} from '@nestjs/websockets';
 
 import { PongService } from './pong.service'
@@ -12,7 +12,7 @@ import { Socket,
 		Server
 		} from "socket.io"
 
-import { Room } from "./pong.interface"
+import { Player } from "ft_transcendence"
 
 @WebSocketGateway({
 	cors: {
@@ -28,48 +28,33 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 	@WebSocketServer()
 	server: Server;
 
-	handleConnection(client: Socket)
+	handleConnection(player: Socket)
 	{
-		let room : Room;
-
-		console.log('Player ' + client.id + ' joined');
-		this.pongService.addPlayer(client.id);
-		room = this.pongService.checkQueue(client.id);
-		if (room.id.length)
-		{
-			this.server.emit(room.opponentId, {roomId : room.id, player : "playerB"});
-			this.server.emit(client.id, {roomId : room.id, player: "playerA"});
-		}
+		console.log('Player ' + player.id + ' joined');
+		this.pongService.findRoom(this.server, player, JSON.parse(String(player.handshake.query.playerData)));
 	}
 
-	handleDisconnect(client: Socket)
+	handleDisconnect(player: Socket)
 	{
-		console.log('Player ' + client.id + " left");
-		this.pongService.removePlayer(client.id);
+		console.log('Player ' + player.id + " left");
+		this.pongService.removeFromQueue(player.id);
 	}
 
 	@SubscribeMessage('joinRoom')
-	joinRoom(client: Socket, roomId : string) {
-		client.join(roomId);
-    }
-	
-	@SubscribeMessage('ball')
-	updateBall(@MessageBody() data : any) {
-		this.server.to(data.roomId).emit('ball', JSON.stringify(data.ball));
+	joinRoom(player : Socket, roomId : string)
+	{
+		this.pongService.joinRoom(player, roomId);
     }
 
-	@SubscribeMessage('playerA')
-	updatePlayerA(@MessageBody() data : any) {
-		this.server.to(data.roomId).emit('playerA', JSON.stringify(data.playerA));
+	@SubscribeMessage('movePlayer')
+	movePlayer(@MessageBody() data : any) {
+		let playerMoved : Player = this.pongService.movePlayer(data.roomId, data.position, data.key);
+
+		this.server.to(data.roomId).emit('movePlayer', JSON.stringify({player: playerMoved, position: data.position}));
   	}
 
-	@SubscribeMessage('playerB')
-	updatePlayerB(@MessageBody() data : any) {
-		this.server.to(data.roomId).emit('playerB', JSON.stringify(data.playerB));
-  	}
-
-	@SubscribeMessage('updateScore')
-	updateScore(@MessageBody() data : any) {
-		this.server.to(data.roomId).emit('updateScore', JSON.stringify(data.score));
+	@SubscribeMessage('speedPowerUp')
+	speedPowerUp(@MessageBody() data : any) {
+		this.pongService.useSpeedPowerUp(data.roomId, data.position, this.server);
   	}
 }

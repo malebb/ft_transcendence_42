@@ -1,5 +1,3 @@
-#!bin/bash
-
 cd back
 npm install @babel/core
 npm install @mui/material
@@ -24,6 +22,8 @@ npm i uuid --save
 npm i nestjs-form-data --save
 npm i @types/multer --save
 
+npm install ../lib/
+
 cd ../front
 npm i @fortawesome/fontawesome-svg-core
 npm i @fortawesome/free-solid-svg-icons
@@ -39,3 +39,5 @@ npm i socket.io-client
 npm i gapi-script react-google-login
 npm i url util crypto crypto-browserify 
 npm i speakeasy qrcode
+npm install ../lib/
+npm install axios

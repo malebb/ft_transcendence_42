@@ -1,9 +1,11 @@
-import {useRef, useEffect} from "react";
-
-import Ball from "../classes/Ball";
-import Player from "../classes/Player";
+import { useRef, useEffect } from "react";
 import Draw from "../classes/Draw";
-import {io, Socket} from "socket.io-client"
+import { io, Socket } from "socket.io-client";
+import { Ball, Room, Player, PlayerData } from "ft_transcendence";
+import LinkZone from "../interfaces/LinkZone";
+import { axiosToken, getToken } from '../api/axios';
+import { AxiosInstance} from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function Canvas()
 {
@@ -11,206 +13,440 @@ export default function Canvas()
 	const size					= useRef({width: 600, height: 350});
 	const ctx					= useRef<CanvasRenderingContext2D | null>(null);
 	const ball					= useRef<Ball>();
-	const playerA				= useRef<Player | null>(null);
-	const playerB				= useRef<Player | null>(null);
+	const leftPlayer			= useRef<Player | null>(null);
+	const rightPlayer			= useRef<Player | null>(null);
 	const animationFrameId		= useRef<number>(0);
 	const kd					= useRef(require('keydrown'));
+	const keyPressed			= useRef<boolean>(false);
 	const socket				= useRef<Socket | null>(null);
-	const roomId				= useRef<string | null>(null);
-	const player				= useRef<string | null>(null);
 	const draw					= useRef<Draw | null>(null);
+	const room					= useRef<Room | null>(null);
+	const position				= useRef<string>("");
+	const map					= useRef<HTMLImageElement | null>(null);
+	const speedPowerUp			= useRef<HTMLImageElement | null>(null);
+	const axiosInstance			= useRef<AxiosInstance | null>(null);
+	const navigate 				= useRef(useNavigate());
 
 	useEffect(() =>
 	{
-
-		interface TextZone{
-			posX : number;
-			posY : number;
-			width : number;
-			height : number;
-		}
-
-		function addLink(textZone : TextZone, linkAction : Function)
+		const pong = async () => 
+		{
+		function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
 		{
 			var canvas = document.getElementById('canvas');
-			var	mouseOnZone : TextZone | null = null;
+			var clickZone = canvas!.getBoundingClientRect();
+
+			if (e.clientX - clickZone.left >= textZone.posX &&
+				e.clientX - clickZone.left <= textZone.posX + textZone.width)
+			{
+				if (e.clientY - clickZone.top >= textZone.posY &&
+				e.clientY - clickZone.top <= textZone.posY + textZone.height)
+				{
+					return (true);
+				}
+			}
+			return (false);
+		}
+
+		function addLink(textZone : LinkZone, linkAction : Function, zones : LinkZone[], data : any) : Function []
+		{
+			var canvas = document.getElementById('canvas');
 			var executeLink = (e : MouseEvent) =>
 			{
-
-				var clickZone = canvas!.getBoundingClientRect();
-
-				if (e.clientX - clickZone.left >= textZone.posX &&
-				e.clientX - clickZone.left <= textZone.posX + textZone.width)
+				if (mouseOnZone(e, textZone))
 				{
-					if (e.clientY - clickZone.top >= textZone.posY &&
-					e.clientY - clickZone.top <= textZone.posY + textZone.height)
+					canvas!.removeEventListener('click', executeLink);
+					canvas!.removeEventListener('mousemove', drawMousePointer);
+					canvas!.style.cursor = 'default';
+					linkAction(data);
+				}
+				else
+				{
+					zones.forEach(zone => {
+					if (mouseOnZone(e, zone))
 					{
 						canvas!.removeEventListener('click', executeLink);
 						canvas!.removeEventListener('mousemove', drawMousePointer);
 						canvas!.style.cursor = 'default';
-						linkAction();
 					}
+					});
 				}
 			};
+
 			var drawMousePointer = (e : MouseEvent) =>
 			{
-				var clickZone = canvas!.getBoundingClientRect();
-
-				if (e.clientX - clickZone.left >= textZone.posX &&
-				e.clientX - clickZone.left <= textZone.posX + textZone.width)
-				{
-					if (e.clientY - clickZone.top >= textZone.posY &&
-					e.clientY - clickZone.top <= textZone.posY + textZone.height)
-					{
-						canvas!.style.cursor = 'pointer';
-						mouseOnZone = textZone;
-					}
-					else
-					{
-						if (mouseOnZone && mouseOnZone === textZone)
-							canvas!.style.cursor = 'default';
-					}
-				}
+				if (mouseOnZone(e, textZone))
+					canvas!.style.cursor = 'pointer';
 				else
 				{
-						if (mouseOnZone && mouseOnZone === textZone)
-							canvas!.style.cursor = 'default';
+					var		mouseOnOtherZone : boolean = false;
+	
+					zones.forEach(zone => {
+					if (mouseOnZone(e, zone))
+						mouseOnOtherZone = true;
+					});
+					if (!mouseOnOtherZone)
+						canvas!.style.cursor = 'default';
 				}
 			}
 			canvas!.addEventListener('click', executeLink)
 			canvas!.addEventListener('mousemove', drawMousePointer);
+			return ([executeLink, drawMousePointer]);
 		}
 
-		function launchGame()
+		function destroyLink(link : any[])
 		{
-			playerA.current = new Player(75, 100, size.current.width / 60, size.current.height / 5, 4, "white", ctx.current);
-			playerB.current = new Player(size.current.width - 100, size.current.height - 100, size.current.width / 60, size.current.height / 5, 4, "white", ctx.current);
+			var canvas = document.getElementById('canvas');
 
-			ball.current = new Ball(size.current.width / 2, size.current.height / 2, 10, "white", ctx.current!);
+			canvas!.removeEventListener('click', link[0]);
+			canvas!.removeEventListener('mousemove', link[1]);
+		}
 
-			socket.current!.on("ball", (arg : string) => {
-					ball.current!.update_pos(JSON.parse(arg))});
-			socket.current!.on("playerA", (arg : string) => {
-					playerA.current!.update_pos(JSON.parse(arg))});
-			socket.current!.on("playerB", (arg : string) => {
-					playerB.current!.update_pos(JSON.parse(arg));});
-			socket.current!.on("updateScore", (score : string) => {
-					playerA.current!.updateScore(JSON.parse(score).playerA);
-					playerB.current!.updateScore(JSON.parse(score).playerB);
-					});
+		function stopGame()
+		{
+			window.cancelAnimationFrame(animationFrameId.current)
+			socket.current!.disconnect();
+			kd.current.stop();
+			document!.removeEventListener('keypress', powerUp);
+			document!.removeEventListener('keyup', notifyKeyReleased);
+		}
+
+		function opponentDisconnection()
+		{
+			stopGame();
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
+
+			background.onload = function()
+			{
+				draw.current!.outGameBackground(background);
+				draw.current!.opponentDisconnection();
+
+				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
+				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
+				let zones = [newGameZone, menuZone];
+
+				addLink(newGameZone, matchmaking, zones, 0);
+				addLink(menuZone, menu, zones, 0);
+			}
+		}
+
+		function result(status: string)
+		{
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
+
+			background.onload = function()
+			{
+				draw.current!.outGameBackground(background);
+				if (status === "won")
+					draw.current!.youWon();
+				else
+					draw.current!.youLost();
+
+				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
+				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
+				let zones = [newGameZone, menuZone];
+
+				addLink(newGameZone, matchmaking, zones, 0);
+				addLink(menuZone, menu, zones, 0);
+			}
+		}
+
+		function notifyKeyReleased()
+		{
+			keyPressed.current = false;
+		}
+
+		function powerUpEnabled()
+		{
+			return ((position.current === "left" && leftPlayer.current!.speedPowerUp) ||
+			(position.current === "right" && rightPlayer.current!.speedPowerUp))
+		}
+
+		function powerUp(e: KeyboardEvent)
+		{
+			if (keyPressed.current)
+				return;
+			if (e.key === ' ' && powerUpEnabled())
+			{
+				socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
+				keyPressed.current = true;
+			}
+		}
+
+		function updateSpeedPowerUp(status: boolean, position: string)
+		{
+			if (position === "left")
+				leftPlayer.current!.speedPowerUp = status;
+			else if (position === "right")
+				rightPlayer.current!.speedPowerUp = status;
+		}
+
+		async function launchGame()
+		{
+			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.leftPlayer);
+			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.rightPlayer);
+
+			leftPlayer.current.setCtx(ctx.current!);
+			rightPlayer.current.setCtx(ctx.current!);
+
+			ball.current = Object.assign(new Ball(0, 0, 0, "white", 0, null, null), room.current!.ball);
+			ball.current.setCtx(ctx.current!);
+
+			socket.current!.on("moveBall", (arg : string) => {
+					ball.current!.update_pos(JSON.parse(arg))
+			});
+
+			socket.current!.on("movePlayer", (arg : string) => {
+				let data = JSON.parse(arg);
+
+				if (data.position === "left")
+					leftPlayer.current!.update_pos(data.player)
+				else if (data.position === "right")
+					rightPlayer.current!.update_pos(data.player)
+			});
+
+			socket.current!.on("updateScore", (scoreData: string) => {
+				let scoreDataObj = JSON.parse(scoreData);
+
+				if (scoreDataObj.scorer === "left")
+					leftPlayer.current!.updateScore(scoreDataObj.score);
+				else if (scoreDataObj.scorer === "right")
+					rightPlayer.current!.updateScore(scoreDataObj.score);
+			});
+
+			socket.current!.on("opponentDisconnection", () =>
+			{
+				opponentDisconnection();
+			});
+
+			socket.current!.on("endGame", (winner: string) =>
+			{
+				stopGame();
+				if (winner === position.current)
+					result("won");
+				else
+					result("lost");
+			});
+
+			socket.current!.on("updateSpeedPowerUp", (status: boolean, position: string) =>
+			{
+				updateSpeedPowerUp(status, position);
+			});
 
 			kd.current.UP.down(function()
 			{
-				if (player.current === "playerA")
-				{
-					playerA.current!.moveUp();
-					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
-				}
-				else
-				{
-					playerB.current!.moveUp();
-					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
-				}
+				socket.current!.emit("movePlayer", {roomId : room.current!.id, position: position.current, key: "UP"});
 			});
 
 			kd.current.DOWN.down(function()
 			{
-				if (player.current === "playerA")
-				{
-					playerA.current!.moveDown();
-					socket.current!.emit("playerA", {playerA : playerA.current, roomId : roomId.current});
-				}
-				else
-				{
-					playerB.current!.moveDown();
-					socket.current!.emit("playerB", {playerB : playerB.current, roomId : roomId.current});
-				}
+				socket.current!.emit("movePlayer", {roomId : room.current!.id, position: position.current, key: "DOWN"});
 			})
 
 			kd.current.run(function () {
 				kd.current.tick();
 			});
-			render();
+
+			document.addEventListener('keypress', powerUp);
+			document.addEventListener('keyup', notifyKeyReleased);
+
+			// TODO fetch user selected map in database
+
+			map.current = draw.current!.initGameMap((await axiosInstance.current!.get('/users/me', {})).data.map);
+			map.current!.onload = function()
+			{
+				speedPowerUp.current = draw.current!.initSpeedPowerUp();
+				speedPowerUp.current!.onload = function()
+				{
+					render();
+				}
+			}
 		}
 
 		function findRoom() : Promise<string>
 		{
 			return (new Promise(resolve => {
 				socket.current!.on(socket.current!.id, (data) => {
-					socket.current!.emit('joinRoom', data.roomId)
-					player.current = data.player;
-					resolve(data.roomId);
+					socket.current!.emit('joinRoom', JSON.parse(data).room.id)
+					resolve(data);
 				});
 			}));
 		}
 
+		function cancelMatchmaking()
+		{
+			socket.current!.disconnect();
+			menu();
+		}
 
 		async function matchmaking()
 		{
-			draw.current.matchmakingPage();
-			socket.current = io(`ws://localhost:3333`, {transports: ["websocket"]});
-			socket.current!.on("connect", async () => {
-			await findRoom().then(id => {
-				roomId.current = id;
-			});
-			launchGame();
-			});
+			let cancelLink: Function[];
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
+
+			background.onload = async function()
+			{
+				draw.current!.outGameBackground(background);
+				draw.current!.matchmaking();
+
+				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, "black", "Courier New");
+
+				let zones = [cancelZone];
+				let playerData: PlayerData = {id: "", skin: ""};
+
+				playerData.skin = (await axiosInstance.current!.get('/users/me', {})).data.skin;
+				socket.current = io(`ws://localhost:3333`,
+				{
+					transports: ["websocket"],
+					query:	{
+								playerData: JSON.stringify(playerData)
+							}
+				});
+				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
+				socket.current!.on("connect", async () => {
+					await findRoom().then(data => {
+						room.current = JSON.parse(data).room;
+						position.current = JSON.parse(data).position;
+					});
+					destroyLink(cancelLink);
+					await launchGame();
+				});
+			} 
+		}
+
+		function changeSkin(name : string)
+		{
+			draw.current!.skins = [];
+			axiosInstance.current!.patch('/users/', {skin: name});
+			menu();
 		}
 
 		function skins()
 		{
-			draw.current.skinsPage();
-		}
+			let colouredSkins : string[] = ["white", "blue", "yellow", "orange", "pink", "purple", "green", "grey", "red", "cyan"];
+			let skinLinkZones : LinkZone[] = [];
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
 
-		function createMenu()
-		{
-			draw.current.menuBackground();
-
-			let newGameZone = draw.current.text("new game", size.current.width / 2, size.current.height / 2, 35);
-			let skinsZone = draw.current.text("skins", size.current.width / 4, size.current.height / 1.3, 20);
-			let mapsZone = draw.current.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20);
-
-			addLink(newGameZone, matchmaking);
-			addLink(skinsZone, skins);
-		}
-
-		function draw()
-		{
-			ctx.current!.fillStyle = 'black';
-			ctx.current?.fillRect(0, 0, size.current.width, size.current.height);
-			ctx.current?.beginPath();
-			ctx.current!.fillStyle = 'white';
-			ctx.current?.moveTo(size.current.width / 2, 0);
-			ctx.current?.lineTo(size.current.width / 2, size.current.height);
-			ctx.current?.moveTo(0, 0);
-			ctx.current?.lineTo(80, 80);
-			ctx.current?.stroke();
-			playerA.current?.draw_paddle();
-			playerB.current?.draw_paddle();
-			playerA.current?.draw_score(size.current.width / 3, size.current.height / 4);
-			playerB.current?.draw_score(size.current.width - (size.current.width / 3 ) - 30, size.current.height / 4);
-			
-			if (ball.current?.move([playerA.current, playerB.current]))
+			background.onload = function()
 			{
-				socket.current!.emit("updateScore", {score : {playerA : playerA.current!.score, playerB : playerB.current!.score}, roomId : roomId.current});
+				draw.current!.outGameBackground(background);
+				draw.current!.skinsTitle();
+				colouredSkins.forEach(color => {
+					let skinLinkZone = draw.current!.skin(color)
+					skinLinkZones.push(skinLinkZone);
+				});
+				skinLinkZones.forEach(skinLinkZone => {
+				addLink(skinLinkZone, changeSkin, skinLinkZones, colouredSkins[skinLinkZones.indexOf(skinLinkZone)]);
+			});
 			}
-			
+		}
+
+		async function changeMap(name: string)
+		{
+			axiosInstance.current!.patch('/users/', {map: name});
+			menu();
+		}
+
+		function maps()
+		{
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
+			let mapLinkZones: LinkZone[] = [];
+
+			background.onload = function ()
+			{
+				draw.current!.outGameBackground(background);
+				draw.current!.mapsTitle();
+				mapLinkZones = draw.current!.map();
+				mapLinkZones.forEach((mapLinkZone: LinkZone) => {
+					addLink(mapLinkZone, changeMap, mapLinkZones, draw.current!.mapList[mapLinkZones.indexOf(mapLinkZone)].name);
+				});
+			}
+		}
+
+		function menu()
+		{
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
+
+			background.onload = function()
+			{
+				draw.current!.outGameBackground(background);
+				let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35, "black", "Courier New");
+				let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
+				let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
+				let zones = [newGameZone, skinsZone, mapsZone];
+
+				addLink(newGameZone, matchmaking, zones, 0);
+				addLink(skinsZone, skins, zones, 0);
+				addLink(mapsZone, maps, zones, 0);
+			}
+		}
+
+		function game()
+		{
+			draw.current!.gameMap(map.current!);
+			leftPlayer.current!.draw_paddle();
+			rightPlayer.current!.draw_paddle();
+			draw.current!.score(leftPlayer.current!.score, rightPlayer.current!.score);
+			draw.current!.speedPowerUp(speedPowerUp.current!, leftPlayer.current!.speedPowerUp, rightPlayer.current!.speedPowerUp);
 			ball.current?.draw();
-			socket.current!.emit("ball", {ball : ball.current, roomId: roomId.current});
 		}
 
 		function render()
 		{
-			draw();
+			game();
 			animationFrameId.current = window.requestAnimationFrame(render)
+		}
+
+		async function initUser()
+		{
+			await axiosInstance.current!.get('/users/me', {});
+		}
+
+		function redirectSignInPage()
+		{
+			navigate.current('/signin', { replace: true});
+		}
+
+		function signInToPlay()
+		{
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
+
+			background.onload = function()
+			{
+				draw.current!.outGameBackground(background);
+				let signInZone : LinkZone = draw.current!.signInToPlay();
+				let zones = [signInZone];
+
+				addLink(signInZone, redirectSignInPage, zones, 0);
+			}
 		}
 
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
-		createMenu();
-		return () => { window.cancelAnimationFrame(animationFrameId.current) }
+		axiosInstance.current = axiosToken();
+		if (getToken() == null)
+		{
+			signInToPlay();
+			return (false);
+		}
+		else
+		{
+			await initUser();
+			menu();
+			return (true);
+		}
+		}
+
+		pong();
+
+		return () => { 
+			window.cancelAnimationFrame(animationFrameId.current)
+		}
 
 	}, []);
-
-	return (<center><canvas id="canvas" style={{marginTop: 150}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>);
+	return (
+	<center>
+		<canvas id="canvas" style={{marginTop: 150}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas>
+	</center>
+	);
 }

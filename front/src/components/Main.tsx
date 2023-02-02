@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/App.css';
+//import '../styles/App.css';
 import Headers from './Headers';
 import Nav from './Nav';
 import Log from './Log';
@@ -10,9 +10,14 @@ function Main() {
     <div className="App">
       <div className='static'>
       <Headers/>
+<<<<<<< HEAD
       {sessionStorage.getItem("tokens") ? <Nav/> : <Log/>}
       <Canvas/>
+=======
+      {sessionStorage.getItem("token") ? <Nav/> : <Log/>}
+>>>>>>> master
       </div>
+      <Canvas/>
     </div>
   );
 }
