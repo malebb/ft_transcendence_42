@@ -25,23 +25,23 @@ export default function Home() {
 
 	}
 
-	return <div>
-		
-
-		{!username && (
-        <div>
-            <input placeholder="Username" ref={usernameRef} />
-            <button className="cta" onClick={handleSetUsername}>
-              START
-            </button>
-        </div>
-      )}
-
-		<RoomsContainer />
-		
-			
-		<MessagesContainer />	
-		
-		
+	return     
+	<div>
+	{!username && (
+	  <div>
+		<div>
+		  <input placeholder="Username" ref={usernameRef} />
+		  <button className="cta" onClick={handleSetUsername}>
+			START
+		  </button>
+		</div>
 	</div>
+	)}
+	{username && (
+	  <div>
+		<RoomsContainer />
+		<MessagesContainer />
+	  </div>
+	)}
+  </div>
 }

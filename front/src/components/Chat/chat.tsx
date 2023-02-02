@@ -75,16 +75,17 @@ import { useSockets } from './context/socket.context';
 
 import RoomsContainer from './containers/Rooms';
 import MessagesContainer from './containers/Message';
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+// import styles from "./utils/Home.css";
 
 export default function Home() {
 	const { socket, username, setUsername } = useSockets();
-	const usernameRef = useRef(null)
+	const usernameRef = useRef<any>(null)
 
 	function handleSetUsername() {
-		if (!usernameRef.current)
-			return;
-		const value = usernameRef.current['value'];
+		// if (!usernameRef.current)
+		// 	return;
+		const value = usernameRef.current.value;
 		if (!value) {
 			return ;
 		}
@@ -95,23 +96,27 @@ export default function Home() {
 
 	}
 
-	return <div>
-		
+	useEffect(() => {
+		if (usernameRef)
+		  usernameRef.current.value = localStorage.getItem("username") || "";
+	  }, []);
 
-		{!username && (
-        <div>
-            <input placeholder="Username" ref={usernameRef} />
-            <button className="cta" onClick={handleSetUsername}>
-              START
-            </button>
-        </div>
-      )}
+	return (
+		<div>
+		  {!username && <div>
+			<input placeholder="Username" ref={usernameRef} />
+				<button onClick={handleSetUsername}>
+				  START
+				</button>
+		  </div>}
+		  {
+			username && <>
+			  <RoomsContainer />
+			  <MessagesContainer />
 
-		<RoomsContainer />
-		
-			
-		<MessagesContainer />	
-		
-		
-	</div>
-}
+			</>
+		  }
+
+		</div>
+	  );
+	}
