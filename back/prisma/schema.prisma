@@ -25,12 +25,8 @@ model User {
   lastName  String?
   profilePicture String?
 
-<<<<<<< HEAD
-=======
-  bookmarks  Bookmark[]
   skin String @default("white")
   map String @default("basic")
->>>>>>> master
 
   @@map("users")
 }

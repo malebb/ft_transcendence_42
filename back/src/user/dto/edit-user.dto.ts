@@ -5,9 +5,6 @@ export class EditUserDto {
     @IsOptional()
     login?: string
 
-<<<<<<< HEAD
-}
-=======
     @IsString()
     @IsOptional()
     firstName?: string
@@ -24,4 +21,3 @@ export class EditUserDto {
     @IsOptional()
     skin?: string
 }
->>>>>>> master

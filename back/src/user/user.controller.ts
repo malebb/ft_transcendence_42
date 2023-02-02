@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { Controller, Get, UseGuards, Req, Patch, Body, Post, UseInterceptors, UploadedFile, Param, Res } from '@nestjs/common';
-=======
-import { Controller, Get, UseGuards, Req, Patch, Body, Param } from '@nestjs/common';
->>>>>>> master
 import { JwtGuard } from '../auth/guard';
 import { GetUser, Public } from '../auth/decorator';
 import { User } from '@prisma/client';
@@ -45,7 +41,6 @@ export class UserController {
     }
 
     @Patch()
-<<<<<<< HEAD
     editUser(@GetUser() user: User, @Body() dto: EditUserDto)
     {
         return this.userService.editUser(user.id, dto);
@@ -80,10 +75,5 @@ export class UserController {
         if (dto.login !== undefined)
             this.userService.editEmail(user.id, dto);
         //this.userService.editUser(user.id, dto);
-=======
-    editUser(@GetUser('id') userId: number, @Body() dto: EditUserDto)
-    {
-		return this.userService.editUser(userId, dto);
->>>>>>> master
     }
 }
