@@ -9,16 +9,15 @@ const VERIF_PATH='/auth/verify'
 
 async function verify(jwt: string)
 {
+  console.log("jwt = " + jwt)
   try { 
-    let token = jwt.split(":")[1];
-    token = token.substring(1, token.length - 2);
     const response: AxiosResponse = await axios.get('http://localhost:3333/auth/verify',
     {
       headers: {
-        'Authorization': 'Bearer ' + token
+        'Authorization': 'Bearer ' + jwt
       }
     });
-    console.log(response.data)
+    console.log("oogog " + response.data)
     return response.data;
   }
   catch(err : any){
@@ -34,9 +33,9 @@ const PrivateRoutes = () => {
   useEffect(() =>
   {
     const checkAuth = async () => {
-      const jwt = sessionStorage.getItem("token");
+      const jwt = JSON.parse(sessionStorage.getItem("tokens") || '{}');
       if (jwt) {
-        const user = await verify(jwt);
+        const user = await verify(jwt['access_token']);
         if (user)
           setIsAuth(true);
       }
@@ -49,8 +48,9 @@ const PrivateRoutes = () => {
     return <Loading/>;
   }
 
+    {console.log(isAuth)}
   return (
-    sessionStorage.getItem('token') ? <Outlet/> : <Navigate to="/signin"/>
+    isAuth ? <Outlet/> : <Navigate to="/signin"/>
   );
 }
 

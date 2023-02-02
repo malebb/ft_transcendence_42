@@ -8,24 +8,30 @@ import { AuthProvider } from '../context/TokenContext';
 import Main from './Main';
 import Signin from './Login/signin';
 import Signup from './Login/signup';
+import SetTfa from './SetTfa';
+import DeleteTfa from './DeleteTfa';
+import VerifTfa from './VerifTfa';
 import User from './User';
 import History from './History';
 import Friends from './Friends';
 import PrivateRoutes from './PrivateRoute/PrivateRoutes';
 
+        /*<Route element={<PrivateRoutes /> } ></Route>
+        </Route>*/
 function App() {
   return (
     <AuthProvider>
     <BrowserRouter>
       <Routes>
-        <Route element={<PrivateRoutes /> } >
           <Route path='/user' element={<User/>} />
           <Route path='/history' element={<History/>}/>
           <Route path='/friends'element={<Friends/>}/>
-        </Route>
         <Route path='/' element={<Main/>} />
         <Route path='/signin' element={<Signin/>}/>
         <Route path='/signup' element={<Signup/>}/>
+        <Route path='/2factivate' element={<SetTfa/>}/>
+        <Route path='/2fadelete' element={<DeleteTfa/>}/>
+        <Route path='/2faverif' element={<VerifTfa/>}/>
       </Routes>
     </BrowserRouter>
   </AuthProvider> 

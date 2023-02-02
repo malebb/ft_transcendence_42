@@ -10,7 +10,7 @@ function Main() {
     <div className="App">
       <div className='static'>
       <Headers/>
-      {sessionStorage.getItem("token") ? <Nav/> : <Log/>}
+      {sessionStorage.getItem("tokens") ? <Nav/> : <Log/>}
       <Canvas/>
       </div>
     </div>

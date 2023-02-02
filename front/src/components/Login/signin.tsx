@@ -1,5 +1,5 @@
 import React from 'react';
-import './signin.css';
+import '../../styles/signin.css';
 import Signup from './signup';
 import { useRef, useState, useEffect, useContext} from 'react';
 import { faCheck, faTimes, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
@@ -9,6 +9,10 @@ import { Link } from 'react-router-dom';
 import { AxiosError, AxiosResponse } from 'axios';
 import TokenContext from '../../context/TokenContext';
 import { setTokenSourceMapRange } from 'typescript';
+import Tfa from '../Tfa';
+import VerifTfa from '../VerifTfa';
+import SetTfa from '../SetTfa';
+import { useNavigate } from 'react-router-dom';
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_@.]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,24}$/
@@ -29,9 +33,12 @@ const Signin = () => {
   const [validPwd, setValidPwd] = useState(false);
   const [pwdFocus, setPwdFocus] = useState(false);
 
+  const [isTfa, setIsTfa] = useState<boolean>(false);
 
   const [errMsg, setErrMsg] = useState('');
   const [success, setSuccess] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     // userRef.current.focus();
@@ -74,10 +81,15 @@ const Signin = () => {
       console.log(response.data);
       setSuccess(true);
       setToken(response.data.token);
-      sessionStorage.setItem("token", JSON.stringify(response.data));
+      setIsTfa(response.data.isTfa);
+      console.log("tfa === " + JSON.stringify(response.data));
+      sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
       console.log(response.data.access_token);
       console.log(token);
-
+      if (response.data.isTfa === false)
+        navigate('/');
+      else
+        navigate('/2faverif');
     }catch(err : any)
     {
       if (!err?.response)
@@ -97,8 +109,15 @@ const Signin = () => {
     <>
     {success? (
       <section>
-        <h1>Success!</h1>
-        <Link to='/'>Go to Home</Link>
+        {isTfa &&
+          <VerifTfa/>
+        }
+        {!isTfa && 
+          <div>
+            <h1>Success!</h1>
+            <Link to='/'>Go to Home</Link>
+          </div>
+        }
       </section>
     ):(
       <section>
