@@ -41,3 +41,4 @@ npm i url util crypto crypto-browserify
 npm i speakeasy qrcode
 npm install ../lib/
 npm install axios
+npm install stream-browserify

@@ -10,12 +10,8 @@ function Main() {
     <div className="App">
       <div className='static'>
       <Headers/>
-<<<<<<< HEAD
       {sessionStorage.getItem("tokens") ? <Nav/> : <Log/>}
       <Canvas/>
-=======
-      {sessionStorage.getItem("token") ? <Nav/> : <Log/>}
->>>>>>> master
       </div>
       <Canvas/>
     </div>
