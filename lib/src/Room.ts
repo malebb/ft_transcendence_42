@@ -8,4 +8,5 @@ export interface Room {
 	leftPlayer:					Player;
 	rightPlayer:				Player;
 	speedPowerUpInterval:		ReturnType<typeof setTimeout>;
+	powerUpMode:				boolean;
 }

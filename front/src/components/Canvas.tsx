@@ -31,6 +31,7 @@ export default function Canvas()
 	const position				= useRef<string>("");
 	const map					= useRef<HTMLImageElement | null>(null);
 	const speedPowerUp			= useRef<HTMLImageElement | null>(null);
+	const powerUpMode			= useRef<boolean>(false);
 	const axiosInstance			= useRef<AxiosInstance | null>(null);
 	const navigate 				= useRef(useNavigate());
 
@@ -235,10 +236,13 @@ export default function Canvas()
 					result("lost");
 			});
 
-			socket.current!.on("updateSpeedPowerUp", (status: boolean, position: string) =>
+			if (room.current!.powerUpMode)
 			{
-				updateSpeedPowerUp(status, position);
-			});
+				socket.current!.on("updateSpeedPowerUp", (status: boolean, position: string) =>
+				{
+					updateSpeedPowerUp(status, position);
+				});
+			}
 
 			kd.current.UP.down(function()
 			{
@@ -299,14 +303,14 @@ export default function Canvas()
 				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, "black", "Courier New");
 
 				let zones = [cancelZone];
-				let playerData: PlayerData = {id: "", skin: ""};
+				let playerData: PlayerData = {id: "", skin: "", powerUpMode: powerUpMode.current};
 
 				playerData.skin = (await axiosInstance.current!.get('/users/me', {})).data.skin;
 				socket.current = io(`ws://localhost:3333`,
 				{
 					transports: ["websocket"],
 					query:	{
-								playerData: JSON.stringify(playerData)
+								playerData: JSON.stringify(playerData),
 							}
 				});
 				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
@@ -373,6 +377,8 @@ export default function Canvas()
 		function switchToPowerUpMode(checkboxData: CheckboxData)
 		{
 			let checkboxZone = draw.current!.checkbox(checkboxData.checkbox);
+
+			powerUpMode.current = powerUpMode.current ? false : true;
 
 			draw.current!.updateCheckboxStatus();
 			draw.current!.checked(checkboxData.checked);
