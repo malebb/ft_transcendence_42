@@ -17,6 +17,11 @@ npm install prisma
 npm install -D pactum
 npm i --save @nestjs/websockets
 npm i --save @nestjs/platform-socket.io
+npm i --save @nestjs/platform-express
+npm i uuid --save
+npm i nestjs-form-data --save
+npm i @types/multer --save
+
 npm install ../lib/
 
 cd ../front
@@ -31,5 +36,8 @@ npm i react-router-dom
 npm i typescript
 npm i keydrown
 npm i socket.io-client
+npm i gapi-script react-google-login
+npm i url util crypto crypto-browserify 
+npm i speakeasy qrcode
 npm install ../lib/
 npm install axios

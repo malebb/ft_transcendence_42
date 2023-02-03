@@ -3,8 +3,11 @@ import {IsEmail, IsString, IsOptional} from "class-validator";
 export class EditUserDto {
     @IsEmail()
     @IsOptional()
-    email?: string
+    login?: string
 
+<<<<<<< HEAD
+}
+=======
     @IsString()
     @IsOptional()
     firstName?: string
@@ -21,3 +24,4 @@ export class EditUserDto {
     @IsOptional()
     skin?: string
 }
+>>>>>>> master
