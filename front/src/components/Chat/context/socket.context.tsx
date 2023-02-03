@@ -1,5 +1,5 @@
 import io, { Socket } from 'socket.io-client';
-import { SOCKET_URL } from '../config/default';
+// import { SOCKET_URL } from '../config/default';
 import { createContext, useContext, useEffect, useState } from 'react';
 import EVENTS from '../config/events';
 
@@ -14,7 +14,7 @@ interface Context {
 	rooms: Record<string,{name: string}>,
 }
 
-const socket = io(SOCKET_URL);
+const socket = io("*");
 
 const SocketContext = createContext<Context>({
 	socket,
@@ -71,10 +71,6 @@ function SocketsProvider(props: any) {
 export const useSockets = () => useContext(SocketContext);
 
 export default SocketsProvider;
-
-
-
-
 
 
 

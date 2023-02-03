@@ -5,7 +5,9 @@ import { useRef } from 'react';
 function RoomsContainer() {
 
 	const { socket, roomId, rooms } = useSockets();
-	const newRoomRef = useRef<any>(null)
+	const newRoomRef = useRef<any>(null);
+	// const newRoomRef = useRef(null);
+
 
 	function handleCreateRoom() {
 
@@ -31,17 +33,17 @@ function RoomsContainer() {
 		socket.emit(EVENTS.CLIENT.JOIN_ROOM, key)
 	}
 
-	return <nav>
+	return ( <nav>
 		<div>
 			<input ref={newRoomRef} placeholder="Room name" />
-			<button onClick={handleCreateRoom}>CREATE ROOM</button>
+			<button className="cta" onClick={handleCreateRoom}>CREATE ROOM</button>
 		</div>
 
 {/* // key = roomId */}
 		{Object.keys(rooms).map((key) => {
 			return <div key={key}>
-				<button disabled={key === roomId}
-				
+				<button
+				disabled={key === roomId}
 				title={`Join ${rooms[key].name}`}
 				onClick={() => handleJoinRoom(key)}
 				>
@@ -51,7 +53,7 @@ function RoomsContainer() {
 			</div>;
 		})}
 
-	</nav>
+	</nav>)
 
 }
 

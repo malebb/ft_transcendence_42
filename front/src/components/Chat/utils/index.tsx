@@ -1,6 +1,3 @@
-// import Head from "next/head";
-// import Image from "next/image";
-// import styles from "../styles"
 import { useSockets } from '../context/socket.context';
 
 import RoomsContainer from '../containers/Rooms';
@@ -25,23 +22,24 @@ export default function Home() {
 
 	}
 
-	return     
-	<div>
-	{!username && (
-	  <div>
+	return (
 		<div>
-		  <input placeholder="Username" ref={usernameRef} />
-		  <button className="cta" onClick={handleSetUsername}>
-			START
-		  </button>
+			{!username && (
+				<div>
+					<div>
+					<input placeholder="Username" ref={usernameRef} />
+						<button className="cta" onClick={handleSetUsername}>
+						START
+						</button>
+					</div>
+				</div>
+			)}
+			{username && (
+				<div>
+					<RoomsContainer />
+					<MessagesContainer />
+				</div>
+			)}
 		</div>
-	</div>
-	)}
-	{username && (
-	  <div>
-		<RoomsContainer />
-		<MessagesContainer />
-	  </div>
-	)}
-  </div>
+	)
 }
