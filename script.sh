@@ -5,6 +5,8 @@ npm install @mui/styled-engine-sc
 npm install @nestjs/config
 npm install @nestjs/jwt
 npm install @nestjs/passport
+npm install @nestjs/core
+npm install @nestjs/common
 npm install @prisma/client
 npm install @types/passport-jwt
 npm install argon2
@@ -42,3 +44,4 @@ npm i speakeasy qrcode
 npm install ../lib/
 npm install axios
 npm install stream-browserify
+npm install crypto-browserify
