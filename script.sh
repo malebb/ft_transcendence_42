@@ -38,7 +38,7 @@ npm i react-router-dom
 npm i typescript
 npm i keydrown
 npm i socket.io-client
-npm i gapi-script react-google-login
+#npm i gapi-script react-google-login
 npm i url util crypto crypto-browserify 
 npm i speakeasy qrcode
 npm install ../lib/
