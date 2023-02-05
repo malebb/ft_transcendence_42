@@ -12,6 +12,7 @@ import { use } from 'passport';
 import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
 import { connected } from 'process';
+import { Response } from 'express';
 
 const DEFAULT_IMG='uploads/profileimages/default_profile_picture.png'
 
@@ -89,6 +90,14 @@ export class AuthService {
   //          hash,
   //      })
     }
+
+    
+    signin42(res: Response)
+    {
+        const redirect_uri = this.config.get('OAUTH_REDIRECT_URI');
+        res.redirect(redirect_uri);
+    }
+
 
     async updateRtHash(userId: number, refreshToken: string)
     {

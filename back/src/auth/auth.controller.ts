@@ -1,4 +1,4 @@
-import { Body, Headers, Controller, HttpCode, HttpStatus, Post, Req, Get, UseGuards } from '@nestjs/common';
+import { Body, Headers, Controller, HttpCode, HttpStatus, Post, Req, Get, UseGuards, Res } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthDto, TFADto} from './dto';
@@ -6,11 +6,13 @@ import { Tokens } from './types';
 import { Request } from 'express';
 import { JwtGuard , RtGuard} from './guard';
 import { GetUser, Public } from './decorator';
-
+import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) {}
+    constructor(private authService: AuthService, config: ConfigService) {}
+
 
     @Public()
     @Post('signup')
@@ -28,6 +30,14 @@ export class AuthController {
     {
         console.log(headers);
         return this.authService.signin(dto);
+    }
+
+    @Public()
+    @HttpCode(HttpStatus.OK)
+    @Get('signin/42login')
+    signin42(@Res() res : Response)
+    {
+        return this.authService.signin42(res);
     }
 
     @Post('logout')
