@@ -3,7 +3,7 @@ import React from 'react';
 import Headers from './Headers';
 import Nav from './Nav';
 import Log from './Log';
-// import Canvas from './Canvas';
+import Canvas from './Canvas';
 
 function Main() {
   return (
@@ -11,7 +11,7 @@ function Main() {
       <div className='static'>
       <Headers/>
       {sessionStorage.getItem("tokens") ? <Nav/> : <Log/>}
-      {/* <Canvas/> */}
+      { <Canvas/> }
       </div>
      {/* { <Canvas/>} */}
     </div>

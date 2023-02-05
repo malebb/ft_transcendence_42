@@ -20,4 +20,3 @@ export declare class Player {
     updateScore(scoreUpdated: number): void;
     setCtx(ctx: CanvasRenderingContext2D): void;
 }
-//# sourceMappingURL=Player.d.ts.map

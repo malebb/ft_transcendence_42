@@ -8,4 +8,3 @@ export interface Room {
     rightPlayer: Player;
     speedPowerUpInterval: ReturnType<typeof setTimeout>;
 }
-//# sourceMappingURL=Room.d.ts.map

@@ -21,4 +21,3 @@ export declare class Ball {
     setCtx(ctx: CanvasRenderingContext2D): void;
     speedPowerUp(): void;
 }
-//# sourceMappingURL=Ball.d.ts.map
