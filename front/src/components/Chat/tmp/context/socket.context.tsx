@@ -1,7 +1,9 @@
 import io, { Socket } from 'socket.io-client';
+// import * as io from 'socket.io-client';
 // import { SOCKET_URL } from '../config/default';
 import { createContext, useContext, useEffect, useState } from 'react';
 import EVENTS from '../config/events';
+// import { io, Socket } from "socket.io-client";
 
 interface Context {
 	socket: Socket;
@@ -15,6 +17,7 @@ interface Context {
 }
 
 const socket = io("*");
+// const socket = socketIOClient();
 
 const SocketContext = createContext<Context>({
 	socket,
