@@ -44,6 +44,7 @@ export class AuthService {
                     email: dto.email,
                     hash: hash,
                     profilePicture: DEFAULT_IMG,
+                    username: dto.email,
                 }
             })
             const tokens = await this.signToken(user.id, user.email);
@@ -124,10 +125,40 @@ export class AuthService {
         console.log("after axios inside get42QT"); 
         console.log(response.status);
         console.log(response.data);
+        //if(response.status !== 200)//TODO protect depending on response status
+        
         const response2: AxiosResponse = await axios.get('https://api.intra.42.fr/v2/me', {
             headers: {'Authorization': 'Bearer ' + response.data['access_token']},
         });
         console.log("getme =" + JSON.stringify(response2.data));
+        const id42 = JSON.stringify(response.data['id']);
+        const pic42 = response2.data.image.versions.small;
+        console.log(pic42);
+        console.log(pic42);
+
+        const user = await this.prismaService.user.findUnique({
+            where: {
+                id42: id42
+            }
+        });
+        if(!user)
+        {
+            const newuser = await this.prismaService.user.create(
+                {
+                data:{
+                    email: response.data['email'],
+                    hash: '',
+                    profilePicture: DEFAULT_IMG,
+                    id42: id42,
+                    username: response.data['login']
+                }
+
+                }
+            )
+        }
+        const tokens = await this.signToken(user.id, user.email);
+        this.updateRtHash(user.id, tokens.refresh_token)
+        return {tokens: tokens, isTfa: user.isTFA};
         //console.log("data = " + JSON.stringify(response.data));
         return response.data;
     }
