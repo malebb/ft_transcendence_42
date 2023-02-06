@@ -13,8 +13,13 @@ import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
 import { connected } from 'process';
 import { Response } from 'express';
+import axios, { AxiosResponse } from 'axios';
 
+require('oauth2');
+
+const GRANT_TYPE ='authorization_code';
 const DEFAULT_IMG='uploads/profileimages/default_profile_picture.png'
+const REDIRECT_URI='http://localhost:3000/auth/signin/42login/callback'
 
 @Injectable()
 export class AuthService {
@@ -96,6 +101,35 @@ export class AuthService {
     {
         const redirect_uri = this.config.get('OAUTH_REDIRECT_URI');
         res.redirect(redirect_uri);
+    }
+
+   /* async get42AT(code)
+    {
+        const client_id = this.config.get('OAUTH_CLIENT_UID');
+        const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
+        console.log("get inside get42QT = " + client_id + " | " + client_secret); 
+        const response: AxiosResponse = await axios.post('https://api.intra.42.fr/oauth/token', {grant_type: GRANT_TYPE,client_id: client_id, client_secret: client_secret, code: code, redirect_uri: REDIRECT_URI},);
+        console.log("after axios inside get42QT"); 
+        console.log(response.data);
+        return response;
+    }*/
+
+    async callback42(code)
+    {
+        //const response : AxiosResponse = await this.get42AT(code);
+        const client_id = this.config.get('OAUTH_CLIENT_UID');
+        const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
+        console.log("get inside get42QT = " + client_id + " | " + client_secret); 
+        const response: AxiosResponse = await axios.post('https://api.intra.42.fr/oauth/token', {grant_type: GRANT_TYPE,client_id: client_id, client_secret: client_secret, code: code, redirect_uri: REDIRECT_URI},);
+        console.log("after axios inside get42QT"); 
+        console.log(response.status);
+        console.log(response.data);
+        const response2: AxiosResponse = await axios.get('https://api.intra.42.fr/v2/me', {
+            headers: {'Authorization': 'Bearer ' + response.data['access_token']},
+        });
+        console.log("getme =" + JSON.stringify(response2.data));
+        //console.log("data = " + JSON.stringify(response.data));
+        return response.data;
     }
 
 
