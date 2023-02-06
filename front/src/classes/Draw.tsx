@@ -13,26 +13,9 @@ export default class Draw
 			{name: "nature", path: "./images/nature.jpg"},
 			{name: "snow", path: "./images/snow.jpg"},
 			{name: "space", path: "./images/space.jpg"}];
-	checkboxStatus: boolean = false;
 
 	constructor(public readonly ctx : CanvasRenderingContext2D | null)
 	{
-	}
-
-	initCheckbox()
-	{
-		const checkbox = new Image();
-
-		checkbox.src = './images/checkbox.png';
-		return (checkbox);
-	}
-
-	initChecked()
-	{
-		const checked = new Image();
-
-		checked.src = './images/checked.png';
-		return (checked);
 	}
 
 	initOutGameBackground() : HTMLImageElement
@@ -206,30 +189,5 @@ export default class Draw
 	signInToPlay() : LinkZone
 	{
 		return (this.text("Sign in to play", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New"));
-	}
-
-	checkbox(checkbox: HTMLImageElement): LinkZone
-	{
-		let	checkboxZone: LinkZone = {posX : this.ctx!.canvas.width / 1.8, posY: this.ctx!.canvas.height / 1.77, width: 20, height: 20}
-
-		this.ctx!.drawImage(checkbox, checkboxZone.posX, checkboxZone.posY, checkboxZone.width, checkboxZone.height);
-		return (checkboxZone);
-	}
-
-	checked(checkbox: HTMLImageElement): LinkZone
-	{
-		let	checkboxZone: LinkZone = {posX : this.ctx!.canvas.width / 1.8, posY: this.ctx!.canvas.height / 1.77, width: 20, height: 20}
-
-		if (this.checkboxStatus)
-			this.ctx!.drawImage(checkbox, checkboxZone.posX, checkboxZone.posY, checkboxZone.width, checkboxZone.height);
-		return (checkboxZone);
-	}
-
-	updateCheckboxStatus()
-	{
-		if (this.checkboxStatus)
-			this.checkboxStatus = false;
-		else
-			this.checkboxStatus = true;
 	}
 }

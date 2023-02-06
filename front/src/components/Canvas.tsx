@@ -7,13 +7,6 @@ import { axiosToken, getToken } from '../api/axios';
 import { AxiosInstance} from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-interface CheckboxData
-{
-	checkbox: HTMLImageElement;
-	checked: HTMLImageElement;
-	zones: LinkZone[];
-}
-
 export default function Canvas()
 {
 	const canvasRef				= useRef(document.createElement("canvas"));
@@ -31,7 +24,6 @@ export default function Canvas()
 	const position				= useRef<string>("");
 	const map					= useRef<HTMLImageElement | null>(null);
 	const speedPowerUp			= useRef<HTMLImageElement | null>(null);
-	const powerUpMode			= useRef<boolean>(false);
 	const axiosInstance			= useRef<AxiosInstance | null>(null);
 	const navigate 				= useRef(useNavigate());
 
@@ -70,14 +62,14 @@ export default function Canvas()
 				}
 				else
 				{
-						zones.forEach(zone => {
-						if (mouseOnZone(e, zone))
-						{
-							canvas!.removeEventListener('click', executeLink);
-							canvas!.removeEventListener('mousemove', drawMousePointer);
-							canvas!.style.cursor = 'default';
-						}
-						});
+					zones.forEach(zone => {
+					if (mouseOnZone(e, zone))
+					{
+						canvas!.removeEventListener('click', executeLink);
+						canvas!.removeEventListener('mousemove', drawMousePointer);
+						canvas!.style.cursor = 'default';
+					}
+					});
 				}
 			};
 
@@ -236,13 +228,10 @@ export default function Canvas()
 					result("lost");
 			});
 
-			if (room.current!.powerUpMode)
+			socket.current!.on("updateSpeedPowerUp", (status: boolean, position: string) =>
 			{
-				socket.current!.on("updateSpeedPowerUp", (status: boolean, position: string) =>
-				{
-					updateSpeedPowerUp(status, position);
-				});
-			}
+				updateSpeedPowerUp(status, position);
+			});
 
 			kd.current.UP.down(function()
 			{
@@ -303,14 +292,14 @@ export default function Canvas()
 				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, "black", "Courier New");
 
 				let zones = [cancelZone];
-				let playerData: PlayerData = {id: "", skin: "", powerUpMode: powerUpMode.current};
+				let playerData: PlayerData = {id: "", skin: ""};
 
 				playerData.skin = (await axiosInstance.current!.get('/users/me', {})).data.skin;
 				socket.current = io(`ws://localhost:3333`,
 				{
 					transports: ["websocket"],
 					query:	{
-								playerData: JSON.stringify(playerData),
+								playerData: JSON.stringify(playerData)
 							}
 				});
 				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
@@ -374,48 +363,21 @@ export default function Canvas()
 			}
 		}
 
-		function switchToPowerUpMode(checkboxData: CheckboxData)
-		{
-			let checkboxZone = draw.current!.checkbox(checkboxData.checkbox);
-
-			powerUpMode.current = powerUpMode.current ? false : true;
-
-			draw.current!.updateCheckboxStatus();
-			draw.current!.checked(checkboxData.checked);
-			addLink(checkboxZone, switchToPowerUpMode, checkboxData.zones, checkboxData);
-		}
-
 		function menu()
 		{
 			let background: HTMLImageElement = draw.current!.initOutGameBackground();
 
 			background.onload = function()
 			{
-				let checkbox: HTMLImageElement = draw.current!.initCheckbox();
+				draw.current!.outGameBackground(background);
+				let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35, "black", "Courier New");
+				let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
+				let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
+				let zones = [newGameZone, skinsZone, mapsZone];
 
-				checkbox.onload = function()
-				{
-					let checked: HTMLImageElement = draw.current!.initChecked();
-
-					checked.onload = function()
-					{
-						draw.current!.outGameBackground(background);
-						draw.current!.checkbox(background);
-						let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35, "black", "Courier New");
-						let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
-						let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
-						draw.current!.text("Power-up", size.current.width / 2.1, size.current.height / 1.66, 16, "black", "Courier New");
-						let checkboxZone = draw.current!.checkbox(checkbox);
-						draw.current!.checked(checked);
-	
-						let zones = [newGameZone, skinsZone, mapsZone];
-	
-						addLink(newGameZone, matchmaking, zones, 0);
-						addLink(skinsZone, skins, zones, 0);
-						addLink(mapsZone, maps, zones, 0);
-						addLink(checkboxZone, switchToPowerUpMode, zones, {checkbox: checkbox, checked: checked, zones: zones});
-					}
-				}
+				addLink(newGameZone, matchmaking, zones, 0);
+				addLink(skinsZone, skins, zones, 0);
+				addLink(mapsZone, maps, zones, 0);
 			}
 		}
 
@@ -474,7 +436,9 @@ export default function Canvas()
 			return (true);
 		}
 		}
+
 		pong();
+
 		return () => { 
 			window.cancelAnimationFrame(animationFrameId.current)
 		}

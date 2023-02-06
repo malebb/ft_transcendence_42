@@ -8,6 +8,7 @@ import { JwtGuard , RtGuard} from './guard';
 import { GetUser, Public } from './decorator';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
+import { CallbackDto } from './dto/callback.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -38,6 +39,15 @@ export class AuthController {
     signin42(@Res() res : Response)
     {
         return this.authService.signin42(res);
+    }
+
+    @Public()
+    @HttpCode(HttpStatus.OK)
+    @Post('signin/42login/callback')
+    callback42(@Req() req : Request, @Body() dto: CallbackDto)
+    {
+        console.log("code from dto = " + dto.code);
+        return this.authService.callback42(dto.code);
     }
 
     @Post('logout')

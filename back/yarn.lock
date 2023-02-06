@@ -3473,6 +3473,11 @@ npmlog@^5.0.1:
     gauge "^3.0.0"
     set-blocking "^2.0.0"
 
+oauth2@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.npmjs.org/oauth2/-/oauth2-0.0.1.tgz"
+  integrity sha512-9Tt84t73Kav/XJHmu+n4GdAThiA/xHabggutF5bO64zyO4YW8NVjTTffOB6+aSjAqAUR6Za1iqMD6AmGZPWhrg==
+
 object-assign@^4, object-assign@^4.1.1:
   version "4.1.1"
 

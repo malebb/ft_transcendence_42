@@ -8,7 +8,7 @@ export const axiosMain =  axios.create({
 
 export function getToken()
 {
-    return JSON.parse(sessionStorage.getItem('tokens')!);
+    return JSON.parse(sessionStorage.getItem('token')!);
 }
 
 export function getAuthorizationHeader()
