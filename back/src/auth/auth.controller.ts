@@ -44,7 +44,7 @@ export class AuthController {
     @Public()
     @HttpCode(HttpStatus.OK)
     @Post('signin/42login/callback')
-    callback42(@Req() req : Request, @Body() dto: CallbackDto)
+    callback42(@Req() req : Request, @Body() dto: CallbackDto): Promise<Object>
     {
         console.log("code from dto = " + dto.code);
         return this.authService.callback42(dto.code);

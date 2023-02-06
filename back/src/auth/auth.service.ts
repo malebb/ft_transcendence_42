@@ -115,7 +115,7 @@ export class AuthService {
         return response;
     }*/
 
-    async callback42(code)
+    async callback42(code) : Promise<Object> //TODO may change || "" by so;ething more accurate
     {
         //const response : AxiosResponse = await this.get42AT(code);
         const client_id = this.config.get('OAUTH_CLIENT_UID');
@@ -127,30 +127,30 @@ export class AuthService {
         console.log(response.data);
         //if(response.status !== 200)//TODO protect depending on response status
         
-        const response2: AxiosResponse = await axios.get('https://api.intra.42.fr/v2/me', {
+        const getprofile: AxiosResponse = await axios.get('https://api.intra.42.fr/v2/me', {
             headers: {'Authorization': 'Bearer ' + response.data['access_token']},
         });
-        console.log("getme =" + JSON.stringify(response2.data));
-        const id42 = JSON.stringify(response.data['id']);
-        const pic42 = response2.data.image.versions.small;
+        console.log("getme =" + JSON.stringify(getprofile.data));
+        const id42 = JSON.stringify(getprofile.data['id']) || "";
+        const pic42 = getprofile.data.image.versions.small;
         console.log(pic42);
         console.log(pic42);
 
-        const user = await this.prismaService.user.findUnique({
+        let user = await this.prismaService.user.findUnique({
             where: {
                 id42: id42
             }
         });
         if(!user)
         {
-            const newuser = await this.prismaService.user.create(
+            user = await this.prismaService.user.create(
                 {
                 data:{
-                    email: response.data['email'],
+                    email: getprofile.data['email'] || "",
                     hash: '',
-                    profilePicture: DEFAULT_IMG,
+                    profilePicture: getprofile.data.image.versions.small,
                     id42: id42,
-                    username: response.data['login']
+                    username: getprofile.data['login'] || ""
                 }
 
                 }

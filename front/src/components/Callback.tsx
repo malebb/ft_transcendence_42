@@ -17,7 +17,7 @@ const Callback = () => {
         const callback42 = async () => {
             const response : AxiosResponse = await axiosMain.post(CALLBACK_PATH, {code: code});
             console.log("response = " + JSON.stringify(response.data));
-            sessionStorage.setItem("tokens", JSON.stringify(response.data));
+            sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
         }
         callback42();
     //},[])

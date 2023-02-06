@@ -283,7 +283,8 @@ useEffect(() => {
         setValidUser(true);
         console.log("profilePicture = " + JSON.stringify(profile.profilePicture));
         console.log("split = " + JSON.stringify(user?.profilePicture.split('/')[2]));
-        setPicture(profile.profilePicture.split('/')[2]);
+        //setPicture(profile.profilePicture.split('/')[2]);
+        setPicture(profile.profilePicture);
         if (picture === null)
           setPicture(DEFAULT_IMG);
         setLogin(profile.email);
@@ -306,7 +307,12 @@ useEffect(() => {
     return (
       <div>
       {validUser ?(<><section>
+        {!(picture.search('http'))?(<img src={picture} />):(
         <img src={image ? image : "http://localhost:3333/users/profile-image/" + picture} alt='profile_picture'/>
+        )
+        
+        }
+
         <form onSubmit={handleSubmit}>
         <label htmlFor="avatar">Choose a profile picture:</label>
         <input type="file"
