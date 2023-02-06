@@ -11,9 +11,8 @@ function Main() {
       <div className='static'>
       <Headers/>
       {sessionStorage.getItem("tokens") ? <Nav/> : <Log/>}
-      { <Canvas/> }
       </div>
-     {/* { <Canvas/>} */}
+     {<Canvas/>}
     </div>
   );
 }
