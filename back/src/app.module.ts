@@ -12,7 +12,16 @@ import { JwtGuard } from './auth/guard';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, NestjsFormDataModule],
+  imports: [
+	ConfigModule.forRoot({isGlobal: true,}), 
+	AuthModule, 
+	UserModule, 
+	BookmarkModule, 
+	PrismaModule, 
+	PongModule, 
+	NestjsFormDataModule,
+	MessageModule,
+],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_GUARD,
