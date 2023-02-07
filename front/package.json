@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@angular/cli": "^15.1.4",
     "@fortawesome/fontawesome-svg-core": "^6.2.1",
     "@fortawesome/free-solid-svg-icons": "^6.2.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
@@ -16,6 +17,7 @@
     "@types/socket.io-client": "^3.0.0",
     "axios": "^1.3.1",
     "ft_transcendence": "file:../lib",
+    "i": "^0.3.7",
     "keydrown": "^1.2.8",
     "nanoid": "^3.3.4",
     "react": "^18.2.0",
