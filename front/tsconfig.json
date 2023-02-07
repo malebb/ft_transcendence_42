@@ -8,8 +8,10 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true, 
+	// ??? -> changement pour main.ts avec "const io = socketIO(server);"
+    // "esModuleInterop": false,
+	"allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,

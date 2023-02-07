@@ -4,40 +4,34 @@ import { AppModule } from './app.module';
 import express from 'express';
 
 // checker pour mettre ailleurs (chat.ts ?????)
-import { Server } from 'socket.io';
-import cors from 'cors';
-// import * as config from 'config';
-import socket from "./chat/tmp/socket";
-import http from 'http';
-const io = require('socket.io');
-
+import * as cors from 'cors';
+import { ChatServer } from './chat/chat-server';
+import { Server } from "socket.io";
 
 async function bootstrap() {
 	
 	const app = await NestFactory.create(AppModule);
 	app.useGlobalPipes(new ValidationPipe({whitelist: true,}));
-	app.enableCors();
-	
-	var http = require('http').createServer(app);
-	// const io = require('socket.io').listen(http);
+	// si on veut les options par default de cors... (methode)
+	// app.enableCors();
+	// si on veut plus de controle sur cors... (fonction middleware)
+	app.use(cors ({
+		origin: "*",
+		credentials: true,
+	}));
+	// les deux sont similaires
+
+	// recupere l'instance http de app :
+	// const server = require('http').createServer();
+	// const io = require('socket.io')(server);
 
 
-	// const io = new Server(server, {
-	// 	cors: {
-	// 		origin: "http://localhost:3333",
-	// 		credentials: true,
-	// 	}
+	// evenement de connection pour gerer les sockets
+	// io.on('connection', (socket) => {
+	// 	console.log("clien connected");
 	// });
 
-	io.on("connection", (socket) => {
-		console.log("socket.io connected")
-	});
-	// const http = require("http");
-	// // const server = http.createServer(app);
-	// const server = require('http').Server(app);
-	// const io = require("socket.io")(server);
-	// const socket = io.listen(server);
-	// await server.listen(3333);
 	await app.listen(3333);
+
 }
 bootstrap();

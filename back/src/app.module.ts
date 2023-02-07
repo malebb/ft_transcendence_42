@@ -9,7 +9,13 @@ import { PrismaModule } from './prisma/prisma.module';
 import { PongModule } from './pong/pong.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule],
+  imports: [
+	ConfigModule.forRoot({isGlobal: true,}), 
+	AuthModule, 
+	UserModule, 
+	BookmarkModule, 
+	PrismaModule, 
+	PongModule],
   controllers: [AppController],
   providers: [AppService],
 })
