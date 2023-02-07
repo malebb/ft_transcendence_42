@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import {ConfigModule} from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -10,6 +10,7 @@ import { PongModule } from './pong/pong.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/guard';
 import { NestjsFormDataModule } from 'nestjs-form-data';
+import { ChatModule } from './Chat/chat.module';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { NestjsFormDataModule } from 'nestjs-form-data';
 	PrismaModule, 
 	PongModule, 
 	NestjsFormDataModule,
-	MessageModule,
+	ChatModule,
 ],
   controllers: [AppController],
   providers: [AppService, {
