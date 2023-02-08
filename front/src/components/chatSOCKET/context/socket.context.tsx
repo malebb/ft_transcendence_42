@@ -18,7 +18,9 @@ const socket = io("*");
 
 const SocketContext = createContext<Context>({
 	socket,
-	setUsername: () => false,
+	setUsername: (username:string) => {
+		console.log({username});
+	},
 	setMessages: () => false,
 	rooms: {},
 	messages: [],

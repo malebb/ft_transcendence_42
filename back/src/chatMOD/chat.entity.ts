@@ -1,16 +1,16 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, } from 'typeorm';
+// import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, } from 'typeorm';
 	
-@Entity()
-export class Chat {
-	@PrimaryGeneratedColumn('uuid')
-	id: number;
+// @Entity()
+// export class Chat {
+// 	@PrimaryGeneratedColumn('uuid')
+// 	id: number;
 
-	@Column()
-	email: string;
+// 	@Column()
+// 	email: string;
 
-	@Column({ unique: true })
-	text: string;
+// 	@Column({ unique: true })
+// 	text: string;
 
-	@CreateDateColumn()
-	createdAt: Date;
-}
+// 	@CreateDateColumn()
+// 	createdAt: Date;
+// }

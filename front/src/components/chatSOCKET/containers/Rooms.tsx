@@ -1,14 +1,23 @@
 
 import EVENTS from "../config/events";
 import { useSockets } from "../context/socket.context";
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
-function RoomsContainer() {
+function RoomsContainer(props:RoomContainerProps) {
 
 	const { socket, roomId, rooms } = useSockets();
 	const newRoomRef = useRef<any>(null);
 	// const newRoomRef = useRef(null);
+	const username = props?.username;
 
+	console.log({props}, 12)
+
+	useEffect(() => {
+		if (username && username.length){
+			console.log("Room created")
+			handleCreateRoom();
+		}
+	}, [username]);
 
 	function handleCreateRoom() {
 
@@ -28,7 +37,7 @@ function RoomsContainer() {
 
 	}
 
-	function handleJoinRoom(key: any) {
+	function handleJoinRoom(key: string) {
 		if (key === roomId) return;
 
 		socket.emit(EVENTS.CLIENT.JOIN_ROOM, key)
@@ -56,6 +65,10 @@ function RoomsContainer() {
 
 	</nav>)
 
+}
+
+interface RoomContainerProps {
+	username?:string
 }
 
 

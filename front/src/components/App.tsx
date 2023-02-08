@@ -14,6 +14,7 @@ import VerifTfa from './VerifTfa';
 import User from './User';
 import History from './History';
 import Friends from './Friends';
+import Chat from './chatSOCKET/chat';
 import PrivateRoutes from './PrivateRoute/PrivateRoutes';
 import {useEffect} from 'react';
 
@@ -27,6 +28,7 @@ function App() {
           <Route path='/user' element={<User/>} />
           <Route path='/history' element={<History/>}/>
           <Route path='/friends'element={<Friends/>}/>
+          <Route path='/chat'element={<Chat/>}/>
         <Route path='/' element={<Main/>} />
         <Route path='/signin' element={<Signin/>}/>
         <Route path='/signup' element={<Signup/>}/>
