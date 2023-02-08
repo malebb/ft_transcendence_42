@@ -1091,10 +1091,10 @@
   dependencies:
     "@types/express" "*"
 
-"@types/node@*", "@types/node@^16.0.0", "@types/node@>=10.0.0":
-  "integrity" "sha512-9qGjJ5GyShZjUfx2ArBIGM+xExdfLvvaCyQR0t6yRXKPcWCVYF/WemtX/uIU3r7FYECXRXkIiw2Vnhn6y8d+pw=="
-  "resolved" "https://registry.npmjs.org/@types/node/-/node-16.18.4.tgz"
-  "version" "16.18.4"
+"@types/node@*", "@types/node@^16.18.12", "@types/node@>=10.0.0":
+  "integrity" "sha512-vzLe5NaNMjIE3mcddFVGlAXN1LEWueUsMsOJWaT6wWMJGyljHAWHznqfnKUQWGzu7TLPrGvWdNAsvQYW+C0xtw=="
+  "resolved" "https://registry.npmjs.org/@types/node/-/node-16.18.12.tgz"
+  "version" "16.18.12"
 
 "@types/parse-json@^4.0.0":
   "integrity" "sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA=="
@@ -3433,6 +3433,11 @@
 
 "mute-stream@0.0.8":
   "version" "0.0.8"
+
+"nanoid@^4.0.1":
+  "integrity" "sha512-udKGtCCUafD3nQtJg9wBhRP3KMbPglUsgV5JVsXhvyBs/oefqb4sqMEhKBBgqZncYowu58p1prsZQBYvAj/Gww=="
+  "resolved" "https://registry.npmjs.org/nanoid/-/nanoid-4.0.1.tgz"
+  "version" "4.0.1"
 
 "natural-compare-lite@^1.4.0":
   "version" "1.4.0"
