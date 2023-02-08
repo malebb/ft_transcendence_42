@@ -17,6 +17,9 @@ npm install passport
 npm install passport-jwt
 npm install prisma
 npm install -D pactum
+# pas sure, pour le chat
+# npm i --save @nestjs/typeorm typeorm
+# npm add typeorm OU YARN ???
 npm i --save @nestjs/websockets
 npm i --save @nestjs/platform-socket.io
 npm i --save @nestjs/platform-express

@@ -20,16 +20,15 @@ import { Chat } from './chat.entity';
 // de n'import quelle url
 @Injectable()
 export class ChatService {
-  constructor(
-    @InjectRepository(Chat) private chatRepository: Repository<Chat>,
-  ) {}
-  async createMessage(chat: Chat): Promise<Chat> {
-    return await this.chatRepository.save(chat);
-  }
+	constructor(@InjectRepository(Chat) private chatRepository: Repository<Chat>,) {}
 
-  async getMessages(): Promise<Chat[]> {
-    return await this.chatRepository.find();
-  }
+	async createMessage(chat: Chat): Promise<Chat> {
+		return await this.chatRepository.save(chat);
+	}
+
+	async getMessages(): Promise<Chat[]> {
+		return await this.chatRepository.find();
+	}
 }
 
 // @Injectable()

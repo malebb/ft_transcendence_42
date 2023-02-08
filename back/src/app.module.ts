@@ -10,7 +10,7 @@ import { PongModule } from './pong/pong.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/guard';
 import { NestjsFormDataModule } from 'nestjs-form-data';
-import { ChatModule } from './Chat/chat.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
