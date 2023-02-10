@@ -45,6 +45,7 @@ function socket({io}: {io:Server}) {
 
 			// emit back to the room creator with all the rooms
 			socket.emit(EVENTS.SERVER.ROOMS, rooms);
+
 			// emit evnt back the the room creator saying they have joined a room
 			socket.emit(EVENTS.SERVER.JOINED_ROOM, roomId);
 
@@ -57,7 +58,9 @@ function socket({io}: {io:Server}) {
 			const date = new Date();
 
 			socket.to(roomId).emit(EVENTS.SERVER.ROOM_MESSAGE, {
-				
+				message,
+		        username,
+	        	time: `${date.getHours()}:${date.getMinutes()}`,
 			})
 
 		});
@@ -66,6 +69,8 @@ function socket({io}: {io:Server}) {
 		quand un utilisateur va dans une room
 		*/
 		socket.on(EVENTS.CLIENT.JOIN_ROOM, (roomId) => {
+
+			console.log(`Socket ${socket.id} joining ${roomId}`);
 			socket.join(roomId);
 
 			socket.emit(EVENTS.SERVER.JOINED_ROOM, roomId);

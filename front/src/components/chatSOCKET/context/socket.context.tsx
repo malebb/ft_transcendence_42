@@ -12,22 +12,27 @@ interface Context {
 	roomId?: string;
 	// rooms: object;
 	rooms: Record<string,{name: string}>,
+	setRoomId: Function,
 }
 
 const socket = io("*");
 
 const SocketContext = createContext<Context>({
 	socket,
-	setUsername: (username:string) => {
+	setUsername: (username: string) => {
 		console.log({username});
 	},
-	setMessages: () => false,
+	setMessages: () => {},
 	rooms: {},
+	setRoomId: (roomId: string) => {
+		console.log({roomId});
+	},
 	messages: [],
 });
 
 function SocketsProvider(props: any) {
 
+	//
 	const [username, setUsername] = useState("");
 	const [roomId, setRoomId] = useState("");
 	const [rooms, setRooms] = useState({});
@@ -39,7 +44,7 @@ function SocketsProvider(props: any) {
 
 	socket.on(EVENTS.SERVER.JOINED_ROOM, (value) => {
 		setRoomId(value);
-
+		console.log({value});
 		setMessages([]);
 	});
 
@@ -61,6 +66,7 @@ function SocketsProvider(props: any) {
 			setUsername,
 			rooms,
 			roomId,
+			setRoomId,
 			messages,
 			setMessages,
 		}}

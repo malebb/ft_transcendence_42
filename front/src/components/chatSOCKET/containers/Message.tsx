@@ -6,21 +6,32 @@ function MessagesContainer() {
 
 	const { socket, messages, roomId, username, setMessages} = useSockets();
 	const newMessageRef = useRef<any>(null);
+	const messageEndRef = useRef<any>(null);
 
 	function handleSendMessage() {
+
 		const message = newMessageRef.current.value;
+		// console.log({message});
 
 		if (!String(message).trim()) {
+			console.log({message});
 			return ;
 		}
 
-		socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, {roomId, message, username});
-
+		socket.emit("SEND_ROOM_MESAGE", {roomId, message, username}, () => {
+	
+			
+		});
+		
+		// OKKKKK
+		// console.log({message});
+		
 		const date = new Date()
-
+		
 		setMessages(messages ? [
 			...messages,
 			{
+				roomId: roomId,
 				username: 'You',
 				message,
 				time: `${date.getHours()}:${date.getMinutes}`,
@@ -28,32 +39,58 @@ function MessagesContainer() {
 		] : [messages]);
 
 		newMessageRef.current.value = "";
-
 	}
 
-	if (!roomId) {
-		return <div />;
-	}
+	// useEffect(() => {
+	// 	messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	//   }, [messages]);
+
+	// if (!roomId) {
+	// 	return <div />;
+	// }
 
 	return (
-		<div>
+		// <div>
+		// 	{/* console.log({"quarante-deux"}) */}
+		// 	{messages && messages.map(({message}, index) => {
+		// 		return <p key={index}>{message}</p>;
+		// 	})}
 
-			{messages && messages.map(({message}, index) => {
-				return <p key={index}>{message}</p>;
-			})}
+		// 	<div>
+		// 		<textarea
+		// 		rows={1}
+		// 		placeholder="Faut ecrire ici en fait"
+		// 		ref={newMessageRef}
+		// 		/>
 
-			<div>
-				<textarea
+		// 		<button onClick={handleSendMessage}>SEND</button>
+		// 	</div>
+
+		// </div>
+		<div >
+		  {messages && messages.map(({ message, username, time }, index) => {
+			return (
+				<div key={index} >
+				  <span >
+					{username} - {time}
+				  </span>
+				  <span >{message}</span>
+			  </div>
+			);
+		  })}
+		  <div ref={messageEndRef} />
+
+			<div >
+			  <textarea
 				rows={1}
-				placeholder="Faut ecrire ici en fait"
+				placeholder="Tell us what you are thinking"
 				ref={newMessageRef}
-				/>
-
-				<button onClick={handleSendMessage}>SEND</button>
+			  />
+			  <button onClick={handleSendMessage}>SEND</button>
 			</div>
-
-		</div>
-	);
+		  </div>
+	
+		);
 }
 
 export default MessagesContainer;

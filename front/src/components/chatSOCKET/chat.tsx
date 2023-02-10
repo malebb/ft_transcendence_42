@@ -1,21 +1,22 @@
+import { useRef, useEffect, useState } from "react";
 import { useSockets } from './context/socket.context';
 import RoomsContainer from './containers/Rooms';
 import MessagesContainer from './containers/Message';
-import { useRef, useEffect, useState } from "react";
-// import styles from "../../styles/Home.module.css";
+import { io } from 'socket.io-client';
+import ChatRoom from "./containers/ChatRoom";
 
-// import styles from "./utils/Home.css";
 
-// export default function Home() {
+const socket = io();
+
 const Chat = () => {
+	
 	const [user, setUser] = useState<string>("");
 	const { socket, username, setUsername } = useSockets();
-	const usernameRef = useRef<any>(null)
+	const usernameRef = useRef<HTMLInputElement>(null)
 
 	function handleSetUsername() {
-		// if (!usernameRef.current)
-		// 	return;
-		const value = usernameRef.current.value;
+
+		const value = usernameRef?.current?.value;
 		if (!value) {
 			return ;
 		}
@@ -27,10 +28,27 @@ const Chat = () => {
 	}
 
 	useEffect(() => {
-		if (usernameRef)
-		usernameRef.current.value = localStorage.getItem("username") || "";
+		if (usernameRef && usernameRef.current)
+			usernameRef.current.value = localStorage.getItem("username") || "";
 	}, []);
 	
+	socket.on("connection", (socket: any) => {
+  
+		// Join a conversation
+		const { roomId } = socket.handshake.query;
+		socket.join(roomId);
+	  
+		// Listen for new messages
+		socket.on("newChatMessage", (data: any) => {
+		  socket.in(roomId).emit("newChatMessage", data);
+		});
+
+		// Leave the room if the user closes the socket
+		socket.on("disconnect", () => {
+		  socket.leave(roomId);
+		});
+	  });
+
 	return (
 		<div>
 		  {!user && (
@@ -45,8 +63,8 @@ const Chat = () => {
 		  )}
 		  {user && (
 			<div >
+				{/* <Route exact path="/:roomId" component={RoomsContainer} /> */}
 			  <RoomsContainer username={user}/>
-			  <MessagesContainer />
 			</div>
 		  )}
 		</div>
