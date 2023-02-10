@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { Ball, Player, Size, Room, PlayerData } from 'ft_transcendence';
 import { Socket, Server } from 'socket.io'
+import { GameService } from '../game/game.service';
 
 @Injectable()
 export class PongService {
+
+	constructor(private readonly gameService: GameService) {}
+
 	queue: PlayerData[] = [];
 	powerUpQueue: PlayerData[] = [];
 	rooms = [];
@@ -32,7 +36,7 @@ export class PongService {
 		for (let i = 0; i < queue.length; ++i) {
 			if (queue[i] === player)
 				continue;
-			roomId = queue[i].id < player.id ? queue[i] + player.id : player.id + queue[i];
+			roomId = queue[i].id < player.id ? queue[i].id + player.id : player.id + queue[i].id;
 			opponent = queue[i];
 			this.removeFromQueue(player.id);
 			this.removeFromQueue(opponent.id);
@@ -41,6 +45,7 @@ export class PongService {
 	}
 
 	initRoom(roomId: string, leftPlayer: PlayerData, rightPlayer: PlayerData): Room {
+		this.gameService.addGame(roomId);
 		return (
 			{
 				id: roomId,
@@ -109,6 +114,7 @@ export class PongService {
 				this.rooms.splice(this.rooms.indexOf(roomToLeave), 1);
 			else {
 				this.rooms[roomToLeave].running = false;
+				this.gameService.removeGame(roomToLeave);
 				player.to(roomToLeave).emit("opponentDisconnection");
 			}
 		}
