@@ -12,11 +12,10 @@ async function bootstrap() {
 		origin: "*",
 		credentials: true,
 	}));
-	
 
 	await app.listen(3333);
 
-	
 }
+
 bootstrap();
 

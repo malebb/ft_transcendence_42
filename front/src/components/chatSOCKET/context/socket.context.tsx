@@ -22,7 +22,9 @@ const SocketContext = createContext<Context>({
 	setUsername: (username: string) => {
 		console.log({username});
 	},
-	setMessages: () => {},
+	setMessages: (messages: {message: string; time: string; username: string}[]) => {
+		console.log({messages});
+	},
 	rooms: {},
 	setRoomId: (roomId: string) => {
 		console.log({roomId});
@@ -53,7 +55,7 @@ function SocketsProvider(props: any) {
 			if (!document.hasFocus()) {
 				document.title = "New message...";
 			}
-
+			console.log(42, {messages});
 			setMessages((messages) => [...messages, { message, username, time }]);
 
 		});

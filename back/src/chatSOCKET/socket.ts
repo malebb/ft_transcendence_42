@@ -79,4 +79,4 @@ function socket({io}: {io:Server}) {
 
 }
 
-export default socket
+export default socket;

@@ -14,7 +14,7 @@ function MessagesContainer() {
 		// console.log({message});
 
 		if (!String(message).trim()) {
-			console.log({message});
+			// console.log({message});
 			return ;
 		}
 
@@ -28,15 +28,17 @@ function MessagesContainer() {
 		
 		const date = new Date()
 		
-		setMessages(messages ? [
-			...messages,
+		setMessages(message ? [
+			...message,
 			{
 				roomId: roomId,
 				username: 'You',
 				message,
 				time: `${date.getHours()}:${date.getMinutes}`,
 			},
-		] : [messages]);
+		] : [message]);
+
+		// console.log({message});
 
 		newMessageRef.current.value = "";
 	}

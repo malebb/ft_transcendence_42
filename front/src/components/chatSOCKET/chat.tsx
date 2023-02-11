@@ -51,7 +51,7 @@ const Chat = () => {
 
 	return (
 		<div>
-		  {!user && (
+		  {/* {!user && (
 			<div >
 			  <div >
 				<input placeholder="Username" ref={usernameRef} />
@@ -61,12 +61,12 @@ const Chat = () => {
 			  </div>
 			</div>
 		  )}
-		  {user && (
+		  {user && ( */}
 			<div >
 				{/* <Route exact path="/:roomId" component={RoomsContainer} /> */}
 			  <RoomsContainer username={user}/>
 			</div>
-		  )}
+		  {/* )} */}
 		</div>
 	  );
 }
