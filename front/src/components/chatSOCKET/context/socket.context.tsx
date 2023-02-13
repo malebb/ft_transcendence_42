@@ -15,7 +15,7 @@ interface Context {
 	setRoomId: Function,
 }
 
-const socket = io("*");
+const socket = io("http://localhost:4444");
 
 const SocketContext = createContext<Context>({
 	socket,
@@ -23,7 +23,7 @@ const SocketContext = createContext<Context>({
 		console.log({username});
 	},
 	setMessages: (messages: {message: string; time: string; username: string}[]) => {
-		console.log({messages});
+		// console.log({messages});
 	},
 	rooms: {},
 	setRoomId: (roomId: string) => {

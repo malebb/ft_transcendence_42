@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import useChat from "./useChat";
 import MessagesContainer from "./Message";
 
-interface room {
+interface Rooms {
 	id: number;
 	name: string;
 	users: Array<number>;
@@ -13,13 +13,18 @@ interface room {
 
 function RoomsContainer(props: any) {//RoomContainerProps) {
 
-	// const { socket, roomId, rooms, setRoomId } = useSockets();
+	const { socket, roomId, rooms, setRoomId } = useSockets();
 	// const newRoomRef = useRef<any>(null);
 	// const username = props?.username;
 	const [roomName, setRoomName] = useState<string>("");
-	const { roomId } = useSockets();
+	// const { roomId } = useSockets();
 	// console.log({props}, 12)
 
+	useEffect(() => {
+		// socket.emit(EVENTS.CLIENT.CREATE_ROOM, {roomName});
+		// socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, {});
+
+	}, []);
 
 
 	// function handleCreateRoom() {
@@ -32,7 +37,6 @@ function RoomsContainer(props: any) {//RoomContainerProps) {
 	// 	console.log(42, {roomName});
 
 	// 	// emit room created event
-	// 	socket.emit(EVENTS.CLIENT.CREATE_ROOM, {roomName});
 
 	// 	// setRoomId(newRoomRef.current.value);
 	// 	// const handleRoomNameChange = (event: any) => {
@@ -58,12 +62,13 @@ function RoomsContainer(props: any) {//RoomContainerProps) {
 	// 	socket.emit(EVENTS.CLIENT.JOIN_ROOM, key)
 	// }
 
-	const [currentRoom, setCurrentRoom] = useState<room|null>(null);
+	const [currentRoom, setCurrentRoom] = useState<Rooms|null>(null);
 
 	const handleCreateRoom = () => {
 		//change function name
 		//create new room from name => sockets.emit
-		// roomId = roomName;
+		socket.emit(EVENTS.CLIENT.CREATE_ROOM, roomName);
+		// setRoomId(roomName);
 		setCurrentRoom({
 			id: 0,
 			name: roomName,

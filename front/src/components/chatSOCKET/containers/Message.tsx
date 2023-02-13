@@ -11,20 +11,21 @@ function MessagesContainer() {
 	function handleSendMessage() {
 
 		const message = newMessageRef.current.value;
-		// console.log({message});
-
+		
 		if (!String(message).trim()) {
 			// console.log({message});
 			return ;
 		}
-
-		socket.emit("SEND_ROOM_MESAGE", {roomId, message, username}, () => {
-	
+		
+		// console.log({message});
+		socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, {roomId, message, username}, () => {
+			
+			console.log(username + " send a message in room " + roomId);
+			console.log(42,{message});
 			
 		});
 		
 		// OKKKKK
-		// console.log({message});
 		
 		const date = new Date()
 		
