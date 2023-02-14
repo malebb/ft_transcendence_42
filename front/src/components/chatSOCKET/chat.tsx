@@ -87,7 +87,9 @@ const Chat = () => {
 		  {user && ( */}
 			<div >
 				{/* <Route exact path="/:roomId" component={RoomsContainer} /> */}
-			  <RoomsContainer username={user}/>
+			  {/* <RoomsContainer username={user}/> */}
+			  <MessagesContainer />
+
 			</div>
 		  {/* )} */}
 		</div>

@@ -1,48 +1,68 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import EVENTS from "../config/events";
 import { useSockets } from "../context/socket.context";
 
+import "./message.style.css"
+
+interface partialMessage {
+	username: string;
+	message: string;
+	time: number;
+}
+
+interface message extends partialMessage {
+	roomId: number;
+}
+
 function MessagesContainer() {
+	const [messages, setMessages] = useState<message[]>([]);
 
-	const { socket, messages, roomId, username, setMessages} = useSockets();
+	const { socket, roomId, username } = useSockets();
+	// const [ newMessageRef, setNewMessageRef ] = useState<any>(null);
 	const newMessageRef = useRef<any>(null);
-	const messageEndRef = useRef<any>(null);
 
-	function handleSendMessage() {
 
-		const message = newMessageRef.current.value;
-		
-		if (!String(message).trim()) {
-			// console.log({message});
-			return ;
+	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		//@ts-ignore
+		const form = new FormData(event.target);
+		const currentMessage = form.get("userMessage")?.toString()?.trim();
+
+		if (!currentMessage?.length) {
+			return;
 		}
-		
-		// console.log({message});
-		socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, {roomId, message, username}, () => {
-			
-			console.log(username + " send a message in room " + roomId);
-			console.log(42,{message});
-			
-		});
-		
-		// OKKKKK
-		
-		const date = new Date()
-		
-		setMessages(message ? [
-			...message,
-			{
-				roomId: roomId,
-				username: 'You',
-				message,
-				time: `${date.getHours()}:${date.getMinutes}`,
-			},
-		] : [message]);
 
-		// console.log({message});
+		// emit un message vers le back
+		socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, { roomId, currentMessage, username }, () => {
+
+			console.log(username + " send [" + messages + "] in room " + roomId);
+			// console.log(42,{message});
+
+		});
+
+		// debugger;
+
+		const dateTS = +new Date();
+		setMessages([
+			...messages,
+			{
+				username: "b",
+				message: currentMessage,
+				time: dateTS,
+				roomId: 0
+			}
+		])
+		// recevoir des messages venant d'un utilisateur de la room
+		socket.on(EVENTS.SERVER.ROOM_MESSAGE, function (data) {
+			console.log({ data });
+			//console.log("Received message : ",{message});
+		});
+
+		// message = "";
 
 		newMessageRef.current.value = "";
 	}
+
 
 	// useEffect(() => {
 	// 	messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,48 +72,44 @@ function MessagesContainer() {
 	// 	return <div />;
 	// }
 
-	return (
-		// <div>
-		// 	{/* console.log({"quarante-deux"}) */}
-		// 	{messages && messages.map(({message}, index) => {
-		// 		return <p key={index}>{message}</p>;
-		// 	})}
-
-		// 	<div>
-		// 		<textarea
-		// 		rows={1}
-		// 		placeholder="Faut ecrire ici en fait"
-		// 		ref={newMessageRef}
-		// 		/>
-
-		// 		<button onClick={handleSendMessage}>SEND</button>
-		// 	</div>
-
-		// </div>
-		<div >
-		  {messages && messages.map(({ message, username, time }, index) => {
+	const genMessages = () => {
+		if (!messages?.length) return;
+		return (messages.map(({ message, username, time }, index) => {
+			const date = new Date(time);
 			return (
-				<div key={index} >
-				  <span >
-					{username} - {time}
-				  </span>
-				  <span >{message}</span>
-			  </div>
+				<div className="chat-wrapper">
+					<div key={index} className="chat">
+						<span>{username}</span>
+						<span>{message}</span>
+					</div>
+					<span className="date">{`${date.getHours()}:${date.getMinutes()}`}</span>
+				</div>
 			);
-		  })}
-		  <div ref={messageEndRef} />
+		}));
+	}
 
-			<div >
-			  <textarea
-				rows={1}
-				placeholder="Tell us what you are thinking"
-				ref={newMessageRef}
-			  />
-			  <button onClick={handleSendMessage}>SEND</button>
+	const genSendMessage = () => {
+		return (
+			<form onSubmit={handleSubmit} className="sendInput">
+				<input
+					placeholder="Tell us what you are thinking"
+					ref={newMessageRef}
+					name="userMessage"
+				/>
+				<button>SEND</button>
+			</form>
+		)
+	}
+
+	return (
+		<div id="content">	
+			<div id="chatContainer">
+				{genMessages()}
 			</div>
-		  </div>
-	
-		);
+			{genSendMessage()}
+		</div>
+
+	);
 }
 
 export default MessagesContainer;

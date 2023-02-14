@@ -17,14 +17,15 @@ function RoomsContainer(props: any) {//RoomContainerProps) {
 	// const newRoomRef = useRef<any>(null);
 	// const username = props?.username;
 	const [roomName, setRoomName] = useState<string>("");
+	setRoomId(roomName);
 	// const { roomId } = useSockets();
 	// console.log({props}, 12)
 
-	useEffect(() => {
+	// useEffect(() => {
 		// socket.emit(EVENTS.CLIENT.CREATE_ROOM, {roomName});
 		// socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, {});
 
-	}, []);
+	// }, []);
 
 
 	// function handleCreateRoom() {
@@ -68,7 +69,7 @@ function RoomsContainer(props: any) {//RoomContainerProps) {
 		//change function name
 		//create new room from name => sockets.emit
 		socket.emit(EVENTS.CLIENT.CREATE_ROOM, roomName);
-		// setRoomId(roomName);
+		setRoomId(roomName);
 		setCurrentRoom({
 			id: 0,
 			name: roomName,

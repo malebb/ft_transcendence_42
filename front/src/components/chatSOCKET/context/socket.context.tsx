@@ -27,7 +27,7 @@ const SocketContext = createContext<Context>({
 	},
 	rooms: {},
 	setRoomId: (roomId: string) => {
-		console.log({roomId});
+		// console.log({roomId});
 	},
 	messages: [],
 });

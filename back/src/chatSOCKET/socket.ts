@@ -27,7 +27,7 @@ const EVENTS = {
 	},
 };
 
-const	INSTRUCTIONS = {
+const INSTRUCTIONS = {
 	// <> ou [] = obligatoire ou facultatif ??
 	//CREATE_ROOM "my_room" <jeannifr>
 	CREATE_ROOM: {
@@ -50,9 +50,11 @@ io.on('connect', (socket) => {
 
 	socket.on(EVENTS.CLIENT.SEND_ROOM_MESSAGE, ({roomId, message, username}) => {
 		console.log(username + " send " + message + " on " + roomId);
-	});
+		io.emit(EVENTS.SERVER.ROOM_MESSAGE, ({roomId, message, username}));
+	
+	// });
 
-	// socket.on(EVENTS.CLIENT.CREATE_ROOM, ({roomName}) => {
+	// socket.on(EVENTS.CLIENT.CREATE_ROOM, (roomName) => {
 
 	// creation d'une nouvelle chaine (create a room id)
 		// room.id = nanoid()
@@ -67,21 +69,13 @@ io.on('connect', (socket) => {
 	})
 });
 
-
-
-
-// io.on("connect", (socket) => {
-
-
-
-// 	console.log(45);
-// 	console.log(socket)
-// 	socket.emit("bonjour du serveur", 1, "2", { 3: Buffer.from([4]) }); 
-// 	socket.on("bonjour du client", (...args) => {
-// 	  console.log("ok");
+// io.on(EVENTS.CLIENT.SEND_ROOM_MESSAGE, (socket) => {
+// 	console.log({socket});
+// 	io.emit(EVENTS.SERVER.ROOM_MESSAGE, ({roomId, message, username}) => {
+// 		console.log(42);
+// 		console.log(message);
 // 	});
-//   });
-
+});
 
 
 // clef = string (roomId), object as body

@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Hanalei+Fill&display=swap');
 
+:root {
+	--main: #1D1E24;
+	--secondary: #20232B;
+}
+
 .static{
   position: fixed;
   width: 100%;
