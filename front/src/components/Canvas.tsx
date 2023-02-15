@@ -39,8 +39,8 @@ export default function Canvas()
 	{
 		const pong = async () => 
 		{
-		function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
-		{
+			function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
+			{
 			var canvas = document.getElementById('canvas');
 			var clickZone = canvas!.getBoundingClientRect();
 
@@ -311,6 +311,7 @@ export default function Canvas()
 					transports: ["websocket"],
 					query:	{
 								playerData: JSON.stringify(playerData),
+								spectator: false
 							}
 				});
 				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
