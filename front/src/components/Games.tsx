@@ -190,19 +190,15 @@ const Games = () => {
 			await initGames();
 		}
 		spectate();
-		return () => { 
-			window.cancelAnimationFrame(animationFrameId.current)
+		return () =>
+		{ 
+			if (socket.current != null)
+			{
+				window.cancelAnimationFrame(animationFrameId.current)
+				socket.current!.disconnect();
+			}
 		}
 	}, [gameId]);
-
-	window.onpopstate = () =>
-	{
-		if (socket.current != null)
-		{
-			window.cancelAnimationFrame(animationFrameId.current)
-			socket.current!.disconnect();
-		}
-	}
 
 	if (!gameId)
 	{

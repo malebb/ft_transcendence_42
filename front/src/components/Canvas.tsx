@@ -474,14 +474,12 @@ export default function Canvas()
 			return (true);
 		}
 		}
-		window.onpopstate = () =>
-		{
+		
+		pong();
+		return () =>
+		{ 
 			if (socket.current != null)
 				stopGame();
-		}
-		pong();
-		return () => { 
-			window.cancelAnimationFrame(animationFrameId.current)
 		}
 
 	}, []);
