@@ -1,15 +1,53 @@
+import { Link, Routes, Route, useParams, BrowserRouter } from 'react-router-dom';
+
 import EVENTS from "../config/events";
 import { useSockets } from "../context/socket.context";
 import { useRef, useEffect, useState } from 'react';
-import { Link } from "react-router-dom";
 import useChat from "./useChat";
 import MessagesContainer from "./Message";
+import { ChatBaseRoom } from "./ChatBaseRoom";
 
 interface Rooms {
 	id: number;
 	name: string;
 	users: Array<number>;
 }
+
+function ChatRoom() {
+
+	const roomId = useParams();
+
+	const room = ChatBaseRoom.find((x) => x.id === roomId?.id);
+	console.log({room});
+	if (!room) return ;
+
+	return (
+		<div>
+			{room && (
+				<div>
+				<h2>{room?.title}</h2>
+					<MessagesContainer />
+				</div>
+			)}
+		</div>
+	);
+}
+
+function Landing() {
+	return (
+		<>
+			<ul className="chat-room-list">
+				{ChatBaseRoom.map((room: any) => (
+					<li key={room.id}>
+						<Link to={`/chat/${room.id}`}>{room.title}</Link>
+						{/* {ChatRoom()} */}
+					</li>
+				))}
+			</ul>
+		</>
+	);
+}
+
 
 function RoomsContainer(props: any) {//RoomContainerProps) {
 
@@ -98,46 +136,30 @@ function RoomsContainer(props: any) {//RoomContainerProps) {
 		if (!currentRoom) return;
 		
 		return (
-			<div>
-				<h1>Welcome to {currentRoom.name} </h1>
+			<div >
+				<h1 id="roomContainer">Welcome to {currentRoom.name} </h1>
 				<MessagesContainer />
-				{/* console.log({currentRoom.name}); */}
+				
 
 			</div>
 		)
 	}
 
 	return (
-// 	<nav>
-// 		<div>
-// 			<input ref={roomName} placeholder="Room name" />
-// 			<button className="cta" onClick={handleCreateRoom}>CREATE ROOM</button>
-// {/* </div> */}
-// {/* // key = roomId */}
-// 		{Object.keys(rooms).map((key) => {
-// 			return <div key={key}>
-// 				<button
-// 					disabled={key === roomId}
-// 					title={`Join ${rooms[key].name}`}
-// 					onClick={() => handleJoinRoom(key)}
-// 					>
-// 				{rooms[key].name}
+		<div> 
+			<h2>Choose a Chat Room...</h2>
+			<div><Landing/></div>
+			<h2>...or create a new one !</h2>
+			{/* <div><ChatRoom/></div> */}
 
-// 				</button>
-// 			</div>;
-// 		})}
-
-// 		</div>
-
-
-// 	</nav>)
-
-	<div className="home-container">
-		{currentRoom ? displayCurrentRoom() : joinRoom()}
-	</div>
+		<div className="home-container">
+			{currentRoom ? displayCurrentRoom() : joinRoom()}
+		</div>
+		</div>
 	);
 
 }
+
 
 interface RoomContainerProps {
 	username?:string

@@ -1,18 +1,25 @@
+import { Link, Routes, Route, useParams, BrowserRouter } from 'react-router-dom';
 import { useRef, useEffect, useState } from "react";
 import { useSockets } from './context/socket.context';
 import RoomsContainer from './containers/Rooms';
 import MessagesContainer from './containers/Message';
 import {io} from 'socket.io-client';
-import ChatRoom from "./containers/ChatRoom";
+// import ChatRoom from "./containers/ChatRoom";
+import { ChatBaseRoom } from "./containers/ChatBaseRoom";
+
 
 // const socket = io("http://localhost:4444");
 
+// doc: https://v5.reactrouter.com/web/example/url-params
+
+
 const Chat = () => {
-	
+	const {roomId} = useParams();
 	const [user, setUser] = useState<string>("");
 	const { socket, username, setUsername } = useSockets();
 	const usernameRef = useRef<HTMLInputElement>(null)
 
+	console.log({roomId})
 
 	function handleSetUsername() {
 
@@ -72,6 +79,7 @@ const Chat = () => {
 	},[]);
 	
 
+
 	return (
 		<div>
 		  {/* {!user && (
@@ -87,8 +95,18 @@ const Chat = () => {
 		  {user && ( */}
 			<div >
 				{/* <Route exact path="/:roomId" component={RoomsContainer} /> */}
-			  {/* <RoomsContainer username={user}/> */}
-			  <MessagesContainer />
+			{/* <BrowserRouter> */}
+				{/* <Routes>
+	                <Route path="/" element={<Landing />} />
+	                <Route path="/chat/:id" element={<ChatRoom />} />
+					
+	            </Routes> */}
+			<div>
+
+			</div>
+			{/* </BrowserRouter> */}
+			  <RoomsContainer />
+			  {/* <MessagesContainer /> */}
 
 			</div>
 		  {/* )} */}

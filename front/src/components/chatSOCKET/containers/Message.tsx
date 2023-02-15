@@ -23,8 +23,10 @@ function MessagesContainer() {
 
 
 	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		
 		event.preventDefault();
-		//@ts-ignore
+
+		// @ts-ignore
 		const form = new FormData(event.target);
 		const currentMessage = form.get("userMessage")?.toString()?.trim();
 
@@ -32,13 +34,12 @@ function MessagesContainer() {
 			return;
 		}
 
+		
+		// debugger;;
+
+
 		// emit un message vers le back
-		socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, { roomId, currentMessage, username }, () => {
-
-			console.log(username + " send [" + messages + "] in room " + roomId);
-			// console.log(42,{message});
-
-		});
+		socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, { roomId, currentMessage, username });
 
 		// debugger;
 
@@ -52,13 +53,12 @@ function MessagesContainer() {
 				roomId: 0
 			}
 		])
+		
 		// recevoir des messages venant d'un utilisateur de la room
-		socket.on(EVENTS.SERVER.ROOM_MESSAGE, function (data) {
-			console.log({ data });
-			//console.log("Received message : ",{message});
+		socket.on(EVENTS.SERVER.ROOM_MESSAGE, () => {
+			// console.log({ data });
+			// console.log("Received message : ", {});
 		});
-
-		// message = "";
 
 		newMessageRef.current.value = "";
 	}
