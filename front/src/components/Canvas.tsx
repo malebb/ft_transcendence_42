@@ -37,6 +37,37 @@ export default function Canvas()
 
 	useEffect(() =>
 	{
+		function powerUpEnabled()
+		{
+			return ((position.current === "left" && leftPlayer.current!.speedPowerUp) ||
+			(position.current === "right" && rightPlayer.current!.speedPowerUp))
+		}
+
+		function powerUp(e: KeyboardEvent)
+		{
+			if (keyPressed.current)
+				return;
+			if (e.key === ' ' && powerUpEnabled())
+			{
+				socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
+				keyPressed.current = true;
+			}
+		}
+
+		function notifyKeyReleased()
+		{
+			keyPressed.current = false;
+		}
+
+		function stopGame()
+		{
+			window.cancelAnimationFrame(animationFrameId.current)
+			socket.current!.disconnect();
+			kd.current.stop();
+			document!.removeEventListener('keypress', powerUp);
+			document!.removeEventListener('keyup', notifyKeyReleased);
+		}
+
 		const pong = async () => 
 		{
 			function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
@@ -110,15 +141,6 @@ export default function Canvas()
 			canvas!.removeEventListener('mousemove', link[1]);
 		}
 
-		function stopGame()
-		{
-			window.cancelAnimationFrame(animationFrameId.current)
-			socket.current!.disconnect();
-			kd.current.stop();
-			document!.removeEventListener('keypress', powerUp);
-			document!.removeEventListener('keyup', notifyKeyReleased);
-		}
-
 		function opponentDisconnection()
 		{
 			stopGame();
@@ -156,28 +178,6 @@ export default function Canvas()
 
 				addLink(newGameZone, matchmaking, zones, 0);
 				addLink(menuZone, menu, zones, 0);
-			}
-		}
-
-		function notifyKeyReleased()
-		{
-			keyPressed.current = false;
-		}
-
-		function powerUpEnabled()
-		{
-			return ((position.current === "left" && leftPlayer.current!.speedPowerUp) ||
-			(position.current === "right" && rightPlayer.current!.speedPowerUp))
-		}
-
-		function powerUp(e: KeyboardEvent)
-		{
-			if (keyPressed.current)
-				return;
-			if (e.key === ' ' && powerUpEnabled())
-			{
-				socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
-				keyPressed.current = true;
 			}
 		}
 
@@ -260,7 +260,6 @@ export default function Canvas()
 
 			document.addEventListener('keypress', powerUp);
 			document.addEventListener('keyup', notifyKeyReleased);
-
 			// TODO fetch user selected map in database
 
 			map.current = draw.current!.initGameMap((await axiosInstance.current!.get('/users/me', {})).data.map);
@@ -474,6 +473,11 @@ export default function Canvas()
 			menu();
 			return (true);
 		}
+		}
+		window.onpopstate = () =>
+		{
+			if (socket.current != null)
+				stopGame();
 		}
 		pong();
 		return () => { 
