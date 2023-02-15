@@ -195,6 +195,15 @@ const Games = () => {
 		}
 	}, [gameId]);
 
+	window.onpopstate = () =>
+	{
+		if (socket.current != null)
+		{
+			window.cancelAnimationFrame(animationFrameId.current)
+			socket.current!.disconnect();
+		}
+	}
+
 	if (!gameId)
 	{
 		return (

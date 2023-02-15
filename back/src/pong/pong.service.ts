@@ -38,7 +38,6 @@ export class PongService {
 		}
 		else
 			spectator.emit(spectator.id, JSON.stringify({joined: false}));
-
 	}
 
 	checkQueue(player: PlayerData, queue: PlayerData[])
@@ -126,7 +125,8 @@ export class PongService {
 		if (roomToLeave != undefined) {
 			if (this.rooms[roomToLeave].playerGoneCount == 1)
 				this.rooms[roomToLeave].playerGoneCount++;
-			else {
+			else
+			{
 				this.gameService.removeGame(roomToLeave);
 				player.to(roomToLeave).emit("opponentDisconnection");
 				this.rooms[roomToLeave].playerGoneCount++;
