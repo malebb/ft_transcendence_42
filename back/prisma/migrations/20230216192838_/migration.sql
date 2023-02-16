@@ -21,6 +21,8 @@ CREATE TABLE "users" (
 CREATE TABLE "Game" (
     "id" SERIAL NOT NULL,
     "gameId" TEXT NOT NULL,
+    "leftUsername" TEXT NOT NULL,
+    "rightUsername" TEXT NOT NULL,
 
     CONSTRAINT "Game_pkey" PRIMARY KEY ("id")
 );

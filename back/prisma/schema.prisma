@@ -34,4 +34,6 @@ model User {
 model Game {
 	id			Int		@id @default(autoincrement())
 	gameId		String @unique
+	leftUsername String
+	rightUsername String
 }

@@ -191,8 +191,8 @@ export default function Canvas()
 
 		async function launchGame()
 		{
-			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.leftPlayer);
-			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.rightPlayer);
+			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", null, null), room.current!.leftPlayer);
+			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", null, null), room.current!.rightPlayer);
 
 			leftPlayer.current.setCtx(ctx.current!);
 			rightPlayer.current.setCtx(ctx.current!);
@@ -302,9 +302,11 @@ export default function Canvas()
 				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, "black", "Courier New");
 
 				let zones = [cancelZone];
-				let playerData: PlayerData = {id: "", skin: "", powerUpMode: powerUpMode.current};
+				let playerData: PlayerData = {id: "", username: "", skin: "", powerUpMode: powerUpMode.current};
 
 				playerData.skin = (await axiosInstance.current!.get('/users/me', {})).data.skin;
+				playerData.username = (await axiosInstance.current!.get('/users/me', {})).data.email;
+
 				socket.current = io(`ws://localhost:3333`,
 				{
 					transports: ["websocket"],

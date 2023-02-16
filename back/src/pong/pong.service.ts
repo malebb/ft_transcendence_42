@@ -57,7 +57,7 @@ export class PongService {
 	}
 
 	initRoom(roomId: string, leftPlayer: PlayerData, rightPlayer: PlayerData): Room {
-		this.gameService.addGame(roomId);
+		this.gameService.addGame(roomId, leftPlayer.username, rightPlayer.username);
 		return (
 			{
 				id: roomId,
@@ -77,6 +77,7 @@ export class PongService {
 					5,
 					leftPlayer.skin,
 					"left",
+					leftPlayer.username,
 					null,
 					this.sizeCanvas),
 
@@ -89,6 +90,7 @@ export class PongService {
 					5,
 					rightPlayer.skin,
 					"right",
+					rightPlayer.username,
 					null,
 					this.sizeCanvas),
 				speedPowerUpInterval: null,

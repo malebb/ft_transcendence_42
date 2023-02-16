@@ -7,12 +7,14 @@ export class GameService {
     {
 	}
 
-	async addGame(gameId: string)
+	async addGame(gameId: string, leftUsername: string, rightUsername: string)
 	{
 		await this.prisma.game.create(
 		{
   			data: {
    				 gameId: gameId,
+				 leftUsername: leftUsername,
+				 rightUsername: rightUsername,
 			},
 		})
 	}
