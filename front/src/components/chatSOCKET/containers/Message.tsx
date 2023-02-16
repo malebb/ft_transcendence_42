@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import EVENTS from "../config/events";
 import { useSockets } from "../context/socket.context";
+import InputButton from "../../utils/inputs/InputButton";
 
 import "./message.style.css"
 
@@ -15,24 +16,20 @@ interface message extends partialMessage {
 }
 
 function MessagesContainer() {
+
 	const [messages, setMessages] = useState<message[]>([]);
 
 	const { socket, roomId, username } = useSockets();
-	// const [ newMessageRef, setNewMessageRef ] = useState<any>(null);
-	const newMessageRef = useRef<any>(null);
 
 
 	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		
-		event.preventDefault();
 
 		// @ts-ignore
 		const form = new FormData(event.target);
 		const currentMessage = form.get("userMessage")?.toString()?.trim();
 
-		if (!currentMessage?.length) {
-			return;
-		}
+		if (!currentMessage?.length) return;
 
 		
 		// debugger;;
@@ -60,7 +57,6 @@ function MessagesContainer() {
 			// console.log("Received message : ", {});
 		});
 
-		newMessageRef.current.value = "";
 	}
 
 
@@ -77,8 +73,8 @@ function MessagesContainer() {
 		return (messages.map(({ message, username, time }, index) => {
 			const date = new Date(time);
 			return (
-				<div className="chat-wrapper">
-					<div key={index} className="chat">
+				<div key={index} className="chat-wrapper">
+					<div className="chat">
 						<span>{username}</span>
 						<span>{message}</span>
 					</div>
@@ -90,14 +86,14 @@ function MessagesContainer() {
 
 	const genSendMessage = () => {
 		return (
-			<form onSubmit={handleSubmit} className="sendInput">
-				<input
-					placeholder="Tell us what you are thinking"
-					ref={newMessageRef}
-					name="userMessage"
-				/>
-				<button>SEND</button>
-			</form>
+			<InputButton
+				onSubmit={handleSubmit}
+				inputProps={{
+					placeholder: "Tell us what you are thinking",
+					name: "userMessage"
+				}}
+				buttonText="SEND"
+			/>
 		)
 	}
 

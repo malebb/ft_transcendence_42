@@ -13,6 +13,7 @@ import { ChatBaseRoom } from "./containers/ChatBaseRoom";
 // doc: https://v5.reactrouter.com/web/example/url-params
 
 
+
 const Chat = () => {
 	const {roomId} = useParams();
 	const [user, setUser] = useState<string>("");
@@ -20,6 +21,8 @@ const Chat = () => {
 	const usernameRef = useRef<HTMLInputElement>(null)
 
 	console.log({roomId})
+
+
 
 	function handleSetUsername() {
 
@@ -78,6 +81,49 @@ const Chat = () => {
 		// };
 	},[]);
 	
+	const Landing = () => {
+		return (
+			<>
+				<ul className="chat-room-list">
+					{ChatBaseRoom.map((room: any) => (
+						<li key={room.id}>
+							<Link to={`/room/${room.id}`}>{room.title}</Link>
+							{/* {ChatRoom()} */}
+							{/* <MessagesContainer /> */}
+						</li>
+					))}
+				</ul>
+			</>
+		);
+	}
+
+	const ChatRoom = () => {
+
+		// const roomId = useParams();
+	
+		const room = ChatBaseRoom.find((x) => x.id === roomId);
+		console.log({room});
+		if (!room) return ;
+	
+		return (
+			<div>
+				{room && (
+					<div>
+							<h2>{room?.title}</h2>
+							{/* <MessagesContainer /> */}
+					</div>
+				)}
+			</div>
+		);
+	}
+
+	const rien = () => {
+		return (
+			<div>
+
+			</div>
+		)
+	}
 
 
 	return (
@@ -93,7 +139,7 @@ const Chat = () => {
 			</div>
 		  )}
 		  {user && ( */}
-			<div >
+			{/* <div > */}
 				{/* <Route exact path="/:roomId" component={RoomsContainer} /> */}
 			{/* <BrowserRouter> */}
 				{/* <Routes>
@@ -101,13 +147,16 @@ const Chat = () => {
 	                <Route path="/chat/:id" element={<ChatRoom />} />
 					
 	            </Routes> */}
+			{/* <div> */}
+			<h2>Choose a Chat Room...</h2>
+			<div><Landing/></div>
+			<h2>...or create a new one !</h2>
 			<div>
-
+				{roomId ? ChatRoom() : rien()}
 			</div>
-			{/* </BrowserRouter> */}
+			<div>
 			  <RoomsContainer />
 			  {/* <MessagesContainer /> */}
-
 			</div>
 		  {/* )} */}
 		</div>

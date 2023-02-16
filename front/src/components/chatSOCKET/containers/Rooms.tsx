@@ -6,6 +6,8 @@ import { useRef, useEffect, useState } from 'react';
 import useChat from "./useChat";
 import MessagesContainer from "./Message";
 import { ChatBaseRoom } from "./ChatBaseRoom";
+import InputButton from "../../utils/inputs/InputButton";
+
 
 interface Rooms {
 	id: number;
@@ -13,49 +15,12 @@ interface Rooms {
 	users: Array<number>;
 }
 
-function ChatRoom() {
-
-	const roomId = useParams();
-
-	const room = ChatBaseRoom.find((x) => x.id === roomId?.id);
-	console.log({room});
-	if (!room) return ;
-
-	return (
-		<div>
-			{room && (
-				<div>
-				<h2>{room?.title}</h2>
-					<MessagesContainer />
-				</div>
-			)}
-		</div>
-	);
-}
-
-function Landing() {
-	return (
-		<>
-			<ul className="chat-room-list">
-				{ChatBaseRoom.map((room: any) => (
-					<li key={room.id}>
-						<Link to={`/chat/${room.id}`}>{room.title}</Link>
-						{/* {ChatRoom()} */}
-					</li>
-				))}
-			</ul>
-		</>
-	);
-}
-
-
 function RoomsContainer(props: any) {//RoomContainerProps) {
 
 	const { socket, roomId, rooms, setRoomId } = useSockets();
 	// const newRoomRef = useRef<any>(null);
 	// const username = props?.username;
-	const [roomName, setRoomName] = useState<string>("");
-	setRoomId(roomName);
+	// setRoomId(roomName);
 	// const { roomId } = useSockets();
 	// console.log({props}, 12)
 
@@ -103,9 +68,17 @@ function RoomsContainer(props: any) {//RoomContainerProps) {
 
 	const [currentRoom, setCurrentRoom] = useState<Rooms|null>(null);
 
-	const handleCreateRoom = () => {
+	const handleCreateRoom = (event: React.FormEvent<HTMLFormElement>) => {
 		//change function name
 		//create new room from name => sockets.emit
+
+		//@ts-ignore
+		const form = new FormData(event.target);
+		const roomName = form.get("roomName")?.toString()?.trim();
+
+		if (!roomName?.length) return;
+
+
 		socket.emit(EVENTS.CLIENT.CREATE_ROOM, roomName);
 		setRoomId(roomName);
 		setCurrentRoom({
@@ -117,18 +90,14 @@ function RoomsContainer(props: any) {//RoomContainerProps) {
 
 	const joinRoom = () => {
 		return (
-			<>
-				<input
-				  type="text"
-				  placeholder="Room"
-				  value={roomName}
-				  onChange={(e: any) => setRoomName(e.target.value)}
-				  className="text-input-field"
-				/>
-				<button className="enter-room-button" onClick={handleCreateRoom}>
-				  Create room
-				</button>
-			</>
+			<InputButton
+				onSubmit={handleCreateRoom}
+				inputProps={{
+					placeholder: "New room name",
+					name: "roomName"
+				}}
+				buttonText="Create Room"
+			/>
 		)
 	}
 
@@ -139,22 +108,15 @@ function RoomsContainer(props: any) {//RoomContainerProps) {
 			<div >
 				<h1 id="roomContainer">Welcome to {currentRoom.name} </h1>
 				<MessagesContainer />
-				
-
 			</div>
 		)
 	}
 
 	return (
 		<div> 
-			<h2>Choose a Chat Room...</h2>
-			<div><Landing/></div>
-			<h2>...or create a new one !</h2>
-			{/* <div><ChatRoom/></div> */}
-
-		<div className="home-container">
-			{currentRoom ? displayCurrentRoom() : joinRoom()}
-		</div>
+			<div className="home-container">
+				{currentRoom ? displayCurrentRoom() : joinRoom()}
+			</div>
 		</div>
 	);
 

@@ -40,37 +40,6 @@ body {
     align-items: center;
 } */
   #chatContainer {
-  }
-  .sendInput {
-	width: 80%;
-	padding: 8px 16px;
-	height: 34px;
-	border-radius: 12px;
-	border: 0px;
-	background: white;
-	display: flex;
-	align-items: center;
-  }
-  .sendInput > input {
-	height: 34px;
-	border: 0px;
-	flex: 1;
-	font-size: 17px;
-	
-  }
-  .sendInput > input:focus-visible {
-	outline: none;
-  }
-  .sendInput button {
-	height: 100%;
-	padding: 8px 16px;
-	border: 0;
-	background-color: #413368;
-	font-weight: 700;
-	border-radius: 8px;
-	color: white;
-  }
-  #chatContainer {
 	height: calc(100vh - 50px);
 	background-color: var(--secondary);
 	border-radius: 16px;

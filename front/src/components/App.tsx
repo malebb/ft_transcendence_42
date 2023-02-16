@@ -15,6 +15,7 @@ import User from './User';
 import History from './History';
 import Friends from './Friends';
 import Chat from './chatSOCKET/chat';
+import ChatRoom from './chatSOCKET/chatRoom';
 import Rooms from './chatSOCKET/containers/Rooms'
 import PrivateRoutes from './PrivateRoute/PrivateRoutes';
 import {useEffect} from 'react';
@@ -30,7 +31,7 @@ function App() {
           <Route path='/history' element={<History/>}/>
           <Route path='/friends'element={<Friends/>}/>
 		  <Route path='/chat' element={<Chat/>}/>
-          <Route path='/chat/:roomId' element={<Chat/>}/>
+          <Route path='/room/:roomId' element={<ChatRoom/>}/>
         <Route path='/' element={<Main/>} />
         <Route path='/signin' element={<Signin/>}/>
         <Route path='/signup' element={<Signup/>}/>

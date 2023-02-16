@@ -1,0 +1,31 @@
+.title > svg {
+	height: 210px;
+	z-index: 1;
+}
+.title {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 2;
+}
+.title > h1 {
+	width: fit-content;
+	max-width: 600px;
+	  text-align: right;
+	  top: 26px;
+	  font-size: 54px;
+	  text-transform: capitalize;
+	  left: 48px;
+	  color: white;
+}
+.logo {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 2;
+}
+.chat {
+	display: flex;
+	height: calc(100vh - 50px);
+	position: absolute;
+}
