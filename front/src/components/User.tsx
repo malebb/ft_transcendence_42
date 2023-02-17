@@ -19,6 +19,7 @@ const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_@.]{3,23}$/;
 const CODE_REGEX = /^[0-9]{6}$/;
 const PATCH_PATH = '/users/patchme'
 const DEFAULT_IMG='default_profile_picture.png'
+const GET_PROFILE_PICTURE='http://localhost:3333/users/profile-image/' 
 
 
   const secret = speakeasy.generateSecret({
@@ -57,6 +58,15 @@ const getPic = async(jwt: string) => {
     return null;
   }
 }
+  function validURL(str: string) {
+    var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+      '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+      '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!pattern.test(str);
+  }
 
         /*<form onSubmit={handleSubmit}>
         <label htmlFor='username'>
@@ -95,6 +105,15 @@ const User = () => {
   const [errMsg, setErrMsg] = useState('');
   console.log("LOOOOOOP");
 
+  function validURL(str: string) {
+    var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+      '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+      '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!pattern.test(str);
+  }
 
   useEffect(() => {
     const result = CODE_REGEX.test(code);
@@ -171,7 +190,7 @@ const User = () => {
     }
     //console.log("Form = " + formData.getAll("login"));
     try{
-      const response: AxiosResponse = await axiosMain.patch(PATCH_PATH, formData,
+      const response: AxiosResponse = await axiosMain.post(PATCH_PATH, formData,
       {
         headers: {'Authorization': 'Bearer ' + getJWT()},
         //withCredentials: true
@@ -283,7 +302,10 @@ useEffect(() => {
         setValidUser(true);
         console.log("profilePicture = " + JSON.stringify(profile.profilePicture));
         console.log("split = " + JSON.stringify(user?.profilePicture.split('/')[2]));
-        setPicture(profile.profilePicture.split('/')[2]);
+        if (validURL(profile.profilePicture))
+          setPicture(profile.profilePicture);
+        else
+          setPicture(GET_PROFILE_PICTURE + profile.profilePicture.split('/')[2]);
         if (picture === null)
           setPicture(DEFAULT_IMG);
         setLogin(profile.email);
@@ -306,7 +328,7 @@ useEffect(() => {
     return (
       <div>
       {validUser ?(<><section>
-        <img src={image ? image : "http://localhost:3333/users/profile-image/" + picture} alt='profile_picture'/>
+        <img src={image ? image : picture} alt='profile_picture'/>
         <form onSubmit={handleSubmit}>
         <label htmlFor="avatar">Choose a profile picture:</label>
         <input type="file"

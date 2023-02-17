@@ -461,7 +461,7 @@ export default function Canvas()
 
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
-		axiosInstance.current = axiosToken();
+		axiosInstance.current = await axiosToken();
 		if (getToken() == null)
 		{
 			signInToPlay();

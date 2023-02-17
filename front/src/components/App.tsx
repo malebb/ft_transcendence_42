@@ -16,6 +16,8 @@ import History from './History';
 import Friends from './Friends';
 import PrivateRoutes from './PrivateRoute/PrivateRoutes';
 import {useEffect} from 'react';
+import Callback from './Callback';
+import UserProfile from './UserProfile';
 
         /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
@@ -33,6 +35,8 @@ function App() {
         <Route path='/2factivate' element={<SetTfa/>}/>
         <Route path='/2fadelete' element={<DeleteTfa/>}/>
         <Route path='/2faverif' element={<VerifTfa/>}/>
+        <Route path='/auth/signin/42login/callback' element={<Callback/>}/>
+        <Route path='user/:userId' element={<UserProfile/>} /> 
       </Routes>
     </BrowserRouter>
   </AuthProvider> 

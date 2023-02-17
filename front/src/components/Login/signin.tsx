@@ -5,6 +5,7 @@ import { useRef, useState, useEffect, useContext} from 'react';
 import { faCheck, faTimes, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {axiosMain} from '../../api/axios';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { AxiosError, AxiosResponse } from 'axios';
 import TokenContext from '../../context/TokenContext';
@@ -17,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_@.]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,24}$/
 const SIGNIN_PATH = '/auth/signin'
+const LOGIN42_PATH = '/auth/signin/42login'
 
 const Signin = () => {
 
@@ -63,6 +65,17 @@ const Signin = () => {
     setErrMsg('');
   }, [user, pwd])
 
+  /*const Login42 = async () => {
+      /*const response: AxiosResponse = await axiosMain.get('https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code',
+        {
+          headers: {'Access-Control-Allow-Origin': '*',
+          /*'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+          'Access-Control-Allow-Credentials': 'true'*/
+        // }
+        // }
+        // );
+  // }*/
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const v1 = USER_REGEX.test(user);
@@ -105,8 +118,34 @@ const Signin = () => {
     }
   }
 
+  const CSS = `<style>
+  button {
+    /* padding-top: 100px; */
+    width: 100%;
+    border: none;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url("https://www.searchpng.com/wp-content/uploads/2019/01/Game-Button-PNG-copy.jpg");
+    height: 100%;
+    max-width: 1400px;
+margin: 0 auto;
+position: relative;
+  }
+ button span {
+text-align: left;
+position: absolute;
+left: 20%;
+color: white;
+top: 29px;
+}
+button img{position: relative;
+}
+</style>`
   return (
     <>
+    <style>
+      {CSS}
+    </style>
     {success? (
       <section>
         {isTfa &&
@@ -168,6 +207,17 @@ const Signin = () => {
 
             <button disabled={!validName || !validPwd ? true : false}>Sign in</button>
         </form>
+        <div>
+        <button type="button" onClick={() => window.location.href='https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code'}>
+          <span>test</span>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg"
+            width="60"
+          />
+          {/* <a href='https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code'>LOGIN AS STUDENT</a> */}
+          
+        </button>
+        </div>
         <div className='signin__div__to_signup'>
             <p>Don't have an account?</p>
             <Link className='Signup-Link' to='/signup'>Sign up</Link>

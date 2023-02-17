@@ -8,6 +8,7 @@ import { JwtGuard , RtGuard} from './guard';
 import { GetUser, Public } from './decorator';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
+import { CallbackDto } from './dto/callback.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -37,7 +38,31 @@ export class AuthController {
     @Get('signin/42login')
     signin42(@Res() res : Response)
     {
+       /* let origin;
+        if (req.headers.origin)
+        {
+            origin = req.headers.origin;
+            console.log("origin = " + origin);
+            res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3333');
+        }*/
         return this.authService.signin42(res);
+    }
+
+    @Public()
+    @HttpCode(HttpStatus.OK)
+    @Post('signin/42login/callback')
+    callback42(@Body() dto: CallbackDto): Promise<Object>
+    {
+        /*let origin;
+        if (req.headers.origin)
+        {
+            origin = req.headers.origin;
+            console.log("origin = " + origin);
+            res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3333');
+            //res.setHeader("Access-Control-Allow-Origin", '*');
+        }*/
+        console.log("code from dto = " + dto.code);
+        return this.authService.callback42(dto.code);
     }
 
     @Post('logout')
