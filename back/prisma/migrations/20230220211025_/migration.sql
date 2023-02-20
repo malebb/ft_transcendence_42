@@ -18,6 +18,19 @@ CREATE TABLE "users" (
 );
 
 -- CreateTable
+CREATE TABLE "Stats" (
+    "id" SERIAL NOT NULL,
+    "win" INTEGER NOT NULL DEFAULT 0,
+    "defeat" INTEGER NOT NULL DEFAULT 0,
+    "victory" INTEGER NOT NULL DEFAULT 0,
+    "xp" INTEGER NOT NULL DEFAULT 0,
+    "level" INTEGER NOT NULL DEFAULT 0,
+    "userId" INTEGER NOT NULL,
+
+    CONSTRAINT "Stats_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Game" (
     "id" SERIAL NOT NULL,
     "gameId" TEXT NOT NULL,
@@ -31,4 +44,10 @@ CREATE TABLE "Game" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Stats_userId_key" ON "Stats"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Game_gameId_key" ON "Game"("gameId");
+
+-- AddForeignKey
+ALTER TABLE "Stats" ADD CONSTRAINT "Stats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

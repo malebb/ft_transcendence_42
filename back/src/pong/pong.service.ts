@@ -2,17 +2,20 @@ import { Injectable } from '@nestjs/common'
 import { Ball, Player, Size, Room, PlayerData } from 'ft_transcendence';
 import { Socket, Server } from 'socket.io'
 import { GameService } from '../game/game.service';
+import { StatsService } from '../stats/stats.service';
+import { levels } from './levels'
 
 @Injectable()
 export class PongService {
 
-	constructor(private readonly gameService: GameService) {}
+	constructor(private readonly gameService: GameService,
+			   	private readonly statsService: StatsService) {}
 
 	queue: PlayerData[] = [];
 	powerUpQueue: PlayerData[] = [];
 	rooms = [];
 	sizeCanvas: Size = { width: 600, height: 350 };
-	scoreToWin: number = 11;
+	scoreToWin: number = 1;
 
 	addToQueue(player: PlayerData, queue: PlayerData[]) {
 		queue.push(player);
@@ -151,6 +154,27 @@ export class PongService {
 		player.join(roomId);
 	}
 
+	async updateStats(winnerUsername: string, loserUsername: string)
+	{
+		this.statsService.addVictory(winnerUsername);
+		this.statsService.addDefeat(loserUsername);
+
+		await this.statsService.addXp(winnerUsername, 500);
+
+		let winnerXp = (await this.statsService.getXp(winnerUsername));
+		let newLevel = 0;
+
+		for (let i = 0; i < levels.length; ++i)
+		{
+			if (levels[i] <= winnerXp)
+				newLevel++;
+		}
+
+		let winnerLevel = (await this.statsService.getLevel(winnerUsername));
+		if (newLevel != winnerLevel)
+			await this.statsService.updateLevel(winnerUsername, newLevel);
+	}
+
 	runRoom(roomId: string, server: Server) {
 		let scorer: string = "";
 
@@ -176,13 +200,19 @@ export class PongService {
 					{
 						server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].leftPlayer.score }));
 						if (this.rooms[roomId].leftPlayer.score == this.scoreToWin)
+						{
+							this.updateStats(this.rooms[roomId].leftPlayer.username, this.rooms[roomId].rightPlayer.username);
 							server.to(roomId).emit('endGame', scorer);
+						}
 					}
 					else if (scorer == "right")
 					{
 						server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].rightPlayer.score }));
 						if (this.rooms[roomId].rightPlayer.score == this.scoreToWin)
+						{
+							this.updateStats(this.rooms[roomId].rightPlayer.username, this.rooms[roomId].leftPlayer.username);
 							server.to(roomId).emit('endGame', scorer);
+						}
 					}
 					scorer = "";
 				}

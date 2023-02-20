@@ -39,6 +39,9 @@ export class AuthService {
                     email: dto.email,
                     hash: hash,
                     profilePicture: DEFAULT_IMG,
+					stats: {
+						create: {}
+					}
                 }
             })
             const tokens = await this.signToken(user.id, user.email);
