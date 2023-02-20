@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, MutableRefObject } from "react";
 import EVENTS from "../config/events";
 import { useSockets } from "../context/socket.context";
 import InputButton from "../../utils/inputs/InputButton";
@@ -23,7 +23,6 @@ function MessagesContainer() {
 
 
 	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-		
 
 		// @ts-ignore
 		const form = new FormData(event.target);
@@ -35,11 +34,11 @@ function MessagesContainer() {
 		// debugger;;
 
 
+		// console.log({roomId, currentMessage, username});
 		// emit un message vers le back
-		socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, { roomId, currentMessage, username });
-
+		
 		// debugger;
-
+		
 		const dateTS = +new Date();
 		setMessages([
 			...messages,
@@ -47,11 +46,18 @@ function MessagesContainer() {
 				username: "b",
 				message: currentMessage,
 				time: dateTS,
-				roomId: 0
+				roomId: 0,
 			}
 		])
+		console.log({messages})
 		
-		// recevoir des messages venant d'un utilisateur de la room
+		socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, messages);
+
+		// messages = [];
+
+
+		// recevoir des messages venant d'un utilisateur de la room ?? 
+		// marche pas loool
 		socket.on(EVENTS.SERVER.ROOM_MESSAGE, () => {
 			// console.log({ data });
 			// console.log("Received message : ", {});
@@ -59,16 +65,15 @@ function MessagesContainer() {
 
 	}
 
-
-	// useEffect(() => {
-	// 	messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	//   }, [messages]);
-
 	// if (!roomId) {
 	// 	return <div />;
 	// }
 
+	// let content = getElementById("content");
+	// allow 1px inaccuracy by adding 1
+
 	const genMessages = () => {
+
 		if (!messages?.length) return;
 		return (messages.map(({ message, username, time }, index) => {
 			const date = new Date(time);
@@ -98,13 +103,14 @@ function MessagesContainer() {
 	}
 
 	return (
-		<div id="content">	
-			<div id="chatContainer">
-				{genMessages()}
+		// <div id="scroll">
+			<div id="content">	
+				<div id="chatContainer">
+					{genMessages()}
+				</div>
+				{genSendMessage()}
 			</div>
-			{genSendMessage()}
-		</div>
-
+		// </div>
 	);
 }
 

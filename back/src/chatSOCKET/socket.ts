@@ -48,12 +48,11 @@ io.on('connect', (socket) => {
 
 	console.log('a user connected');
 
-	
-	// });
-	socket.on(EVENTS.CLIENT.SEND_ROOM_MESSAGE, ({roomId, message, username}) => {
+	socket.on(EVENTS.CLIENT.SEND_ROOM_MESSAGE, (message) => {
 		
-		console.log(username + " send " + message + " on " + roomId);
-		io.emit(EVENTS.SERVER.ROOM_MESSAGE, ({roomId, message, username}));
+		// console.log(username + " send " + message + " on " + roomId);
+		console.log({message});
+		io.emit(EVENTS.SERVER.ROOM_MESSAGE, ({message}));
 	
 	// socket.on(EVENTS.CLIENT.CREATE_ROOM, (roomName) => {
 		

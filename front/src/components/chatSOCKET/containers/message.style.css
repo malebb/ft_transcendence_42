@@ -1,25 +1,41 @@
 :root {
 	--main: #1D1E24;
 	--secondary: #20232B;
+	--tertiary: #B785F5;
 }
 
 body {
 	background-color: var(--main);
 	padding: 8px;
+	height: 100.001vh;
 }
 
-
-#content {
+#scroll {
 	height: 96vh;
+    overflow: scroll;
 	display: flex;
 	flex-direction: column;
+	width: 100%;
+	overflow-anchor: none;
+}
+
+#content {
+	/* position: absolute; */
+
+	height: 96vh;
+    overflow: scroll;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+
   }
+
   #roomContainer {
 	color: white;
 	display: flex;
 	width: 100%;
 	align-items: center;
-	background-color: #B785F5;
+	background-color: var(--tertiary);
 	border-radius: 8px;
 	padding: 8px 16px;
 	row-gap: 1em;
@@ -40,7 +56,8 @@ body {
     align-items: center;
 } */
   #chatContainer {
-	height: calc(100vh - 50px);
+/* 100vh = ?? 50px = ?? - 200px = titre - 40 = input chat */
+	height: calc(100vh - 50px - 200px - 50px);
 	background-color: var(--secondary);
 	border-radius: 16px;
 	margin-bottom: 1em;
@@ -49,6 +66,7 @@ body {
 	flex-direction: column;
 	row-gap: 1em;
 	overflow-y: scroll;
+	overflow: auto;
 }
 
 .date {
@@ -56,7 +74,7 @@ body {
 	color: white;
 }
 .chat {
-	background-color: #B785F5;
+	background-color: var(--tertiary);
 	border-radius: 8px;
 	padding: 8px 16px;
 	color: white;
@@ -75,3 +93,4 @@ body {
 	width: 100%;
 	align-items: center;
 }
+/* .roomBase */

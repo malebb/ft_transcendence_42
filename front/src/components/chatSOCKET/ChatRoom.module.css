@@ -1,14 +1,16 @@
 .title > svg {
-	height: 210px;
+	height: 200px;
 	z-index: 1;
 }
 .title {
-	position: absolute;
+	/* position: absolute;
+	-> si on le met, supperpose le chat et le titre */
 	top: 0;
 	left: 0;
 	z-index: 2;
 }
 .title > h1 {
+	position: absolute;
 	width: fit-content;
 	max-width: 600px;
 	  text-align: right;
@@ -28,4 +30,5 @@
 	display: flex;
 	height: calc(100vh - 50px);
 	position: absolute;
+	width: 98%;
 }
