@@ -49,6 +49,7 @@ function MessagesContainer() {
 				roomId: 0,
 			}
 		])
+
 		console.log({messages})
 		
 		socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, messages);
