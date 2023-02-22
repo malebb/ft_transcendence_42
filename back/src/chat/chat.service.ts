@@ -16,21 +16,22 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { Chat } from './chat.entity';
+import { User } from "@prisma/client";
 
 // permet au client de communiquer au server par le biais
 // de n'import quelle url
 @Injectable() 
 export class ChatService {
-	constructor(
-		@InjectRepository(Chat) private chatRepository: Repository<Chat>,) {}
+	// constructor(
+	// 	@InjectRepository(Chat) private chatRepository: Repository<Chat>,) {}
 
-	async createMessage(chat: Chat): Promise<Chat> {
-		return await this.chatRepository.save(chat);
+	async createMessage(chat: Chat) {
+		// return await this.chatRepository.save(chat);
 	}
 
-	async getMessages(): Promise<Chat[]> {
-		return await this.chatRepository.find();
-	}
+	// async getMessages(): Promise<Chat[]> {
+		// return await this.chatRepository.find();
+	// }
 }
 
 // @Injectable()

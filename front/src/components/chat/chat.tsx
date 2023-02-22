@@ -7,12 +7,9 @@ import {io} from 'socket.io-client';
 // import ChatRoom from "./containers/ChatRoom";
 import { ChatBaseRoom } from "./containers/ChatBaseRoom";
 
-
 // const socket = io("http://localhost:4444");
 
 // doc: https://v5.reactrouter.com/web/example/url-params
-
-
 
 const Chat = () => {
 	const {roomId} = useParams();
@@ -21,8 +18,6 @@ const Chat = () => {
 	const usernameRef = useRef<HTMLInputElement>(null)
 
 	console.log({roomId})
-
-
 
 	function handleSetUsername() {
 
@@ -88,8 +83,6 @@ const Chat = () => {
 					{ChatBaseRoom.map((room: any) => (
 						<li key={room.id}>
 							<Link to={`/room/${room.id}`}>{room.title}</Link>
-							{/* {ChatRoom()} */}
-							{/* <MessagesContainer /> */}
 						</li>
 					))}
 				</ul>
@@ -110,7 +103,9 @@ const Chat = () => {
 				{room && (
 					<div>
 							<h2>{room?.title}</h2>
-							{/* <MessagesContainer /> */}
+							<div onClick={ () => {
+								socket?.emit("joinRoom", { roomId });
+							}}/>
 					</div>
 				)}
 			</div>

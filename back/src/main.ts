@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { useRef, useEffect, useState } from "react";
 import { JwtGuard } from './auth/guard';
 import * as cors from 'cors';
-import socket from './chatSOCKET/socket'
+import socket from './chat/socket'
 
 async function bootstrap() {
 

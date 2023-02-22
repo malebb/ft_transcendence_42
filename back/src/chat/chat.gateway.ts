@@ -13,13 +13,15 @@ import { Socket, Server } from 'socket.io';
 import { Chat } from './chat.entity';
 import { ChatService } from './chat.service';
 
-import { AuthService } from '../auth/auth.service';
-import { UserService } from '../user/user.service';
+// import { AuthService } from '../auth/auth.service';
+// import { UserService } from '../user/user.service';
 
 @WebSocketGateway({
 	cors: {
 		origin: '*',
 		// eventuellement 'http://localhost:3333'
+		credentials: true,
+		// methods: ['GET', 'POST']
 	},
 })
 
@@ -30,15 +32,15 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
 	constructor(
 		private chatService: ChatService,
-		private authService: AuthService,
-		private userService: UserService
+		// private authService: AuthService,
+		// private userService: UserService
 	) {}
   
 	@WebSocketServer()
 	server: Server;
 
 	@SubscribeMessage('joinRoom')
-	joinRoom(user: Socket, roomId: string)
+	async joinRoom(user: Socket, roomId: string)
 	{
 		console.log("User ${user.id} joined room ${roomId}");
 	}

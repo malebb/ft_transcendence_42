@@ -10,10 +10,10 @@ import { PongModule } from './pong/pong.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/guard';
 import { NestjsFormDataModule } from 'nestjs-form-data';
-// import { ChatModule } from "./chat/chat.module";
+import { ChatModule } from "./chat/chat.module";
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, NestjsFormDataModule],
+  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, NestjsFormDataModule, ChatModule],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_GUARD,

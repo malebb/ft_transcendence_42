@@ -14,9 +14,9 @@ import VerifTfa from './VerifTfa';
 import User from './User';
 import History from './History';
 import Friends from './Friends';
-import Chat from './chatSOCKET/chat';
-import ChatRoom from './chatSOCKET/chatRoom';
-import Rooms from './chatSOCKET/containers/Rooms'
+import Chat from './chat/chat';
+import ChatRoom from './chat/chatRoom';
+import Rooms from './chat/containers/Rooms'
 import PrivateRoutes from './PrivateRoute/PrivateRoutes';
 import {useEffect} from 'react';
 
