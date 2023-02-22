@@ -5,13 +5,13 @@ import { StatsService } from './stats.service';
 class StatsController
 {
 	constructor(private statsService: StatsService) {}
-/*
-	@Get()
-	async getRoot()
+
+	@Get(':username')
+	async getGame(@Param('username') username: string)
 	{
-		return (await this.statsService.getS());
+		return (await this.statsService.getStats(username));
 	}
-*/
+
 }
 
 export default StatsController;

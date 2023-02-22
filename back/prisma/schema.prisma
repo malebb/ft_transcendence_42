@@ -29,6 +29,8 @@ model User {
   map String @default("basic")
 
   stats Stats?
+  gamePlayed GamePlayed[]
+  achievementDone AchievementDone[]
 
   @@map("users")
 }
@@ -36,14 +38,37 @@ model User {
 model Stats {
   id        Int      	@id @default(autoincrement())
 
-  win		Int			@default(0)
   defeat	Int			@default(0)
   victory	Int			@default(0)
   xp		Int			@default(0)
   level		Int			@default(0)
 
+  modeExplorer		Boolean			@default(false)
+  fashionWeek		Boolean			@default(false)
+  traveler			Boolean			@default(false)
+  failureKnowledge	Boolean			@default(false)
+
   user		User		@relation(fields: [userId], references: [id])
   userId	Int			@unique
+}
+
+model GamePlayed {
+	id				Int			@id @default(autoincrement())
+	leftUsername String
+	rightUsername String
+	leftScore		Int
+	rightScore		Int
+  	playedAt DateTime @default(now())
+	user		User[]
+}
+
+model AchievementDone {
+	id				Int			@id @default(autoincrement())
+	title			String
+	desc			String
+  	achievedAt 		DateTime	@default(now())
+	user			User		@relation(fields: [userId], references: [id])
+	userId	Int
 }
 
 model Game {
@@ -52,4 +77,3 @@ model Game {
 	leftUsername 	String
 	rightUsername	String
 }
-

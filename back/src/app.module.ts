@@ -8,13 +8,14 @@ import { BookmarkModule } from './bookmark/bookmark.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PongModule } from './pong/pong.module';
 import { GameModule } from './game/game.module';
+import { HistoryModule } from './history/history.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/guard';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import  GameController from './game/game.controller';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, GameModule, NestjsFormDataModule],
+  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, GameModule, HistoryModule, NestjsFormDataModule],
   controllers: [AppController, GameController],
   providers: [AppService, {
     provide: APP_GUARD,

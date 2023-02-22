@@ -66,4 +66,19 @@ export class UserService {
         delete user.hash;
         return user;
     }
+
+	async getCustomisation(username: string)
+	{
+		const customisation = await this.prisma.user.findUnique(
+		{
+			where: {
+				email: username,
+			},
+			select: {
+				skin: true,
+				map: true
+			}
+		});
+		return (customisation);
+	}
 }

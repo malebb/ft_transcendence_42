@@ -1,15 +1,23 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common';
 import { Ball, Player, Size, Room, PlayerData } from 'ft_transcendence';
-import { Socket, Server } from 'socket.io'
+import { Socket, Server } from 'socket.io';
 import { GameService } from '../game/game.service';
 import { StatsService } from '../stats/stats.service';
-import { levels } from './levels'
+import { HistoryService } from '../history/history.service';
+import { UserService } from '../user/user.service';
+import { levels } from './levels';
+import { winSteps, levelSteps, modeExplorer,
+		fashionWeek, traveler, failureKnowledge} from './achievements';
+import { Stats } from './Stats';
+import { Customisation } from './Customisation';
 
 @Injectable()
 export class PongService {
 
 	constructor(private readonly gameService: GameService,
-			   	private readonly statsService: StatsService) {}
+			   	private readonly statsService: StatsService,
+			   	private readonly historyService: HistoryService,
+			   	private readonly userService: UserService) {}
 
 	queue: PlayerData[] = [];
 	powerUpQueue: PlayerData[] = [];
@@ -154,25 +162,86 @@ export class PongService {
 		player.join(roomId);
 	}
 
-	async updateStats(winnerUsername: string, loserUsername: string)
+	async updateAchievements(player: Player, playerStats: Stats,
+							 levelUp: boolean, powerUpMode: boolean, winner: boolean)
 	{
-		this.statsService.addVictory(winnerUsername);
-		this.statsService.addDefeat(loserUsername);
+		let playerCustomisation: Customisation = await this.userService.getCustomisation(player.username);
 
-		await this.statsService.addXp(winnerUsername, 500);
+		if (winner)
+		{
+			for (let i = 0; i < winSteps.length; ++i)
+			{
+				if (playerStats.victory == winSteps[i].gameWon)
+				{
+					await this.historyService.addAchievementDone(player.username, winSteps[i].title, winSteps[i].desc);
+					break;
+				}
+			}
+		}
+		if (winner && levelUp)
+		{
+			for (let i = 0; i < levelSteps.length; ++i)
+			{
+				if (playerStats.level == levelSteps[i].level)
+				{
+					await this.historyService.addAchievementDone(player.username, levelSteps[i].title, levelSteps[i].desc);
+					break;
+				}
+			}
+		}
+		if (powerUpMode && !playerStats.modeExplorer)
+		{
+			await this.historyService.addAchievementDone(player.username, modeExplorer.title, modeExplorer.desc);
+			await this.statsService.updateModeExplorer(player.username);
+		}
+		if (playerCustomisation.skin != "white" && !playerStats.fashionWeek)
+		{
+			await this.historyService.addAchievementDone(player.username, fashionWeek.title, fashionWeek.desc);
+			await this.statsService.updateFashionWeek(player.username);
+		}
+		if (playerCustomisation.map != "basic" && !playerStats.traveler)
+		{
+			await this.historyService.addAchievementDone(player.username, traveler.title, traveler.desc);
+			await this.statsService.updateTraveler(player.username);
+		}
+		if (!winner && playerStats.defeat == failureKnowledge.gameLost)
+		{
+			await this.historyService.addAchievementDone(player.username, failureKnowledge.title, failureKnowledge.desc);
+			await this.statsService.updateFailureKnowledge(player.username);
+		}
 
-		let winnerXp = (await this.statsService.getXp(winnerUsername));
-		let newLevel = 0;
+	}
+
+	async updateStats(winner: Player, loser: Player, powerUpMode: boolean)
+	{
+		await this.statsService.addVictory(winner.username);
+		await this.statsService.addDefeat(loser.username);
+		await this.statsService.addXp(winner.username, 500);
+
+		let winnerStats: Stats = await this.statsService.getStats(winner.username);
+		let loserStats: Stats = await this.statsService.getStats(loser.username);
+
+		let newWinnerLevel = 0;
 
 		for (let i = 0; i < levels.length; ++i)
 		{
-			if (levels[i] <= winnerXp)
-				newLevel++;
+			if (levels[i] <= winnerStats.xp)
+				newWinnerLevel++;
 		}
+		let levelUp = false;
+		if (newWinnerLevel != winnerStats.level)
+		{
+			await this.statsService.updateLevel(winner.username, newWinnerLevel);
+			winnerStats.level = newWinnerLevel;
+			levelUp = true;
+		}
+		this.updateAchievements(winner, winnerStats, levelUp, powerUpMode, true);
+		this.updateAchievements(loser, loserStats, levelUp, powerUpMode, false);
+	}
 
-		let winnerLevel = (await this.statsService.getLevel(winnerUsername));
-		if (newLevel != winnerLevel)
-			await this.statsService.updateLevel(winnerUsername, newLevel);
+	async updateHistory(leftUsername: string, rightUsername: string, leftScore: number, rightScore: number)
+	{
+		this.historyService.addGamePlayed(leftUsername, rightUsername, leftScore, rightScore);
 	}
 
 	runRoom(roomId: string, server: Server) {
@@ -201,7 +270,9 @@ export class PongService {
 						server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].leftPlayer.score }));
 						if (this.rooms[roomId].leftPlayer.score == this.scoreToWin)
 						{
-							this.updateStats(this.rooms[roomId].leftPlayer.username, this.rooms[roomId].rightPlayer.username);
+							this.updateStats(this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer, this.rooms[roomId].powerUpMode);
+							this.updateHistory(this.rooms[roomId].leftPlayer.username, this.rooms[roomId].rightPlayer.username,
+											  this.rooms[roomId].leftPlayer.score, this.rooms[roomId].rightPlayer.score);
 							server.to(roomId).emit('endGame', scorer);
 						}
 					}
@@ -210,7 +281,9 @@ export class PongService {
 						server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].rightPlayer.score }));
 						if (this.rooms[roomId].rightPlayer.score == this.scoreToWin)
 						{
-							this.updateStats(this.rooms[roomId].rightPlayer.username, this.rooms[roomId].leftPlayer.username);
+							this.updateStats(this.rooms[roomId].rightPlayer, this.rooms[roomId].leftPlayer, this.rooms[roomId].powerUpMode);
+							this.updateHistory(this.rooms[roomId].leftPlayer.username, this.rooms[roomId].rightPlayer.username,
+											  this.rooms[roomId].leftPlayer.score, this.rooms[roomId].rightPlayer.score);
 							server.to(roomId).emit('endGame', scorer);
 						}
 					}
