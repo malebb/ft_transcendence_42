@@ -58,7 +58,7 @@ model GamePlayed {
 	rightUsername String
 	leftScore		Int
 	rightScore		Int
-  	playedAt DateTime @default(now())
+  	date DateTime @default(now())
 	user		User[]
 }
 
@@ -66,7 +66,7 @@ model AchievementDone {
 	id				Int			@id @default(autoincrement())
 	title			String
 	desc			String
-  	achievedAt 		DateTime	@default(now())
+  	date	 		DateTime	@default(now())
 	user			User		@relation(fields: [userId], references: [id])
 	userId	Int
 }

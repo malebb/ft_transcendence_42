@@ -1,22 +1,80 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { axiosToken } from '../api/axios'
+import { GamePlayed } from '../interfaces/GamePlayed';
+import { AchievementDone } from '../interfaces/AchievementDone';
+import '../styles/history.css';
 
-const History = () => {	
+interface HistoryElem
+{
+	type: string;
+	value: any;
+}
+
+const History = () => {
+	const [sorted, setSorted] = useState<boolean>(false);
+	const historyElem = useRef<HistoryElem[]>([]);
+
+	const trimUsername = (username: string) =>
+	{
+		return (username.length < 15 ? username : username.slice(0, 13) + '..');
+	}
+
+	const printHistory = () =>
+	{
+		if (sorted)
+		{
+			return (historyElem.current.map((elem) => {
+			if (elem.type === "game")
+			{
+				return (<div className="historyElem" id="gamePlayed" key={elem.value.date}><h2>{trimUsername(elem.value.leftUsername)}</h2>
+				<h2>{elem.value.leftScore} - {elem.value.rightScore}</h2> <h2>{trimUsername(elem.value.rightUsername)}</h2></div>);
+			}
+			else if (elem.type === "achievement")
+			{
+				return (<div className="historyElem" id="achievementDone"key={elem.value.date}><h2 className="title">{elem.value.title}</h2><h4 className="desc">{elem.value.desc}</h4></div>);
+			}
+			else
+				return (<div>other</div>);
+			}));
+		}
+		return (<div>Loading...</div>);
+	}
+
+	const compareElemDate = (elemA: any, elemB: any) =>
+	{
+		if (elemA.value.date > elemB.value.date)
+		{
+			return (-1);
+		}
+		if (elemA.value.date < elemB.value.date)
+		{
+			return (1);
+		}
+		return (0);
+	}
 
 	const initHistory = async () => {
 		const axiosInstance = axiosToken();
 		const username = (await axiosInstance.get('users/me', {})).data.email;
-	const gamesPlayed = await axiosInstance.get('history/gamePlayed/' + username);
-	let date = gamesPlayed.data.gamePlayed[1].playedAt;
-	let jsDate = new Date(date);
-	console.log("date js = ", jsDate);
+		const gamePlayed = (await axiosInstance.get('history/gamePlayed/' + username)).data.gamePlayed;
+		const achievementDone = (await axiosInstance.get('history/achievementsDone/' + username)).data.achievementDone;
+		for (let i = 0; i < gamePlayed.length; ++i)
+		{
+			historyElem.current.push({type: "game", value: gamePlayed[i]});
+		}
+		for (let i = 0; i < achievementDone.length; ++i)
+		{
+			historyElem.current.push({type: "achievement", value: achievementDone[i]});
+		}
+		historyElem.current.sort(compareElemDate);
+		setSorted(true);
 	};
 
 	useEffect(() => {
 		initHistory();
 	}, []);
 	return (
-		<div>History</div>
+		<div id="history">{printHistory()}</div>
 	);
 }
 

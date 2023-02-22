@@ -40,7 +40,7 @@ CREATE TABLE "GamePlayed" (
     "rightUsername" TEXT NOT NULL,
     "leftScore" INTEGER NOT NULL,
     "rightScore" INTEGER NOT NULL,
-    "playedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "GamePlayed_pkey" PRIMARY KEY ("id")
 );
@@ -50,7 +50,7 @@ CREATE TABLE "AchievementDone" (
     "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "desc" TEXT NOT NULL,
-    "achievedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userId" INTEGER NOT NULL,
 
     CONSTRAINT "AchievementDone_pkey" PRIMARY KEY ("id")

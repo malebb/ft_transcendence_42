@@ -5,7 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class HistoryService {
     constructor(private prisma: PrismaService) {}
 
-	async addGamePlayed(leftUsername: string, rightUsername, leftScore: number, rightScore: number)
+	async addGamePlayed(leftUsername: string, rightUsername: string, leftScore: number, rightScore: number)
 	{
 		const gamePlayed = await this.prisma.gamePlayed.create({
 			data: {
@@ -46,5 +46,18 @@ export class HistoryService {
 				desc: desc
 			}
 		})
+	}
+
+	async getAchievementsDone(username: string)
+	{
+		const achievementsDone = await this.prisma.user.findUnique({
+			where : {
+				email: username
+			},
+			select: {
+				achievementDone: true
+			}
+		});
+		return (achievementsDone);
 	}
 }
