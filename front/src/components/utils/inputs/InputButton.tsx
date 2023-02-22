@@ -6,6 +6,7 @@ const InputButton = (props: InputButtonProps) => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     props.onSubmit(event);
+	
   };
 
   return (
