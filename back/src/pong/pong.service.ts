@@ -251,6 +251,8 @@ export class PongService {
 			this.rooms[roomId].speedPowerUpInterval = setTimeout(() => {
 				server.to(roomId).emit('updateSpeedPowerUp', true, "left");
 				server.to(roomId).emit('updateSpeedPowerUp', true, "right");
+				this.rooms[roomId].leftPlayer.speedPowerUp = true;
+				this.rooms[roomId].rightPlayer.speedPowerUp = true;
 			}, 10000);
 		}
 
@@ -298,9 +300,17 @@ export class PongService {
 		this.rooms[roomId].speedPowerUpInterval = setTimeout(() => {
 			server.to(roomId).emit('updateSpeedPowerUp', true, position);
 			server.to(roomId).emit('updateSpeedPowerUp', true, position);
+			if (position == "left")
+				this.rooms[roomId].leftPlayer.speedPowerUp = true;
+			else
+				this.rooms[roomId].rightPlayer.speedPowerUp = true;
 		}, 10000);
 
 		this.rooms[roomId].ball.speedPowerUp();
 		server.to(roomId).emit('updateSpeedPowerUp', false, position);
+		if (position == "left")
+			this.rooms[roomId].leftPlayer.speedPowerUp = false;
+		else
+			this.rooms[roomId].rightPlayer.speedPowerUp = false;
 	}
 }
