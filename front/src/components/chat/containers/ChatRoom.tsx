@@ -2,9 +2,7 @@ import React from "react";
 import useChat from "./useChat";
 
 const ChatRoom = (props: any) => {
-
-
-	const { roomId } = props?.match?.params; // Gets roomId from URL
+  const { roomId } = props?.match?.params; // Gets roomId from URL
   const { messages, sendMessage } = useChat(roomId); // Creates a websocket and manages messaging
   const [newMessage, setNewMessage] = React.useState(""); // Message to be sent
 
@@ -25,9 +23,9 @@ const ChatRoom = (props: any) => {
           {messages.map((message, i) => (
             <li
               key={i}
-            //   className={`message-item ${
-            //     message && message.ownedByCurrentUser ? "my-message" : "received-message"
-            //   }`}
+              //   className={`message-item ${
+              //     message && message.ownedByCurrentUser ? "my-message" : "received-message"
+              //   }`}
             >
               {/* {message && message.body} */}
             </li>

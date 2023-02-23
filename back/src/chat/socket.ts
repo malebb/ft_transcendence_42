@@ -16,6 +16,7 @@ interface Room {
 const EVENTS = {
   // connection: 'connection',
   CLIENT: {
+	CONNECT: "CONNECT",
     CREATE_ROOM: 'CREATE_ROOM',
     SEND_ROOM_MESSAGE: 'SEND_ROOM_MESAGE',
     JOIN_ROOM: 'JOIN_ROOM',
@@ -44,7 +45,8 @@ const io = new Server(4444, {
 });
 
 io.on('connect', (socket) => {
-  console.log('a user connected');
+
+	console.log("User connected");
 
   socket.on(EVENTS.CLIENT.SEND_ROOM_MESSAGE, (message) => {
     // console.log(username + " send " + message + " on " + roomId);
