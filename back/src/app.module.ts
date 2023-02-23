@@ -8,7 +8,7 @@ import { BookmarkModule } from './bookmark/bookmark.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PongModule } from './pong/pong.module';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtGuard } from './auth/guard';
+import { JwtGuard , RtGuard} from './auth/guard';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
@@ -18,6 +18,10 @@ import { NestjsFormDataModule } from 'nestjs-form-data';
     provide: APP_GUARD,
     useClass: JwtGuard,
   },
+  /*{
+    provide: APP_GUARD,
+    useClass: RtGuard,
+  },*/
 ],
 })
 export class AppModule {}

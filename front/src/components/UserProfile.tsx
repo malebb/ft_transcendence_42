@@ -3,6 +3,9 @@ import { useParams } from 'react-router-dom'
 import { AxiosResponse } from 'axios'
 import axios from 'axios'
 import {getToken, axiosMain, axiosToken} from '../api/axios'
+import '../styles/UserProfile.css'
+import Sidebar from './Sidebar'
+import Headers from './Headers'
 
 const GET_PROFILE_PICTURE='http://localhost:3333/users/profile-image/' 
 const GET_STATUS_PATH='/users/request-status/' 
@@ -35,6 +38,10 @@ const UserProfile = () => {
     const [errMsg, setErrMsg] = useState('');
     const [friendStatus, setFriendStatus] = useState<string>("");
     const [sendingStatus, setSendingStatus] = useState<string>("");
+    const [showConfirmation, setShowConfirmation] = useState(false);
+	  const userSessionId = JSON.parse(sessionStorage.getItem('id')!);
+
+    const handleUnfriendClick = (): void => setShowConfirmation(true);
 
     const AddFriendReq = async () : Promise<string> => {
        // e.preventDefault();
@@ -135,26 +142,32 @@ const UserProfile = () => {
   }, []);
 
 
-  const deleteRequest = async () => {
-    try{
-        const sendingReq: AxiosResponse = await (await axiosToken()).get('users/destroy-friend-request-by-userid/' + userId)
-        console.log(JSON.stringify(sendingReq.data));
-        setFriendStatus("");
-        return sendingReq.data;
+  const deleteRequest = async (confirmed: boolean) => {
+    if (confirmed) 
+    {
+      try{
+          const sendingReq: AxiosResponse = await (await axiosToken()).get('users/destroy-friend-request-by-userid/' + userId)
+          console.log(JSON.stringify(sendingReq.data));
+          setFriendStatus("");
+          setShowConfirmation(false);
+          return sendingReq.data;
+      }
+      catch(err:any){
+          console.log('error getme');
+          if (!err?.response)
+          {
+            setErrMsg('No Server Response');
+          }else if (err.response?.status === 403)
+          {
+            setErrMsg('Invalid Credentials');
+          }else{
+            setErrMsg('Unauthorized');
+          }
+          setShowConfirmation(false);
+          return ("" as string);
+      }
     }
-    catch(err:any){
-        console.log('error getme');
-        if (!err?.response)
-        {
-          setErrMsg('No Server Response');
-        }else if (err.response?.status === 403)
-        {
-          setErrMsg('Invalid Credentials');
-        }else{
-          setErrMsg('Unauthorized');
-        }
-        return ("" as string);
-    }
+    setShowConfirmation(false);
   }
   const refuseRequest = async () => {
     try{
@@ -223,6 +236,26 @@ const UserProfile = () => {
   }
 
   useEffect(() => {
+      if (showConfirmation)
+      {
+        //document.body.style.opacity="0.5";
+        
+        document.body.style.background="#1f2125";
+        document.getElementById("profilePicture")!.style.opacity = "0.5";
+        document.getElementById("divprofileName")!.style.opacity = "0.5";
+        document.body.style.zIndex="98";
+      }
+      else
+      {
+       // document.body.style.opacity="1";
+        document.body.style.background="";
+        document.getElementById("profilePicture")!.style.opacity = "1";
+        document.getElementById("divprofileName")!.style.opacity = "1";
+        document.body.style.zIndex="";
+      }
+  }, [showConfirmation]);
+
+  useEffect(() => {
     if (friendStatus === "pending")
     {
         getSendingStatus();
@@ -237,17 +270,55 @@ const UserProfile = () => {
 
   return (
     <div>
+        <Headers/>
+        <Sidebar/>
         {errMsg}
-        UserProfile
-        <img src={picture} alt='profile_picture'/>
-        {user?.username}
-        {sendingStatus}
-        {friendStatus === "accepted" && <button onClick={deleteRequest}>Unfriend</button>}
-        {friendStatus === "declined" && sendingStatus == "receiver" && <button onClick={acceptRequest}>Add friend +</button>}
-        {friendStatus === "declined" && sendingStatus == "creator" && <button disabled>Not Accepted yet</button>}
-        {friendStatus === "pending" && sendingStatus === "receiver" && <div><button onClick={acceptRequest}>Accept req</button><button onClick={refuseRequest}>Reject Req</button></div>}
-        {friendStatus === "pending" && sendingStatus === "creator" && <button disabled>Pending</button>}
-        {friendStatus === "" && <button onClick={AddFriend}>Add friend +</button>}
+        <div className={showConfirmation? 'container' : 'container'}>
+          {/* <div className='divprofilePicture'> */}
+            <img id="profilePicture" className="profilePicture" src={picture} alt='profile_picture'/>
+          {/* </div> */}
+        <div id="divprofileName" className='divprofileName'>
+          <p className='profileName'>{(user?.username)?.slice(0,15)}</p>
+        </div>
+        <div className='profileFriendButton'>
+        {friendStatus === "accepted" && <div> 
+        <button id="profileButtonCancel" className='profileButtonCancel' onClick={handleUnfriendClick}>Unfriend</button>
+        {showConfirmation && (
+        <div className='profileConfirmPopup'>
+          <p className='popupText'>
+          Are you sure you want to remove this person from your friends list?
+            This action is final and you will not be able to recover it.
+          </p>
+          <button className='profileConfirmYes'onClick={(e:any) => deleteRequest(true)}>Unfriend</button>
+          <button className='profileConfirmNo'onClick={(e:any) => deleteRequest(false)}>Cancel</button>
+        </div>
+        )}
+        </div>
+        }
+        {/* //  <button onClick={deleteRequest}>Unfriend</button>} */}
+        {friendStatus === "declined" && sendingStatus == "receiver" && <button className='profileButtonAddFriend' onClick={acceptRequest}>Add friend +</button>}
+        {/* {friendStatus === "declined" && sendingStatus == "creator" && <button className='profileButtonWaiting' disabled>Not Accepted yet</button>} */}
+        {friendStatus === "pending" && sendingStatus === "receiver" && <div><button className='profileButtonAddFriend' onClick={acceptRequest}>Accept req</button><button className='profileButtonRefuse' onClick={refuseRequest}>Reject Req</button></div>}
+        {friendStatus === "pending" && sendingStatus === "creator" && <div> 
+        <button id="profileButtonCancel" className={showConfirmation ? 'profileButtonCancel' : 'profileButtonCancel'} onClick={handleUnfriendClick}>Cancel</button>
+        {showConfirmation && (
+        <div className='profileConfirmPopup'>
+          <p className='popupText'>
+          Are you sure you want to remove this person from your waiting list?
+            This action is final and you will not be able to recover it.
+          </p>
+          <button className='profileConfirmYes' onClick={(e:any) => deleteRequest(true)}>Yes</button>
+          <button className='profileConfirmNo' onClick={(e:any) => deleteRequest(false)}>No</button>
+        </div>
+        )}
+        </div>
+        }
+        {/* <button disabled>Pending</button>} */}
+        {(friendStatus === "" && (userId != userSessionId)) ?
+          <button className='profileButtonAddFriend' onClick={AddFriend}>Add friend +</button> : (<></>)
+          }
+        </div>
+    </div>
     </div>
   )
 }

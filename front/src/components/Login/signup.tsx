@@ -73,7 +73,8 @@ const Signup = () => {
       console.log(response.data);
       setSuccess(true);
      // setToken(response.data.token);
-      sessionStorage.setItem("tokens", JSON.stringify(response.data));
+      sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
+      sessionStorage.setItem("id", JSON.stringify(response.data.userId));
       console.log(response.data.access_token);
       //console.log(token);
     }catch(err : any)

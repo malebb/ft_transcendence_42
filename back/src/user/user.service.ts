@@ -114,6 +114,7 @@ export class UserService {
 
     async createFriendRequest(creatorId: number, receiverId: number) : Promise<string>
     {
+        if (creatorId == receiverId) return;
         const status = await this.alreadyRequested(creatorId, receiverId);
         if (status === "")
         {
@@ -131,6 +132,7 @@ export class UserService {
 
     async acceptFriendRequestByUserId(myId: number,userId: number)
     {
+        if (myId == userId) return;
         return await this.prisma.friendRequest.updateMany({
             where: {
                 receiverId: myId,
@@ -166,6 +168,7 @@ export class UserService {
     }
     async declineFriendRequestByUserId(myId: number,userId: number)
     {
+        if (myId == userId) return;
         return await this.prisma.friendRequest.updateMany({
             where: {
                 receiverId: myId,
@@ -178,6 +181,7 @@ export class UserService {
     }
     async deleteFriendRequestByUserId(myId: number,userId: number)
     {
+        if (myId == userId) return;
         let ret = await this.prisma.friendRequest.deleteMany({
             where: {
                 receiverId: myId,

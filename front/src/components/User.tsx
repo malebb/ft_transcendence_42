@@ -349,7 +349,7 @@ useEffect(() => {
       <section>
         <h1>SETTINGS</h1>
         <label>Activate Google Authentificator 2FA</label>
-        <input type={'checkbox'} checked={isTFA} onChange={printQrCode}/>
+        {/* <input type={'checkbox'} checked={isTFA} onChange={printQrCode}/> */}
         {isTFA ? (<>
         <Link className="Nav-Qrcode" to="/2famodif">
         <button /*onClick={QrCodePage}*/>Change</button>

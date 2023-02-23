@@ -36,7 +36,7 @@ export class AuthService {
         return hash;
     }
     
-    async signup(dto: AuthDto) : Promise<Tokens>
+    async signup(dto: AuthDto) : Promise<Object>
     {
         const hash = await argon.hash(dto.password);
         try{
@@ -51,7 +51,7 @@ export class AuthService {
             const tokens = await this.signToken(user.id, user.email);
             this.updateRtHash(user.id, tokens.refresh_token)
             console.log(tokens)
-            return tokens;
+            return {tokens: tokens, isTfa: user.isTFA, userId: user.id};
         }
         catch(error)
         {
@@ -69,7 +69,6 @@ export class AuthService {
 
     async signin(dto: AuthDto) : Promise<Object>
     {
-        console.log('sigin');
         const user = await this.prismaService.user.findUnique({
             where:{
                 email: dto.email,
@@ -91,7 +90,7 @@ export class AuthService {
         }
         const tokens = await this.signToken(user.id, user.email);
         this.updateRtHash(user.id, tokens.refresh_token)
-        return {tokens: tokens, isTfa: user.isTFA};
+        return {tokens: tokens, isTfa: user.isTFA, userId: user.id};
   //      const user = await this.prismaService.user.findUnique({
   //          email,
   //          hash,
@@ -160,7 +159,7 @@ export class AuthService {
         const tokens = await this.signToken(user.id, user.email);
         this.updateRtHash(user.id, tokens.refresh_token)
         console.log("tokens ==" + JSON.stringify(tokens));
-        return {tokens: tokens, isTfa: user.isTFA};
+        return {tokens: tokens, isTfa: user.isTFA, userId: user.id};
         //console.log("data = " + JSON.stringify(response.data));
         return response.data;
     }

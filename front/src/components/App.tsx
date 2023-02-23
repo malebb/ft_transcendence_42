@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/App.css';
 import { Route, Routes, BrowserRouter } from 'react-router-dom';
-import Headers from '../components/Headers';
+import Headers from './HeadersTitle';
 import Nav from '../components/Nav';
 import Canvas from '../components/Canvas'
 import { AuthProvider } from '../context/TokenContext';

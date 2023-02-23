@@ -50,12 +50,12 @@ function SearchBar() {
   return (
     <div>
       <div>
-        <input type="text" value={query} onChange={handleInputChange} />
+        <input className='Nav-Searchbar' type="text" value={query} onChange={handleInputChange} placeholder="Search for a friend..."/>
       </div>
-      <div>
+      <div className='Nav-Result'>
         <ul>
           {results.map((item) => (
-            <li key={item.id}><Link to={'/user/' + item.id}>{item.username}</Link></li>
+            <div key={item.id}><Link to={'/user/' + item.id}>{item.username}</Link></div>
           ))}
         </ul>
       </div>
