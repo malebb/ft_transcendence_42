@@ -187,7 +187,7 @@ const Games = () => {
 	
 		const initGames = async () =>
 		{
-			const axiosInstance = axiosToken();
+			const axiosInstance = await axiosToken();
 	
 			if (gameId)
 			{

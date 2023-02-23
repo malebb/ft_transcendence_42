@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "users" ALTER COLUMN "id42" SET DATA TYPE TEXT;

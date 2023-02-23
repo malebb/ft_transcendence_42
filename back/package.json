@@ -53,6 +53,7 @@
     "ft_transcendence": "file:../lib",
     "gapi-script": "^1.2.0",
     "nestjs-form-data": "^1.8.7",
+    "oauth": "^0.10.0",
     "oauth2": "^0.0.1",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
