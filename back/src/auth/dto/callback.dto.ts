@@ -1,12 +1,8 @@
+
 import { IsEmail, isNotEmpty, IsNotEmpty, isString, IsString } from 'class-validator';
 
-export class AuthDto{
+export class CallbackDto{
     
     @IsNotEmpty()
-    email: string;
-
-
-    @IsString()
-    @IsNotEmpty()
-    password: string;
+    code: string;
 }

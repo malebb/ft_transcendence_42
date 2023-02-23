@@ -2,6 +2,7 @@ import { Ball, Player } from "ft_transcendence";
 import { io, Socket } from "socket.io-client";
 import { useState, useRef, useEffect} from 'react';
 import { axiosToken } from '../api/axios';
+import { AxiosInstance } from 'axios';
 import Game from '../interfaces/Game';
 import { Link, useParams } from "react-router-dom";
 import Draw from "../classes/Draw";
@@ -21,6 +22,7 @@ const Games = () => {
 	const map						= useRef<HTMLImageElement | null>(null);
 	const speedPowerUp				= useRef<HTMLImageElement | null>(null);
 	const animationFrameId			= useRef<number>(0);
+	const axiosInstance				= useRef<AxiosInstance | null>(null);
 
 	const printGames = () =>
 	{
@@ -187,8 +189,6 @@ const Games = () => {
 	
 		const initGames = async () =>
 		{
-			const axiosInstance = axiosToken();
-	
 			if (gameId)
 			{
 				ctx.current = canvasRef.current.getContext("2d");
@@ -197,7 +197,8 @@ const Games = () => {
 			}
 			else
 			{
-				setGamesList((await axiosInstance.get('/game')).data);
+				axiosInstance.current = await axiosToken();
+				setGamesList((await axiosInstance.current.get('/game')).data);
 			}
 		}
 

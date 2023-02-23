@@ -10,7 +10,7 @@ import { PongModule } from './pong/pong.module';
 import { GameModule } from './game/game.module';
 import { HistoryModule } from './history/history.module';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtGuard } from './auth/guard';
+import { JwtGuard , RtGuard} from './auth/guard';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import  GameController from './game/game.controller';
 
@@ -21,6 +21,10 @@ import  GameController from './game/game.controller';
     provide: APP_GUARD,
     useClass: JwtGuard,
   },
+  /*{
+    provide: APP_GUARD,
+    useClass: RtGuard,
+  },*/
 ],
 })
 export class AppModule {}

@@ -262,6 +262,7 @@ export default function Canvas()
 			document.addEventListener('keyup', notifyKeyReleased);
 			// TODO fetch user selected map in database
 
+			axiosInstance.current = await axiosToken();
 			map.current = draw.current!.initGameMap((await axiosInstance.current!.get('/users/me', {})).data.map);
 			map.current!.onload = function()
 			{
@@ -304,7 +305,9 @@ export default function Canvas()
 				let zones = [cancelZone];
 				let playerData: PlayerData = {id: "", username: "", skin: "", powerUpMode: powerUpMode.current};
 
+				axiosInstance.current = await axiosToken();
 				playerData.skin = (await axiosInstance.current!.get('/users/me', {})).data.skin;
+				axiosInstance.current = await axiosToken();
 				playerData.username = (await axiosInstance.current!.get('/users/me', {})).data.email;
 
 				socket.current = io(`ws://localhost:3333`,
@@ -327,10 +330,11 @@ export default function Canvas()
 			} 
 		}
 
-		function changeSkin(name : string)
+		async function changeSkin(name : string)
 		{
 			draw.current!.skins = [];
-			axiosInstance.current!.patch('/users/', {skin: name});
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current!.post('/users/', {skin: name});
 			menu();
 		}
 
@@ -356,7 +360,8 @@ export default function Canvas()
 
 		async function changeMap(name: string)
 		{
-			axiosInstance.current!.patch('/users/', {map: name});
+			axiosInstance.current = await axiosToken();
+			axiosInstance.current!.post('/users/', {map: name});
 			menu();
 		}
 
@@ -439,7 +444,10 @@ export default function Canvas()
 
 		async function initUser()
 		{
+
+			axiosInstance.current = await axiosToken();
 			await axiosInstance.current!.get('/users/me', {});
+			console.log("ui");
 		}
 
 		function redirectSignInPage()
@@ -463,7 +471,7 @@ export default function Canvas()
 
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
-		axiosInstance.current = axiosToken();
+//		axiosInstance.current = await axiosToken();
 		if (getToken() == null)
 		{
 			signInToPlay();

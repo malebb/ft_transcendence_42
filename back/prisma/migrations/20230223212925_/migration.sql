@@ -1,8 +1,13 @@
+-- CreateEnum
+CREATE TYPE "Status" AS ENUM ('pending', 'accepted', 'declined');
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "id42" TEXT,
+    "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "hash" TEXT NOT NULL,
     "hashRt" TEXT,
@@ -15,6 +20,16 @@ CREATE TABLE "users" (
     "map" TEXT NOT NULL DEFAULT 'basic',
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "FriendRequest" (
+    "id" SERIAL NOT NULL,
+    "status" "Status" NOT NULL,
+    "creatorId" INTEGER NOT NULL,
+    "receiverId" INTEGER NOT NULL,
+
+    CONSTRAINT "FriendRequest_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -71,6 +86,9 @@ CREATE TABLE "_GamePlayedToUser" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_id42_key" ON "users"("id42");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
