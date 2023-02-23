@@ -30,8 +30,11 @@ model User {
   skin String @default("white")
   map  String @default("basic")
 
+  stats Stats?
+
   @@map("users")
 }
+
 
 model FriendRequest {
   id         Int    @id @default(autoincrement())
@@ -44,4 +47,24 @@ enum Status {
   pending
   accepted
   declined
+}
+
+model Stats {
+  id        Int      	@id @default(autoincrement())
+
+  win		Int			@default(0)
+  defeat	Int			@default(0)
+  victory	Int			@default(0)
+  xp		Int			@default(0)
+  level		Int			@default(0)
+
+  user		User		@relation(fields: [userId], references: [id])
+  userId	Int			@unique
+}
+
+model Game {
+	id				Int			@id @default(autoincrement())
+	gameId			String		@unique
+	leftUsername 	String
+	rightUsername	String
 }

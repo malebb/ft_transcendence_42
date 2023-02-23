@@ -232,4 +232,9 @@ export default class Draw
 		else
 			this.checkboxStatus = true;
 	}
+
+	spectatorEnd()
+	{
+		this.text("Game is finished", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New");
+	}
 }

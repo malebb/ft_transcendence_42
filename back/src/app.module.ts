@@ -7,13 +7,15 @@ import { UserModule } from './user/user.module';
 import { BookmarkModule } from './bookmark/bookmark.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PongModule } from './pong/pong.module';
+import { GameModule } from './game/game.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard , RtGuard} from './auth/guard';
 import { NestjsFormDataModule } from 'nestjs-form-data';
+import  GameController from './game/game.controller';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, NestjsFormDataModule],
-  controllers: [AppController],
+  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, GameModule, NestjsFormDataModule],
+  controllers: [AppController, GameController],
   providers: [AppService, {
     provide: APP_GUARD,
     useClass: JwtGuard,

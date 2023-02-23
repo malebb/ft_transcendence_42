@@ -14,6 +14,7 @@ import VerifTfa from './VerifTfa';
 import User from './User';
 import History from './History';
 import Friends from './Friends';
+import Games from './Games';
 import PrivateRoutes from './PrivateRoute/PrivateRoutes';
 import {useEffect} from 'react';
 import Callback from './Callback';
@@ -28,7 +29,8 @@ function App() {
       <Routes>
           <Route path='/user' element={<User/>} />
           <Route path='/history' element={<History/>}/>
-          <Route path='/friends'element={<Friends/>}/>
+          <Route path='/friends' element={<Friends/>}/>
+          <Route path='/games/:gameId?' element={<Games/>}/>
         <Route path='/' element={<Main/>} />
         <Route path='/signin' element={<Signin/>}/>
         <Route path='/signup' element={<Signup/>}/>

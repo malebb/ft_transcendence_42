@@ -37,10 +37,41 @@ export default function Canvas()
 
 	useEffect(() =>
 	{
+		function powerUpEnabled()
+		{
+			return ((position.current === "left" && leftPlayer.current!.speedPowerUp) ||
+			(position.current === "right" && rightPlayer.current!.speedPowerUp))
+		}
+
+		function powerUp(e: KeyboardEvent)
+		{
+			if (keyPressed.current)
+				return;
+			if (e.key === ' ' && powerUpEnabled())
+			{
+				socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
+				keyPressed.current = true;
+			}
+		}
+
+		function notifyKeyReleased()
+		{
+			keyPressed.current = false;
+		}
+
+		function stopGame()
+		{
+			window.cancelAnimationFrame(animationFrameId.current)
+			socket.current!.disconnect();
+			kd.current.stop();
+			document!.removeEventListener('keypress', powerUp);
+			document!.removeEventListener('keyup', notifyKeyReleased);
+		}
+
 		const pong = async () => 
 		{
-		function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
-		{
+			function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
+			{
 			var canvas = document.getElementById('canvas');
 			var clickZone = canvas!.getBoundingClientRect();
 
@@ -110,15 +141,6 @@ export default function Canvas()
 			canvas!.removeEventListener('mousemove', link[1]);
 		}
 
-		function stopGame()
-		{
-			window.cancelAnimationFrame(animationFrameId.current)
-			socket.current!.disconnect();
-			kd.current.stop();
-			document!.removeEventListener('keypress', powerUp);
-			document!.removeEventListener('keyup', notifyKeyReleased);
-		}
-
 		function opponentDisconnection()
 		{
 			stopGame();
@@ -159,28 +181,6 @@ export default function Canvas()
 			}
 		}
 
-		function notifyKeyReleased()
-		{
-			keyPressed.current = false;
-		}
-
-		function powerUpEnabled()
-		{
-			return ((position.current === "left" && leftPlayer.current!.speedPowerUp) ||
-			(position.current === "right" && rightPlayer.current!.speedPowerUp))
-		}
-
-		function powerUp(e: KeyboardEvent)
-		{
-			if (keyPressed.current)
-				return;
-			if (e.key === ' ' && powerUpEnabled())
-			{
-				socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
-				keyPressed.current = true;
-			}
-		}
-
 		function updateSpeedPowerUp(status: boolean, position: string)
 		{
 			if (position === "left")
@@ -191,8 +191,8 @@ export default function Canvas()
 
 		async function launchGame()
 		{
-			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.leftPlayer);
-			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", null, null), room.current!.rightPlayer);
+			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", null, null), room.current!.leftPlayer);
+			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", null, null), room.current!.rightPlayer);
 
 			leftPlayer.current.setCtx(ctx.current!);
 			rightPlayer.current.setCtx(ctx.current!);
@@ -260,7 +260,6 @@ export default function Canvas()
 
 			document.addEventListener('keypress', powerUp);
 			document.addEventListener('keyup', notifyKeyReleased);
-
 			// TODO fetch user selected map in database
 
 			map.current = draw.current!.initGameMap((await axiosInstance.current!.get('/users/me', {})).data.map);
@@ -303,14 +302,17 @@ export default function Canvas()
 				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, "black", "Courier New");
 
 				let zones = [cancelZone];
-				let playerData: PlayerData = {id: "", skin: "", powerUpMode: powerUpMode.current};
+				let playerData: PlayerData = {id: "", username: "", skin: "", powerUpMode: powerUpMode.current};
 
 				playerData.skin = (await axiosInstance.current!.get('/users/me', {})).data.skin;
+				playerData.username = (await axiosInstance.current!.get('/users/me', {})).data.email;
+
 				socket.current = io(`ws://localhost:3333`,
 				{
 					transports: ["websocket"],
 					query:	{
 								playerData: JSON.stringify(playerData),
+								spectator: false
 							}
 				});
 				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
@@ -474,9 +476,12 @@ export default function Canvas()
 			return (true);
 		}
 		}
+		
 		pong();
-		return () => { 
-			window.cancelAnimationFrame(animationFrameId.current)
+		return () =>
+		{ 
+			if (socket.current != null)
+				stopGame();
 		}
 
 	}, []);

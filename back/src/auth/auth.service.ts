@@ -46,7 +46,10 @@ export class AuthService {
                     hash: hash,
                     profilePicture: DEFAULT_IMG,
                     username: dto.email,
-                }
+					          stats: {
+						          create: {}
+					          }
+                    }
             })
             const tokens = await this.signToken(user.id, user.email);
             this.updateRtHash(user.id, tokens.refresh_token)

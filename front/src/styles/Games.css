@@ -1,0 +1,28 @@
+.game
+{
+   height: 175px;
+   width: 450px;
+   padding: 20px;
+   background-color: #9A25FF;
+   border: 1px, solid;
+   margin: 40px;
+   display: flex;
+   justify-content: space-around;
+   align-items: center;
+   text-decoration: none;
+   transition: transform .2s;
+   color: #3F007B;
+   font-size: 19px;
+   border-radius: 25px;
+}
+
+.game:hover
+{
+	transform: scale(1.025);
+}
+
+.gameLink
+{
+   text-decoration: none;
+   color: inherit;
+}

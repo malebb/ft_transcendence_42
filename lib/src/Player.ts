@@ -7,7 +7,8 @@ export class Player
 	speedPowerUp: boolean = false;
 
 	constructor(public posX: number, public posY: number, public width: number,
-	public height: number, public vel: number, public skin: string, public readonly position: string, public ctx: CanvasRenderingContext2D | null, private canvasSize: Size | null)
+	public height: number, public vel: number, public skin: string, public readonly position: string,
+	public username: string, public ctx: CanvasRenderingContext2D | null, private canvasSize: Size | null)
 	{
 	}
 

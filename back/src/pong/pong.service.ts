@@ -1,14 +1,21 @@
 import { Injectable } from '@nestjs/common'
 import { Ball, Player, Size, Room, PlayerData } from 'ft_transcendence';
 import { Socket, Server } from 'socket.io'
+import { GameService } from '../game/game.service';
+import { StatsService } from '../stats/stats.service';
+import { levels } from './levels'
 
 @Injectable()
 export class PongService {
+
+	constructor(private readonly gameService: GameService,
+			   	private readonly statsService: StatsService) {}
+
 	queue: PlayerData[] = [];
 	powerUpQueue: PlayerData[] = [];
 	rooms = [];
 	sizeCanvas: Size = { width: 600, height: 350 };
-	scoreToWin: number = 11;
+	scoreToWin: number = 1;
 
 	addToQueue(player: PlayerData, queue: PlayerData[]) {
 		queue.push(player);
@@ -25,14 +32,26 @@ export class PongService {
 		}
 	}
 
-	checkQueue(player: PlayerData, queue: PlayerData[]) {
+	spectateRoom(roomId: string, spectator: Socket)
+	{
+		if (roomId in this.rooms)
+		{
+			this.joinRoom(spectator, roomId);
+			spectator.emit(spectator.id, JSON.stringify({joined: true, leftPlayer: this.rooms[roomId].leftPlayer, rightPlayer: this.rooms[roomId].rightPlayer, ball: this.rooms[roomId].ball}));
+		}
+		else
+			spectator.emit(spectator.id, JSON.stringify({joined: false}));
+	}
+
+	checkQueue(player: PlayerData, queue: PlayerData[])
+	{
 		let roomId: string = "";
 		let opponent: PlayerData;
 
 		for (let i = 0; i < queue.length; ++i) {
 			if (queue[i] === player)
 				continue;
-			roomId = queue[i].id < player.id ? queue[i] + player.id : player.id + queue[i];
+			roomId = queue[i].id < player.id ? queue[i].id + player.id : player.id + queue[i].id;
 			opponent = queue[i];
 			this.removeFromQueue(player.id);
 			this.removeFromQueue(opponent.id);
@@ -41,10 +60,11 @@ export class PongService {
 	}
 
 	initRoom(roomId: string, leftPlayer: PlayerData, rightPlayer: PlayerData): Room {
+		this.gameService.addGame(roomId, leftPlayer.username, rightPlayer.username);
 		return (
 			{
 				id: roomId,
-				running: false,
+				playerGoneCount: 0,
 				ball: new Ball(this.sizeCanvas.width / 2,
 					this.sizeCanvas.height / 2,
 					7,
@@ -60,6 +80,7 @@ export class PongService {
 					5,
 					leftPlayer.skin,
 					"left",
+					leftPlayer.username,
 					null,
 					this.sizeCanvas),
 
@@ -72,9 +93,11 @@ export class PongService {
 					5,
 					rightPlayer.skin,
 					"right",
+					rightPlayer.username,
 					null,
 					this.sizeCanvas),
 				speedPowerUpInterval: null,
+				roomInterval: null,
 				powerUpMode: leftPlayer.powerUpMode
 			}
 		);
@@ -105,11 +128,13 @@ export class PongService {
 
 		roomToLeave = Array.from(player.rooms)[1];
 		if (roomToLeave != undefined) {
-			if (this.rooms[roomToLeave].running == false)
-				this.rooms.splice(this.rooms.indexOf(roomToLeave), 1);
-			else {
-				this.rooms[roomToLeave].running = false;
+			if (this.rooms[roomToLeave].playerGoneCount == 1)
+				this.rooms[roomToLeave].playerGoneCount++;
+			else
+			{
+				this.gameService.removeGame(roomToLeave);
 				player.to(roomToLeave).emit("opponentDisconnection");
+				this.rooms[roomToLeave].playerGoneCount++;
 			}
 		}
 	}
@@ -129,11 +154,30 @@ export class PongService {
 		player.join(roomId);
 	}
 
+	async updateStats(winnerUsername: string, loserUsername: string)
+	{
+		this.statsService.addVictory(winnerUsername);
+		this.statsService.addDefeat(loserUsername);
+
+		await this.statsService.addXp(winnerUsername, 500);
+
+		let winnerXp = (await this.statsService.getXp(winnerUsername));
+		let newLevel = 0;
+
+		for (let i = 0; i < levels.length; ++i)
+		{
+			if (levels[i] <= winnerXp)
+				newLevel++;
+		}
+
+		let winnerLevel = (await this.statsService.getLevel(winnerUsername));
+		if (newLevel != winnerLevel)
+			await this.statsService.updateLevel(winnerUsername, newLevel);
+	}
+
 	runRoom(roomId: string, server: Server) {
 		let scorer: string = "";
-		let roomInterval: ReturnType<typeof setInterval>;
 
-		this.rooms[roomId].running = true;
 		if (this.rooms[roomId].powerUpMode) {
 			this.rooms[roomId].speedPowerUpInterval = setTimeout(() => {
 				server.to(roomId).emit('updateSpeedPowerUp', true, "left");
@@ -141,25 +185,39 @@ export class PongService {
 			}, 10000);
 		}
 
-		roomInterval = setInterval(() => {
-			if (!this.rooms[roomId].running) {
-				clearInterval(roomInterval);
+		this.rooms[roomId].roomInterval = setInterval(() =>
+		{
+			if (this.rooms[roomId].playerGoneCount == 2) {
+				clearInterval(this.rooms[roomId].roomInterval);
 				clearInterval(this.rooms[roomId].speedPowerUpInterval);
+				delete this.rooms[roomId];
 			}
-			if ((scorer = this.rooms[roomId].ball.move([this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer])).length) {
-				if (scorer == "left") {
-					server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].leftPlayer.score }));
-					if (this.rooms[roomId].leftPlayer.score == this.scoreToWin)
-						server.to(roomId).emit('endGame', scorer);
+			else
+			{
+				if ((scorer = this.rooms[roomId].ball.move([this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer])).length)
+				{
+					if (scorer == "left")
+					{
+						server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].leftPlayer.score }));
+						if (this.rooms[roomId].leftPlayer.score == this.scoreToWin)
+						{
+							this.updateStats(this.rooms[roomId].leftPlayer.username, this.rooms[roomId].rightPlayer.username);
+							server.to(roomId).emit('endGame', scorer);
+						}
+					}
+					else if (scorer == "right")
+					{
+						server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].rightPlayer.score }));
+						if (this.rooms[roomId].rightPlayer.score == this.scoreToWin)
+						{
+							this.updateStats(this.rooms[roomId].rightPlayer.username, this.rooms[roomId].leftPlayer.username);
+							server.to(roomId).emit('endGame', scorer);
+						}
+					}
+					scorer = "";
 				}
-				else if (scorer == "right") {
-					server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].rightPlayer.score }));
-					if (this.rooms[roomId].rightPlayer.score == this.scoreToWin)
-						server.to(roomId).emit('endGame', scorer);
-				}
-				scorer = "";
+				server.to(roomId).emit('moveBall', JSON.stringify(this.rooms[roomId].ball));
 			}
-			server.to(roomId).emit('moveBall', JSON.stringify(this.rooms[roomId].ball));
 		}, 20);
 	}
 
