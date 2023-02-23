@@ -2,7 +2,6 @@ import { IsEmail, isNotEmpty, IsNotEmpty, isString, IsString } from 'class-valid
 
 export class AuthDto{
     
-//    @IsEmail()
     @IsNotEmpty()
     email: string;
 

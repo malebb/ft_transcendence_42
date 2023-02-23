@@ -1,0 +1,151 @@
+.profilePicture{
+    margin: 0 auto;
+    grid-area: pix;
+    width: 100px;
+    height: 100px;
+    border-radius: 50px;
+    object-fit: cover;
+    object-position: center;
+    border-width: 2px; 
+    vertical-align: middle;
+}
+
+.container{
+    display: grid;
+    grid-auto-flow: column dense;
+    grid-template-columns: 0.3fr 1.2fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0px 0px;
+    grid-template-areas:
+        "pix ."
+        "pix .";
+    align-items: stretch;
+}
+.opacity{
+    opacity: 0.5;
+}
+
+.divprofileName{
+    display: flex;
+}
+
+.profileName{
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #424950;
+    padding: 10px 20px 10px 20px;
+    border-radius: 10px;
+
+}
+
+.divprofileName{
+    display: flex;
+    color: white;
+    align-items: center;
+}
+
+.profileFriendButton{
+    display: flex;
+    align-items: baseline;
+}
+
+.profileButtonAddFriend{
+    font-size: 10px;margin: 3px 3px;
+    background-color: #29632B;
+    border: none;
+    padding: 5px 10px 5px 10px;
+    border-radius: 5px;
+}
+.profileButtonAddFriend:hover{
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0.6;
+}
+.profileButtonAddFriend:active{
+    opacity: 0.3;
+}
+.profileButtonRefuse{
+    font-size: 10px;margin: 3px 3px;
+    background-color: #9a3535;
+    border: none;
+    padding: 5px 10px 5px 10px;
+    border-radius: 5px;
+}
+.profileButtonRefuse:hover{
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0.6;
+}
+.profileButtonRefuse:active{
+    opacity: 0.3;
+}
+.profileButtonCancel{
+    font-size: 10px;margin: 3px 3px;
+    background-color: #c07622;
+    border: none;
+    padding: 5px 10px 5px 10px;
+    border-radius: 5px;
+}
+.profileButtonCancel:hover{
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0.6;
+}
+.profileButtonCancel:active{
+    opacity: 0.3;
+}
+.profileConfirmYes{
+    font-size: 10px;margin: 3px 3px;
+    background-color: #29632B;
+    border: none;
+    padding: 5px 10px 5px 10px;
+    border-radius: 5px;
+}
+.profileConfirmYes:hover{
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0.6;
+}
+.profileConfirmYes:active{
+    z-index: 98;
+    opacity: 0.3;
+}
+.profileConfirmNo{
+    font-size: 10px;margin: 3px 3px;
+    background-color: #9a3535;
+    border: none;
+    padding: 5px 10px 5px 10px;
+    border-radius: 5px;
+}
+.profileConfirmNo:hover{
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0.6;
+}
+.profileConfirmNo:active{
+    opacity: 0.3;
+}
+
+.profileConfirmPopup{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 2fr 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: column;
+    grid-template-areas:
+      "text text"
+      ". .";
+    height: 150px;
+    width: 400px;
+    opacity: 1;
+    border: solid;
+    z-index: 99;
+    border-width: 2px;
+    background-color: #55595e;
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    position: fixed;
+    margin: 200px 200px;
+}
+.popupText {
+    grid-area: text;
+    text-align: center;
+    font-size: 18px;
+}
