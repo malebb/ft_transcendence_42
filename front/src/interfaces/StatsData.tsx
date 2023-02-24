@@ -1,4 +1,4 @@
-export default interface Stats
+export default interface StatsData
 {
 	defeat: number;
 	victory: number;

@@ -7,6 +7,8 @@ import Game from '../interfaces/Game';
 import { Link, useParams } from "react-router-dom";
 import Draw from "../classes/Draw";
 import "../styles/Games.css";
+import Sidebar from './Sidebar'
+import Headers from './Headers'
 
 const Games = () => {
 	const ctx					= useRef<CanvasRenderingContext2D | null>(null);
@@ -220,17 +222,20 @@ const Games = () => {
 	if (!gameId)
 	{
 		return (
-			<div>
-				<div>Games</div>
-				<div>{printGames()}</div>
+			<div id="games">
+	        	<Headers/>
+    	    	<Sidebar/>
+				{printGames()}
 			</div>
 		);
 	}
 	else
 		return (
-			<center>
+			<div id="spectate">
+	        	<Headers/>
+    	    	<Sidebar/>
 				<canvas id="canvas" style={{marginTop: 150}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas>
-			</center>
+			</div>
 		);
 
 }

@@ -3,9 +3,10 @@ import { useParams } from 'react-router-dom'
 import { AxiosResponse } from 'axios'
 import axios from 'axios'
 import {getToken, axiosMain, axiosToken} from '../api/axios'
-import '../styles/UserProfile.css'
-import Sidebar from './Sidebar'
-import Headers from './Headers'
+import '../styles/UserProfile.css';
+import Sidebar from './Sidebar';
+import Headers from './Headers';
+import Stats from './Stats';
 
 const GET_PROFILE_PICTURE='http://localhost:3333/users/profile-image/' 
 const GET_STATUS_PATH='/users/request-status/' 
@@ -319,6 +320,7 @@ const UserProfile = () => {
           }
         </div>
     </div>
+	<Stats/>
     </div>
   )
 }

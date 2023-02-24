@@ -1,6 +1,6 @@
 import React from 'react'
-import { axiosMain, axiosToken } from '../api/axios'
-import axios, { AxiosResponse, AxiosInstance } from 'axios';
+import { axiosMain } from '../api/axios'
+import axios, { AxiosResponse} from 'axios';
 import userEvent from '@testing-library/user-event';
 import { SemanticClassificationFormat, setSourceMapRange } from 'typescript';
 import { useState, useEffect, useRef } from 'react';
@@ -11,8 +11,6 @@ import speakeasy from 'speakeasy';
 // import qrcode from 'qrcode';
 // import { createSecretKey } from 'crypto';
 import { useNavigate, Link} from 'react-router-dom';
-import Stats from '../interfaces/Stats';
-import '../styles/User.css';
 //var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer; 
 
@@ -106,11 +104,6 @@ const User = () => {
 
   const [errMsg, setErrMsg] = useState('');
 
-  const [victory, setVictory] = useState(0);
-  const [defeat, setDefeat] = useState(0);
-  const [xp, setXp] = useState(0);
-  const [level, setLevel] = useState(0);
-  const axiosInstance = useRef<AxiosInstance | null>(null);
 
   function validURL(str: string) {
     var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
@@ -334,21 +327,6 @@ useEffect(() => {
   console.log("image to print = " + image);
   console.log("errMsg = " + errMsg);
 
-	useEffect(() => {
-
-			const initStats = async () => {
-				axiosInstance.current = await axiosToken();
-				const username = (await axiosInstance.current.get('users/me', {})).data.email;
-				axiosInstance.current = await axiosToken();
-				let stats: Stats = (await axiosInstance.current.get('/stats/' + username)).data;
-				setVictory(stats.victory);
-				setDefeat(stats.defeat);
-				setXp(stats.xp);
-				setLevel(stats.level);
-			}
-			initStats();
-
-	}, []);
 
     return (
       <div>
@@ -393,27 +371,6 @@ useEffect(() => {
         </section>
       )
       }
-		<h2>Your stats</h2>
-	  <div id="stats">
-			<table>
-				<tr>
-					<th>Victories</th>
-					<td>{victory}</td>
-				</tr>
-				<tr>
-					<th>Defeats</th>
-					<td>{defeat}</td>
-				</tr>
-				<tr>
-					<th scope="row">Level</th>
-					<td>{level}</td>
-				</tr>
-				<tr>
-					<th>Xp</th>
-					<td>{xp}</td>
-				</tr>
-			</table>
-		</div>
       </div>
     )
   }

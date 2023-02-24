@@ -4,6 +4,8 @@ import { AxiosInstance } from 'axios';
 import { GamePlayed } from '../interfaces/GamePlayed';
 import { AchievementDone } from '../interfaces/AchievementDone';
 import '../styles/history.css';
+import Sidebar from './Sidebar'
+import Headers from './Headers'
 
 interface HistoryElem
 {
@@ -78,7 +80,11 @@ const History = () => {
 		initHistory();
 	}, []);
 	return (
-		<div id="history">{printHistory()}</div>
+		<div id="history">
+        <Headers/>
+        <Sidebar/>
+		{printHistory()}
+		</div>
 	);
 }
 
