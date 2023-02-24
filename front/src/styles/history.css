@@ -5,22 +5,24 @@
 	align-items: center;
 }
 
-
 .historyElem
 {
 	margin: 20px;
 	background-color: #547EBE;
-	height: 100px;
-	width: 400px;
+	height: 70px;
+	width: 80%;
 	text-align: center;
 	border-radius: 5px;
 }
 
-#gamePlayed
+.gameDataContainer
 {
 	display: flex;
 	justify-content: space-around;
+	flex-direction: row;
 	align-items: center;
+	width: 40%;
+	margin: auto;
 }
 
 #achievementDone
@@ -42,4 +44,18 @@
 {
 	margin: 5px;
 	margin-bottom: 10px;
+}
+
+.score
+{
+	width: 100px;
+	white-space: nowrap;
+	margin-right: 10px;
+	margin-left: 10px;
+}
+
+.leftPlayer, .rightPlayer
+{
+	width: 160px;
+	text-align: center;
 }

@@ -6,6 +6,7 @@ import LinkZone from "../interfaces/LinkZone";
 import { axiosToken, getToken } from '../api/axios';
 import { AxiosInstance} from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { CANVAS_FONT, FONT_COLOR } from '../classes/Draw';
 
 interface CheckboxData
 {
@@ -151,8 +152,8 @@ export default function Canvas()
 				draw.current!.outGameBackground(background);
 				draw.current!.opponentDisconnection();
 
-				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
-				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
+				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
 				let zones = [newGameZone, menuZone];
 
 				addLink(newGameZone, matchmaking, zones, 0);
@@ -172,8 +173,8 @@ export default function Canvas()
 				else
 					draw.current!.youLost();
 
-				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
-				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
+				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
 				let zones = [newGameZone, menuZone];
 
 				addLink(newGameZone, matchmaking, zones, 0);
@@ -300,7 +301,7 @@ export default function Canvas()
 				draw.current!.outGameBackground(background);
 				draw.current!.matchmaking();
 
-				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, "black", "Courier New");
+				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
 
 				let zones = [cancelZone];
 				let playerData: PlayerData = {id: "", username: "", skin: "", powerUpMode: powerUpMode.current};
@@ -408,10 +409,10 @@ export default function Canvas()
 					{
 						draw.current!.outGameBackground(background);
 						draw.current!.checkbox(background);
-						let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35, "black", "Courier New");
-						let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
-						let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
-						draw.current!.text("Power-up", size.current.width / 2.1, size.current.height / 1.66, 16, "black", "Courier New");
+						let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35, FONT_COLOR, CANVAS_FONT);
+						let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+						let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+						draw.current!.text("Power-up", size.current.width / 2.1, size.current.height / 1.66, 16, FONT_COLOR, CANVAS_FONT);
 						let checkboxZone = draw.current!.checkbox(checkbox);
 						draw.current!.checked(checked);
 	
@@ -469,6 +470,9 @@ export default function Canvas()
 			}
 		}
 
+
+//		let googleFont = new FontFace("Tilt Warp", "url('https://fonts.googleapis.com/css2?family=Tilt+Warp&display=swap')");
+
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
 //		axiosInstance.current = await axiosToken();
@@ -480,7 +484,15 @@ export default function Canvas()
 		else
 		{
 			await initUser();
-			menu();
+//				console.log("aie"); let googleFont = draw.current.initFont();
+			//let googleFont = new FontFace("Tilt Warp", "url('https://fonts.gstatic.com/s/bitter/v7/HEpP8tJXlWaYHimsnXgfCOvvDin1pK8aKteLpeZ5c0A.woff2')");
+			//let googleFont = new FontFace("Tilt Warp", "url('https://fonts.googleapis.com/css2?family=Tilt+Warp&display=swap')");
+	//		let googleFont = new FontFace("Tilt Warp", "url('http://localhost:3000/fonts/TiltWarp-Regular.ttf')");
+			let googleFont = draw.current!.initFont();
+			document.fonts.add(googleFont);
+			googleFont.load().then(() => {
+				menu();
+			});
 			return (true);
 		}
 		}

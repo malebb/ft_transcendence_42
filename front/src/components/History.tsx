@@ -30,12 +30,17 @@ const History = () => {
 			return (historyElem.current.map((elem) => {
 			if (elem.type === "game")
 			{
-				return (<div className="historyElem" id="gamePlayed" key={elem.value.date}><h2>{trimUsername(elem.value.leftUsername)}</h2>
-				<h2>{elem.value.leftScore} - {elem.value.rightScore}</h2> <h2>{trimUsername(elem.value.rightUsername)}</h2></div>);
+				return (<div className="historyElem" id="gamePlayed" key={elem.value.date}>
+							<div className="gameDataContainer">
+								<h3 className="leftPlayer">{trimUsername(elem.value.leftUsername)}</h3>
+								<h3 className="score">{elem.value.leftScore} - {elem.value.rightScore}</h3>
+								<h3 className="rightPlayer">{trimUsername(elem.value.rightUsername)}</h3>
+							</div>
+						</div>);
 			}
 			else if (elem.type === "achievement")
 			{
-				return (<div className="historyElem" id="achievementDone"key={elem.value.date}><h2 className="title">{elem.value.title}</h2><h4 className="desc">{elem.value.desc}</h4></div>);
+				return (<div className="historyElem" id="achievementDone"key={elem.value.date}><h3 className="title">{elem.value.title}</h3><h4 className="desc">{elem.value.desc}</h4></div>);
 			}
 			else
 				return (<div>other</div>);

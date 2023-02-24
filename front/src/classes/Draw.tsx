@@ -2,6 +2,10 @@ import Skin from "../classes/Skin";
 import MapData from "../interfaces/MapData";
 import LinkZone from '../interfaces/LinkZone'; 
 
+//export const CANVAS_FONT:string = 'Tilt Warp';
+export const CANVAS_FONT:string = 'Poppins';
+export const FONT_COLOR:string = 'white';
+
 export default class Draw
 {
 	skins : Skin[] = [];
@@ -17,6 +21,12 @@ export default class Draw
 
 	constructor(public readonly ctx : CanvasRenderingContext2D | null)
 	{
+	}
+
+	initFont()
+	{
+	//	return (new FontFace("Tilt Warp", "url('http://localhost:3000/fonts/TiltWarp-Regular.ttf')"));
+		return (new FontFace("Poppins", "url('http://localhost:3000/fonts/Poppins-SemiBold.ttf')"));
 	}
 
 	initCheckbox()
@@ -73,12 +83,6 @@ export default class Draw
 		return (img);
 	}
 
-	menuBackground()
-	{
-		this.ctx!.fillStyle = 'black';
-		this.ctx!.fillRect(0, 0, this.ctx!.canvas.width, this.ctx!.canvas.height);
-	}
-	
 	getTextZone(text: string, posX : number, posY : number)
 	{
 			let	textzone : TextMetrics = this.ctx!.measureText(text);
@@ -103,17 +107,17 @@ export default class Draw
 
 	matchmaking()
 	{
-		this.text("looking for player...", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New");
+		this.text("looking for player...", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
 
 	opponentDisconnection()
 	{
-		this.text("Opponent has left", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New");
+		this.text("Opponent has left", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
 	
 	skinsTitle()
 	{
-		this.text("Skins", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35, "black", "Courier New");
+		this.text("Skins", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35, FONT_COLOR, CANVAS_FONT);
 	}
 
 	skin(name : string) : LinkZone
@@ -131,7 +135,7 @@ export default class Draw
 
 	mapsTitle()
 	{
-		this.text("Maps", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35, "black", "Courier New");
+		this.text("Maps", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 6, 35, FONT_COLOR, CANVAS_FONT);
 	}
 
 	map(): LinkZone[]
@@ -181,12 +185,12 @@ export default class Draw
 
 	youWon()
 	{
-		this.text("You won!", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New");
+		this.text("You won!", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
 
 	youLost()
 	{
-		this.text("You lost!", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New");
+		this.text("You lost!", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
 
 	score(scoreLeft: number, scoreRight: number)
@@ -205,7 +209,7 @@ export default class Draw
 
 	signInToPlay() : LinkZone
 	{
-		return (this.text("Sign in to play", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New"));
+		return (this.text("Sign in to play", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT));
 	}
 
 	checkbox(checkbox: HTMLImageElement): LinkZone
@@ -235,6 +239,6 @@ export default class Draw
 
 	spectatorEnd()
 	{
-		this.text("Game is finished", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, "black", "Courier New");
+		this.text("Game is finished", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
 }
