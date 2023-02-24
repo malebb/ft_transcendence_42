@@ -6,15 +6,13 @@ import {
   BrowserRouter,
 } from "react-router-dom";
 import { useRef, useEffect, useState } from "react";
-// import { useSockets } from "./context/socket.context";
+// import { SocketContext } from "./context/socket.context";
 import RoomsContainer from "./containers/Rooms";
-import MessagesContainer from "./containers/Message";
+// import MessagesContainer from "./containers/Message";
 import io, { Socket } from "socket.io-client";
 // import ChatRoom from "./containers/ChatRoom";
 import { ChatBaseRoom } from "./containers/ChatBaseRoom";
 import EVENTS from "./config/events";
-
-const socket = io("http://localhost:4444");
 
 // doc: https://v5.reactrouter.com/web/example/url-params
 

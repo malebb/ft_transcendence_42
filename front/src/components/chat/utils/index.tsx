@@ -1,30 +1,30 @@
-import { useSockets } from '../context/socket.context';
+import { SocketContext } from '../context/socket.context';
 
 import RoomsContainer from '../containers/Rooms';
 import MessagesContainer from '../containers/Message';
 import { useRef } from "react";
 
 export default function Home() {
-	const { socket, username, setUsername } = useSockets();
-	const usernameRef = useRef(null)
+	// const { socket, username, setUsername } = SocketContext();
+	// const usernameRef = useRef(null)
 
-	function handleSetUsername() {
-		if (!usernameRef.current)
-			return;
-		const value = usernameRef.current['value'];
-		if (!value) {
-			return ;
-		}
+	// function handleSetUsername() {
+	// 	if (!usernameRef.current)
+	// 		return;
+	// 	const value = usernameRef.current['value'];
+	// 	if (!value) {
+	// 		return ;
+	// 	}
 
-		setUsername(value);
+	// 	setUsername(value);
 
-		localStorage.setItem("username", value);
+	// 	localStorage.setItem("username", value);
 
-	}
+	// }
 
 	return (
 		<div>
-			{!username && (
+			{/* {!username && (
 				<div>
 					<div>
 					<input placeholder="Username" ref={usernameRef} />
@@ -39,7 +39,7 @@ export default function Home() {
 					<RoomsContainer />
 					<MessagesContainer />
 				</div>
-			)}
+			)} */}
 		</div>
 	)
 }

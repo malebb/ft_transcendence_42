@@ -2,12 +2,34 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 import MessagesContainer from "./containers/Message";
+import { SocketContext } from "./context/socket.context";
+import EVENTS from "./config/events";
 
 import style from "./ChatRoom.module.css"
 
-const ChatRoom = () => {
+interface Room {
+	admin: string;
+	nameRoom: string;
+	// users: Array<User>;
+	createdAt: Date;
+  }
+  
 
-	const {roomId} = useParams();
+const ChatRoomBase = () => {
+
+	const socket = SocketContext();
+
+	const { roomId } = useParams();
+
+	if (!roomId?.length) return <></>
+
+	let newRoom: Room = {
+		admin: "ldermign",
+		nameRoom: roomId,
+		createdAt: new Date(),
+	  };
+
+	socket.emit(EVENTS.SERVER.JOINED_ROOM, newRoom);
 
 	const genTitle = () => {
 		return (
@@ -30,4 +52,4 @@ const ChatRoom = () => {
 	);
 };
 
-export default ChatRoom;
+export default ChatRoomBase;

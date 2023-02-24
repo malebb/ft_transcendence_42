@@ -1,14 +1,14 @@
 import { Link } from "react-router-dom";
 
 import EVENTS from "../config/events";
-import { useSockets } from "../context/socket.context";
+import { SocketContext } from "../context/socket.context";
 import { useState } from "react";
 // import useChat from "./useChat";
 import MessagesContainer from "./Message";
 // import { ChatBaseRoom } from "./ChatBaseRoom";
 import InputButton from "../inputs/InputButton";
 
-interface Rooms {
+interface Room {
   admin: string;
   nameRoom: string;
   // users: Array<User>;
@@ -16,15 +16,21 @@ interface Rooms {
 }
 
 function RoomsContainer(props: any) {
-  //RoomContainerProps) {
+  let newRoom: Room = {
+    admin: "ldermign",
+    nameRoom: "",
+    createdAt: new Date(),
+  };
 
-  const { socket, setRoomId } = useSockets();
+  const [currentRoom, setCurrentRoom] = useState<Room | null>({
+    ...newRoom,
+  });
 
-  const [currentRoom, setCurrentRoom] = useState<Rooms | null>(null);
+  const socket = SocketContext();
 
-  const handleCreateRoom = (event: React.FormEvent<HTMLFormElement>) => {
-    //change function name
-    //create new room from name => sockets.emit
+  function handleCreateRoom(event: React.FormEvent<HTMLFormElement>) {
+
+    event.preventDefault();
 
     //@ts-ignore
     const form = new FormData(event.target);
@@ -32,15 +38,13 @@ function RoomsContainer(props: any) {
 
     if (!roomName?.length) return;
 
-    socket.emit(EVENTS.CLIENT.CREATE_ROOM, roomName);
-    setRoomId(roomName);
-    setCurrentRoom({
+    newRoom = {
+      ...newRoom,
       nameRoom: roomName,
-      admin: "username",
-      createdAt: new Date(),
-      // users:[],
-    });
-  };
+    };
+
+    socket.emit(EVENTS.CLIENT.CREATE_ROOM, {newRoom});
+  }
 
   const JoinRoom = () => {
     return (
@@ -56,25 +60,34 @@ function RoomsContainer(props: any) {
   };
 
   const DisplayCurrentRoom = () => {
-    if (!currentRoom) return <></>;
+    // if (!currentRoom) return <></>;
 
     return (
-      <div>
+      <>
+        <InputButton
+          onSubmit={handleCreateRoom}
+          inputProps={{
+            placeholder: "New room name",
+            name: "roomName",
+          }}
+          buttonText="Create Room"
+        />
         <ul className="chat-room-created">
-          <Link to={`/room/${currentRoom.nameRoom}`}>
-            {currentRoom.nameRoom}
+          <Link to={`/room/${currentRoom?.nameRoom}`}>
+            {currentRoom?.nameRoom}
           </Link>
-          <h1 id="roomContainer">Welcome to {currentRoom.nameRoom} </h1>
-          <MessagesContainer />
+          {/* <h1 id="roomContainer">Welcome to {currentRoom.nameRoom} </h1>
+          <MessagesContainer /> */}
         </ul>
-      </div>
+      </>
     );
   };
 
   return (
     <div>
       <div className="home-container">
-        {currentRoom ? <DisplayCurrentRoom /> : <JoinRoom />}
+        <DisplayCurrentRoom />
+        {/* {currentRoom ? <DisplayCurrentRoom /> : <JoinRoom />} */}
       </div>
     </div>
   );

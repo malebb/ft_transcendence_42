@@ -1,6 +1,6 @@
 import { useState } from "react";
 import EVENTS from "../config/events";
-import { useSockets } from "../context/socket.context";
+import { SocketContext } from "../context/socket.context";
 import InputButton from "../inputs/InputButton";
 
 import "./message.style.css";
@@ -15,7 +15,7 @@ import "./message.style.css";
 //   roomId: string;
 // }
 
-interface message {
+interface Message {
   username: string;
   message: string;
   sendAt: Date;
@@ -24,7 +24,7 @@ interface message {
 }
 
 function MessagesContainer() {
-  let newMessage: message = {
+  let newMessage: Message = {
     username: "username",
     message: "",
     sendAt: new Date(),
@@ -32,15 +32,15 @@ function MessagesContainer() {
     roomId: "",
   };
 
-  const [stateMessage, setStateMessage] = useState<message[]>([
+  const [stateMessage, setStateMessage] = useState<Message[]>([
     {
       ...newMessage,
     },
   ]);
 
-  let currentMessage: message = { ...newMessage };
+  let currentMessage: Message = { ...newMessage };
 
-  const { socket } = useSockets();
+  const socket = SocketContext();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
@@ -70,10 +70,14 @@ function MessagesContainer() {
     // currentMessage = [];
 
     // recevoir des messages venant d'un utilisateur de la room ??
-    socket.on(EVENTS.SERVER.ROOM_MESSAGE, (data) => {
-      console.log({ data });
-      // console.log("Received message : ", {});
-    });
+    // socket.on(EVENTS.SERVER.ROOM_MESSAGE, (data) => {
+    //   console.log({ data });
+    //   // console.log("Received message : ", {});
+    // });
+	socket.on(EVENTS.SERVER.ROOM_MESSAGE, message => {
+		console.log({message})
+	})
+
   }
 
   const GenMessages = () => {

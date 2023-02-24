@@ -16,7 +16,7 @@ interface Room {
 const EVENTS = {
   // connection: 'connection',
   CLIENT: {
-	CONNECT: "CONNECT",
+    CONNECT: 'CONNECT',
     CREATE_ROOM: 'CREATE_ROOM',
     SEND_ROOM_MESSAGE: 'SEND_ROOM_MESAGE',
     JOIN_ROOM: 'JOIN_ROOM',
@@ -45,23 +45,29 @@ const io = new Server(4444, {
 });
 
 io.on('connect', (socket) => {
+  console.log('User connected');
 
-	console.log("User connected");
+  socket.on(EVENTS.SERVER.JOINED_ROOM, (room) => {
 
-  socket.on(EVENTS.CLIENT.SEND_ROOM_MESSAGE, (message) => {
-    // console.log(username + " send " + message + " on " + roomId);
-    console.log({ message });
-    io.emit(EVENTS.SERVER.ROOM_MESSAGE, { message });
+    console.log({ room });
 
-    // socket.on(EVENTS.CLIENT.CREATE_ROOM, (roomName) => {
+	socket.on(EVENTS.CLIENT.SEND_ROOM_MESSAGE, (message) => {
+	  // console.log(username + " send " + message + " on " + roomId);
+	  console.log({ message });
 
-    // creation d'une nouvelle chaine (create a room id)
-    // room.id = nanoid()
-    //add a new roomto the rooms object
-    // rooms[roomId] = {
-    // 	name: roomName,
-    // }
-    // })
+	  io.emit(EVENTS.SERVER.ROOM_MESSAGE, message);
+	  // io.emit(EVENTS.SERVER.ROOM_MESSAGE, { message });
+  
+	  // socket.on(EVENTS.CLIENT.CREATE_ROOM, (roomName) => {
+  
+	  // creation d'une nouvelle chaine (create a room id)
+	  // room.id = nanoid()
+	  //add a new roomto the rooms object
+	  // rooms[roomId] = {
+	  // 	name: roomName,
+	  // }
+	  // })
+	});
   });
 
   socket.on('disonnect', () => {
