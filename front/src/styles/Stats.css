@@ -1,7 +1,6 @@
 #stats{
 	width: 87%;
 	margin: auto;
-	height: 500px;
 }
 
 #statsTitle
@@ -15,7 +14,7 @@ table, td, th{
 	border-color: black;
 	border-style: solid;
 	border-collapse: collapse;
-	background-color:#547EBE;
+	background-color: #547EBE;
 }
 
 table

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { AxiosResponse } from 'axios'
 import axios from 'axios'
-import {getToken, axiosMain, axiosToken} from '../api/axios'
+import { getToken, axiosMain, axiosToken } from '../api/axios'
 import { Link } from 'react-router-dom'
 import { acceptRequest, deleteRequest, refuseRequest } from 'src/api/friend'
 import Popup from 'reactjs-popup'
@@ -10,7 +10,7 @@ const FRIEND_LIST_PATH = '/users/friend-list'
 const RECV_LIST_PATH = '/users/recv-request'
 const SEND_LIST_PATH = '/users/created-request'
 
-type FriendType = {
+export type FriendType = {
   id: number
   createdAt: Date
   id42: string | null

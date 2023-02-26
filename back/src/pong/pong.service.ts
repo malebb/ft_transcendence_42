@@ -7,7 +7,7 @@ import { HistoryService } from '../history/history.service';
 import { UserService } from '../user/user.service';
 import { levels } from './levels';
 import { winSteps, levelSteps, modeExplorer,
-		fashionWeek, traveler, failureKnowledge} from './achievements';
+		fashionWeek, traveler, failureKnowledge} from 'ft_transcendence';
 import { Stats } from './Stats';
 import { Customisation } from './Customisation';
 
@@ -171,7 +171,7 @@ export class PongService {
 		{
 			for (let i = 0; i < winSteps.length; ++i)
 			{
-				if (playerStats.victory == winSteps[i].gameWon)
+				if (playerStats.victory == winSteps[i].goal)
 				{
 					await this.historyService.addAchievementDone(player.username, winSteps[i].title, winSteps[i].desc);
 					break;
@@ -182,7 +182,7 @@ export class PongService {
 		{
 			for (let i = 0; i < levelSteps.length; ++i)
 			{
-				if (playerStats.level == levelSteps[i].level)
+				if (playerStats.level == levelSteps[i].goal)
 				{
 					await this.historyService.addAchievementDone(player.username, levelSteps[i].title, levelSteps[i].desc);
 					break;
@@ -204,7 +204,7 @@ export class PongService {
 			await this.historyService.addAchievementDone(player.username, traveler.title, traveler.desc);
 			await this.statsService.updateTraveler(player.username);
 		}
-		if (!winner && playerStats.defeat == failureKnowledge.gameLost)
+		if (!winner && playerStats.defeat == failureKnowledge.goal)
 		{
 			await this.historyService.addAchievementDone(player.username, failureKnowledge.title, failureKnowledge.desc);
 			await this.statsService.updateFailureKnowledge(player.username);

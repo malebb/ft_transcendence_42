@@ -4,4 +4,8 @@ export default interface StatsData
 	victory: number;
 	xp: number;
 	level: number;
+	modeExplorer: boolean;
+	fashionWeek: boolean;
+	traveler: boolean;
+	failureKnowledge: boolean;
 }
