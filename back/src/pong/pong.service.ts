@@ -147,7 +147,8 @@ export class PongService {
 		}
 	}
 
-	movePlayer(roomId: string, position: string, key: string): Player {
+	movePlayer(roomId: string, position: string, key: string): Player
+	{
 		if (position == "left") {
 			this.rooms[roomId].leftPlayer.move(key);
 			return (this.rooms[roomId].leftPlayer);
@@ -247,20 +248,14 @@ export class PongService {
 	runRoom(roomId: string, server: Server) {
 		let scorer: string = "";
 
-		if (this.rooms[roomId].powerUpMode) {
-			this.rooms[roomId].speedPowerUpInterval = setTimeout(() => {
-				server.to(roomId).emit('updateSpeedPowerUp', true, "left");
-				server.to(roomId).emit('updateSpeedPowerUp', true, "right");
-				this.rooms[roomId].leftPlayer.speedPowerUp = true;
-				this.rooms[roomId].rightPlayer.speedPowerUp = true;
-			}, 10000);
-		}
-
+		this.programNextPowerUp(roomId, "left", server);
+		this.programNextPowerUp(roomId, "right", server);
 		this.rooms[roomId].roomInterval = setInterval(() =>
 		{
 			if (this.rooms[roomId].playerGoneCount == 2) {
 				clearInterval(this.rooms[roomId].roomInterval);
-				clearInterval(this.rooms[roomId].speedPowerUpInterval);
+				clearTimeout(this.rooms[roomId].leftPowerUpTimeout);
+				clearTimeout(this.rooms[roomId].rightPowerUpTimeout);
 				delete this.rooms[roomId];
 			}
 			else
@@ -293,19 +288,31 @@ export class PongService {
 				}
 				server.to(roomId).emit('moveBall', JSON.stringify(this.rooms[roomId].ball));
 			}
-		}, 20);
+		}, 15);
 	}
 
-	useSpeedPowerUp(roomId: string, position: string, server: Server) {
-		this.rooms[roomId].speedPowerUpInterval = setTimeout(() => {
-			server.to(roomId).emit('updateSpeedPowerUp', true, position);
+	programNextPowerUp(roomId: string, position: string, server: Server)
+	{
+		let timeout: ReturnType<typeof setTimeout>;
+
+		timeout = setTimeout(() =>
+		{
 			server.to(roomId).emit('updateSpeedPowerUp', true, position);
 			if (position == "left")
 				this.rooms[roomId].leftPlayer.speedPowerUp = true;
 			else
 				this.rooms[roomId].rightPlayer.speedPowerUp = true;
 		}, 10000);
+		if (position == "left")
+			this.rooms[roomId].leftPowerUpTimeout = timeout;
+		else
+			this.rooms[roomId].rightPowerUpTimeout = timeout;
 
+	}
+
+	useSpeedPowerUp(roomId: string, position: string, server: Server)
+	{
+		this.programNextPowerUp(roomId, position, server);
 		this.rooms[roomId].ball.speedPowerUp();
 		server.to(roomId).emit('updateSpeedPowerUp', false, position);
 		if (position == "left")
