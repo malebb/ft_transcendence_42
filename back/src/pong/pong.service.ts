@@ -19,17 +19,19 @@ export class PongService {
 			   	private readonly historyService: HistoryService,
 			   	private readonly userService: UserService) {}
 
-	queue: PlayerData[] = [];
-	powerUpQueue: PlayerData[] = [];
-	rooms = [];
-	sizeCanvas: Size = { width: 600, height: 350 };
-	scoreToWin: number = 11;
+	queue: 			PlayerData[] 	= [];
+	powerUpQueue:	PlayerData[] 	= [];
+	rooms 							= [];
+	sizeCanvas: 	Size			= { width: 600, height: 350 };
+	scoreToWin:		number			= 11;
 
-	addToQueue(player: PlayerData, queue: PlayerData[]) {
+	addToQueue(player: PlayerData, queue: PlayerData[])
+	{
 		queue.push(player);
 	}
 
-	removeFromQueue(playerId: string) {
+	removeFromQueue(playerId: string)
+	{
 		for (let i = 0; i < this.queue.length; ++i) {
 			if (this.queue[i].id == playerId)
 				this.queue.splice(i, 1);
@@ -67,7 +69,8 @@ export class PongService {
 		return ({ roomId: roomId, opponent: opponent });
 	}
 
-	initRoom(roomId: string, leftPlayer: PlayerData, rightPlayer: PlayerData): Room {
+	initRoom(roomId: string, leftPlayer: PlayerData, rightPlayer: PlayerData): Room
+	{
 		this.gameService.addGame(roomId, leftPlayer.username, rightPlayer.username);
 		return (
 			{
@@ -111,7 +114,8 @@ export class PongService {
 		);
 	}
 
-	findRoom(server: Server, player: Socket, playerData: PlayerData) {
+	findRoom(server: Server, player: Socket, playerData: PlayerData)
+	{
 		let room: Room;
 		let queueResearch = { roomId: null, opponent: null };
 		let queue: PlayerData[] = playerData.powerUpMode ? this.powerUpQueue : this.queue;
@@ -131,7 +135,8 @@ export class PongService {
 		});
 	}
 
-	stopRoom(player: Socket) {
+	stopRoom(player: Socket)
+	{
 		let roomToLeave: string | undefined;
 
 		roomToLeave = Array.from(player.rooms)[1];
@@ -159,14 +164,16 @@ export class PongService {
 		}
 	}
 
-	joinRoom(player: Socket, roomId: string) {
+	joinRoom(player: Socket, roomId: string)
+	{
 		player.join(roomId);
 	}
 
 	async updateAchievements(player: Player, playerStats: Stats,
 							 levelUp: boolean, powerUpMode: boolean, winner: boolean)
 	{
-		let playerCustomisation: Customisation = await this.userService.getCustomisation(player.username);
+		let playerCustomisation: Customisation = await
+			this.userService.getCustomisation(player.username);
 
 		if (winner)
 		{
@@ -174,7 +181,8 @@ export class PongService {
 			{
 				if (playerStats.victory == winSteps[i].goal)
 				{
-					await this.historyService.addAchievementDone(player.username, winSteps[i].title, winSteps[i].desc);
+					await this.historyService.addAchievementDone(player.username,
+							winSteps[i].title, winSteps[i].desc);
 					break;
 				}
 			}
@@ -185,29 +193,34 @@ export class PongService {
 			{
 				if (playerStats.level == levelSteps[i].goal)
 				{
-					await this.historyService.addAchievementDone(player.username, levelSteps[i].title, levelSteps[i].desc);
+					await this.historyService.addAchievementDone(player.username,
+							levelSteps[i].title, levelSteps[i].desc);
 					break;
 				}
 			}
 		}
 		if (powerUpMode && !playerStats.modeExplorer)
 		{
-			await this.historyService.addAchievementDone(player.username, modeExplorer.title, modeExplorer.desc);
+			await this.historyService.addAchievementDone(player.username,
+									modeExplorer.title, modeExplorer.desc);
 			await this.statsService.updateModeExplorer(player.username);
 		}
 		if (playerCustomisation.skin != "white" && !playerStats.fashionWeek)
 		{
-			await this.historyService.addAchievementDone(player.username, fashionWeek.title, fashionWeek.desc);
+			await this.historyService.addAchievementDone(player.username,
+									fashionWeek.title, fashionWeek.desc);
 			await this.statsService.updateFashionWeek(player.username);
 		}
 		if (playerCustomisation.map != "basic" && !playerStats.traveler)
 		{
-			await this.historyService.addAchievementDone(player.username, traveler.title, traveler.desc);
+			await this.historyService.addAchievementDone(player.username,
+									traveler.title, traveler.desc);
 			await this.statsService.updateTraveler(player.username);
 		}
 		if (!winner && playerStats.defeat == failureKnowledge.goal)
 		{
-			await this.historyService.addAchievementDone(player.username, failureKnowledge.title, failureKnowledge.desc);
+			await this.historyService.addAchievementDone(player.username,
+									failureKnowledge.title, failureKnowledge.desc);
 			await this.statsService.updateFailureKnowledge(player.username);
 		}
 
@@ -240,9 +253,11 @@ export class PongService {
 		this.updateAchievements(loser, loserStats, levelUp, powerUpMode, false);
 	}
 
-	async updateHistory(leftUsername: string, rightUsername: string, leftScore: number, rightScore: number)
+	async updateHistory(leftUsername: string, rightUsername: string,
+						leftScore: number, rightScore: number)
 	{
-		this.historyService.addGamePlayed(leftUsername, rightUsername, leftScore, rightScore);
+		this.historyService.addGamePlayed(leftUsername,
+						rightUsername, leftScore, rightScore);
 	}
 
 	runRoom(roomId: string, server: Server) {
@@ -260,27 +275,38 @@ export class PongService {
 			}
 			else
 			{
-				if ((scorer = this.rooms[roomId].ball.move([this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer])).length)
+				if ((scorer = this.rooms[roomId].ball.move(
+					[this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer])).length)
 				{
 					if (scorer == "left")
 					{
-						server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].leftPlayer.score }));
+						server.to(roomId).emit('updateScore',
+						JSON.stringify({ scorer: scorer, score: this.rooms[roomId].leftPlayer.score }));
 						if (this.rooms[roomId].leftPlayer.score == this.scoreToWin)
 						{
-							this.updateStats(this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer, this.rooms[roomId].powerUpMode);
-							this.updateHistory(this.rooms[roomId].leftPlayer.username, this.rooms[roomId].rightPlayer.username,
-											  this.rooms[roomId].leftPlayer.score, this.rooms[roomId].rightPlayer.score);
+							this.updateStats(this.rooms[roomId].leftPlayer,
+											this.rooms[roomId].rightPlayer,
+											this.rooms[roomId].powerUpMode);
+							this.updateHistory(this.rooms[roomId].leftPlayer.username,
+											   this.rooms[roomId].rightPlayer.username,
+											  this.rooms[roomId].leftPlayer.score,
+											  this.rooms[roomId].rightPlayer.score);
 							server.to(roomId).emit('endGame', scorer);
 						}
 					}
 					else if (scorer == "right")
 					{
-						server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].rightPlayer.score }));
+						server.to(roomId).emit('updateScore',
+								JSON.stringify({ scorer: scorer, score: this.rooms[roomId].rightPlayer.score }));
 						if (this.rooms[roomId].rightPlayer.score == this.scoreToWin)
 						{
-							this.updateStats(this.rooms[roomId].rightPlayer, this.rooms[roomId].leftPlayer, this.rooms[roomId].powerUpMode);
-							this.updateHistory(this.rooms[roomId].leftPlayer.username, this.rooms[roomId].rightPlayer.username,
-											  this.rooms[roomId].leftPlayer.score, this.rooms[roomId].rightPlayer.score);
+							this.updateStats(this.rooms[roomId].rightPlayer,
+											 this.rooms[roomId].leftPlayer,
+											 this.rooms[roomId].powerUpMode);
+							this.updateHistory(this.rooms[roomId].leftPlayer.username,
+											   this.rooms[roomId].rightPlayer.username,
+											  this.rooms[roomId].leftPlayer.score,
+											  this.rooms[roomId].rightPlayer.score);
 							server.to(roomId).emit('endGame', scorer);
 						}
 					}

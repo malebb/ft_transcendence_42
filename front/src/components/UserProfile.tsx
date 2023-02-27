@@ -294,7 +294,7 @@ const UserProfile = () => {
 				setIsFriend(true);
 			friendList.forEach((friend) => 
 			{
-				if (friend.username == profileUser.username)
+				if (friend.username === profileUser.username)
 					setIsFriend(true);
 			});
 		}

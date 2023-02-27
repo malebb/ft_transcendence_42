@@ -20,14 +20,14 @@ const Achievements = () =>
 
 	function printStatus(achievement: AchievementsData)
 	{
-		const achievementDone = <img width="58px" src="http://localhost:3000/images/achievementDone.png"/>
-		const achievementToDo = <img width="50px" src="http://localhost:3000/images/achievementToDo.png"/>
+		const achievementDone = <img width="58px" src="http://localhost:3000/images/achievementDone.png" alt="achievementDone"/>
+		const achievementToDo = <img width="50px" src="http://localhost:3000/images/achievementToDo.png" alt="achievementToDo"/>
 
-		if (achievement.title == "Mode explorer")
+		if (achievement.title === "Mode explorer")
 			return (stats!.modeExplorer ? achievementDone : achievementToDo);
-		else if (achievement.title == "Fashion week")
+		else if (achievement.title === "Fashion week")
 			return (stats!.fashionWeek ? achievementDone : achievementToDo);
-		else if (achievement.title == "Traveler")
+		else if (achievement.title === "Traveler")
 			return (stats!.traveler ? achievementDone : achievementToDo);
 		else if (winAchievements.current.includes(achievement.title))
 			return (stats!.victory < achievement.goal! ? achievementToDo : achievementDone); 
@@ -115,7 +115,7 @@ const Achievements = () =>
 		}
 		initAchievements();
 
-	}, []);
+	}, [userId]);
 	return (
 		<div>
 			<h2 id="achievementsTitle">Achievements</h2>

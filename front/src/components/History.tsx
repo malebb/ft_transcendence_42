@@ -1,8 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { axiosToken } from '../api/axios'
 import { AxiosInstance } from 'axios';
-import { GamePlayed } from '../interfaces/GamePlayed';
-import { AchievementDone } from '../interfaces/AchievementDone';
 import '../styles/history.css';
 import Sidebar from './Sidebar'
 import Headers from './Headers'
@@ -62,26 +60,26 @@ const History = () => {
 		return (0);
 	}
 
-	const initHistory = async () => {
-		axiosInstance.current = await axiosToken();
-		const username = (await axiosInstance.current.get('users/me', {})).data.email;
-		axiosInstance.current = await axiosToken();
-		const gamePlayed = (await axiosInstance.current.get('history/gamePlayed/' + username)).data.gamePlayed;
-		axiosInstance.current = await axiosToken();
-		const achievementDone = (await axiosInstance.current.get('history/achievementsDone/' + username)).data.achievementDone;
-		for (let i = 0; i < gamePlayed.length; ++i)
-		{
-			historyElem.current.push({type: "game", value: gamePlayed[i]});
-		}
-		for (let i = 0; i < achievementDone.length; ++i)
-		{
-			historyElem.current.push({type: "achievement", value: achievementDone[i]});
-		}
-		historyElem.current.sort(compareElemDate);
-		setSorted(true);
-	};
 
 	useEffect(() => {
+		const initHistory = async () => {
+			axiosInstance.current = await axiosToken();
+			const username = (await axiosInstance.current.get('users/me', {})).data.email;
+			axiosInstance.current = await axiosToken();
+			const gamePlayed = (await axiosInstance.current.get('history/gamePlayed/' + username)).data.gamePlayed;
+			axiosInstance.current = await axiosToken();
+			const achievementDone = (await axiosInstance.current.get('history/achievementsDone/' + username)).data.achievementDone;
+			for (let i = 0; i < gamePlayed.length; ++i)
+			{
+				historyElem.current.push({type: "game", value: gamePlayed[i]});
+			}
+			for (let i = 0; i < achievementDone.length; ++i)
+			{
+				historyElem.current.push({type: "achievement", value: achievementDone[i]});
+			}
+			historyElem.current.sort(compareElemDate);
+			setSorted(true);
+		};
 		initHistory();
 	}, []);
 	return (

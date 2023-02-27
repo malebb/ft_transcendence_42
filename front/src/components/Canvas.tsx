@@ -63,10 +63,10 @@ export default function Canvas()
 		function stopGame()
 		{
 			window.cancelAnimationFrame(animationFrameId.current)
-			socket.current!.disconnect();
 			kd.current.stop();
 			document!.removeEventListener('keypress', powerUp);
 			document!.removeEventListener('keyup', notifyKeyReleased);
+			socket.current!.disconnect();
 		}
 
 		const pong = async () => 
@@ -448,7 +448,6 @@ export default function Canvas()
 
 			axiosInstance.current = await axiosToken();
 			await axiosInstance.current!.get('/users/me', {});
-			console.log("ui");
 		}
 
 		function redirectSignInPage()
@@ -470,12 +469,8 @@ export default function Canvas()
 			}
 		}
 
-
-//		let googleFont = new FontFace("Tilt Warp", "url('https://fonts.googleapis.com/css2?family=Tilt+Warp&display=swap')");
-
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
-//		axiosInstance.current = await axiosToken();
 		if (getToken() == null)
 		{
 			signInToPlay();
@@ -484,10 +479,6 @@ export default function Canvas()
 		else
 		{
 			await initUser();
-//				console.log("aie"); let googleFont = draw.current.initFont();
-			//let googleFont = new FontFace("Tilt Warp", "url('https://fonts.gstatic.com/s/bitter/v7/HEpP8tJXlWaYHimsnXgfCOvvDin1pK8aKteLpeZ5c0A.woff2')");
-			//let googleFont = new FontFace("Tilt Warp", "url('https://fonts.googleapis.com/css2?family=Tilt+Warp&display=swap')");
-	//		let googleFont = new FontFace("Tilt Warp", "url('http://localhost:3000/fonts/TiltWarp-Regular.ttf')");
 			let googleFont = draw.current!.initFont();
 			document.fonts.add(googleFont);
 			googleFont.load().then(() => {
