@@ -263,8 +263,11 @@ export class PongService {
 	runRoom(roomId: string, server: Server) {
 		let scorer: string = "";
 
-		this.programNextPowerUp(roomId, "left", server);
-		this.programNextPowerUp(roomId, "right", server);
+		if (this.rooms[roomId].powerUpMode)
+		{
+			this.programNextPowerUp(roomId, "left", server);
+			this.programNextPowerUp(roomId, "right", server);
+		}
 		this.rooms[roomId].roomInterval = setInterval(() =>
 		{
 			if (this.rooms[roomId].playerGoneCount == 2) {

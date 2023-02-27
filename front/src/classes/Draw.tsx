@@ -10,9 +10,9 @@ export default class Draw
 {
 	skins : Skin[] = [];
 	mapList = [{name: "basic", path: "./images/basic.png"},
-			{name: "beach", path: "./images/beach.jpg"},
+			{name: "beach", path: "./images/beach.png"},
 			{name: "city", path: "./images/city.jpg"},
-			{name: "desert", path: "./images/desert.jpg"},
+			{name: "jungle", path: "./images/jungle.png"},
 			{name: "lava", path: "./images/lava.jpg"},
 			{name: "nature", path: "./images/nature.jpg"},
 			{name: "snow", path: "./images/snow.jpg"},
@@ -195,8 +195,14 @@ export default class Draw
 
 	score(scoreLeft: number, scoreRight: number)
 	{
-		this.text(scoreLeft.toString(), this.ctx!.canvas.width / 3.03, this.ctx!.canvas.height / 5, 55, "white", "Verdana");
-		this.text(scoreRight.toString(), this.ctx!.canvas.width / 1.51, this.ctx!.canvas.height / 5, 55, "white", "Verdana");
+		this.text(scoreLeft.toString(), this.ctx!.canvas.width / 3.03, this.ctx!.canvas.height / 5, 55, "white", CANVAS_FONT);
+		this.text(scoreRight.toString(), this.ctx!.canvas.width / 1.51, this.ctx!.canvas.height / 5, 55, "white", CANVAS_FONT);
+	}
+
+	usernames(leftUsername: string, rightUsername: string)
+	{
+		this.text(leftUsername, this.ctx!.canvas.width / 4.5, this.ctx!.canvas.height / 1.02, 15, "white", CANVAS_FONT);
+		this.text(rightUsername, this.ctx!.canvas.width / 1.30, this.ctx!.canvas.height / 1.02, 15, "white", CANVAS_FONT);
 	}
 
 	speedPowerUp(logo: HTMLImageElement, leftSpeedPowerUp: boolean, rightSpeedPowerUp: boolean)
