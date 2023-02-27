@@ -28,6 +28,10 @@ const Games = () => {
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 
 	const printGames = () => {
+		if (!gamesList.length)
+		return (
+			<p id="noGame">No game to spectate</p>
+		);
 		return (gamesList.map(game => {
 			return (
 				<Link className="gameLink" to={`/games/${game.gameId}`} key={game.gameId} >
