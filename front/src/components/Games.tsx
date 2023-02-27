@@ -9,9 +9,9 @@ import Draw from "../classes/Draw";
 import "../styles/Games.css";
 import Sidebar from './Sidebar';
 import Headers from './Headers';
-import { CANVAS_FONT, FONT_COLOR } from '../classes/Draw';
 
-const Games = () => {
+const Games = () =>
+{
 	const ctx = useRef<CanvasRenderingContext2D | null>(null);
 	const [gamesList, setGamesList] = useState<Game[]>([]);
 	const { gameId } = useParams();

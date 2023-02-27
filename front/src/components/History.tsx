@@ -11,7 +11,8 @@ interface HistoryElem
 	value: any;
 }
 
-const History = () => {
+const History = () =>
+{
 	const [sorted, setSorted] = useState<boolean>(false);
 	const historyElem = useRef<HistoryElem[]>([]);
 	const axiosInstance = useRef<AxiosInstance | null>(null);
@@ -25,6 +26,8 @@ const History = () => {
 	{
 		if (sorted)
 		{
+			if (!historyElem.current.length)
+				return (<p id="noActivity">No activity yet</p>);
 			return (historyElem.current.map((elem) => {
 			if (elem.type === "game")
 			{

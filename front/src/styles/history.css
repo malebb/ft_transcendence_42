@@ -59,3 +59,29 @@
 	width: 160px;
 	text-align: center;
 }
+
+#noGame
+{
+	background-color: #547EBE;
+	text-align: center;
+	width: 400px;
+	margin: auto;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	margin-top: 50px;
+	margin-bottom: 50px;
+	border-radius: 5px;
+}
+
+#noActivity
+{
+	background-color: #547EBE;
+	text-align: center;
+	width: 400px;
+	margin: auto;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	margin-top: 50px;
+	margin-bottom: 50px;
+	border-radius: 5px;
+}
