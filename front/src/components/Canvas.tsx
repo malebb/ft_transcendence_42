@@ -311,7 +311,7 @@ export default function Canvas()
 				axiosInstance.current = await axiosToken();
 				playerData.username = (await axiosInstance.current!.get('/users/me', {})).data.email;
 
-				socket.current = io(`ws://localhost:3333`,
+				socket.current = io(`ws://localhost:3333/pong`,
 				{
 					transports: ["websocket"],
 					query:	{
