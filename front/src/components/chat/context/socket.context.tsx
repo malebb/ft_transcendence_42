@@ -16,7 +16,7 @@ On appel ce fichier dans les pages room, message, etc. en utilisant :
 
 **/
 
-export const socket = io("http://localhost:3333", {
+export const socket = io("ws://localhost:3333/chat", {
   transports: ["websocket"],
 //   query: {
 //     // playerData: JSON.stringify(playerData),

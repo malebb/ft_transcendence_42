@@ -4,17 +4,17 @@ import { useParams } from 'react-router-dom';
 import MessagesContainer from "./containers/Message";
 import { SocketContext } from "./context/socket.context";
 import EVENTS from "./config/events";
+// import { EVENTS } from 'ft_transcendence';
 
 import style from "./ChatRoom.module.css"
 
 interface Room {
+	roomId: string;
 	admin: string;
-	nameRoom: string;
-	// users: Array<User>;
+	// members: ChatRoomUser[];
 	createdAt: Date;
   }
-  
-
+ 
 const ChatRoomBase = () => {
 
 	const socket = SocketContext();
@@ -25,11 +25,11 @@ const ChatRoomBase = () => {
 
 	let newRoom: Room = {
 		admin: "ldermign",
-		nameRoom: roomId,
+		roomId: roomId,
 		createdAt: new Date(),
 	  };
 
-	socket.emit(EVENTS.SERVER.JOINED_ROOM, newRoom);
+	socket.emit(EVENTS.CLIENT.JOIN_ROOM, newRoom);
 
 	const genTitle = () => {
 		return (
@@ -53,3 +53,5 @@ const ChatRoomBase = () => {
 };
 
 export default ChatRoomBase;
+
+//TODO changer le chemin pour EVENTS

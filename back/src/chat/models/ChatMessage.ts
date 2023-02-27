@@ -1,11 +1,11 @@
 import { User } from "@prisma/client";
-import { Room } from "./room.interface";
+import { ChatRoom } from "./ChatRoom";
 
 export interface Message {
 
 	userId: string;
 	user: User;
-	room: Room;
+	room: ChatRoom;
 	message: string;
 	sendAt: Date;
 }

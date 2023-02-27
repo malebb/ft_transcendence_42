@@ -1,49 +1,48 @@
 // fichier pour la logique du module
 // update, creation et rangements des donnees
 
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 // import { UserService } from "src/user/user.service";
-import { UserService } from "../user/user.service";
+import { UserService } from '../user/user.service';
 import {
-	SubscribeMessage,
-	WebSocketGateway,
-	OnGatewayInit,
-	WebSocketServer,
-	OnGatewayConnection,
-	OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
+  OnGatewayInit,
+  WebSocketServer,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { Chat } from './chat.entity';
-import { User } from "@prisma/client";
+import { User } from '@prisma/client';
 
 // interfaces :
-import { Room } from "./models/room.interface";
+import { ChatRoom } from './models/ChatRoom';
 
 // permet au client de communiquer au server par le biais
 // de n'import quelle url
-@Injectable() 
+@Injectable()
 export class ChatService {
-	// constructor(
-	// 	@InjectRepository(Chat) private chatRepository: Repository<Chat>,) {}
+  // constructor(
+  // 	@InjectRepository(Chat) private chatRepository: Repository<Chat>,) {}
 
-	async createMessage(chat: Chat) {
-		// return await this.chatRepository.save(chat);
-	}
+  // async createMessage(chat: Chat) {
+  // return await this.chatRepository.save(chat);
+  // }
 
-	async joinRoom(client: Socket, room: Room) {
-		console.log("test");
-	}
+  joinRoom(client: Socket, room: ChatRoom) {
+    console.log({ room });
+    client.on('SEND_ROOM_MESAGE', (message) => {
+      console.log({ message });
 
-	// async getMessages(): Promise<Chat[]> {
-		// return await this.chatRepository.find();
-	// }
+    //   io.emit('ROOM_MESSAGE', message);
+    });
+    // console.log("funciton joinRoom in ChatService");
+  }
+
+  // async getMessages(): Promise<Chat[]> {
+  // return await this.chatRepository.find();
+  // }
 }
-
-// @Injectable()
-// export class ChatService {
-
-
-
-// }

@@ -1,10 +1,10 @@
 import { User } from "@prisma/client";
-import { Room } from "./room.interface";
+import { ChatRoom } from "./ChatRoom";
 
-export interface UserRoom {
+export interface ChatRoomUser {
 
 	roomId: string;
-	room: Room;
+	room: ChatRoom;
 	user: User;
 	isAdmin: boolean;
 }
