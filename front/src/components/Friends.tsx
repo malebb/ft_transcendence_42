@@ -5,6 +5,10 @@ import {getToken, axiosMain, axiosToken} from '../api/axios'
 import { Link } from 'react-router-dom'
 import { acceptRequest, deleteRequest, refuseRequest } from 'src/api/friend'
 import Popup from 'reactjs-popup'
+import Sidebar from './Sidebar'
+import Headers from './Headers'
+import '../styles/Friend.css'
+import { GET_PROFILE_PICTURE, validURL } from 'src/api/utils'
 
 const FRIEND_LIST_PATH = '/users/friend-list'
 const RECV_LIST_PATH = '/users/recv-request'
@@ -18,7 +22,7 @@ type FriendType = {
   email: string
   firstName: string | null
   lastName: string | null
-  profilePicture: string | null
+  profilePicture: string
   skin: string
   map: string
 }
@@ -80,6 +84,14 @@ const Friends = () => {
     }
     setShowConfirmation(false);
   }
+
+  const handleSrc = (friend: FriendType) =>
+  {
+    if (validURL(friend.profilePicture))
+      return friend.profilePicture;
+    else
+      return (GET_PROFILE_PICTURE + friend.profilePicture.split('/')[2]);
+  }
   
   useEffect(() => {
   }, [friendArray, recvArray, sendArray]);
@@ -91,10 +103,16 @@ const Friends = () => {
   }, []);
   return (
     <>
-    <div>Friends</div>
+    <Headers/>
+    <Sidebar/>
+    <main>
+    <div className="accordion">
+     <input type="radio" name="select" className="accordion-select" checked />
+    <div className="accordion-title"><span>Friend</span></div>
+    <div className="accordion-content">
     <ul>
       {friendArray?.map((friend: FriendType) =>{
-        return <div key={friend.id}><Link to={'/user/' + friend.id}>{friend.username}</Link>
+        return <div key={friend.id}><Link to={'/user/' + friend.id}>{<img id="profilePicture" className='profilePicture' src={handleSrc(friend)}/>}{friend.username}</Link>
         <button onClick={handleUnfriendClick}>Unfriend</button>
         {showConfirmation && (
         <div>
@@ -109,7 +127,10 @@ const Friends = () => {
         </div>
       })}
     </ul>
-    <div><br></br>
+      </div> 
+         <input type="radio" name="select" className="accordion-select" />
+    <div className="accordion-title"><span>Sended Request</span></div>
+    <div className="accordion-content">
     <ul>
       {sendArray?.map((friend: NeutralUser) =>{
         return <div key={friend.id}><Link to={'/user/' + friend.id}>{friend.username}</Link>
@@ -126,14 +147,19 @@ const Friends = () => {
         )}
         </div>
       })}
-    </ul></div>
-    <div><br></br>
+    </ul>
+      </div> 
+         <input type="radio" name="select" className="accordion-select" />
+    <div className="accordion-title"><span>Received Request</span></div>
+    <div className="accordion-content">
     <ul>
       {recvArray?.map((friend: NeutralUser) =>{
         return <div key={friend.id}><Link to={'/user/' + friend.id}>{friend.username}</Link><button onClick={(e:any) => acceptRequestWrap(friend.id)}>Accept</button><button onClick={(e:any) => refuseRequestWrap(friend.id)}>Decline</button></div>;
         //return <li key={friend.id}>{friend.username}</li>;
       })}
-    </ul></div>
+    </ul></div> 
+</div> 
+    </main>
     </>
   )
 }

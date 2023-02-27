@@ -273,7 +273,7 @@ const UserProfile = () => {
         <Headers/>
         <Sidebar/>
         {errMsg}
-        <div className={showConfirmation? 'container' : 'container'}>
+        <main className={showConfirmation? 'container' : 'container'}>
           {/* <div className='divprofilePicture'> */}
             <img id="profilePicture" className="profilePicture" src={picture} alt='profile_picture'/>
           {/* </div> */}
@@ -318,7 +318,7 @@ const UserProfile = () => {
           <button className='profileButtonAddFriend' onClick={AddFriend}>Add friend +</button> : (<></>)
           }
         </div>
-    </div>
+    </main>
     </div>
   )
 }
