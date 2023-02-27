@@ -16,6 +16,12 @@ On appel ce fichier dans les pages room, message, etc. en utilisant :
 
 **/
 
-export const socket = io("http://localhost:4444");
+export const socket = io("http://localhost:3333", {
+  transports: ["websocket"],
+//   query: {
+//     // playerData: JSON.stringify(playerData),
+//     sepctator: false,
+//   },
+});
 export const useSocket = React.createContext(socket);
 export const SocketContext = () => useContext(useSocket);

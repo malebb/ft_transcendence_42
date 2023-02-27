@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EVENTS from "../config/events";
 import { SocketContext } from "../context/socket.context";
 import InputButton from "../inputs/InputButton";
@@ -32,6 +32,8 @@ function MessagesContainer() {
     roomId: "",
   };
 
+  // declaration d'une variable d'etat 
+  // useState = hook d'etat (pour une variable)
   const [stateMessage, setStateMessage] = useState<Message[]>([
     {
       ...newMessage,
@@ -41,6 +43,15 @@ function MessagesContainer() {
   let currentMessage: Message = { ...newMessage };
 
   const socket = SocketContext();
+
+  // hook d'effet = gere les effets de bords
+//   useEffect(() => {
+//     socket.on(EVENTS.SERVER.ROOM_MESSAGE, (message) => {
+// 		// setStateMessage([...stateMessage, message]);
+
+// 	});
+//   }, []);
+
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
@@ -63,8 +74,6 @@ function MessagesContainer() {
       sendAt: dateTS,
     };
 
-    setStateMessage([...stateMessage, currentMessage]);
-
     socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, currentMessage);
 
     // currentMessage = [];
@@ -74,10 +83,21 @@ function MessagesContainer() {
     //   console.log({ data });
     //   // console.log("Received message : ", {});
     // });
-	socket.on(EVENTS.SERVER.ROOM_MESSAGE, message => {
-		console.log({message})
-	})
 
+    socket.on(EVENTS.SERVER.ROOM_MESSAGE, (message) => {
+      //   setStateMessage([...stateMessage, message]);
+      //   currentMessage = {
+      //     // ...stateMessage,
+      //     username: message.username,
+      //     message: message.message,
+      //     sendAt: message.sendAt,
+      //     room: message.room,
+      //     roomId: message.roomId,
+      //   };
+        console.log("message received = ", { message });
+    });
+
+    setStateMessage([...stateMessage, currentMessage]);
   }
 
   const GenMessages = () => {

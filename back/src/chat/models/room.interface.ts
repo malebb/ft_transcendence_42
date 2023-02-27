@@ -1,8 +1,7 @@
-import { UserRoom } from "./user-room.interface";
+import { UserRoom } from './user-room.interface';
 
 export interface Room {
-
-	roomId: string;
-	admin: string;
-	members: UserRoom[];
+  roomId: string;
+  admin: string;
+  members: UserRoom[];
 }

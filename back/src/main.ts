@@ -4,11 +4,11 @@ import { AppModule } from './app.module';
 import { useRef, useEffect, useState } from "react";
 import { JwtGuard } from './auth/guard';
 import * as cors from 'cors';
-import socket from './chat/socket'
+// import socket from './chat/socket'
 
 async function bootstrap() {
 
-	socket();
+	// socket();
 
 	const app = await NestFactory.create(AppModule);
 	app.useGlobalPipes(new ValidationPipe({whitelist: true,}));

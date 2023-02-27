@@ -18,6 +18,9 @@ import { Socket, Server } from 'socket.io';
 import { Chat } from './chat.entity';
 import { User } from "@prisma/client";
 
+// interfaces :
+import { Room } from "./models/room.interface";
+
 // permet au client de communiquer au server par le biais
 // de n'import quelle url
 @Injectable() 
@@ -27,6 +30,10 @@ export class ChatService {
 
 	async createMessage(chat: Chat) {
 		// return await this.chatRepository.save(chat);
+	}
+
+	async joinRoom(client: Socket, room: Room) {
+		console.log("test");
 	}
 
 	// async getMessages(): Promise<Chat[]> {
