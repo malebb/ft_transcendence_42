@@ -59,6 +59,11 @@ export class ChatGateway
   //     this.server.emit('recMessage', payload);
   //   }
 
+  @SubscribeMessage('CREATE_ROOM')
+  createRoom(client: Socket, room: ChatRoom) {
+    this.chatService.createRoom(client, room);
+    console.log('User ' + client.id + ' joined room ' + room.roomId);
+  }
   // async??
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {

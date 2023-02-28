@@ -31,6 +31,10 @@ export class ChatService {
   // async createMessage(chat: Chat) {
   // return await this.chatRepository.save(chat);
   // }
+	createRoom(client: Socket, room: ChatRoom)
+	{
+
+	}
 
   joinRoom(client: Socket, room: ChatRoom) {
     console.log({ room });
@@ -38,7 +42,7 @@ export class ChatService {
       console.log({ message });
 
     //   io.emit('ROOM_MESSAGE', message);
-    });
+	});
     // console.log("funciton joinRoom in ChatService");
   }
 

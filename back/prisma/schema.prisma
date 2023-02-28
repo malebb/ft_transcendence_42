@@ -28,6 +28,25 @@ model User {
   skin String @default("white")
   map String @default("basic")
 
+  ownerChats	ChatRoom[]
+  adminChats	ChatRoom[]
+
   @@map("users")
 }
 
+model ChatRoom
+{
+	id       		 	Int    			  @id @default(autoincrement())
+	name				String
+	password			String?
+	accessibility		Restriction
+	owner				User?
+	admin 				User[]
+}
+
+enum Restriction
+{
+	PUBLIC
+	PRIVATE
+	PROTECTED
+}
