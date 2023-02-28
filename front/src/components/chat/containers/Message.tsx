@@ -4,6 +4,7 @@ import { SocketContext } from "../context/socket.context";
 import InputButton from "../inputs/InputButton";
 
 import "./message.style.css";
+import { type } from "os";
 
 // interface partialMessage {
 //   username: string;
@@ -15,8 +16,11 @@ import "./message.style.css";
 //   roomId: string;
 // }
 
+type mesageType = "current" | "other";
+
 interface Message {
   username: string;
+  userId: number;
   message: string;
   sendAt: Date;
   hours: number;
@@ -28,6 +32,7 @@ interface Message {
 function MessagesContainer() {
   let newMessage: Message = {
     username: "username",
+    userId: 0,
     message: "",
     sendAt: new Date(),
     hours: 0,
@@ -38,26 +43,23 @@ function MessagesContainer() {
 
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
-  const [stateMessage, setStateMessage] = useState<Message[]>([
-    {
-      ...newMessage,
-    },
-  ]);
+  const [stateMessage, setStateMessage] = useState<Message[]>([]);
 
   let currentMessage: Message = { ...newMessage };
 
   const socket = SocketContext();
+  const userIdValue: string = sessionStorage.getItem("id") || "0";
+  const userId: number = parseInt(userIdValue);
 
   useEffect(() => {
     socket.on("ROOM_MESSAGE", (message) => {
+      console.log({ message });
       setStateMessage([...stateMessage, message]);
     });
   });
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-
-	
-	// https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
+    // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
 
@@ -74,6 +76,7 @@ function MessagesContainer() {
     currentMessage = {
       ...newMessage,
       message: inputMessage,
+      userId: userId,
       sendAt: dateTS,
       hours: dateTS.getHours(),
       minutes: dateTS.getMinutes(),
@@ -89,17 +92,38 @@ function MessagesContainer() {
       return `${date.hours}:${date.minutes}`;
     };
 
+    const genMessage = (isCurrentUser: boolean, currentMessage: Message) => {
+      if (isCurrentUser) {
+        return (
+          <>
+            <div className="chat">
+              <span>{currentMessage.username}</span>
+              <span>{currentMessage.message}</span>
+            </div>
+            <span className="date">{genDate(currentMessage)}</span>
+          </>
+        );
+      }
+      return (
+        <>
+          <span className="date">{genDate(currentMessage)}</span>
+          <div className="chat-sender">
+            <span>{currentMessage.username}</span>
+            <span>{currentMessage.message}</span>
+          </div>
+        </>
+      );
+    };
+
     // if (currentMessage?.message === "") return <div id="liena"></div>;
     return (
       <>
         {stateMessage?.map((stateMessage, index) => {
+          const isCurrentUser = userId == stateMessage.userId;
+
           return (
             <div key={index + 1} className="chat-wrapper">
-              <div className="chat">
-                <span>{stateMessage.username}</span>
-                <span>{stateMessage.message}</span>
-              </div>
-              <span className="date">{genDate(stateMessage)}</span>
+              {genMessage(isCurrentUser, stateMessage)}
             </div>
           );
         })}
