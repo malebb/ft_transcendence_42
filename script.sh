@@ -21,6 +21,8 @@ npm i --save @nestjs/websockets
 npm i --save @nestjs/platform-socket.io
 npm i --save @nestjs/platform-express
 npm i --save @nestjs/typeorm typeorm
+npm i --save pino
+npm i --save dayjs
 npm i uuid --save
 npm i nestjs-form-data --save
 npm i @types/multer --save
