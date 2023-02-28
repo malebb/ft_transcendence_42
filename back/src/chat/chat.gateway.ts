@@ -16,6 +16,8 @@ import { ChatService } from './chat.service';
 // interfaces :
 import { ChatRoom } from './models/ChatRoom';
 
+import { UserService } from 'src/user/user.service';
+
 
 // import { AuthService } from '../auth/auth.service';
 // import { UserService } from '../user/user.service';
@@ -62,7 +64,8 @@ export class ChatGateway
   // async??
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
-    this.chatService.joinRoom(client, room);
+// enregistrer la socket dan sun channel
+    this.chatService.joinRoom(this.server, client, room);
     console.log('User ' + client.id + ' joined room ' + room.roomId);
   }
 

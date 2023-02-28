@@ -2,6 +2,7 @@
 	--main: #1D1E24;
 	--secondary: #20232B;
 	--tertiary: #B785F5;
+	--quatre: #547EBE
 }
 
 body {
@@ -92,5 +93,16 @@ body {
 	display: flex;
 	width: 100%;
 	align-items: center;
+}
+
+.chat-sender {
+	background-color: #547EBE;
+	border-radius: 8px;
+	padding: 8px 16px;
+	color: white;
+	display: flex;
+	row-gap: 1em;
+	flex: 1 1;
+	color: white;
 }
 /* .roomBase */
