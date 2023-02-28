@@ -1,0 +1,70 @@
+#games
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-height: 400px;
+	height: 100%;
+}
+
+.game
+{
+   background-color: #547EBE;
+   border: 1px, solid;
+   display: flex;
+   justify-content: space-around;
+   align-items: center;
+   text-decoration: none;
+   transition: transform .2s;
+   font-size: 19px;
+   border-radius: 5px;
+}
+
+.game:hover
+{
+	transform: scale(1.020);
+}
+
+.gameLink
+{
+   height: 50px;
+   width: 450px;
+   text-decoration: none;
+   color: inherit;
+   margin: 30px;
+}
+
+#spectate
+{
+	text-align: center;
+}
+
+#canvas
+{
+}
+
+#spectatorTitle
+{
+	background-color: #547EBE;
+	text-align: center;
+	width: 250px;
+	padding: 8px;
+	margin: auto;
+	margin-top: 50px;
+	margin-bottom: 50px;
+	border-radius: 5px;
+}
+
+#noGame
+{
+	background-color: #547EBE;
+	text-align: center;
+	width: 400px;
+	margin: auto;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	margin-top: 50px;
+	margin-bottom: 50px;
+	border-radius: 5px;
+
+}

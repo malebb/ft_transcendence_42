@@ -13,8 +13,14 @@ import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
 import { connected } from 'process';
 import { Response } from 'express';
+import axios, { AxiosResponse } from 'axios';
 
+require('oauth2');
+
+const JWT_TOKEN_EXPIRE_TIME= 900
+const GRANT_TYPE ='authorization_code';
 const DEFAULT_IMG='uploads/profileimages/default_profile_picture.png'
+const REDIRECT_URI='http://localhost:3000/auth/signin/42login/callback'
 
 @Injectable()
 export class AuthService {
@@ -30,7 +36,7 @@ export class AuthService {
         return hash;
     }
     
-    async signup(dto: AuthDto) : Promise<Tokens>
+    async signup(dto: AuthDto) : Promise<Object>
     {
         const hash = await argon.hash(dto.password);
         try{
@@ -39,12 +45,16 @@ export class AuthService {
                     email: dto.email,
                     hash: hash,
                     profilePicture: DEFAULT_IMG,
-                }
+                    username: dto.email,
+					          stats: {
+						          create: {}
+					          }
+                    }
             })
             const tokens = await this.signToken(user.id, user.email);
             this.updateRtHash(user.id, tokens.refresh_token)
             console.log(tokens)
-            return tokens;
+            return {tokens: tokens, isTfa: user.isTFA, userId: user.id};
         }
         catch(error)
         {
@@ -62,7 +72,6 @@ export class AuthService {
 
     async signin(dto: AuthDto) : Promise<Object>
     {
-        console.log('sigin');
         const user = await this.prismaService.user.findUnique({
             where:{
                 email: dto.email,
@@ -84,7 +93,7 @@ export class AuthService {
         }
         const tokens = await this.signToken(user.id, user.email);
         this.updateRtHash(user.id, tokens.refresh_token)
-        return {tokens: tokens, isTfa: user.isTFA};
+        return {tokens: tokens, isTfa: user.isTFA, userId: user.id};
   //      const user = await this.prismaService.user.findUnique({
   //          email,
   //          hash,
@@ -96,6 +105,66 @@ export class AuthService {
     {
         const redirect_uri = this.config.get('OAUTH_REDIRECT_URI');
         res.redirect(redirect_uri);
+    }
+
+   /* async get42AT(code)
+    {
+        const client_id = this.config.get('OAUTH_CLIENT_UID');
+        const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
+        console.log("get inside get42QT = " + client_id + " | " + client_secret); 
+        const response: AxiosResponse = await axios.post('https://api.intra.42.fr/oauth/token', {grant_type: GRANT_TYPE,client_id: client_id, client_secret: client_secret, code: code, redirect_uri: REDIRECT_URI},);
+        console.log("after axios inside get42QT"); 
+        console.log(response.data);
+        return response;
+    }*/
+
+    async callback42(code) : Promise<Object> //TODO may change || "" by so;ething more accurate
+    {
+        //const response : AxiosResponse = await this.get42AT(code);
+        const client_id = this.config.get('OAUTH_CLIENT_UID');
+        const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
+        console.log("get inside get42QT = " + client_id + " | " + client_secret); 
+        const response: AxiosResponse = await axios.post('https://api.intra.42.fr/oauth/token', {grant_type: GRANT_TYPE,client_id: client_id, client_secret: client_secret, code: code, redirect_uri: REDIRECT_URI},);
+        console.log("after axios inside get42QT"); 
+        console.log(response.status);
+        console.log(response.data);
+        //if(response.status !== 200)//TODO protect depending on response status
+        
+        const getprofile: AxiosResponse = await axios.get('https://api.intra.42.fr/v2/me', {
+            headers: {'Authorization': 'Bearer ' + response.data['access_token']},
+        });
+        console.log("getme =" + JSON.stringify(getprofile.data));
+        const id42 = JSON.stringify(getprofile.data['id']) || "";
+        const pic42 = getprofile.data.image.versions.small;
+        console.log(pic42);
+        console.log(pic42);
+
+        let user = await this.prismaService.user.findUnique({
+            where: {
+                id42: id42
+            }
+        });
+        if(!user)
+        {
+            user = await this.prismaService.user.create(
+                {
+                data:{
+                    email: getprofile.data['email'] || "",
+                    hash: '',
+                    profilePicture: getprofile.data.image.versions.small,
+                    id42: id42,
+                    username: getprofile.data['login'] || ""
+                }
+
+                }
+            )
+        }
+        const tokens = await this.signToken(user.id, user.email);
+        this.updateRtHash(user.id, tokens.refresh_token)
+        console.log("tokens ==" + JSON.stringify(tokens));
+        return {tokens: tokens, isTfa: user.isTFA, userId: user.id};
+        //console.log("data = " + JSON.stringify(response.data));
+        return response.data;
     }
 
 
@@ -120,7 +189,7 @@ export class AuthService {
         }
         const secret = this.config.get('JWT_SECRET')
         const token = await this.jwt.signAsync(payload, {
-            expiresIn: '20m',
+            expiresIn: JWT_TOKEN_EXPIRE_TIME,
             secret: secret,
         })
         const rtsecret = this.config.get('RT_SECRET')
@@ -131,6 +200,8 @@ export class AuthService {
         return {
             access_token: token, 
             refresh_token: rToken,
+            crea_time: new Date(),
+            expireIn: JWT_TOKEN_EXPIRE_TIME,
         };
     }
 

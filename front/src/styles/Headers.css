@@ -1,9 +1,35 @@
-.Headers{
+
+.static_header{
+  position: fixed;
+  border-radius: 10px;
+  display: flex;
+  width: 98%;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  text-align: center;
+  background: rgb(67,41,81);
+background: linear-gradient(90deg, rgba(67,41,81,1) 35%, rgba(84,126,190,1) 100%);
+background: rgb(67,41,81);
+background: linear-gradient(137deg, rgba(67,41,81,1) 35%, rgba(84,126,190,1) 100%);
+  justify-content: space-between;
+  height: 79px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.HeadersTitle{
+    width: 450px;
     display: flex;
+    justify-content: center;
     margin: 0px;
     padding: 0px;
     font-size: 48px;
     align-items: center;
+    color: black;
+}
+.Header-Title{
+    color: white;
+    font-size: 50px;
 }
 
 .Header-Link{
@@ -12,4 +38,40 @@
 
 .Header-Link:checked{
     text-decoration: none;
+}
+
+.Nav{
+    flex: 1;
+    max-width: 600px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.Nav-Link {
+    margin: 10 px;
+    padding: 10 px;
+    text-decoration: none;
+}
+
+.Nav-Searchbar{
+    font-family: Arial, Helvetica, sans-serif;
+    height: 30px;
+    font-size: 16px;
+    vertical-align: middle;
+    outline: none;
+    border-radius: 7px;
+}
+
+.Nav-Searchbar:focus{
+    border-color: #547ebe;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.Nav-Result{
+    display: flex;
+    width: 200px;
+    justify-content: center;
+    background-color: blue;
+    position: fixed;
 }
