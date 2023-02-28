@@ -7,45 +7,106 @@ import { useState } from "react";
 import MessagesContainer from "./Message";
 // import { ChatBaseRoom } from "./ChatBaseRoom";
 import InputButton from "../inputs/InputButton";
+import { accessibilities } from "../utils/RoomAccessibilities";
+import bcrypt from 'bcryptjs';
 
-interface Room {
-  admin: string;
-  nameRoom: string;
-  // users: Array<User>;
-  createdAt: Date;
+interface ChatRoom
+{
+	admin: string;
+	nameRoom: string;
+	password: string;
+	accessibility: string;
 }
 
-function RoomsContainer(props: any) {
-  let newRoom: Room = {
-    admin: "ldermign",
-    nameRoom: "",
-    createdAt: new Date(),
-  };
+function RoomsContainer(props: any)
+{
+	const socket = SocketContext();
 
-  const [currentRoom, setCurrentRoom] = useState<Room | null>({
-    ...newRoom,
-  });
+	const CreateRoom = () =>
+	{
+		const [roomAccessibility, setRoomAccessibility] = useState("Public");
+		const [password, setPassword] = useState("");
 
-  const socket = SocketContext();
+		const updateAccessibility = (newAccessibility: string) =>
+		{
+			setRoomAccessibility(newAccessibility);
+		}
 
-  function handleCreateRoom(event: React.FormEvent<HTMLFormElement>) {
+		const updatePassword = (e: React.FormEvent<HTMLInputElement>) =>
+		{
+			setPassword(e.currentTarget.value);
+		}
 
-    event.preventDefault();
+		const passwordField = () => roomAccessibility === 'Protected' ? <input type="text" placeholder="password" value={password} onChange={updatePassword} />: <></>;
 
-    //@ts-ignore
-    const form = new FormData(event.target);
-    const roomName = form.get("roomName")?.toString()?.trim();
+		const checkPassword = () => 
+		{
+			if (roomAccessibility == 'Protected')
+			{
+				
+			}
+		}
 
-    if (!roomName?.length) return;
+		const hashPassword = async (password: string) =>
+		{
+			const salt = await bcrypt.genSalt(10);
+			return (await bcrypt.hash(password, salt));
+		}
 
-    newRoom = {
-      ...newRoom,
-      nameRoom: roomName,
-    };
+  		async function handleCreateRoom(event: React.FormEvent<HTMLFormElement>)
+		{
+			event.preventDefault();
+			//@ts-ignore
+   		 	const form = new FormData(event.target);
+ 			const roomName = form.get("roomName")?.toString()?.trim();
 
-    socket.emit(EVENTS.CLIENT.CREATE_ROOM, {newRoom});
-  }
+	    	if (!roomName?.length) return;
+			checkPassword();
+			let newRoom: ChatRoom =
+			{
+				admin: "ldermign",
+				nameRoom: form.get("roomName")!.toString().trim(),
+				accessibility: roomAccessibility,
+				password: await hashPassword(password)
+			};
+			socket.emit(EVENTS.CLIENT.CREATE_ROOM, newRoom);
+			console.log("new room to be created = ", newRoom);
+   		}
+		return (
+		<>
+			<InputButton
+          		onSubmit={handleCreateRoom}
+          		inputProps={{
+           			placeholder: "New room name",
+            		name: "roomName",
+          		}}
+          		buttonText="Create Room" />
+		<ul id="accessibility">
+			{
+				accessibilities.map((accessibility: string, index: number) =>
+				{
+					return (
+						<li key={index}>
+							<input type="checkbox" name={accessibility}
+							checked={accessibility === roomAccessibility }
+							onChange={() => updateAccessibility(accessibility)}/>
+							<label>{accessibility}</label>
+						</li>
+					);
+				})
+			}
+			{passwordField()}
+		</ul>
+		</>
+		);
+	}
+	return (<CreateRoom / >);
+}
 
+export default RoomsContainer;
+
+
+/*
   const JoinRoom = () => {
     return (
       <InputButton
@@ -58,46 +119,13 @@ function RoomsContainer(props: any) {
       />
     );
   };
-
-  const DisplayCurrentRoom = () => {
+*/
     // if (!currentRoom) return <></>;
-
-    return (
-      <>
-        <InputButton
-          onSubmit={handleCreateRoom}
-          inputProps={{
-            placeholder: "New room name",
-            name: "roomName",
-          }}
-          buttonText="Create Room"
-        />
-        <ul className="chat-room-created">
-          <Link to={`/room/${currentRoom?.nameRoom}`}>
-            {currentRoom?.nameRoom}
-          </Link>
-          {/* <h1 id="roomContainer">Welcome to {currentRoom.nameRoom} </h1>
-          <MessagesContainer /> */}
-        </ul>
-      </>
-    );
-  };
-
-  return (
-    <div>
-      <div className="home-container">
-        <DisplayCurrentRoom />
-        {/* {currentRoom ? <DisplayCurrentRoom /> : <JoinRoom />} */}
-      </div>
-    </div>
-  );
-}
 
 interface RoomContainerProps {
   username?: string;
 }
 
-export default RoomsContainer;
 
 // function createNewRoom = () => {
 
