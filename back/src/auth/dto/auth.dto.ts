@@ -2,6 +2,10 @@ import { IsEmail, isNotEmpty, IsNotEmpty, isString, IsString } from 'class-valid
 
 export class AuthDto{
     
+<<<<<<< HEAD
+=======
+//    @IsEmail()
+>>>>>>> socket
     @IsNotEmpty()
     email: string;
 

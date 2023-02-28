@@ -12,11 +12,19 @@ import { HistoryModule } from './history/history.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard , RtGuard} from './auth/guard';
 import { NestjsFormDataModule } from 'nestjs-form-data';
+<<<<<<< HEAD
 import  GameController from './game/game.controller';
 
 @Module({
   imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, GameModule, HistoryModule, NestjsFormDataModule],
   controllers: [AppController, GameController],
+=======
+import { ChatModule } from "./chat/chat.module";
+
+@Module({
+  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, NestjsFormDataModule, ChatModule],
+  controllers: [AppController],
+>>>>>>> socket
   providers: [AppService, {
     provide: APP_GUARD,
     useClass: JwtGuard,

@@ -1,6 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Hanalei+Fill&display=swap');
 
 body{
+	/* :root {
+		--main: rgb(169, 169, 241);
+		--secondary: #20232B;
+	}
+	
+	.static{
+	  position: fixed;
+	  width: 100%; */
   margin: 0;
   background: rgb(39,42,47);
   background: linear-gradient(90deg, rgba(39,42,47,1) 0%, rgba(29,30,36,1) 100%);

@@ -19,6 +19,8 @@ import PrivateRoutes from './PrivateRoute/PrivateRoutes';
 import {useEffect} from 'react';
 import Callback from './Callback';
 import UserProfile from './UserProfile';
+import Chat from './chat/chat';
+import ChatRoomBase from './chat/chatRoom';
 
         /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
@@ -31,6 +33,9 @@ function App() {
           <Route path='/history' element={<History/>}/>
           <Route path='/friends' element={<Friends/>}/>
           <Route path='/games/:gameId?' element={<Games/>}/>
+		  <Route path='/chat' element={<Chat/>}/>
+          <Route path='/room/:roomId' element={<ChatRoomBase/>}/>
+
         <Route path='/' element={<Main/>} />
         <Route path='/signin' element={<Signin/>}/>
         <Route path='/signup' element={<Signup/>}/>
