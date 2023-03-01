@@ -48,7 +48,7 @@ const Sidebar = () => {
           </svg>
         </div>
       </Link>
-      <Link className="Sidebar-Link" to='/friends'>
+      <Link className="Sidebar-Link" to='/chat'>
         <div className='div-sidebar'>
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg"  width="50px" height="50px" viewBox="0 0 1000 1000" enableBackground="new 0 0 1000 1000" >
 <metadata> Svg Vector Icons : http://www.onlinewebfonts.com/icon </metadata>

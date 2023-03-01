@@ -5,13 +5,6 @@ import HeadersTitle from './HeadersTitle'
 import '../styles/Headers.css'
 
 const Headers = () => {
-/*
-    return(
-        <div className="Headers">
-            <Link className='Header-Link' to='/'>Transcendence</Link>
-        </div>
-    )
-	*/
   return (
       <div className='static_header'>
       <HeadersTitle/>

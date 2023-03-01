@@ -19,6 +19,8 @@ interface Message {
   username: string;
   message: string;
   sendAt: Date;
+  hours: number;
+  minutes: number;
   room: boolean;
   roomId: string;
 }
@@ -28,11 +30,13 @@ function MessagesContainer() {
     username: "username",
     message: "",
     sendAt: new Date(),
+    hours: 0,
+    minutes: 0,
     room: false,
     roomId: "",
   };
 
-  // declaration d'une variable d'etat 
+  // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessage, setStateMessage] = useState<Message[]>([
     {
@@ -44,17 +48,16 @@ function MessagesContainer() {
 
   const socket = SocketContext();
 
-  // hook d'effet = gere les effets de bords
-//   useEffect(() => {
-//     socket.on(EVENTS.SERVER.ROOM_MESSAGE, (message) => {
-// 		// setStateMessage([...stateMessage, message]);
-
-// 	});
-//   }, []);
-
+  useEffect(() => {
+    socket.on("ROOM_MESSAGE", (message) => {
+      setStateMessage([...stateMessage, message]);
+    });
+  });
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
+
+	
+	// https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
 
@@ -72,35 +75,20 @@ function MessagesContainer() {
       ...newMessage,
       message: inputMessage,
       sendAt: dateTS,
+      hours: dateTS.getHours(),
+      minutes: dateTS.getMinutes(),
     };
 
-    socket.emit(EVENTS.CLIENT.SEND_ROOM_MESSAGE, currentMessage);
-
-    // currentMessage = [];
-
-    // recevoir des messages venant d'un utilisateur de la room ??
-    // socket.on(EVENTS.SERVER.ROOM_MESSAGE, (data) => {
-    //   console.log({ data });
-    //   // console.log("Received message : ", {});
-    // });
-
-    socket.on(EVENTS.SERVER.ROOM_MESSAGE, (message) => {
-      //   setStateMessage([...stateMessage, message]);
-      //   currentMessage = {
-      //     // ...stateMessage,
-      //     username: message.username,
-      //     message: message.message,
-      //     sendAt: message.sendAt,
-      //     room: message.room,
-      //     roomId: message.roomId,
-      //   };
-        console.log("message received = ", { message });
-    });
+    socket.emit("SEND_ROOM_MESSAGE", currentMessage);
 
     setStateMessage([...stateMessage, currentMessage]);
   }
 
   const GenMessages = () => {
+    const genDate = (date: Message): string => {
+      return `${date.hours}:${date.minutes}`;
+    };
+
     // if (currentMessage?.message === "") return <div id="liena"></div>;
     return (
       <>
@@ -111,11 +99,7 @@ function MessagesContainer() {
                 <span>{stateMessage.username}</span>
                 <span>{stateMessage.message}</span>
               </div>
-              <span className="date">{`${String(
-                stateMessage.sendAt.getHours()
-              ).padStart(2, "0")}:${String(
-                stateMessage.sendAt.getMinutes()
-              ).padStart(2, "0")}`}</span>
+              <span className="date">{genDate(stateMessage)}</span>
             </div>
           );
         })}

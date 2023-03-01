@@ -4,8 +4,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-// import { UserService } from "src/user/user.service";
-import { UserService } from '../user/user.service';
+
 import {
   SubscribeMessage,
   WebSocketGateway,
@@ -16,17 +15,23 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { Chat } from './chat.entity';
-import { User } from '@prisma/client';
+// import { User } from '@prisma/client';
 
 // interfaces :
 import { ChatRoom } from './models/ChatRoom';
+// import { UserController } from 'src/user/user.controller';
+// import { JwtService } from '@nestjs/jwt';
 
 // permet au client de communiquer au server par le biais
 // de n'import quelle url
 @Injectable()
 export class ChatService {
-  // constructor(
-  // 	@InjectRepository(Chat) private chatRepository: Repository<Chat>,) {}
+  constructor(){}
+	// private userController: UserController,
+	// private jwtService: JwtService,
+	// private user: User,
+	// private userController: UserController) {}
+  	// @InjectRepository(Chat) private chatRepository: Repository<Chat>,) {}
 
   // async createMessage(chat: Chat) {
   // return await this.chatRepository.save(chat);
@@ -36,14 +41,14 @@ export class ChatService {
 
 	}
 
-  joinRoom(client: Socket, room: ChatRoom) {
-    console.log({ room });
-    client.on('SEND_ROOM_MESAGE', (message) => {
-      console.log({ message });
-
-    //   io.emit('ROOM_MESSAGE', message);
-	});
-    // console.log("funciton joinRoom in ChatService");
+  joinRoom(server: Server, client: Socket, room: ChatRoom) {
+	// console.log(client);
+	// console.log(this.userController.getMe(this.user));
+	client.join(room.roomId);
+    client.on('SEND_ROOM_MESSAGE', (message) => {
+	//   https://gist.github.com/crtr0/2896891
+	  client.to(room.roomId).emit('ROOM_MESSAGE', message);
+    });
   }
 
   // async getMessages(): Promise<Chat[]> {
