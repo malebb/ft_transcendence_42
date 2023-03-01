@@ -18,6 +18,7 @@ On appel ce fichier dans les pages room, message, etc. en utilisant :
 
 export const socket = io("ws://localhost:3333/chat", {
   transports: ["websocket"],
+  forceNew: true
 //   query: {
 //     // playerData: JSON.stringify(playerData),
 //     sepctator: false,
