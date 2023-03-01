@@ -8,6 +8,8 @@ import { JwtGuard , RtGuard} from './guard';
 import { GetUser, Public } from './decorator';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
+import { CallbackDto } from './dto/callback.dto';
+import { User } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -16,7 +18,7 @@ export class AuthController {
 
     @Public()
     @Post('signup')
-    signup(@Body() dto: AuthDto, @Headers() headers) : Promise<Tokens>
+    signup(@Body() dto: AuthDto, @Headers() headers) : Promise<Object>
     {
         console.log(headers);
         console.log(dto);
@@ -37,7 +39,31 @@ export class AuthController {
     @Get('signin/42login')
     signin42(@Res() res : Response)
     {
+       /* let origin;
+        if (req.headers.origin)
+        {
+            origin = req.headers.origin;
+            console.log("origin = " + origin);
+            res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3333');
+        }*/
         return this.authService.signin42(res);
+    }
+
+    @Public()
+    @HttpCode(HttpStatus.OK)
+    @Post('signin/42login/callback')
+    callback42(@Body() dto: CallbackDto): Promise<Object>
+    {
+        /*let origin;
+        if (req.headers.origin)
+        {
+            origin = req.headers.origin;
+            console.log("origin = " + origin);
+            res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3333');
+            //res.setHeader("Access-Control-Allow-Origin", '*');
+        }*/
+        console.log("code from dto = " + dto.code);
+        return this.authService.callback42(dto.code);
     }
 
     @Post('logout')
@@ -49,9 +75,20 @@ export class AuthController {
     @Public()
     @UseGuards(RtGuard)
     @Post('refresh')
-    refreshToken(@GetUser('sub') userId: number, @GetUser('refreshToken') rToken : string)
+    //refreshToken(@GetUser() user: User, @Req() req: Request)
+    refreshToken(@GetUser('sub') userId: number, @GetUser('refreshToken') token)
+    //refreshToken(@Req() req: Request)
     {
-        return this.authService.refreshToken(userId, rToken);
+        /*console.log(req);
+        let rToken;
+        console.log(user.id);
+        if (req.get('authorization') && user.id)
+        {
+            rToken = req.get('authorization').replace('Bearer', '').trim();*/
+            return this.authService.refreshToken(userId, token); 
+        /*}
+        console.log("aieeee");
+        return ;*/
     }
 
     @Get('verify')

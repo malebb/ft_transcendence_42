@@ -15,6 +15,7 @@ import { Socket,
 import { Player } from "ft_transcendence"
 
 @WebSocketGateway({
+	namespace: '/pong',
 	cors: {
 		origin: 'http://localhost:3333',
 	}
@@ -31,7 +32,10 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 	handleConnection(player: Socket)
 	{
 		console.log('Player ' + player.id + ' joined');
-		this.pongService.findRoom(this.server, player, JSON.parse(String(player.handshake.query.playerData)));
+		if (player.handshake.query.spectator === 'false')
+			this.pongService.findRoom(this.server, player, JSON.parse(String(player.handshake.query.playerData)));
+		else
+			this.pongService.spectateRoom(String(player.handshake.query.roomId), player);
 	}
 
 	handleDisconnect(player: Socket)
