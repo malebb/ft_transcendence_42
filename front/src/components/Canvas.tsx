@@ -317,7 +317,8 @@ export default function Canvas()
 					query:	{
 								playerData: JSON.stringify(playerData),
 								spectator: false
-							}
+							},
+					forceNew: true
 				});
 				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
 				socket.current!.on("connect", async () => {
