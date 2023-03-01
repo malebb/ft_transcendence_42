@@ -114,6 +114,9 @@ CREATE UNIQUE INDEX "users_id42_key" ON "users"("id42");
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ChatRoom_name_key" ON "ChatRoom"("name");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Stats_userId_key" ON "Stats"("userId");
 
 -- CreateIndex

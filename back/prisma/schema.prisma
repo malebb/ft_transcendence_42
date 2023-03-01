@@ -42,7 +42,7 @@ model User {
 
 model ChatRoom {
 	id       		 	Int    			  @id @default(autoincrement())
-	name				String
+	name				String			@unique
 	password			String?
 	accessibility		Accessibility
 	owner				User @relation(fields: [ownerId], references: [id])

@@ -22,6 +22,10 @@ function RoomsContainer(props: any)
 		const [roomAccessibility, setRoomAccessibility] = useState("PUBLIC");
 		const [password, setPassword] = useState("");
 		const axiosInstance = useRef<AxiosInstance | null>(null);
+		
+		// errors
+		const [nameErr, setNameErr] = useState("");
+		const [passwordErr, setPasswordErr] = useState("");
 
 		const updateAccessibility = (newAccessibility: string) =>
 		{
@@ -33,17 +37,8 @@ function RoomsContainer(props: any)
 			setPassword(e.currentTarget.value);
 		}
 
-		const passwordField = () => roomAccessibility === 'PROTECTED' ? <input type="text" placeholder="password" value={password} onChange={updatePassword} />: <></>;
+		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div><label>{passwordErr}</label><input type="text" placeholder="password" value={password} onChange={updatePassword} /></div>: <></>;
 
-		const checkPassword = (): boolean => 
-		{
-			if (roomAccessibility == 'PROTECTED')
-			{
-				if (password.length < 10)
-					return (false);
-			}
-			return (true);
-		}
 
 		const hashPassword = async (password: string) =>
 		{
@@ -51,22 +46,62 @@ function RoomsContainer(props: any)
 			return (await bcrypt.hash(password, salt));
 		}
 
+		const checkPassword = ()=> 
+		{
+			return (new Promise((resolve) =>
+			{
+				if (roomAccessibility == 'PROTECTED')
+				{
+					if (password.length < 10)
+						setPasswordErr('Password should contain minimum 10 characters');
+					else
+						resolve(true);
+					resolve (false);
+				}
+			}));
+		}
+
+		const checkName = (roomName: string) =>
+		{
+			if (roomName.length < 4)
+				setNameErr('The room name should contain minimum 4 characters');
+			else
+				return (true);
+			return (false);
+		}
+
+		const isNameAvailable = (name: string, chatRooms: AxiosResponse) =>
+		{
+			if (chatRooms.data)
+			{
+				setNameErr("There is already a " + name + " room");
+				return (false);
+			}
+			return (true);
+		}
+
   		async function handleCreateRoom(event: React.FormEvent<HTMLFormElement>)
 		{
+			setNameErr('');
+			setPasswordErr('');
 			try
 			{
 				event.preventDefault();
 				//@ts-ignore
    			 	const form = new FormData(event.target);
- 				const roomName = form.get("roomName")?.toString()?.trim();
+ 				const roomName = form.get("roomName")!.toString().trim();
 				let user: AxiosResponse;
 	
-		    	if (!roomName?.length) return;
 				if (!checkPassword())
 					return ;
 				axiosInstance.current = await axiosToken();
-			
-				user = await axiosInstance.current.get('/users/me');
+				if (!checkName(roomName))
+					return ;
+				if (!isNameAvailable(roomName, await axiosInstance.current!.get('/chatRoom/' + roomName)))
+					return ;
+					
+				axiosInstance.current = await axiosToken();
+				user = await axiosInstance.current!.get('/users/me');
 	
 				let newRoom: ChatRoom =
 				{
@@ -85,6 +120,7 @@ function RoomsContainer(props: any)
    		}
 		return (
 		<>
+			<label>{nameErr}</label>
 			<InputButton
           		onSubmit={handleCreateRoom}
           		inputProps={{

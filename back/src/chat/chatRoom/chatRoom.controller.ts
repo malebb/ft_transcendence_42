@@ -5,13 +5,12 @@ import { ChatRoomService } from './chatRoom.service';
 class ChatRoomController
 {
 	constructor(private ChatRoomService: ChatRoomService) {}
-/*
-	@Get('')
-	async getGame()
+
+	@Get(':name')
+	async getGame(@Param('name') name: string)
 	{
-		return (await this.ChatRoomService.getChatRoom());
+		return (await this.ChatRoomService.getChatRoom(name));
 	}
-	*/
 }
 
 export default ChatRoomController;
