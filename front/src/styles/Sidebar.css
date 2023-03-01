@@ -1,0 +1,30 @@
+.Sidebar{
+    border-radius: 10px;
+    position: fixed;
+    background: rgb(84,126,190);
+background: linear-gradient(0deg, rgba(84,126,190,1) 0%, rgba(67,41,81,1) 75%);
+background: rgb(67,41,81);
+background: linear-gradient(137deg, rgba(67,41,81,1) 35%, rgba(84,126,190,1) 100%);
+    top: 100px;
+    left : 15px;
+    bottom: 15px;
+    width: 125px;
+    display: flex;
+    flex-direction: column;
+}
+
+.Sidebar-Link{
+    align-items: center;
+    height: 70px;
+}
+
+.Sidebar-Link:hover{
+    background-color: #3d1b50de;
+    border-radius: 10px;
+}
+
+.div-sidebar{
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
