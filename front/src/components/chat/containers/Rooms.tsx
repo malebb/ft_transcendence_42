@@ -21,6 +21,7 @@ function RoomsContainer(props: any)
 	{
 		const [roomAccessibility, setRoomAccessibility] = useState("PUBLIC");
 		const [password, setPassword] = useState("");
+		const [name, setName] = useState("");
 		const axiosInstance = useRef<AxiosInstance | null>(null);
 		
 		// errors
@@ -35,6 +36,11 @@ function RoomsContainer(props: any)
 		const updatePassword = (e: React.FormEvent<HTMLInputElement>) =>
 		{
 			setPassword(e.currentTarget.value);
+		}
+
+		const updateName = (e: React.FormEvent<HTMLInputElement>) =>
+		{
+			setName(e.currentTarget.value);
 		}
 
 		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div><label>{passwordErr}</label><input type="text" placeholder="password" value={password} onChange={updatePassword} /></div>: <></>;
@@ -111,6 +117,7 @@ function RoomsContainer(props: any)
 					password: await hashPassword(password)
 				};
 				socket.emit(EVENTS.CLIENT.CREATE_ROOM, newRoom);
+				setName('');
 				console.log("new room to be created = ", newRoom);
 			}
 			catch (error: any)
@@ -126,6 +133,8 @@ function RoomsContainer(props: any)
           		inputProps={{
            			placeholder: "New room name",
             		name: "roomName",
+					value: name,
+					onChange: updateName
           		}}
           		buttonText="Create Room" />
 		<ul id="accessibility">
