@@ -15,10 +15,11 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { Chat } from './chat.entity';
+import { ChatRoom } from 'ft_transcendence';
+import { ChatRoomService } from './chatRoom/chatRoom.service';
 // import { User } from '@prisma/client';
 
 // interfaces :
-import { ChatRoom } from './models/ChatRoom';
 // import { UserController } from 'src/user/user.controller';
 // import { JwtService } from '@nestjs/jwt';
 
@@ -26,7 +27,9 @@ import { ChatRoom } from './models/ChatRoom';
 // de n'import quelle url
 @Injectable()
 export class ChatService {
-  constructor(){}
+  constructor(
+  	private readonly chatRoomService: ChatRoomService
+  ){}
 	// private userController: UserController,
 	// private jwtService: JwtService,
 	// private user: User,
@@ -38,18 +41,21 @@ export class ChatService {
   // }
 	createRoom(client: Socket, room: ChatRoom)
 	{
-
+		this.chatRoomService.createChatRoom(room);
 	}
 
-  joinRoom(server: Server, client: Socket, room: ChatRoom) {
+	joinRoom(server: Server, client: Socket, room: ChatRoom)
+	{
 	// console.log(client);
 	// console.log(this.userController.getMe(this.user));
+	/*
 	client.join(room.roomId);
     client.on('SEND_ROOM_MESSAGE', (message) => {
-	//   https://gist.github.com/crtr0/2896891
 	  client.to(room.roomId).emit('ROOM_MESSAGE', message);
-    });
-  }
+	  });
+	  */
+	//   https://gist.github.com/crtr0/2896891
+    }
 
   // async getMessages(): Promise<Chat[]> {
   // return await this.chatRepository.find();

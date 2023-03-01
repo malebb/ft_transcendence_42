@@ -1,1 +1,3 @@
-export const accessibilities: string[] = ['Public', 'Private', 'Protected'];
+import { Accessibility } from 'ft_transcendence';
+
+export const accessibilities: string[] = Object.keys(Accessibility);

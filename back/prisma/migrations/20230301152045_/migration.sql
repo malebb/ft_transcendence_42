@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "Restriction" AS ENUM ('PUBLIC', 'PRIVATE', 'PROTECTED');
+CREATE TYPE "Accessibility" AS ENUM ('PUBLIC', 'PRIVATE', 'PROTECTED');
 
 -- CreateEnum
 CREATE TYPE "Status" AS ENUM ('pending', 'accepted', 'declined');
@@ -30,7 +30,7 @@ CREATE TABLE "ChatRoom" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "password" TEXT,
-    "accessibility" "Restriction" NOT NULL,
+    "accessibility" "Accessibility" NOT NULL,
     "ownerId" INTEGER NOT NULL,
 
     CONSTRAINT "ChatRoom_pkey" PRIMARY KEY ("id")
@@ -112,9 +112,6 @@ CREATE UNIQUE INDEX "users_id42_key" ON "users"("id42");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "ChatRoom_ownerId_key" ON "ChatRoom"("ownerId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Stats_userId_key" ON "Stats"("userId");
