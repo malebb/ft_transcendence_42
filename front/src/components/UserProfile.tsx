@@ -306,6 +306,7 @@ const UserProfile = () => {
         <Headers/>
         <Sidebar/>
         {errMsg}
+
 	<br/>
         <div className={showConfirmation? 'container' : 'container'}>
           {/* <div className='divprofilePicture'> */}
@@ -352,6 +353,7 @@ const UserProfile = () => {
           <button className='profileButtonAddFriend' onClick={AddFriend}>Add friend +</button> : (<></>)
           }
         </div>
+
     </div>
 	<Stats/>
 	<br/>

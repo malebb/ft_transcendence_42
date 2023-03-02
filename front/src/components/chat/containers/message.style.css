@@ -4,12 +4,13 @@
 	--tertiary: #B785F5;
 	--quatre: #547EBE
 }
-
+/*
 body {
 	background-color: var(--main);
 	padding: 8px;
 	height: 100.001vh;
 }
+*/
 
 #scroll {
 	height: 96vh;

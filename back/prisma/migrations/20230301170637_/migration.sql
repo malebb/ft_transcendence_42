@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "Accessibility" AS ENUM ('PUBLIC', 'PRIVATE', 'PROTECTED');
+
+-- CreateEnum
 CREATE TYPE "Status" AS ENUM ('pending', 'accepted', 'declined');
 
 -- CreateTable
@@ -20,6 +23,17 @@ CREATE TABLE "users" (
     "map" TEXT NOT NULL DEFAULT 'basic',
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ChatRoom" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "password" TEXT,
+    "accessibility" "Accessibility" NOT NULL,
+    "ownerId" INTEGER NOT NULL,
+
+    CONSTRAINT "ChatRoom_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -82,6 +96,12 @@ CREATE TABLE "Game" (
 );
 
 -- CreateTable
+CREATE TABLE "_UserAdmin" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
+-- CreateTable
 CREATE TABLE "_GamePlayedToUser" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
@@ -94,10 +114,19 @@ CREATE UNIQUE INDEX "users_id42_key" ON "users"("id42");
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ChatRoom_name_key" ON "ChatRoom"("name");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Stats_userId_key" ON "Stats"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Game_gameId_key" ON "Game"("gameId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_UserAdmin_AB_unique" ON "_UserAdmin"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_UserAdmin_B_index" ON "_UserAdmin"("B");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_GamePlayedToUser_AB_unique" ON "_GamePlayedToUser"("A", "B");
@@ -106,10 +135,19 @@ CREATE UNIQUE INDEX "_GamePlayedToUser_AB_unique" ON "_GamePlayedToUser"("A", "B
 CREATE INDEX "_GamePlayedToUser_B_index" ON "_GamePlayedToUser"("B");
 
 -- AddForeignKey
+ALTER TABLE "ChatRoom" ADD CONSTRAINT "ChatRoom_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Stats" ADD CONSTRAINT "Stats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AchievementDone" ADD CONSTRAINT "AchievementDone_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_UserAdmin" ADD CONSTRAINT "_UserAdmin_A_fkey" FOREIGN KEY ("A") REFERENCES "ChatRoom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_UserAdmin" ADD CONSTRAINT "_UserAdmin_B_fkey" FOREIGN KEY ("B") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_GamePlayedToUser" ADD CONSTRAINT "_GamePlayedToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "GamePlayed"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -3,4 +3,7 @@ export * from './Player';
 export * from './Room';
 export * from './Size';
 export * from './PlayerData';
+export * from './ChatRoom';
+export * from './Events';
 export * from './achievements';
+export * from './User';

@@ -1,7 +1,8 @@
 import { Ball } from "./Ball"
 import { Player } from "./Player"
 
-export interface Room {
+export interface Room
+{
 	id:							string;
 	playerGoneCount:			number;
 	ball:						Ball;

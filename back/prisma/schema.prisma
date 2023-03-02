@@ -34,9 +34,28 @@ model User {
   gamePlayed GamePlayed[]
   achievementDone AchievementDone[]
 
+  ownerChats	ChatRoom[]
+  adminChats	ChatRoom[] @relation(name: "UserAdmin")
+
   @@map("users")
 }
 
+model ChatRoom {
+	id       		 	Int    			  @id @default(autoincrement())
+	name				String			@unique
+	password			String?
+	accessibility		Accessibility
+	owner				User @relation(fields: [ownerId], references: [id])
+	ownerId				Int
+	admin 				User[] @relation(name: "UserAdmin")
+
+}
+
+enum Accessibility {
+	PUBLIC
+	PRIVATE
+	PROTECTED
+}
 
 model FriendRequest {
   id         Int    @id @default(autoincrement())

@@ -14,9 +14,9 @@ import { Chat } from './chat.entity';
 import { ChatService } from './chat.service';
 
 // interfaces :
-import { ChatRoom } from './models/ChatRoom';
 
 import { UserService } from 'src/user/user.service';
+import { ChatRoom } from 'ft_transcendence';
 
 
 // import { AuthService } from '../auth/auth.service';
@@ -61,12 +61,16 @@ export class ChatGateway
   //     this.server.emit('recMessage', payload);
   //   }
 
+  @SubscribeMessage('CREATE_ROOM')
+  createRoom(client: Socket, room: ChatRoom) {
+    this.chatService.createRoom(client, room);
+  }
   // async??
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
 // enregistrer la socket dan sun channel
     this.chatService.joinRoom(this.server, client, room);
-    console.log('User ' + client.id + ' joined room ' + room.roomId);
+    console.log('User ' + client.id + ' joined room ');
   }
 
   afterInit(server: Server) {

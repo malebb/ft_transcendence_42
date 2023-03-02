@@ -14,6 +14,7 @@ import VerifTfa from './VerifTfa';
 import User from './User';
 import History from './History';
 import Friends from './Friends';
+import Rooms from './chat/containers/Rooms'
 import Games from './Games';
 import PrivateRoutes from './PrivateRoute/PrivateRoutes';
 import {useEffect} from 'react';
@@ -22,8 +23,6 @@ import UserProfile from './UserProfile';
 import Chat from './chat/chat';
 import ChatRoomBase from './chat/chatRoom';
 
-        /*<Route element={<PrivateRoutes /> } ></Route>
-        </Route>*/
 function App() {
   return (
     <AuthProvider>
@@ -33,10 +32,12 @@ function App() {
           <Route path='/history' element={<History/>}/>
           <Route path='/friends' element={<Friends/>}/>
           <Route path='/games/:gameId?' element={<Games/>}/>
+          <Route path='/friends' element={<Friends/>}/>
+          <Route path='/games/:gameId?' element={<Games/>}/>
 		  <Route path='/chat' element={<Chat/>}/>
           <Route path='/room/:roomId' element={<ChatRoomBase/>}/>
 
-        <Route path='/' element={<Main/>} />
+		<Route path='/' element={<Main/>} />
         <Route path='/signin' element={<Signin/>}/>
         <Route path='/signup' element={<Signup/>}/>
         <Route path='/2factivate' element={<SetTfa/>}/>

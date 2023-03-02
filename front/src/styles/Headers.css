@@ -1,19 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap');
 
 .static_header{
+    z-index: 99;
   position: fixed;
-  border-radius: 10px;
   display: flex;
-  width: 98%;
-  top: 15px;
-  left: 15px;
-  right: 15px;
+  width: 100%;
+  top: 0px;
+  left: 0px;
+  right: 0px;
   text-align: center;
   background: rgb(67,41,81);
 background: linear-gradient(90deg, rgba(67,41,81,1) 35%, rgba(84,126,190,1) 100%);
 background: rgb(67,41,81);
 background: linear-gradient(137deg, rgba(67,41,81,1) 35%, rgba(84,126,190,1) 100%);
   justify-content: space-between;
-  height: 79px;
+  height: 6rem;
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -30,6 +31,7 @@ background: linear-gradient(137deg, rgba(67,41,81,1) 35%, rgba(84,126,190,1) 100
 .Header-Title{
     color: white;
     font-size: 50px;
+    font-family: 'Open Sans';
 }
 
 .Header-Link{
@@ -47,12 +49,47 @@ background: linear-gradient(137deg, rgba(67,41,81,1) 35%, rgba(84,126,190,1) 100
     justify-content: space-around;
     align-items: center;
 }
+
+.Nav-container{
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-areas: ". in up";
+    grid-gap: 1rem;
+    align-items: center;
+    justify-content: center;
+}
 .Nav-Link {
     margin: 10 px;
     padding: 10 px;
     text-decoration: none;
 }
-
+.in{
+    color:black;
+    grid-area: in;
+    padding: 0.7rem;
+    text-decoration: underline;
+}
+.in:hover{
+    opacity: 0.6;
+}
+.in:active{
+    opacity: 0.3;
+}
+.up{
+    border: 0.1rem;
+    border-style: solid;
+    color:black;
+    grid-area: up;
+    padding: 0.7rem;
+    border-radius: 5rem;
+}
+.up:hover{
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0.6;
+}
+.up:active{
+    opacity: 0.3;
+}
 .Nav-Searchbar{
     font-family: Arial, Helvetica, sans-serif;
     height: 30px;

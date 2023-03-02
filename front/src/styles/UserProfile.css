@@ -1,3 +1,9 @@
+main{
+    margin-left: 5rem;
+    margin-top: 6rem;
+    padding: 1rem;
+}
+
 .profilePicture{
     margin: 0 auto;
     grid-area: pix;

@@ -41,15 +41,17 @@ export class AuthService {
         const hash = await argon.hash(dto.password);
         try{
             const user = await this.prismaService.user.create({
-                data:{
-                    email: dto.email,
-                    hash: hash,
-                    profilePicture: DEFAULT_IMG,
-                    username: dto.email,
-					          stats: {
-						          create: {}
-					          }
-                    }
+                data:
+				{
+                   	email: dto.email,
+                   	hash: hash,
+                   	profilePicture: DEFAULT_IMG,
+                   	username: dto.email,
+				   	stats:
+					{
+				    	create: {}
+					}
+                 }
             })
             const tokens = await this.signToken(user.id, user.email);
             this.updateRtHash(user.id, tokens.refresh_token)

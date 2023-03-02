@@ -66,6 +66,7 @@ export class PongService {
 			this.removeFromQueue(player.id);
 			this.removeFromQueue(opponent.id);
 		}
+		console.log("ROOM id = ", roomId);
 		return ({ roomId: roomId, opponent: opponent });
 	}
 
@@ -107,7 +108,8 @@ export class PongService {
 					rightPlayer.username,
 					null,
 					this.sizeCanvas),
-				speedPowerUpInterval: null,
+				leftPowerUpTimeout: null,
+				rightPowerUpTimeout: null,
 				roomInterval: null,
 				powerUpMode: leftPlayer.powerUpMode
 			}
