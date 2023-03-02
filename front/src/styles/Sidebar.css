@@ -1,21 +1,31 @@
 .Sidebar{
-    border-radius: 10px;
+    z-index: 99;
+    border-right: 1px;
+    border-right-style: solid;
+    border-right-color: #b6b6b6;
     position: fixed;
-    background: rgb(84,126,190);
-background: linear-gradient(0deg, rgba(84,126,190,1) 0%, rgba(67,41,81,1) 75%);
-background: rgb(67,41,81);
-background: linear-gradient(137deg, rgba(67,41,81,1) 35%, rgba(84,126,190,1) 100%);
-    top: 100px;
-    left : 15px;
-    bottom: 15px;
-    width: 125px;
+    background-color: var(--bg-primary);
+    top: 6rem;
+    width: 5rem;
+    bottom: 0px;
     display: flex;
     flex-direction: column;
+    transition: width 200ms ease;
+}
+
+.Sidebar-Link:last-child{
+    margin-top: auto;
 }
 
 .Sidebar-Link{
+    display: flex;
+    height: 5rem;
+    color: var(--text-primary);
+    width: 100%;
     align-items: center;
-    height: 70px;
+    justify-content: center;
+    text-decoration: none;
+    
 }
 
 .Sidebar-Link:hover{
@@ -26,5 +36,26 @@ background: linear-gradient(137deg, rgba(67,41,81,1) 35%, rgba(84,126,190,1) 100
 .div-sidebar{
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-top: 10px;
+}
+
+.link-text{
+    text-decoration: none;
+    display: none;
+    margin-left: 1rem;
+}
+
+FontAwesomeIcon{
+    min-width: 2rem;
+    margin: 0 1.5rem;
+}
+
+.Sidebar:hover{
+    width: 16rem;
+}
+
+.Sidebar:hover .link-text{
+    text-decoration: none;
+    display: block;
 }
