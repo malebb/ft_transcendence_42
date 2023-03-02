@@ -1,30 +1,29 @@
 import { Link } from "react-router-dom";
-
 import EVENTS from "../config/events";
 import { SocketContext } from "../context/socket.context";
 import { useState, useRef, useEffect } from "react";
-// import useChat from "./useChat";
 import MessagesContainer from "./Message";
-// import { ChatBaseRoom } from "./ChatBaseRoom";
 import InputButton from "../inputs/InputButton";
 import { accessibilities } from "../utils/RoomAccessibilities";
 import { AxiosInstance, AxiosResponse } from 'axios';
 import { axiosToken } from '../../../api/axios';
 import bcrypt from 'bcryptjs';
 import { ChatRoom, Accessibility } from 'ft_transcendence';
+import './rooms.style.css';
 
-function RoomsContainer(props: any)
+function Rooms()
 {
 	const socket = SocketContext();
+	const axiosInstance = useRef<AxiosInstance | null>(null);
 
 	const CreateRoom = () =>
 	{
 		const [roomAccessibility, setRoomAccessibility] = useState("PUBLIC");
 		const [password, setPassword] = useState("");
 		const [name, setName] = useState("");
-		const axiosInstance = useRef<AxiosInstance | null>(null);
 		
 		// errors
+
 		const [nameErr, setNameErr] = useState("");
 		const [passwordErr, setPasswordErr] = useState("");
 
@@ -43,8 +42,7 @@ function RoomsContainer(props: any)
 			setName(e.currentTarget.value);
 		}
 
-		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div><label>{passwordErr}</label><input type="text" placeholder="password" value={password} onChange={updatePassword} /></div>: <></>;
-
+		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div><label>{passwordErr}</label><input type="password" placeholder="password" value={password} onChange={updatePassword} /></div>: <></>;
 
 		const hashPassword = async (password: string) =>
 		{
@@ -52,19 +50,17 @@ function RoomsContainer(props: any)
 			return (await bcrypt.hash(password, salt));
 		}
 
-		const checkPassword = ()=> 
+		const checkPassword = (): boolean => 
 		{
-			return (new Promise((resolve) =>
+			if (roomAccessibility == 'PROTECTED')
 			{
-				if (roomAccessibility == 'PROTECTED')
-				{
-					if (password.length < 10)
-						setPasswordErr('Password should contain minimum 10 characters');
-					else
-						resolve(true);
-					resolve (false);
-				}
-			}));
+				if (password.length < 10)
+					setPasswordErr('Password should contain minimum 10 characters');
+				else
+					return (true);
+				return (false);
+			}
+			return (true);
 		}
 
 		const checkName = (roomName: string) =>
@@ -105,19 +101,18 @@ function RoomsContainer(props: any)
 					return ;
 				if (!isNameAvailable(roomName, await axiosInstance.current!.get('/chatRoom/' + roomName)))
 					return ;
-					
 				axiosInstance.current = await axiosToken();
 				user = await axiosInstance.current!.get('/users/me');
-	
 				let newRoom: ChatRoom =
 				{
-					owner: user.data.username,
+					owner: {...user.data},
 					name: form.get("roomName")!.toString().trim(),
 					accessibility: Accessibility[roomAccessibility as keyof typeof Accessibility],
 					password: await hashPassword(password)
 				};
 				socket.emit(EVENTS.CLIENT.CREATE_ROOM, newRoom);
 				setName('');
+				setPassword('');
 				console.log("new room to be created = ", newRoom);
 			}
 			catch (error: any)
@@ -156,44 +151,63 @@ function RoomsContainer(props: any)
 		</>
 		);
 	}
-	return (<CreateRoom / >);
+
+	const RoomList = () =>
+	{
+		const [chatRoomList, setChatRoomList] = useState<ChatRoom[]>([]);
+
+		const displayChatRooms = () =>
+		{
+			if (!chatRoomList.length)
+				return (<p>No room chat have been created</p>);
+			return(
+				<ul id="roomList">
+				{
+					chatRoomList.map((chatRoom) => {
+						return (
+						<Link className="roomLink" to={`/room/${chatRoom.name}`} key={chatRoom.name}>
+							<li className="chatRoom"><h3 className="roomTitle">{chatRoom.name}</h3>
+													<p>Owner: {chatRoom.owner.username}</p></li>
+						</Link>);
+					})
+				}
+				</ul>
+			)
+				
+		}
+
+		useEffect(() =>
+		{
+			const initChatRoomList = async () => 
+			{
+				try
+				{
+					axiosInstance.current = await axiosToken();
+					const chatRooms = await axiosInstance.current!.get('/chatRoom');
+					setChatRoomList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
+					(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
+				}
+				catch (error: any)
+				{
+					console.log("error while displaying chat rooms: ", error);
+				}
+			}
+			initChatRoomList();
+		}, []);
+
+		return (
+			<div>
+				{displayChatRooms()}
+			</div>
+		);
+	}
+
+	return (
+		<div id="rooms">
+			<CreateRoom />
+			<RoomList />
+		</div>
+	);
 }
 
-export default RoomsContainer;
-
-
-/*
-  const JoinRoom = () => {
-    return (
-      <InputButton
-        onSubmit={handleCreateRoom}
-        inputProps={{
-          placeholder: "New room name",
-          name: "roomName",
-        }}
-        buttonText="Create Room"
-      />
-    );
-  };
-*/
-    // if (!currentRoom) return <></>;
-
-interface RoomContainerProps {
-  username?: string;
-}
-
-
-// function createNewRoom = () => {
-
-// 	event.preventDefault();
-
-// 	// Read the form data
-// 	// @ts-ignore
-// 	const form = new FormData(event.target);
-// 	const inputMessage = form.get("messageInput")?.toString()?.trim();
-
-// 	useEffect(() => {
-
-// 	})
-
-//   };
+export default Rooms;

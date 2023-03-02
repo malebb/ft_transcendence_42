@@ -3,7 +3,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ChatRoom } from 'ft_transcendence';
 
 @Injectable()
-export class ChatRoomService {
+export class ChatRoomService
+{
     constructor(private prisma: PrismaService) {}
 
 	async createChatRoom(chatRoom: ChatRoom)
@@ -12,12 +13,12 @@ export class ChatRoomService {
 			data: {
 				owner: {
 					connect: {
-						email: chatRoom.owner,
+						email: chatRoom.owner.email,
 					}
 				},
 				admin: {
 					connect: {
-						email: chatRoom.owner,
+						email: chatRoom.owner.email,
 					}
 				},
 				name: chatRoom.name,
@@ -37,5 +38,13 @@ export class ChatRoomService {
 		return (chatRoom);
 	}
 
-
+	async getAllRooms()
+	{
+		const chatRoom = await this.prisma.chatRoom.findMany({
+			include: {
+				owner: true
+			}
+		})
+		return (chatRoom);
+	}
 }

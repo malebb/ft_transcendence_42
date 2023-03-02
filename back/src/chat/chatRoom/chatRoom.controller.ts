@@ -6,8 +6,15 @@ class ChatRoomController
 {
 	constructor(private ChatRoomService: ChatRoomService) {}
 
+
+	@Get('')
+	async getAllRooms()
+	{
+		return (await this.ChatRoomService.getAllRooms());
+	}
+
 	@Get(':name')
-	async getGame(@Param('name') name: string)
+	async getChatRooms(@Param('name') name: string)
 	{
 		return (await this.ChatRoomService.getChatRoom(name));
 	}

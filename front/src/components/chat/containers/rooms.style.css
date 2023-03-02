@@ -1,0 +1,37 @@
+#rooms
+{
+	margin-left: 75px;
+	margin-right: 75px;
+}
+
+#roomList
+{
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-around;
+	padding: 0px;
+}
+
+.roomLink
+{
+   text-decoration: none;
+   color: inherit;
+   margin: 10px;
+}
+
+.chatRoom
+{
+   width: 250px;
+   height: 75px;
+   background-color: var(--tertiary);
+   border: 1px, solid;
+   border-radius: 5px;
+   list-style: none;
+   text-align: center;
+}
+
+.roomTitle
+{
+	position: relative;
+	top: 10px;
+}
