@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import EVENTS from "../config/events";
 import { SocketContext } from "../context/socket.context";
 import InputButton from "../inputs/InputButton";
+import { AxiosInstance } from "axios";
 
 import "./message.style.css";
 import { type } from "os";
+import { axiosToken } from "src/api/axios";
 
 // interface partialMessage {
 //   username: string;
@@ -23,8 +25,8 @@ interface Message {
   userId: number;
   message: string;
   sendAt: Date;
-  hours: number;
-  minutes: number;
+  hours: string;
+  minutes: string;
   room: boolean;
   roomId: string;
 }
@@ -35,8 +37,8 @@ function MessagesContainer() {
     userId: 0,
     message: "",
     sendAt: new Date(),
-    hours: 0,
-    minutes: 0,
+    hours: "00",
+    minutes: "00",
     room: false,
     roomId: "",
   };
@@ -44,6 +46,7 @@ function MessagesContainer() {
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessage, setStateMessage] = useState<Message[]>([]);
+  const axiosInstance = useRef<AxiosInstance | null>(null);
 
   let currentMessage: Message = { ...newMessage };
 
@@ -52,6 +55,13 @@ function MessagesContainer() {
   const userId: number = parseInt(userIdValue);
 
   useEffect(() => {
+    const getCurrentUser = async () => {
+      axiosInstance.current = await axiosToken();
+	  const tmp = await axiosInstance.current?.get("/users/me");
+    console.log(tmp);
+	};
+	console.log(currentMessage.username);
+    getCurrentUser();
     socket.on("ROOM_MESSAGE", (message) => {
       console.log({ message });
       setStateMessage([...stateMessage, message]);
@@ -78,8 +88,8 @@ function MessagesContainer() {
       message: inputMessage,
       userId: userId,
       sendAt: dateTS,
-      hours: dateTS.getHours(),
-      minutes: dateTS.getMinutes(),
+      hours: String(dateTS.getHours()).padStart(2, "0"),
+      minutes: String(dateTS.getMinutes()).padStart(2, "0"),
     };
 
     socket.emit("SEND_ROOM_MESSAGE", currentMessage);
@@ -93,7 +103,7 @@ function MessagesContainer() {
     };
 
     const genMessage = (isCurrentUser: boolean, currentMessage: Message) => {
-      if (isCurrentUser) {
+      if (!isCurrentUser) {
         return (
           <>
             <div className="chat">
@@ -145,14 +155,12 @@ function MessagesContainer() {
   };
 
   return (
-    // <div id="scroll">
     <div id="content">
       <div id="chatContainer">
         <GenMessages />
       </div>
       <GenSendMessage />
     </div>
-    // </div>
   );
 }
 
