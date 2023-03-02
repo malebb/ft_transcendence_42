@@ -158,6 +158,22 @@ function Rooms()
 	const RoomList = () =>
 	{
 		const [chatRoomList, setChatRoomList] = useState<ChatRoom[]>([]);
+
+		const accessibilityLogo = (accessibility: Accessibility) =>
+		{
+			const logoWidth = 25;
+
+			switch (accessibility)
+			{
+				case 'PUBLIC':
+					return (<img src="http://localhost:3000/images/public.png" width={logoWidth} height={logoWidth}/>);
+				case 'PRIVATE':
+					return (<img src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth}/>);
+				case 'PROTECTED':
+					return (<img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth}/>);
+			}
+		}
+
 		const displayChatRooms = () =>
 		{
 			if (!chatRoomList.length)
@@ -170,7 +186,10 @@ function Rooms()
 						<Link className="roomLink" to={`/room/${chatRoom.name}`} key={chatRoom.name}>
 							<li className="chatRoom">
 								<h3 className="roomTitle">{chatRoom.name}</h3>
-								<p>Owner : {chatRoom.owner.username}</p>
+								<div className="roomInfo">
+									<p className="owner">Owner : {chatRoom.owner.username}</p>
+									{accessibilityLogo(chatRoom.accessibility)}
+								</div>
 							</li>
 						</Link>);
 					})

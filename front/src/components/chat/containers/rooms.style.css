@@ -59,6 +59,18 @@
 	top: 10px;
 }
 
+.roomInfo
+{
+	height: 25px;
+	display: flex;
+	justify-content: space-around;
+}
+
+.owner
+{
+	margin: 0px;
+}
+
 #joinRoomTitle, #createRoomTitle
 {
 	padding: 10px;
