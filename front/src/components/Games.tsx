@@ -213,21 +213,25 @@ const Games = () =>
 
 	if (!gameId) {
 		return (
-			<div id="games">
+		<>
 				<Headers />
 				<Sidebar />
+			<div id="games">
 				{printGames()}
 			</div>
+		</>	
 		);
 	}
 	else
 		return (
+		<>
+			<Headers />
+			<Sidebar />
 			<div id="spectate">
-				<Headers />
-				<Sidebar />
 				<h3 id="spectatorTitle">Spectator mode</h3>
 				<canvas id="canvas" width={size.current.width} height={size.current.height} ref={canvasRef}></canvas>
 			</div>
+		</>
 		);
 
 }

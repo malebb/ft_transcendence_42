@@ -86,11 +86,13 @@ const History = () =>
 		initHistory();
 	}, []);
 	return (
-		<div id="history">
+	<>
         <Headers/>
         <Sidebar/>
+		<div id="history">
 		{printHistory()}
 		</div>
+	</>
 	);
 }
 
