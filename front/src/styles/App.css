@@ -11,6 +11,14 @@
 }
 
 body{
+	/* :root {
+		--main: rgb(169, 169, 241);
+		--secondary: #20232B;
+	}
+	
+	.static{
+	  position: fixed;
+	  width: 100%; */
   margin: 0;
   padding: 0;
   background-color: white;

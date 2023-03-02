@@ -155,3 +155,12 @@ main{
     text-align: center;
     font-size: 18px;
 }
+
+#notFriend
+{
+	background-color: #547EBE;
+	text-align: center;
+	width: 325px;
+	padding: 8px;
+	margin: auto;
+}

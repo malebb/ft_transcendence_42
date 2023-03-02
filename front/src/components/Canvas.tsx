@@ -6,6 +6,7 @@ import LinkZone from "../interfaces/LinkZone";
 import { axiosToken, getToken } from '../api/axios';
 import { AxiosInstance} from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { CANVAS_FONT, FONT_COLOR } from '../classes/Draw';
 
 interface CheckboxData
 {
@@ -62,10 +63,10 @@ export default function Canvas()
 		function stopGame()
 		{
 			window.cancelAnimationFrame(animationFrameId.current)
-			socket.current!.disconnect();
 			kd.current.stop();
 			document!.removeEventListener('keypress', powerUp);
 			document!.removeEventListener('keyup', notifyKeyReleased);
+			socket.current!.disconnect();
 		}
 
 		const pong = async () => 
@@ -151,8 +152,8 @@ export default function Canvas()
 				draw.current!.outGameBackground(background);
 				draw.current!.opponentDisconnection();
 
-				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
-				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
+				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
 				let zones = [newGameZone, menuZone];
 
 				addLink(newGameZone, matchmaking, zones, 0);
@@ -172,8 +173,8 @@ export default function Canvas()
 				else
 					draw.current!.youLost();
 
-				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
-				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
+				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
 				let zones = [newGameZone, menuZone];
 
 				addLink(newGameZone, matchmaking, zones, 0);
@@ -262,6 +263,7 @@ export default function Canvas()
 			document.addEventListener('keyup', notifyKeyReleased);
 			// TODO fetch user selected map in database
 
+			axiosInstance.current = await axiosToken();
 			map.current = draw.current!.initGameMap((await axiosInstance.current!.get('/users/me', {})).data.map);
 			map.current!.onload = function()
 			{
@@ -299,21 +301,24 @@ export default function Canvas()
 				draw.current!.outGameBackground(background);
 				draw.current!.matchmaking();
 
-				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, "black", "Courier New");
+				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
 
 				let zones = [cancelZone];
 				let playerData: PlayerData = {id: "", username: "", skin: "", powerUpMode: powerUpMode.current};
 
+				axiosInstance.current = await axiosToken();
 				playerData.skin = (await axiosInstance.current!.get('/users/me', {})).data.skin;
+				axiosInstance.current = await axiosToken();
 				playerData.username = (await axiosInstance.current!.get('/users/me', {})).data.email;
 
-				socket.current = io(`ws://localhost:3333`,
+				socket.current = io(`ws://localhost:3333/pong`,
 				{
 					transports: ["websocket"],
 					query:	{
 								playerData: JSON.stringify(playerData),
 								spectator: false
-							}
+							},
+					forceNew: true
 				});
 				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
 				socket.current!.on("connect", async () => {
@@ -327,10 +332,11 @@ export default function Canvas()
 			} 
 		}
 
-		function changeSkin(name : string)
+		async function changeSkin(name : string)
 		{
 			draw.current!.skins = [];
-			axiosInstance.current!.patch('/users/', {skin: name});
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current!.post('/users/', {skin: name});
 			menu();
 		}
 
@@ -356,7 +362,8 @@ export default function Canvas()
 
 		async function changeMap(name: string)
 		{
-			axiosInstance.current!.patch('/users/', {map: name});
+			axiosInstance.current = await axiosToken();
+			axiosInstance.current!.post('/users/', {map: name});
 			menu();
 		}
 
@@ -403,10 +410,10 @@ export default function Canvas()
 					{
 						draw.current!.outGameBackground(background);
 						draw.current!.checkbox(background);
-						let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35, "black", "Courier New");
-						let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20, "black", "Courier New");
-						let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20, "black", "Courier New");
-						draw.current!.text("Power-up", size.current.width / 2.1, size.current.height / 1.66, 16, "black", "Courier New");
+						let newGameZone = draw.current!.text("new game", size.current.width / 2, size.current.height / 2, 35, FONT_COLOR, CANVAS_FONT);
+						let skinsZone = draw.current!.text("skins", size.current.width / 4, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+						let mapsZone = draw.current!.text("maps", size.current.width / 1.3, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+						draw.current!.text("Power-up", size.current.width / 2.1, size.current.height / 1.66, 16, FONT_COLOR, CANVAS_FONT);
 						let checkboxZone = draw.current!.checkbox(checkbox);
 						draw.current!.checked(checked);
 	
@@ -421,12 +428,17 @@ export default function Canvas()
 			}
 		}
 
+		const trimUsername = (username: string) => {
+			return (username.length < 15 ? username : username.slice(0, 13) + '..');
+		}
+
 		function game()
 		{
 			draw.current!.gameMap(map.current!);
 			leftPlayer.current!.draw_paddle();
 			rightPlayer.current!.draw_paddle();
 			draw.current!.score(leftPlayer.current!.score, rightPlayer.current!.score);
+			draw.current!.usernames(trimUsername(leftPlayer.current!.username), trimUsername(rightPlayer.current!.username));
 			draw.current!.speedPowerUp(speedPowerUp.current!, leftPlayer.current!.speedPowerUp, rightPlayer.current!.speedPowerUp);
 			ball.current?.draw();
 		}
@@ -439,6 +451,8 @@ export default function Canvas()
 
 		async function initUser()
 		{
+
+			axiosInstance.current = await axiosToken();
 			await axiosInstance.current!.get('/users/me', {});
 		}
 
@@ -463,7 +477,6 @@ export default function Canvas()
 
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
-		axiosInstance.current = await axiosToken();
 		if (getToken() == null)
 		{
 			signInToPlay();
@@ -472,7 +485,11 @@ export default function Canvas()
 		else
 		{
 			await initUser();
-			menu();
+			let googleFont = draw.current!.initFont();
+			document.fonts.add(googleFont);
+			googleFont.load().then(() => {
+				menu();
+			});
 			return (true);
 		}
 		}

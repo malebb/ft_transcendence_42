@@ -82,6 +82,21 @@ export class UserService {
         return user;
     }
 
+	async getCustomisation(username: string)
+	{
+		const customisation = await this.prisma.user.findUnique(
+		{
+			where: {
+				email: username,
+			},
+			select: {
+				skin: true,
+				map: true
+			}
+		});
+		return (customisation);
+	}
+
     async alreadyRequested(creatorId: number, receiverId: number): Promise<string>
     {
         const user = await this.prisma.user.findUnique({

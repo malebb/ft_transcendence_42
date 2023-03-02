@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
-import { AxiosResponse } from 'axios'
+import { AxiosResponse, AxiosInstance } from 'axios'
 import axios from 'axios'
 import {getToken, axiosMain, axiosToken} from '../api/axios'
-import '../styles/UserProfile.css'
-import Sidebar from './Sidebar'
-import Headers from './Headers'
+import '../styles/UserProfile.css';
+import Sidebar from './Sidebar';
+import Headers from './Headers';
+import Stats from './Stats';
+import Achievements from './Achievements';
+import { FriendType }  from './Friends';
 
 const GET_PROFILE_PICTURE='http://localhost:3333/users/profile-image/' 
 const GET_STATUS_PATH='/users/request-status/' 
@@ -40,6 +43,8 @@ const UserProfile = () => {
     const [sendingStatus, setSendingStatus] = useState<string>("");
     const [showConfirmation, setShowConfirmation] = useState(false);
 	  const userSessionId = JSON.parse(sessionStorage.getItem('id')!);
+	const axiosInstance = useRef<AxiosInstance | null>(null);
+	const [isFriend, setIsFriend] = useState<boolean>(false);
 
     const handleUnfriendClick = (): void => setShowConfirmation(true);
 
@@ -268,12 +273,42 @@ const UserProfile = () => {
         setSendingStatus("");
   }, [friendStatus]);
 
+	function printAchievements()
+	{
+		return (isFriend ? <Achievements/> : (<p id="notFriend">Only friends can see achievements</p>));
+	}
+
+	useEffect(() =>
+	{
+		const checkIfFriend = async () =>
+		{
+			let friendList: FriendType[] = [];
+			let profileUser: NeutralUser;
+			let myProfile: NeutralUser;
+
+			axiosInstance.current = await axiosToken();
+			friendList = (await axiosInstance.current.get('/users/friend-list')).data;
+			profileUser = (await axiosInstance.current.get('/users/profile/' + userId)).data;
+			myProfile = (await axiosInstance.current.get('/users/me')).data;
+			if (profileUser.username === myProfile.username)
+				setIsFriend(true);
+			friendList.forEach((friend) => 
+			{
+				if (friend.username === profileUser.username)
+					setIsFriend(true);
+			});
+		}
+		checkIfFriend();
+	}, []);
+
   return (
     <div>
         <Headers/>
         <Sidebar/>
         {errMsg}
-        <main className={showConfirmation? 'container' : 'container'}>
+
+	<br/>
+        <div className={showConfirmation? 'container' : 'container'}>
           {/* <div className='divprofilePicture'> */}
             <img id="profilePicture" className="profilePicture" src={picture} alt='profile_picture'/>
           {/* </div> */}
@@ -318,7 +353,12 @@ const UserProfile = () => {
           <button className='profileButtonAddFriend' onClick={AddFriend}>Add friend +</button> : (<></>)
           }
         </div>
-    </main>
+
+    </div>
+	<Stats/>
+	<br/>
+	<br/>
+	{printAchievements()}
     </div>
   )
 }

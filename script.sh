@@ -20,6 +20,11 @@ npm install -D pactum
 npm i --save @nestjs/websockets
 npm i --save @nestjs/platform-socket.io
 npm i --save @nestjs/platform-express
+npm i --save @nestjs/typeorm typeorm
+npm i --save pino
+npm i --save dayjs
+npm i --save @nestjs/axios
+npm i --save oauth2
 npm i uuid --save
 npm i nestjs-form-data --save
 npm i @types/multer --save

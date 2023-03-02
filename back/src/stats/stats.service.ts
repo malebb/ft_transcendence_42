@@ -83,45 +83,6 @@ export class StatsService {
 		})
 	}
 
-	async getStats(userId: number)
-	{
-		return (await this.prisma.stats.findMany());
-	}
-
-	async getXp(username: string)
-	{
-		let user = await this.prisma.user.findUnique({
-			where: {
-				email: username
-			},
-			select: {
-				stats: {
-					select: {
-						xp: true
-					}
-				}
-			}
-		});
-		return (user.stats.xp);
-	}
-
-	async getLevel(username: string)
-	{
-		let user = await this.prisma.user.findUnique({
-			where: {
-				email: username
-			},
-			select: {
-				stats: {
-					select: {
-						level: true
-					}
-				}
-			}
-		});
-		return (user.stats.level);
-	}
-
 	async updateLevel(username: string, newLevel: number)
 	{
 		await this.prisma.user.update(
@@ -137,5 +98,87 @@ export class StatsService {
 				}
 			}
 		})
+	}
+
+	async updateModeExplorer(username: string)
+	{
+		await this.prisma.user.update(
+		{
+			where: {
+					email: username
+			},
+			data: {
+				stats: {
+					update: {
+						modeExplorer: true
+					}
+				}
+			}
+		})
+	}
+
+	async updateFashionWeek(username: string)
+	{
+		await this.prisma.user.update(
+		{
+			where: {
+					email: username
+			},
+			data: {
+				stats: {
+					update: {
+						fashionWeek: true
+					}
+				}
+			}
+		})
+	}
+
+	async updateTraveler(username: string)
+	{
+		await this.prisma.user.update(
+		{
+			where: {
+					email: username
+			},
+			data: {
+				stats: {
+					update: {
+						traveler: true
+					}
+				}
+			}
+		})
+	}
+
+	async updateFailureKnowledge(username: string)
+	{
+		await this.prisma.user.update(
+		{
+			where: {
+					email: username
+			},
+			data: {
+				stats: {
+					update: {
+						failureKnowledge: true
+					}
+				}
+			}
+		})
+	}
+
+	async getStats(username: string)
+	{
+		const getUser = await this.prisma.user.findUnique(
+		{
+  			where: {
+				email: username,
+  			},
+			select: {
+				stats: true
+			}
+  		});
+		return (getUser.stats);
 	}
 }

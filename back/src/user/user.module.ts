@@ -8,5 +8,6 @@ import { NestjsFormDataModule } from 'nestjs-form-data';
   imports: [NestjsFormDataModule],
   controllers: [UserController],
   providers: [JwtStrategy, UserService],
+  exports: [UserService],
 })
 export class UserModule {}

@@ -1,27 +1,37 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common';
 import { Ball, Player, Size, Room, PlayerData } from 'ft_transcendence';
-import { Socket, Server } from 'socket.io'
+import { Socket, Server } from 'socket.io';
 import { GameService } from '../game/game.service';
 import { StatsService } from '../stats/stats.service';
-import { levels } from './levels'
+import { HistoryService } from '../history/history.service';
+import { UserService } from '../user/user.service';
+import { levels } from './levels';
+import { winSteps, levelSteps, modeExplorer,
+		fashionWeek, traveler, failureKnowledge} from 'ft_transcendence';
+import { Stats } from './Stats';
+import { Customisation } from './Customisation';
 
 @Injectable()
 export class PongService {
 
 	constructor(private readonly gameService: GameService,
-			   	private readonly statsService: StatsService) {}
+			   	private readonly statsService: StatsService,
+			   	private readonly historyService: HistoryService,
+			   	private readonly userService: UserService) {}
 
-	queue: PlayerData[] = [];
-	powerUpQueue: PlayerData[] = [];
-	rooms = [];
-	sizeCanvas: Size = { width: 600, height: 350 };
-	scoreToWin: number = 1;
+	queue: 			PlayerData[] 	= [];
+	powerUpQueue:	PlayerData[] 	= [];
+	rooms 							= [];
+	sizeCanvas: 	Size			= { width: 600, height: 350 };
+	scoreToWin:		number			= 11;
 
-	addToQueue(player: PlayerData, queue: PlayerData[]) {
+	addToQueue(player: PlayerData, queue: PlayerData[])
+	{
 		queue.push(player);
 	}
 
-	removeFromQueue(playerId: string) {
+	removeFromQueue(playerId: string)
+	{
 		for (let i = 0; i < this.queue.length; ++i) {
 			if (this.queue[i].id == playerId)
 				this.queue.splice(i, 1);
@@ -59,7 +69,8 @@ export class PongService {
 		return ({ roomId: roomId, opponent: opponent });
 	}
 
-	initRoom(roomId: string, leftPlayer: PlayerData, rightPlayer: PlayerData): Room {
+	initRoom(roomId: string, leftPlayer: PlayerData, rightPlayer: PlayerData): Room
+	{
 		this.gameService.addGame(roomId, leftPlayer.username, rightPlayer.username);
 		return (
 			{
@@ -103,7 +114,8 @@ export class PongService {
 		);
 	}
 
-	findRoom(server: Server, player: Socket, playerData: PlayerData) {
+	findRoom(server: Server, player: Socket, playerData: PlayerData)
+	{
 		let room: Room;
 		let queueResearch = { roomId: null, opponent: null };
 		let queue: PlayerData[] = playerData.powerUpMode ? this.powerUpQueue : this.queue;
@@ -123,7 +135,8 @@ export class PongService {
 		});
 	}
 
-	stopRoom(player: Socket) {
+	stopRoom(player: Socket)
+	{
 		let roomToLeave: string | undefined;
 
 		roomToLeave = Array.from(player.rooms)[1];
@@ -139,7 +152,8 @@ export class PongService {
 		}
 	}
 
-	movePlayer(roomId: string, position: string, key: string): Player {
+	movePlayer(roomId: string, position: string, key: string): Player
+	{
 		if (position == "left") {
 			this.rooms[roomId].leftPlayer.move(key);
 			return (this.rooms[roomId].leftPlayer);
@@ -150,67 +164,152 @@ export class PongService {
 		}
 	}
 
-	joinRoom(player: Socket, roomId: string) {
+	joinRoom(player: Socket, roomId: string)
+	{
 		player.join(roomId);
 	}
 
-	async updateStats(winnerUsername: string, loserUsername: string)
+	async updateAchievements(player: Player, playerStats: Stats,
+							 levelUp: boolean, powerUpMode: boolean, winner: boolean)
 	{
-		this.statsService.addVictory(winnerUsername);
-		this.statsService.addDefeat(loserUsername);
+		let playerCustomisation: Customisation = await
+			this.userService.getCustomisation(player.username);
 
-		await this.statsService.addXp(winnerUsername, 500);
+		if (winner)
+		{
+			for (let i = 0; i < winSteps.length; ++i)
+			{
+				if (playerStats.victory == winSteps[i].goal)
+				{
+					await this.historyService.addAchievementDone(player.username,
+							winSteps[i].title, winSteps[i].desc);
+					break;
+				}
+			}
+		}
+		if (winner && levelUp)
+		{
+			for (let i = 0; i < levelSteps.length; ++i)
+			{
+				if (playerStats.level == levelSteps[i].goal)
+				{
+					await this.historyService.addAchievementDone(player.username,
+							levelSteps[i].title, levelSteps[i].desc);
+					break;
+				}
+			}
+		}
+		if (powerUpMode && !playerStats.modeExplorer)
+		{
+			await this.historyService.addAchievementDone(player.username,
+									modeExplorer.title, modeExplorer.desc);
+			await this.statsService.updateModeExplorer(player.username);
+		}
+		if (playerCustomisation.skin != "white" && !playerStats.fashionWeek)
+		{
+			await this.historyService.addAchievementDone(player.username,
+									fashionWeek.title, fashionWeek.desc);
+			await this.statsService.updateFashionWeek(player.username);
+		}
+		if (playerCustomisation.map != "basic" && !playerStats.traveler)
+		{
+			await this.historyService.addAchievementDone(player.username,
+									traveler.title, traveler.desc);
+			await this.statsService.updateTraveler(player.username);
+		}
+		if (!winner && playerStats.defeat == failureKnowledge.goal)
+		{
+			await this.historyService.addAchievementDone(player.username,
+									failureKnowledge.title, failureKnowledge.desc);
+			await this.statsService.updateFailureKnowledge(player.username);
+		}
 
-		let winnerXp = (await this.statsService.getXp(winnerUsername));
-		let newLevel = 0;
+	}
+
+	async updateStats(winner: Player, loser: Player, powerUpMode: boolean)
+	{
+		await this.statsService.addVictory(winner.username);
+		await this.statsService.addDefeat(loser.username);
+		await this.statsService.addXp(winner.username, 500);
+
+		let winnerStats: Stats = await this.statsService.getStats(winner.username);
+		let loserStats: Stats = await this.statsService.getStats(loser.username);
+
+		let newWinnerLevel = 0;
 
 		for (let i = 0; i < levels.length; ++i)
 		{
-			if (levels[i] <= winnerXp)
-				newLevel++;
+			if (levels[i] <= winnerStats.xp)
+				newWinnerLevel++;
 		}
+		let levelUp = false;
+		if (newWinnerLevel != winnerStats.level)
+		{
+			await this.statsService.updateLevel(winner.username, newWinnerLevel);
+			winnerStats.level = newWinnerLevel;
+			levelUp = true;
+		}
+		this.updateAchievements(winner, winnerStats, levelUp, powerUpMode, true);
+		this.updateAchievements(loser, loserStats, levelUp, powerUpMode, false);
+	}
 
-		let winnerLevel = (await this.statsService.getLevel(winnerUsername));
-		if (newLevel != winnerLevel)
-			await this.statsService.updateLevel(winnerUsername, newLevel);
+	async updateHistory(leftUsername: string, rightUsername: string,
+						leftScore: number, rightScore: number)
+	{
+		this.historyService.addGamePlayed(leftUsername,
+						rightUsername, leftScore, rightScore);
 	}
 
 	runRoom(roomId: string, server: Server) {
 		let scorer: string = "";
 
-		if (this.rooms[roomId].powerUpMode) {
-			this.rooms[roomId].speedPowerUpInterval = setTimeout(() => {
-				server.to(roomId).emit('updateSpeedPowerUp', true, "left");
-				server.to(roomId).emit('updateSpeedPowerUp', true, "right");
-			}, 10000);
+		if (this.rooms[roomId].powerUpMode)
+		{
+			this.programNextPowerUp(roomId, "left", server);
+			this.programNextPowerUp(roomId, "right", server);
 		}
-
 		this.rooms[roomId].roomInterval = setInterval(() =>
 		{
 			if (this.rooms[roomId].playerGoneCount == 2) {
 				clearInterval(this.rooms[roomId].roomInterval);
-				clearInterval(this.rooms[roomId].speedPowerUpInterval);
+				clearTimeout(this.rooms[roomId].leftPowerUpTimeout);
+				clearTimeout(this.rooms[roomId].rightPowerUpTimeout);
 				delete this.rooms[roomId];
 			}
 			else
 			{
-				if ((scorer = this.rooms[roomId].ball.move([this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer])).length)
+				if ((scorer = this.rooms[roomId].ball.move(
+					[this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer])).length)
 				{
 					if (scorer == "left")
 					{
-						server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].leftPlayer.score }));
+						server.to(roomId).emit('updateScore',
+						JSON.stringify({ scorer: scorer, score: this.rooms[roomId].leftPlayer.score }));
 						if (this.rooms[roomId].leftPlayer.score == this.scoreToWin)
 						{
-							this.updateStats(this.rooms[roomId].leftPlayer.username, this.rooms[roomId].rightPlayer.username);
+							this.updateStats(this.rooms[roomId].leftPlayer,
+											this.rooms[roomId].rightPlayer,
+											this.rooms[roomId].powerUpMode);
+							this.updateHistory(this.rooms[roomId].leftPlayer.username,
+											   this.rooms[roomId].rightPlayer.username,
+											  this.rooms[roomId].leftPlayer.score,
+											  this.rooms[roomId].rightPlayer.score);
 							server.to(roomId).emit('endGame', scorer);
 						}
 					}
 					else if (scorer == "right")
 					{
-						server.to(roomId).emit('updateScore', JSON.stringify({ scorer: scorer, score: this.rooms[roomId].rightPlayer.score }));
+						server.to(roomId).emit('updateScore',
+								JSON.stringify({ scorer: scorer, score: this.rooms[roomId].rightPlayer.score }));
 						if (this.rooms[roomId].rightPlayer.score == this.scoreToWin)
 						{
-							this.updateStats(this.rooms[roomId].rightPlayer.username, this.rooms[roomId].leftPlayer.username);
+							this.updateStats(this.rooms[roomId].rightPlayer,
+											 this.rooms[roomId].leftPlayer,
+											 this.rooms[roomId].powerUpMode);
+							this.updateHistory(this.rooms[roomId].leftPlayer.username,
+											   this.rooms[roomId].rightPlayer.username,
+											  this.rooms[roomId].leftPlayer.score,
+											  this.rooms[roomId].rightPlayer.score);
 							server.to(roomId).emit('endGame', scorer);
 						}
 					}
@@ -218,16 +317,36 @@ export class PongService {
 				}
 				server.to(roomId).emit('moveBall', JSON.stringify(this.rooms[roomId].ball));
 			}
-		}, 20);
+		}, 15);
 	}
 
-	useSpeedPowerUp(roomId: string, position: string, server: Server) {
-		this.rooms[roomId].speedPowerUpInterval = setTimeout(() => {
-			server.to(roomId).emit('updateSpeedPowerUp', true, position);
-			server.to(roomId).emit('updateSpeedPowerUp', true, position);
-		}, 10000);
+	programNextPowerUp(roomId: string, position: string, server: Server)
+	{
+		let timeout: ReturnType<typeof setTimeout>;
 
+		timeout = setTimeout(() =>
+		{
+			server.to(roomId).emit('updateSpeedPowerUp', true, position);
+			if (position == "left")
+				this.rooms[roomId].leftPlayer.speedPowerUp = true;
+			else
+				this.rooms[roomId].rightPlayer.speedPowerUp = true;
+		}, 10000);
+		if (position == "left")
+			this.rooms[roomId].leftPowerUpTimeout = timeout;
+		else
+			this.rooms[roomId].rightPowerUpTimeout = timeout;
+
+	}
+
+	useSpeedPowerUp(roomId: string, position: string, server: Server)
+	{
+		this.programNextPowerUp(roomId, position, server);
 		this.rooms[roomId].ball.speedPowerUp();
 		server.to(roomId).emit('updateSpeedPowerUp', false, position);
+		if (position == "left")
+			this.rooms[roomId].leftPlayer.speedPowerUp = false;
+		else
+			this.rooms[roomId].rightPlayer.speedPowerUp = false;
 	}
 }

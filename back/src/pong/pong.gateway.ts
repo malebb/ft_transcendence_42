@@ -15,6 +15,7 @@ import { Socket,
 import { Player } from "ft_transcendence"
 
 @WebSocketGateway({
+	namespace: '/pong',
 	cors: {
 		origin: 'http://localhost:3333',
 	}
