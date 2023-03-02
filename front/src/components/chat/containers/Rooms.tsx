@@ -177,6 +177,7 @@ function Rooms()
 						<Link className="roomLink" to={`/room/${chatRoom.name}`} key={chatRoom.name}>
 							<li className="chatRoom">
 								<h3 className="roomTitle">{chatRoom.name}</h3>
+								<p>Owner : {chatRoom.owner.username}</p>
 							</li>
 						</Link>);
 					})
@@ -193,7 +194,7 @@ function Rooms()
 				try
 				{
 					axiosInstance.current = await axiosToken();
-					const chatRooms = await axiosInstance.current!.get('/profile/');
+					const chatRooms = await axiosInstance.current!.get('/chatRoom/');
 					setChatRoomList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
 					(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
 				}
