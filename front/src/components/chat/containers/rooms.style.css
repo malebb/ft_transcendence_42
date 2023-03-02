@@ -35,22 +35,17 @@
 	padding-left: 90px;
 }
 
-.roomLink
-{
-   text-decoration: none;
-   color: inherit;
-   margin: 10px;
-}
-
 .chatRoom
 {
    width: 250px;
-   height: 75px;
+   height: 100px;
    background-color: var(--tertiary);
    border: 1px, solid;
    border-radius: 5px;
    list-style: none;
    text-align: center;
+   margin: 10px;
+   cursor: pointer;
 }
 
 .roomTitle

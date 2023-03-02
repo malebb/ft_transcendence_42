@@ -113,7 +113,6 @@ function Rooms()
 				setName('');
 				setPassword('');
 				window.location.reload();
-				console.log("new room to be created = ", newRoom);
 			}
 			catch (error: any)
 			{
@@ -158,6 +157,9 @@ function Rooms()
 	const RoomList = () =>
 	{
 		const [chatRoomList, setChatRoomList] = useState<ChatRoom[]>([]);
+		const [chatRoomSelected, setChatRoomSelected] = useState<string>('');
+		const [roomPassword, setRoomPassword] = useState<string>('');
+		const [passwordPlaceholder, setPasswordPlaceholder] = useState<string>('Enter password');
 
 		const accessibilityLogo = (accessibility: Accessibility) =>
 		{
@@ -174,24 +176,76 @@ function Rooms()
 			}
 		}
 
+		const joinRoom = () =>
+		{
+		}
+
+		const updateRoomPassword = (e: React.FormEvent<HTMLInputElement>) =>
+		{
+			setRoomPassword(e.currentTarget.value);
+		}
+
+		const checkPassword = async (e: React.FormEvent<HTMLFormElement>, chatRoom: ChatRoom) =>
+		{
+			e.preventDefault();
+			if (await bcrypt.compare(roomPassword, chatRoom.password))
+				joinRoom();
+			setPasswordPlaceholder('Wrong password');
+			setRoomPassword('');
+		}
+
 		const displayChatRooms = () =>
 		{
 			if (!chatRoomList.length)
 				return (<p>No room chat have been created</p>);
+
+			const printRoomInfo = (chatRoom: ChatRoom) =>
+			{
+				if (chatRoomSelected == chatRoom.name)
+				{
+					switch (chatRoom.accessibility)
+					{
+						case 'PROTECTED':
+							return (<div>
+									<form onSubmit={(e) => checkPassword(e, chatRoom)}>
+										<input type="password"
+											placeholder={passwordPlaceholder} value={roomPassword}
+											onChange={updateRoomPassword}
+											autoComplete="on"
+											/>
+									<input type="submit" />
+									</form>
+								</div>);
+						case 'PRIVATE':
+							return (<span>This room is private</span>);
+						case 'PUBLIC':
+							joinRoom();
+					}
+				}
+				return (	<>
+								<p className="owner">Owner : {chatRoom.owner.username}</p>
+								{accessibilityLogo(chatRoom.accessibility)}
+							</>
+						);
+			}
+
+			const updateSelectChatRoom = (chatRoomSelected: string) =>
+			{
+				setChatRoomSelected(chatRoomSelected);
+			}
+
 			return(
 				<ul id="roomList">
 				{
 					chatRoomList.map((chatRoom) => {
 						return (
-						<Link className="roomLink" to={`/room/${chatRoom.name}`} key={chatRoom.name}>
-							<li className="chatRoom">
+							<li className="chatRoom" key={chatRoom.name} onClick={() => updateSelectChatRoom(chatRoom.name)}>
 								<h3 className="roomTitle">{chatRoom.name}</h3>
-								<div className="roomInfo">
-									<p className="owner">Owner : {chatRoom.owner.username}</p>
-									{accessibilityLogo(chatRoom.accessibility)}
-								</div>
+						<div className="roomInfo">
+								{printRoomInfo(chatRoom)}
+						</div>
 							</li>
-						</Link>);
+						);
 					})
 				}
 				</ul>
