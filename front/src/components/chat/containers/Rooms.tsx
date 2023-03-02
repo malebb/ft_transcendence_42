@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import EVENTS from "../config/events";
 import { SocketContext } from "../context/socket.context";
 import { useState, useRef, useEffect } from "react";
-import MessagesContainer from "./Message";
 import InputButton from "../inputs/InputButton";
 import { accessibilities } from "../utils/RoomAccessibilities";
 import { AxiosInstance, AxiosResponse } from 'axios';
@@ -52,7 +51,7 @@ function Rooms()
 
 		const checkPassword = (): boolean => 
 		{
-			if (roomAccessibility == 'PROTECTED')
+			if (roomAccessibility === 'PROTECTED')
 			{
 				if (password.length < 10)
 					setPasswordErr('Password should contain minimum 10 characters');
@@ -159,12 +158,6 @@ function Rooms()
 	const RoomList = () =>
 	{
 		const [chatRoomList, setChatRoomList] = useState<ChatRoom[]>([]);
-
-		const accessibilityLogo = () =>
-		{
-
-		};
-
 		const displayChatRooms = () =>
 		{
 			if (!chatRoomList.length)
