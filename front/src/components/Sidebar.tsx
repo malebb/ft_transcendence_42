@@ -1,52 +1,32 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { faUser, faUserGroup, faClockRotateLeft, faCommentDots, faGears, faGamepad, faTrophy, faRightFromBracket, faChain} from '@fortawesome/free-solid-svg-icons';
+import {  } from '@fortawesome/free-solid-svg-icons';
 import '../styles/Sidebar.css'
 
 const Sidebar = () => {
 	const userSessionId = JSON.parse(sessionStorage.getItem('id')!);
 
   return (
-    <div className='Sidebar'> 
+    <nav className='Sidebar'> 
       <Link className="Sidebar-Link" to={'/user/' + userSessionId}>
-        <div className='div-sidebar'>
-          <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 194.438 194.43">
-            <g id="Group_11591" data-name="Group 11591" transform="translate(6 6)">
-              <g id="profile-user" transform="translate(0 0)">
-                <path id="Path_23422" data-name="Path 23422" d="M91.219,0a91.215,91.215,0,1,0,91.219,91.215A91.22,91.22,0,0,0,91.219,0Zm0,27.274A30.171,30.171,0,1,1,61.052,57.446,30.173,30.173,0,0,1,91.219,27.275ZM91.2,158.582a66.946,66.946,0,0,1-43.594-16.075,12.857,12.857,0,0,1-4.512-9.773,30.428,30.428,0,0,1,30.576-30.42h35.108a30.384,30.384,0,0,1,30.528,30.42A12.825,12.825,0,0,1,134.8,142.5,66.922,66.922,0,0,1,91.2,158.582Z" transform="translate(0 -0.001)" fill="none" stroke="#000" strokeWidth="12"/>
-              </g>
-            </g>
-          </svg>
-        </div>
+        {/* <div className='div-sidebar'> */}
+        <FontAwesomeIcon className='fa-2xl svg-definecolor' icon={faUser}/>
+          <p className='link-text'>Profile</p>
+        {/* </div> */}
       </Link>
       <Link className="Sidebar-Link" to='/history'>
-        <div className='div-sidebar'>
-          <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 122.88 108.12">
-            <title>
-              history
-            </title>
-            <path d="M28.45,55.88c0,.11,0,.22,0,.32l4.44-4.46a6.68,6.68,0,1,1,9.48,9.42L27.14,76.51a6.69,6.69,0,0,1-9.32.15L2.28,63A6.68,6.68,0,0,1,11.08,53l4,3.54v0a54.33,54.33,0,0,1,8-31,52.56,52.56,0,0,1,24-20.73,60.17,60.17,0,0,1,11-3.51,52.58,52.58,0,0,1,60.1,31.09,58.07,58.07,0,0,1,3.47,11,52.47,52.47,0,0,1-1.31,26.95A53.16,53.16,0,0,1,105.8,93a57.11,57.11,0,0,1-22.56,13.1,48.52,48.52,0,0,1-40.51-5.89A6.68,6.68,0,0,1,50,89a35.12,35.12,0,0,0,5.53,3,34.21,34.21,0,0,0,5.7,1.86,35.43,35.43,0,0,0,18.23-.54A43.77,43.77,0,0,0,96.74,83.19a39.7,39.7,0,0,0,10.93-17.06,39,39,0,0,0,1-20.08,46.38,46.38,0,0,0-2.68-8.5,39.19,39.19,0,0,0-45-23.22,45,45,0,0,0-8.52,2.72A39,39,0,0,0,34.5,32.49a40.94,40.94,0,0,0-6.05,23.39ZM60.83,34a6.11,6.11,0,0,1,12.22,0V53l14.89,8.27A6.09,6.09,0,1,1,82,71.93L64.43,62.16a6.11,6.11,0,0,1-3.6-5.57V34Z"/>
-          </svg>
-        </div>
+        {/* <div className='div-sidebar'> */}
+          <FontAwesomeIcon className='fa-2xl svg-definecolor' icon={faClockRotateLeft}/>
+          <p className='link-text'>History</p>
+        {/* </div> */}
       </Link>
       <Link className="Sidebar-Link" to='/friends'>
-        <div className='div-sidebar'>
-          <svg fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" width="50px" height="50px" viewBox="0 0 45.902 45.902">
-            <g>
-              <g>
-                <path d="M43.162,26.681c-1.564-1.578-3.631-2.539-5.825-2.742c1.894-1.704,3.089-4.164,3.089-6.912
-			c0-5.141-4.166-9.307-9.308-9.307c-4.911,0-8.932,3.804-9.281,8.625c4.369,1.89,7.435,6.244,7.435,11.299
-			c0,1.846-0.42,3.65-1.201,5.287c1.125,0.588,2.162,1.348,3.066,2.26c2.318,2.334,3.635,5.561,3.61,8.851l-0.002,0.067
-			l-0.002,0.057l-0.082,1.557h11.149l0.092-12.33C45.921,30.878,44.936,28.466,43.162,26.681z"/>
-      <path d="M23.184,34.558c1.893-1.703,3.092-4.164,3.092-6.912c0-5.142-4.168-9.309-9.309-9.309c-5.142,0-9.309,4.167-9.309,9.309
-			c0,2.743,1.194,5.202,3.084,6.906c-4.84,0.375-8.663,4.383-8.698,9.318l-0.092,1.853h14.153h15.553l0.092-1.714
-			c0.018-2.514-0.968-4.926-2.741-6.711C27.443,35.719,25.377,34.761,23.184,34.558z"/>
-      <path d="M6.004,11.374v3.458c0,1.432,1.164,2.595,2.597,2.595c1.435,0,2.597-1.163,2.597-2.595v-3.458h3.454
-			c1.433,0,2.596-1.164,2.596-2.597c0-1.432-1.163-2.596-2.596-2.596h-3.454V2.774c0-1.433-1.162-2.595-2.597-2.595
-			c-1.433,0-2.597,1.162-2.597,2.595V6.18H2.596C1.161,6.18,0,7.344,0,8.776c0,1.433,1.161,2.597,2.596,2.597H6.004z"/>
-              </g>
-            </g>
-          </svg>
-        </div>
+        {/* <div className='div-sidebar'> */}
+          <FontAwesomeIcon className='fa-2xl svg-definecolor' icon={faUserGroup} />
+          <p className='link-text'>Friends</p>
+        {/* </div> */}
       </Link>
       <Link className="Sidebar-Link" to='/chat'>
         <div className='div-sidebar'>
@@ -57,29 +37,25 @@ const Sidebar = () => {
         </div>
       </Link>
       <Link className="Sidebar-Link" to='/user'>
-        <div className='div-sidebar'>
-          <svg xmlns="http://www.w3.org/2000/svg" width="50px" height="50px" viewBox="0 0 61.891 61.898">
-            <path id="Setting-Icon-SVG-03mcds" d="M105.043,26.127l-5.458-2.091a2.911,2.911,0,0,1-1.612-3.9l2.376-5.329a2.894,2.894,0,0,0-.6-3.244L95.939,7.746a2.905,2.905,0,0,0-3.244-.6L87.367,9.533a2.914,2.914,0,0,1-3.9-1.619L81.378,2.462A2.911,2.911,0,0,0,78.658.591H73.265a2.911,2.911,0,0,0-2.719,1.871L68.461,7.914a2.914,2.914,0,0,1-3.9,1.619L59.228,7.15a2.905,2.905,0,0,0-3.244.6L52.17,11.559a2.907,2.907,0,0,0-.6,3.244l2.383,5.329a2.909,2.909,0,0,1-1.619,3.9l-5.445,2.091a2.9,2.9,0,0,0-1.871,2.713v5.4a2.9,2.9,0,0,0,1.871,2.713l5.445,2.085a2.918,2.918,0,0,1,1.619,3.911L51.568,48.27a2.907,2.907,0,0,0,.6,3.244l3.814,3.82a2.916,2.916,0,0,0,3.244.6l5.329-2.376a2.9,2.9,0,0,1,3.9,1.619l2.085,5.445a2.911,2.911,0,0,0,2.719,1.871h5.393a2.911,2.911,0,0,0,2.719-1.871l2.085-5.445a2.9,2.9,0,0,1,3.9-1.619L92.7,55.93a2.916,2.916,0,0,0,3.244-.6l3.814-3.82a2.894,2.894,0,0,0,.6-3.244l-2.376-5.322a2.92,2.92,0,0,1,1.612-3.911l5.458-2.085a2.9,2.9,0,0,0,1.865-2.713v-5.4a2.9,2.9,0,0,0-1.865-2.713M78.658,45.065A13.792,13.792,0,1,1,89.484,34.24,13.805,13.805,0,0,1,78.658,45.065" transform="translate(-45.016 -0.591)" fillRule="evenodd"/>
-          </svg>
-        </div>
+        {/* <div className='div-sidebar'> */}
+          <FontAwesomeIcon className='fa-2xl svg-definecolor' icon={faGears}/>
+          <p className='link-text'>Settings</p>
+        {/* </div> */}
       </Link>
       <Link className="Sidebar-Link" to='/games'>
-        <div className='div-sidebar'>
-        <svg    xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" width="50px" height="50px" viewBox="0 0 32 32" enable-background="new 0 0 32 32" id="svg2">
-        <g id="background">
-          <rect
-            fill="none"
-            width="32"
-            height="32"
-            id="rect3264"/>
-        </g>
-        <path
-          id="path3267"
-          d="M 29,8 H 16 3 C 1.343,8 0,9.343 0,11 v 7.5 c 0,4.143 3.582,6.157 8,4.5 1.458,-0.547 2.824,-1.059 4,-1.5 2.209,-0.829 5.791,-0.829 8,0 1.177,0.441 2.543,0.953 4,1.5 4.418,1.657 8,-0.357 8,-4.5 V 11 C 32,9.343 30.657,8 29,8 z M 10,16 H 8 v 2 H 6 V 16 H 4 v -2 h 2 v -2 h 2 v 2 h 2 v 2 z m 15,-4 c 0.553,0 1,0.447 1,1 0,0.553 -0.447,1 -1,1 -0.553,0 -1,-0.447 -1,-1 0,-0.553 0.447,-1 1,-1 z m -2,4 c -0.553,0 -1,-0.447 -1,-1 0,-0.553 0.447,-1 1,-1 0.553,0 1,0.447 1,1 0,0.553 -0.447,1 -1,1 z m 2,2 c -0.553,0 -1,-0.447 -1,-1 0,-0.553 0.447,-1 1,-1 0.553,0 1,0.447 1,1 0,0.553 -0.447,1 -1,1 z m 2,-2 c -0.553,0 -1,-0.447 -1,-1 0,-0.553 0.447,-1 1,-1 0.553,0 1,0.447 1,1 0,0.553 -0.447,1 -1,1 z" />
-        </svg>
-        </div>
+        {/* <div className='div-sidebar'> */}
+          <FontAwesomeIcon className='fa-2xl svg-definecolor' icon={faGamepad}/>
+          <p className='link-text'>Watch Games</p>
+        {/* </div> */}
       </Link>
-    </div>
+      <Link className="Sidebar-Link" to='/games'>
+        {/* <div className='div-sidebar'> */}
+          <FontAwesomeIcon className='fa-2xl svg-definecolor' icon={faRightFromBracket}/>
+          <p className='link-text'>Logout</p>
+        {/* </div> */}
+      </Link>
+
+    </nav>
   )
 }
 

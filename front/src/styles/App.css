@@ -1,4 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Hanalei+Fill&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap');
+:root {
+  font-size: 16px;
+  font-family: 'Open Sans';
+  --text-primary: #b6b6b6;
+  --text-secondary: #ececec;
+  --bg-primary: #23232e;
+  --bg-secondary: #141418;
+
+}
 
 :root {
 	--main: rgb(169, 169, 241);
@@ -12,10 +22,16 @@
 
 body{
   margin: 0;
+  padding: 0;
+  background-color: white;
+  color: black;
   background: rgb(39,42,47);
   background: linear-gradient(90deg, rgba(39,42,47,1) 0%, rgba(29,30,36,1) 100%);
-  padding-top: 100px;
-  padding-left: 150px;
+}
+
+.main-video{
+  margin-left: 5rem;
+  padding: 1rem;
 }
 
 .App-header {
@@ -34,8 +50,8 @@ body{
 }
 #old-game-video{
   position: fixed;
-  right: 0;
-  bottom: 0;
+  right: 0px;
+  bottom: 0px;
   min-width: 100%;
   min-height: 100%;
   z-index: -1;

@@ -28,7 +28,9 @@ function Main() {
       <div className='Menu'>
         <Sidebar/>
       </div> 
+      <main className='main-video'>
      {(userSessionId === null) ? (<video autoPlay={true} muted={true} loop={true} id='old-game-video'><source src={backgroundVideo} type='video/mp4'/></video>):(<Canvas/>)}
+      </main>
     </div>
   );
 }
