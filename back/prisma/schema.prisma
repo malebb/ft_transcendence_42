@@ -36,7 +36,7 @@ model User {
 
   ownerChats	ChatRoom[]
   adminChats	ChatRoom[] @relation(name: "UserAdmin")
-
+  memberChats	ChatRoom[] @relation(name: "UserMember")
   @@map("users")
 }
 
@@ -47,8 +47,8 @@ model ChatRoom {
 	accessibility		Accessibility
 	owner				User @relation(fields: [ownerId], references: [id])
 	ownerId				Int
-	admin 				User[] @relation(name: "UserAdmin")
-
+	admins 				User[] @relation(name: "UserAdmin")
+	members				User[] @relation(name: "UserMember")
 }
 
 enum Accessibility {

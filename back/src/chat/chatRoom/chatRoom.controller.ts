@@ -1,5 +1,9 @@
-import { Controller, Get, Param} from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Headers} from '@nestjs/common';
 import { ChatRoomService } from './chatRoom.service';
+
+interface UserDto {
+	username: string
+}
 
 @Controller('chatRoom')
 class ChatRoomController
@@ -14,9 +18,15 @@ class ChatRoomController
 	}
 
 	@Get(':name')
-	async getChatRooms(@Param('name') name: string)
+	async getChatRoom(@Param('name') name: string)
 	{
 		return (await this.ChatRoomService.getChatRoom(name));
+	}
+
+	@Post(':name')
+	async joinChatRoom(@Param('name') chatRoomName: string, @Body() user: UserDto)
+	{
+		await this.ChatRoomService.joinChatRoom(chatRoomName, user.username)
 	}
 }
 

@@ -1,14 +1,14 @@
-import { Link } from "react-router-dom";
-import EVENTS from "../config/events";
 import { SocketContext } from "../context/socket.context";
 import { useState, useRef, useEffect } from "react";
 import InputButton from "../inputs/InputButton";
 import { accessibilities } from "../utils/RoomAccessibilities";
 import { AxiosInstance, AxiosResponse } from 'axios';
-import { axiosToken } from '../../../api/axios';
+import { axiosToken, axiosMain } from '../../../api/axios';
 import bcrypt from 'bcryptjs';
 import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
+import EVENTS from '../config/events';
+import { ChatRoomFilter } from '../utils/ChatRoomFilter';
 
 function Rooms()
 {
@@ -160,6 +160,22 @@ function Rooms()
 		const [chatRoomSelected, setChatRoomSelected] = useState<string>('');
 		const [roomPassword, setRoomPassword] = useState<string>('');
 		const [passwordPlaceholder, setPasswordPlaceholder] = useState<string>('Enter password');
+		const [chatRoomFilter, setChatRoomFilter] = useState<ChatRoomFilter>(ChatRoomFilter["JOINED"]);
+
+		const updateChatRoomFilter = (e: React.FormEvent<HTMLSelectElement>) =>
+		{
+			setChatRoomFilter(ChatRoomFilter[e.currentTarget.value as keyof typeof ChatRoomFilter]);
+		}
+
+		const filterChatRoom = () =>
+		{
+			return (
+				<select value={chatRoomFilter} onChange={updateChatRoomFilter}>
+          	  		<option value="JOINED">Rooms joined</option>
+					<option value="NOT_JOIN">Rooms not joined</option>
+				</select>
+			);
+		}
 
 		const accessibilityLogo = (accessibility: Accessibility) =>
 		{
@@ -176,8 +192,22 @@ function Rooms()
 			}
 		}
 
-		const joinRoom = () =>
+		const joinRoom = async (roomName: string) =>
 		{
+			try {
+				axiosInstance.current = await axiosToken();
+				const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
+
+				await axiosInstance.current.post('/chatRoom/' + roomName,
+					{username: user.data.email},
+					{headers: {'Content-Type': 'application/json'},
+				});
+				window.location.href = 'http://localhost:3000/room/' + roomName;
+			}
+			catch (error: any)
+			{
+				console.log("An error occured when joining the room: ", error);
+			}
 		}
 
 		const updateRoomPassword = (e: React.FormEvent<HTMLInputElement>) =>
@@ -189,16 +219,18 @@ function Rooms()
 		{
 			e.preventDefault();
 			if (await bcrypt.compare(roomPassword, chatRoom.password))
-				joinRoom();
-			setPasswordPlaceholder('Wrong password');
-			setRoomPassword('');
+				joinRoom(chatRoom.name);
+			else
+			{
+				setPasswordPlaceholder('Wrong password');
+				setRoomPassword('');
+			}
 		}
 
 		const displayChatRooms = () =>
 		{
 			if (!chatRoomList.length)
 				return (<p>No room chat have been created</p>);
-
 			const printRoomInfo = (chatRoom: ChatRoom) =>
 			{
 				if (chatRoomSelected == chatRoom.name)
@@ -219,7 +251,7 @@ function Rooms()
 						case 'PRIVATE':
 							return (<span>This room is private</span>);
 						case 'PUBLIC':
-							joinRoom();
+							joinRoom(chatRoom.name);
 					}
 				}
 				return (	<>
@@ -275,6 +307,7 @@ function Rooms()
 		return (
 			<div>
 				<h3 id="joinRoomTitle">... Or join one!</h3>
+				{filterChatRoom()}
 				{displayChatRooms()}
 			</div>
 		);
