@@ -70,7 +70,7 @@ export class ChatGateway
   joinRoom(client: Socket, room: ChatRoom) {
 // enregistrer la socket dan sun channel
     this.chatService.joinRoom(this.server, client, room);
-    console.log('User ' + client.id + ' joined room ');
+    // console.log('User ' + client.id + ' joined room ');
   }
 
   afterInit(server: Server) {

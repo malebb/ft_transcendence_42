@@ -31,4 +31,5 @@
 	height: calc(100vh - 50px);
 	position: absolute;
 	width: 98%;
+	margin-left: 8px;
 }

@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import EVENTS from "../config/events";
 import { SocketContext } from "../context/socket.context";
 import InputButton from "../inputs/InputButton";
-import { AxiosInstance } from "axios";
+import { AxiosInstance, AxiosResponse } from "axios";
 
 import "./message.style.css";
 import { type } from "os";
 import { axiosToken } from "src/api/axios";
+
 
 // interface partialMessage {
 //   username: string;
@@ -46,6 +47,7 @@ function MessagesContainer() {
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessage, setStateMessage] = useState<Message[]>([]);
+  const [user, setUser] = useState("");
   const axiosInstance = useRef<AxiosInstance | null>(null);
 
   let currentMessage: Message = { ...newMessage };
@@ -55,18 +57,26 @@ function MessagesContainer() {
   const userId: number = parseInt(userIdValue);
 
   useEffect(() => {
-    const getCurrentUser = async () => {
-      axiosInstance.current = await axiosToken();
-	  const tmp = await axiosInstance.current?.get("/users/me");
-    console.log(tmp);
-	};
-	console.log(currentMessage.username);
-    getCurrentUser();
+     const getCurrentUser = async () => {
+	axiosInstance.current = await axiosToken();
+	await axiosInstance.current!.get("/users/me").then((response) => {
+	  setUser(response.data.username);
+	});
+  };
+  getCurrentUser();
+    console.log(currentMessage.username);
     socket.on("ROOM_MESSAGE", (message) => {
-      console.log({ message });
       setStateMessage([...stateMessage, message]);
     });
   });
+
+//   const getCurrentUser = async () => {
+// 	axiosInstance.current = await axiosToken();
+// 	await axiosInstance.current!.get("/users/me").then((response) => {
+// 	  setUser(response.data);
+// 	});
+//   };
+//   getCurrentUser();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
@@ -86,6 +96,7 @@ function MessagesContainer() {
     currentMessage = {
       ...newMessage,
       message: inputMessage,
+	  username: user,
       userId: userId,
       sendAt: dateTS,
       hours: String(dateTS.getHours()).padStart(2, "0"),
@@ -115,13 +126,13 @@ function MessagesContainer() {
         );
       }
       return (
-        <>
+        <div className="chat-sender">
           <span className="date">{genDate(currentMessage)}</span>
-          <div className="chat-sender">
+          <div className="chat-username">
             <span>{currentMessage.username}</span>
             <span>{currentMessage.message}</span>
           </div>
-        </>
+        </div>
       );
     };
 

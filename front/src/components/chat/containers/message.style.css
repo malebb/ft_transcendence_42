@@ -69,6 +69,8 @@ body {
 	row-gap: 1em;
 	overflow-y: scroll;
 	overflow: auto;
+	margin-left: 8px;
+	margin-right: 8px;
 }
 
 .date {
@@ -82,8 +84,7 @@ body {
 	color: white;
 	display: flex;
 	row-gap: 1em;
-	flex: 1;
-	color: white;
+	margin-left: 8px;
 }
 .chat > span:first-child {
 	font-weight: bold;
@@ -96,7 +97,7 @@ body {
 	align-items: center;
 }
 
-.chat-sender {
+.chat-username {
 	background-color: #547EBE;
 	margin-right: 8px;
 	border-radius: 8px;
@@ -104,8 +105,20 @@ body {
 	color: white;
 	display: flex;
 	row-gap: 1em;
-	flex: 1 1;
+	/* flex: 1 1; */
 	color: white;
 	margin-left: 8px;
+}
+
+.chat-username > span:first-child {
+	font-weight: bold;
+	margin-right: 1em;
+}
+
+.chat-sender {
+	display: flex;
+	align-items: center;
+	margin-left: auto;
+	
 }
 /* .roomBase */

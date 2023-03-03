@@ -1,5 +1,4 @@
 .sendInput {
-	width: 80%;
 	padding: 8px 16px;
 	height: 34px;
 	border-radius: 12px;
@@ -7,6 +6,8 @@
 	background: white;
 	display: flex;
 	align-items: center;
+	margin-left: 8px;
+	margin-right: 8px;
   }
   .sendInput > input {
 	height: 34px;
