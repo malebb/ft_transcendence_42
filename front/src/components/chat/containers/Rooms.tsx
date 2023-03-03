@@ -156,8 +156,7 @@ function Rooms()
 
 	const RoomList = () =>
 	{
-		const [joinedRoomList, setJoinedRoomList] = useState<ChatRoom[]>([]);
-		const [notJoinedRoomList, setNotJoinedRoomList] = useState<ChatRoom[]>([]);
+		const [chatRoomsList, setChatRoomsList] = useState<ChatRoom[]>([]);
 		const [chatRoomSelected, setChatRoomSelected] = useState<string>('');
 		const [roomPassword, setRoomPassword] = useState<string>('');
 		const [passwordPlaceholder, setPasswordPlaceholder] = useState<string>('Enter password');
@@ -237,7 +236,7 @@ function Rooms()
 
 		const displayNotJoinedChatRooms = () =>
 		{
-			if (!notJoinedRoomList.length)
+			if (!chatRoomsList.length)
 				return (<p>No room chat have been created</p>);
 			const printRoomInfo = (chatRoom: ChatRoom) =>
 			{
@@ -277,7 +276,7 @@ function Rooms()
 			return(
 				<ul id="roomList">
 				{
-					notJoinedRoomList.map((chatRoom) => {
+					chatRoomsList.map((chatRoom) => {
 						return (
 							<li className="chatRoom" key={chatRoom.name} onClick={() => updateSelectChatRoom(chatRoom.name)}>
 								<h3 className="roomTitle">{chatRoom.name}</h3>
@@ -294,13 +293,13 @@ function Rooms()
 
 		const displayJoinedChatRooms = () =>
 		{
-			if (!joinedRoomList.length)
+			if (!chatRoomsList.length)
 				return (<p>You haven't joined any room yet</p>);
 			else
 				return (
 				<ul id="roomList">
 				{
-					joinedRoomList.map((chatRoom) => {
+					chatRoomsList.map((chatRoom) => {
 						return (
 							<li className="chatRoom" key={chatRoom.name} onClick={() => enterRoom(chatRoom.name)}>
 								<h3 className="roomTitle">{chatRoom.name}</h3>
@@ -323,30 +322,36 @@ function Rooms()
 			}
 		}
 
+		const fetchRooms = async () =>
+		{
+			try
+			{
+				let chatRooms: AxiosResponse;
+				axiosInstance.current = await axiosToken();
+				const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
+				if (chatRoomFilter === 'JOINED')
+				{
+					axiosInstance.current = await axiosToken();
+					chatRooms = await axiosInstance.current!.get('/chatRoom/joined' + user.data.username);
+				}
+				else
+				{
+					axiosInstance.current = await axiosToken();
+					chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined' + user.data.username);
+				}
+				setChatRoomsList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
+				(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
+			}
+			catch (error: any)
+			{
+				console.log("error while fetching chat rooms: ", error);
+			}
+		}
+	
 		useEffect(() =>
 		{
-			const initChatRoomList = async () => 
-			{
-				try
-				{
-					axiosInstance.current = await axiosToken();
-					const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
-					axiosInstance.current = await axiosToken();
-					const notJoinedChatRooms = await axiosInstance.current!.get('/chatRoom/notJoined' + user.data.username);
-					setNotJoinedRoomList(notJoinedChatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
-					(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
-					axiosInstance.current = await axiosToken();
-					const joinedChatRooms = await axiosInstance.current!.get('/chatRoom/joined' + user.data.username);
-					setJoinedRoomList(joinedChatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
-					(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
-				}
-				catch (error: any)
-				{
-					console.log("error while displaying chat rooms: ", error);
-				}
-			}
-			initChatRoomList();
-		}, []);
+			fetchRooms();
+		}, [chatRoomFilter]);
 
 		return (
 			<div>
