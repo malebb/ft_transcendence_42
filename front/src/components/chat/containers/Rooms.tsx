@@ -20,6 +20,7 @@ function Rooms()
 		const [roomAccessibility, setRoomAccessibility] = useState("PUBLIC");
 		const [password, setPassword] = useState("");
 		const [name, setName] = useState("");
+		const regexPassword = useRef(/^[0-9]*$/);
 		
 		// errors
 
@@ -33,7 +34,8 @@ function Rooms()
 
 		const updatePassword = (e: React.FormEvent<HTMLInputElement>) =>
 		{
-			setPassword(e.currentTarget.value);
+			if (regexPassword.current.test(e.currentTarget.value) && e.currentTarget.value.length <= 4)
+				setPassword(e.currentTarget.value);
 		}
 
 		const updateName = (e: React.FormEvent<HTMLInputElement>) =>
@@ -41,7 +43,7 @@ function Rooms()
 			setName(e.currentTarget.value);
 		}
 
-		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div><label>{passwordErr}</label><input type="password" placeholder="Enter a password" value={password} onChange={updatePassword} /></div>: <></>;
+		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div><label>{passwordErr}</label><input id="creationPassword" type="password" placeholder="4 digits password" value={password} onChange={updatePassword} /></div>: <></>;
 
 		const hashPassword = async (password: string) =>
 		{
@@ -53,8 +55,10 @@ function Rooms()
 		{
 			if (roomAccessibility === 'PROTECTED')
 			{
-				if (password.length < 10)
-					setPasswordErr('Password should contain minimum 10 characters');
+				if (password.length != 4)
+					setPasswordErr('Enter a 4 digits password');
+				else if (!/^[0-9]+$/.test(password))
+					setPasswordErr('Only digits are accepted');
 				else
 					return (true);
 				return (false);
@@ -159,7 +163,7 @@ function Rooms()
 		const [chatRoomsList, setChatRoomsList] = useState<ChatRoom[]>([]);
 		const [chatRoomSelected, setChatRoomSelected] = useState<string>('');
 		const [roomPassword, setRoomPassword] = useState<string>('');
-		const [passwordPlaceholder, setPasswordPlaceholder] = useState<string>('Enter password');
+		const [passwordPlaceholder, setPasswordPlaceholder] = useState<string>('4 digits password');
 		const [chatRoomFilter, setChatRoomFilter] = useState<ChatRoomFilter>(ChatRoomFilter["JOINED"]);
 
 		const updateChatRoomFilter = (e: React.FormEvent<HTMLSelectElement>) =>

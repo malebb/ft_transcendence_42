@@ -95,3 +95,8 @@ select:focus
 {
 	padding: 10px;
 }
+
+#creationPassword
+{
+	width: 110px;
+}
