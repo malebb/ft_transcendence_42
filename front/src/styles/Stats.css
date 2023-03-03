@@ -1,35 +1,36 @@
-#stats{
-	width: 87%;
-	margin: auto;
+#stats {
+  width: 87%;
+  margin: auto;
 }
 
-#statsTitle
-{
-	text-align: center;
-	padding: 5px;
+#statsTitle {
+  text-align: center;
+  padding: 5px;
 }
 
-table, td, th{
-	border-width: 2px;
-	border-color: black;
-	border-style: solid;
-	border-collapse: collapse;
-	background-color: #547EBE;
+table,
+td,
+th {
+  border-width: 2px;
+  border-color: black;
+  border-style: solid;
+  border-collapse: collapse;
+  background-color: #547ebe;
 }
 
-table
-{
-	width: 100%;
+table {
+  width: 100%;
 }
 
-th, td{
-	text-align: left;
-	padding-left: 10px;
-	width: 50%;
+th,
+td {
+  text-align: left;
+  padding-left: 10px;
+  width: 50%;
 }
 
-td{
-	height: 30px;
-	margin: 10px;
-	padding: 5px;
+td {
+  height: 30px;
+  margin: 10px;
+  padding: 5px;
 }

@@ -1,24 +1,21 @@
-#achievements
-{
-	display: flex;
-	justify-content: space-around;
-	flex-wrap: wrap;
+#achievements {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
 }
 
-.achievement
-{
-	background-color: #547EBE;
-	width: 400px;
-	text-align: center;
-	margin: 20px;
-	border-radius: 5px;
+.achievement {
+  background-color: #547ebe;
+  width: 400px;
+  text-align: center;
+  margin: 20px;
+  border-radius: 5px;
 }
 
-#achievementsTitle
-{
-	background-color: #547EBE;
-	text-align: center;
-	width: 400px;
-	padding: 8px;
-	margin: auto;
+#achievementsTitle {
+  background-color: #547ebe;
+  text-align: center;
+  width: 400px;
+  padding: 8px;
+  margin: auto;
 }
