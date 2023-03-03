@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import InputButton from "../inputs/InputButton";
 import { accessibilities } from "../utils/RoomAccessibilities";
 import { AxiosInstance, AxiosResponse } from 'axios';
-import { axiosToken, axiosMain } from '../../../api/axios';
+import { axiosToken } from '../../../api/axios';
 import bcrypt from 'bcryptjs';
 import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
@@ -156,7 +156,8 @@ function Rooms()
 
 	const RoomList = () =>
 	{
-		const [chatRoomList, setChatRoomList] = useState<ChatRoom[]>([]);
+		const [joinedRoomList, setJoinedRoomList] = useState<ChatRoom[]>([]);
+		const [notJoinedRoomList, setNotJoinedRoomList] = useState<ChatRoom[]>([]);
 		const [chatRoomSelected, setChatRoomSelected] = useState<string>('');
 		const [roomPassword, setRoomPassword] = useState<string>('');
 		const [passwordPlaceholder, setPasswordPlaceholder] = useState<string>('Enter password');
@@ -170,10 +171,12 @@ function Rooms()
 		const filterChatRoom = () =>
 		{
 			return (
+			<div id="filter">
 				<select value={chatRoomFilter} onChange={updateChatRoomFilter}>
           	  		<option value="JOINED">Rooms joined</option>
-					<option value="NOT_JOIN">Rooms not joined</option>
+					<option value="NOT_JOINED">Rooms not joined</option>
 				</select>
+			</div>
 			);
 		}
 
@@ -184,12 +187,17 @@ function Rooms()
 			switch (accessibility)
 			{
 				case 'PUBLIC':
-					return (<img src="http://localhost:3000/images/public.png" width={logoWidth} height={logoWidth}/>);
+					return (<img src="http://localhost:3000/images/public.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 				case 'PRIVATE':
-					return (<img src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth}/>);
+					return (<img src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 				case 'PROTECTED':
-					return (<img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth}/>);
+					return (<img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 			}
+		}
+
+		const enterRoom = async (roomName: string) =>
+		{
+			window.location.href = 'http://localhost:3000/room/' + roomName;
 		}
 
 		const joinRoom = async (roomName: string) =>
@@ -202,7 +210,7 @@ function Rooms()
 					{username: user.data.email},
 					{headers: {'Content-Type': 'application/json'},
 				});
-				window.location.href = 'http://localhost:3000/room/' + roomName;
+				enterRoom(roomName);
 			}
 			catch (error: any)
 			{
@@ -227,13 +235,13 @@ function Rooms()
 			}
 		}
 
-		const displayChatRooms = () =>
+		const displayNotJoinedChatRooms = () =>
 		{
-			if (!chatRoomList.length)
+			if (!notJoinedRoomList.length)
 				return (<p>No room chat have been created</p>);
 			const printRoomInfo = (chatRoom: ChatRoom) =>
 			{
-				if (chatRoomSelected == chatRoom.name)
+				if (chatRoomSelected === chatRoom.name)
 				{
 					switch (chatRoom.accessibility)
 					{
@@ -269,7 +277,7 @@ function Rooms()
 			return(
 				<ul id="roomList">
 				{
-					chatRoomList.map((chatRoom) => {
+					notJoinedRoomList.map((chatRoom) => {
 						return (
 							<li className="chatRoom" key={chatRoom.name} onClick={() => updateSelectChatRoom(chatRoom.name)}>
 								<h3 className="roomTitle">{chatRoom.name}</h3>
@@ -282,7 +290,37 @@ function Rooms()
 				}
 				</ul>
 			)
-				
+		}
+
+		const displayJoinedChatRooms = () =>
+		{
+			if (!joinedRoomList.length)
+				return (<p>You haven't joined any room yet</p>);
+			else
+				return (
+				<ul id="roomList">
+				{
+					joinedRoomList.map((chatRoom) => {
+						return (
+							<li className="chatRoom" key={chatRoom.name} onClick={() => enterRoom(chatRoom.name)}>
+								<h3 className="roomTitle">{chatRoom.name}</h3>
+							</li>
+						);
+					})
+				}
+				</ul>
+				);
+		}
+
+		const displayChatRooms = () =>
+		{
+			switch (chatRoomFilter)
+			{
+				case 'NOT_JOINED':
+					return (displayNotJoinedChatRooms());
+				case 'JOINED':
+					return (displayJoinedChatRooms());
+			}
 		}
 
 		useEffect(() =>
@@ -292,8 +330,14 @@ function Rooms()
 				try
 				{
 					axiosInstance.current = await axiosToken();
-					const chatRooms = await axiosInstance.current!.get('/chatRoom/');
-					setChatRoomList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
+					const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
+					axiosInstance.current = await axiosToken();
+					const notJoinedChatRooms = await axiosInstance.current!.get('/chatRoom/notJoined' + user.data.username);
+					setNotJoinedRoomList(notJoinedChatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
+					(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
+					axiosInstance.current = await axiosToken();
+					const joinedChatRooms = await axiosInstance.current!.get('/chatRoom/joined' + user.data.username);
+					setJoinedRoomList(joinedChatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
 					(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
 				}
 				catch (error: any)
@@ -307,8 +351,14 @@ function Rooms()
 		return (
 			<div>
 				<h3 id="joinRoomTitle">... Or join one!</h3>
-				{filterChatRoom()}
-				{displayChatRooms()}
+				<>
+					{filterChatRoom()}
+				</>
+				<br/>
+				<br/>
+				<>
+					{displayChatRooms()}
+				</>
 			</div>
 		);
 	}

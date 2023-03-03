@@ -43,6 +43,40 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
+	async getNotJoinedRooms(username: string)
+	{
+		const chatRoom = await this.prisma.chatRoom.findMany({
+			where: {
+				members: {
+					none : {
+						email: username
+					}
+				},
+			},
+			include: {
+				owner: true
+			}
+		})
+		return (chatRoom);
+	}
+
+	async getJoinedRooms(username: string)
+	{
+		const chatRoom = await this.prisma.chatRoom.findMany({
+			where: {
+				members: {
+					some: {
+							email: username,
+					},
+				},
+			},
+			include: {
+				owner: true
+			}
+		})
+		return (chatRoom);
+	}
+
 	async getAllRooms()
 	{
 		const chatRoom = await this.prisma.chatRoom.findMany({
