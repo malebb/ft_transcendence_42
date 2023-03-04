@@ -11,7 +11,7 @@
 
 .game
 {
-   background-color: #547EBE;
+	color: white;
    border: 1px, solid;
    display: flex;
    justify-content: space-around;
@@ -20,6 +20,7 @@
    transition: transform .2s;
    font-size: 19px;
    border-radius: 5px;
+   background-color: var(--tertiary);
 }
 
 .game:hover
@@ -39,6 +40,7 @@
 #spectate
 {
 	text-align: center;
+	margin-top: 150px;
 }
 
 #canvas
@@ -47,26 +49,20 @@
 
 #spectatorTitle
 {
-	background-color: #547EBE;
+	color: white;
 	text-align: center;
 	width: 250px;
-	padding: 8px;
 	margin: auto;
-	margin-top: 50px;
-	margin-bottom: 50px;
+	margin-bottom: 20px;
 	border-radius: 5px;
 }
 
 #noGame
 {
-	background-color: #547EBE;
+	color: white;
+	background-color: ;
 	text-align: center;
 	width: 400px;
 	margin: auto;
-	padding-top: 20px;
-	padding-bottom: 20px;
-	margin-top: 50px;
-	margin-bottom: 50px;
-	border-radius: 5px;
-
+	margin-top: 100px;
 }

@@ -7,14 +7,26 @@
 {
 	text-align: center;
 	padding: 5px;
+	background-color: #413368;
+	color: white;
 }
 
 table, td, th{
-	border-width: 2px;
+	border-width: 1px;
 	border-color: black;
 	border-style: solid;
 	border-collapse: collapse;
-	background-color: #547EBE;
+	color: black;
+}
+
+table{
+	
+	background-color: #CACFD2;
+}
+
+tr:nth-child(even)
+{
+	background-color: white;
 }
 
 table
@@ -26,6 +38,7 @@ th, td{
 	text-align: left;
 	padding-left: 10px;
 	width: 50%;
+	font-weight: normal;
 }
 
 td{

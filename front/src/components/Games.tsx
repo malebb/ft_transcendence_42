@@ -36,9 +36,7 @@ const Games = () =>
 			return (
 				<Link className="gameLink" to={`/games/${game.gameId}`} key={game.gameId} >
 					<div className="game">
-						<h3>{trimUsername(game.leftUsername)}</h3>
-						<h2>VS</h2>
-						<h3>{trimUsername(game.rightUsername)}</h3>
+						<p>{trimUsername(game.leftUsername)} &nbsp;&nbsp; vs &nbsp;&nbsp; {trimUsername(game.rightUsername)}</p>
 					</div>
 				</Link>
 			);

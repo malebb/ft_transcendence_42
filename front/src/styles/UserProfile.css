@@ -164,9 +164,8 @@ main{
 
 #notFriend
 {
-	background-color: #547EBE;
+	color: white;
 	text-align: center;
 	width: 325px;
-	padding: 8px;
 	margin: auto;
 }
