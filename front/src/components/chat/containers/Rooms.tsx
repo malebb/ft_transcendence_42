@@ -50,7 +50,7 @@ function Rooms()
 			setName(e.currentTarget.value);
 		}
 
-		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div id="creationPassword"><label id="passwordInfo">{passwordInfo}</label><input id="creationPasswordInput" type="password" value={password} onChange={updatePassword} /></div>: <></>;
+		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div id="creationPassword"><label id="passwordInfo">{passwordInfo}</label><input id="creationPasswordInput" type="password" value={password} onChange={updatePassword} autoComplete="on"/></div>: <></>;
 
 		const hashPassword = async (password: string) =>
 		{
@@ -149,7 +149,6 @@ function Rooms()
 
 		const formatAccessibility = (accessibility: string) =>
 		{
-			console.log("slice(1) = ", accessibility.slice(1));
 			return ((accessibility.toLowerCase().charAt(0).toUpperCase() + accessibility.slice(1).toLowerCase()));
 		}
 
@@ -162,17 +161,19 @@ function Rooms()
 		<>
 		<h3 id="createRoomTitle">Create a new room ... </h3>
 		<div id="createRoom">
-			<div id="accessibility">
+			<form id="accessibility">
 				<ul id="checkboxes">
 					{
 						accessibilities.map((accessibility: string, index: number) =>
 						{
 							return (
 									<li key={index}>
+
 										<label className="checkboxContainer">
 											<input type="checkbox" name={accessibility}
 											checked={accessibility === roomAccessibility}
-											onChange={() => updateAccessibility(accessibility)}/>
+											onChange={() => updateAccessibility(accessibility)}
+											/>
 											<span className="customCheckbox"></span>
 										</label>
 										<label> {formatAccessibility(accessibility)}</label>
@@ -182,7 +183,7 @@ function Rooms()
 					}
 				</ul>
 				{passwordField()}
-			</div>
+			</form>
 			<label id="nameInfo">{nameInfo}</label>
 			<InputButton
           		onSubmit={handleCreateRoom}
