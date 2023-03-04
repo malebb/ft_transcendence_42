@@ -169,7 +169,7 @@ function Rooms()
 						return (
 						<Link className="roomLink" to={`/room/${chatRoom.name}`} key={chatRoom.name}>
 							<li className="chatRoom">
-								<h3 className="roomTitle">{chatRoom.name}</h3>
+								{<h3 className="roomTitle">{chatRoom.name}</h3>}
 								<p>Owner : {chatRoom.owner.username}</p>
 							</li>
 						</Link>);

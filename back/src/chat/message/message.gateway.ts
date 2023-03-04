@@ -10,8 +10,7 @@ import { Socket, Server } from 'socket.io';
 
 // les deux vont exposer les methodes
 // necessaires pour les messages des utilisateurs
-import { Chat } from './chat.entity';
-import { ChatService } from './chat.service';
+import { MessageService } from './message.service';
 
 // interfaces :
 
@@ -34,12 +33,12 @@ import { ChatRoom } from 'ft_transcendence';
 // les 3 instances implementees
 // permettent de connaitre l'etat de l'application
 // ou de faire des operations grace aux hooks
-export class ChatGateway
+export class MessageGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  // va bind l'application ChatService
+  // va bind l'application MessageService
   constructor(
-    private chatService: ChatService, // private authService: AuthService,
+    private messageService: MessageService, // private authService: AuthService,
   ) // private userService: UserService
   {}
 
@@ -57,19 +56,20 @@ export class ChatGateway
   // qui va donner acces a socket.io
   //   @SubscribeMessage('sendMessage')
   //   async handleSendMessage(user: Socket, payload: Chat) {
-  //     await this.chatService.createMessage(payload);
+  //     await this.MessageService.createMessage(payload);
   //     this.server.emit('recMessage', payload);
   //   }
 
-  @SubscribeMessage('CREATE_ROOM')
+  /* @SubscribeMessage('CREATE_ROOM')
   createRoom(client: Socket, room: ChatRoom) {
-    this.chatService.createRoom(client, room);
-  }
+    this.messageService.createRoom(client, room);
+  } */
+
   // async??
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
 // enregistrer la socket dan sun channel
-    this.chatService.joinRoom(this.server, client, room);
+    this.messageService.joinRoom(client, room);
     // console.log('User ' + client.id + ' joined room ');
   }
 
@@ -87,7 +87,7 @@ export class ChatGateway
 /**
 //* INFO
 
-Fichier principalement pour appller le ChatService
+Fichier principalement pour appller le MessageService
 Avoir le moins d'etape possible dedans
 
 OnGatewayInit = implemente la methode afterInit()

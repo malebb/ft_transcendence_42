@@ -23,7 +23,8 @@ body {
 
 #content {
 	/* position: absolute; */
-
+	/* padding: 8px; */
+	/* height: 100.001vh; */
 	height: 96vh;
     overflow: scroll;
 	display: flex;
@@ -121,4 +122,4 @@ body {
 	margin-left: auto;
 	
 }
-/* .roomBase */
+

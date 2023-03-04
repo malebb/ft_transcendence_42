@@ -5195,6 +5195,8 @@
 "ft_transcendence@file:../lib":
   "resolved" "file:../lib"
   "version" "1.0.0"
+  dependencies:
+    "typescript" "^4.9.5"
 
 "function-bind@^1.1.1":
   "integrity" "sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A=="

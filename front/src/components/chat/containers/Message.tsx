@@ -7,7 +7,8 @@ import { AxiosInstance, AxiosResponse } from "axios";
 import "./message.style.css";
 import { type } from "os";
 import { axiosToken } from "src/api/axios";
-
+import Sidebar from "src/components/Sidebar";
+import Headers from "src/components/Headers";
 
 // interface partialMessage {
 //   username: string;
@@ -57,26 +58,26 @@ function MessagesContainer() {
   const userId: number = parseInt(userIdValue);
 
   useEffect(() => {
-     const getCurrentUser = async () => {
-	axiosInstance.current = await axiosToken();
-	await axiosInstance.current!.get("/users/me").then((response) => {
-	  setUser(response.data.username);
-	});
-  };
-  getCurrentUser();
+    const getCurrentUser = async () => {
+      axiosInstance.current = await axiosToken();
+      await axiosInstance.current!.get("/users/me").then((response) => {
+        setUser(response.data.username);
+      });
+    };
+    getCurrentUser();
     console.log(currentMessage.username);
     socket.on("ROOM_MESSAGE", (message) => {
       setStateMessage([...stateMessage, message]);
     });
   });
 
-//   const getCurrentUser = async () => {
-// 	axiosInstance.current = await axiosToken();
-// 	await axiosInstance.current!.get("/users/me").then((response) => {
-// 	  setUser(response.data);
-// 	});
-//   };
-//   getCurrentUser();
+  //   const getCurrentUser = async () => {
+  // 	axiosInstance.current = await axiosToken();
+  // 	await axiosInstance.current!.get("/users/me").then((response) => {
+  // 	  setUser(response.data);
+  // 	});
+  //   };
+  //   getCurrentUser();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
@@ -96,7 +97,7 @@ function MessagesContainer() {
     currentMessage = {
       ...newMessage,
       message: inputMessage,
-	  username: user,
+      username: user,
       userId: userId,
       sendAt: dateTS,
       hours: String(dateTS.getHours()).padStart(2, "0"),
@@ -164,14 +165,20 @@ function MessagesContainer() {
       />
     );
   };
-
+  
   return (
+	<div>
+	<div>
+	  <Headers />
+	  <Sidebar />
+	  </div>
     <div id="content">
       <div id="chatContainer">
         <GenMessages />
       </div>
       <GenSendMessage />
     </div>
+	</div>
   );
 }
 

@@ -44,7 +44,9 @@ const ChatRoomBase = () => {
 
 	return (
 		<div className="roomBase">
+			<div className="headerRoomName">
 			{genTitle()}
+			</div>
 			<div className={style.chat}>
 					<MessagesContainer />
 				</div>
