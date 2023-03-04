@@ -8,10 +8,11 @@
 
 .historyElem
 {
+	color: white;
 	margin: 20px;
-	background-color: #547EBE;
+	background-color: var(--tertiary);
 	height: 70px;
-	width: 80%;
+	width: 50%;
 	text-align: center;
 	border-radius: 5px;
 }
@@ -22,8 +23,9 @@
 	justify-content: space-around;
 	flex-direction: row;
 	align-items: center;
-	width: 40%;
+	width: 50%;
 	margin: auto;
+	padding-top: 10px;
 }
 
 #achievementDone
@@ -43,7 +45,7 @@
 
 .desc
 {
-	margin: 5px;
+	margin: 2px;
 	margin-bottom: 10px;
 }
 
