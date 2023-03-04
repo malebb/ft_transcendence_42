@@ -3,13 +3,16 @@
 	z-index: 1;
 }
 .title {
+	/* padding: 100px; */
 	/* position: absolute;
 	-> si on le met, supperpose le chat et le titre */
-	top: 0;
+	/* top: 0;
 	left: 0;
-	z-index: 2;
+	z-index: 2; */
+	height: 180px;
 }
 .title > h1 {
+	padding:10%;
 	position: absolute;
 	width: fit-content;
 	max-width: 600px;
@@ -26,18 +29,10 @@
 	left: 0;
 	z-index: 2;
 }
-.chat {
+.chat-receiver {
 	width: 100%;
 }
 .roomBase {
+	padding: 100px;
 	background-color: #1D1E24;
-}
-.headerRoomName {
-	position: relative;
-	background-color: var(--main);
-    overflow: scroll;
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-
 }

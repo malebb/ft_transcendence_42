@@ -20,8 +20,9 @@
     overflow: scroll;
 	display: flex;
 	flex-direction: column;
-	width: 100%;
-
+	width: 90%;
+padding: 10%;
+/* padding-top: 3.5rem; */
   }
 
   #roomContainer {
@@ -37,7 +38,7 @@
 
   #chatContainer {
 /* 100vh = ?? 50px = ?? - 200px = titre - 40 = input chat */
-	height: calc(100vh - 50px - 200px - 50px);
+	height: calc(100vh - 50px - 180px - 40px - 5rem);
 	background-color: var(--secondary);
 	border-radius: 16px;
 	margin-bottom: 1em;
