@@ -2,7 +2,6 @@
 	padding: 8px 16px;
 	height: 34px;
 	border-radius: 12px;
-	border: 0px;
 	background: white;
 	display: flex;
 	align-items: center;
@@ -11,7 +10,7 @@
   }
   .sendInput > input {
 	height: 34px;
-	border: 0px;
+	border: 8px;
 	flex: 1;
 	font-size: 17px;
   }
