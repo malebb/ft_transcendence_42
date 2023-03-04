@@ -27,6 +27,7 @@
 	list-style: none;
 	color: white;
 	display: flex;
+	margin-right: 20px;
 }
 
 .checkboxContainer
@@ -96,6 +97,8 @@
 	width: 400px;
 	height: 20px;
 	margin-right: 50px;
+	margin-left: 20px;
+	white-space: nowrap;
 }
 
 #creationPasswordInput
@@ -117,6 +120,7 @@
 #nameInfo
 {
 	margin: 5px;
+	height: 22px;
 }
 
 #filter
@@ -192,4 +196,36 @@ select:focus
 #noRoomJoined, #noRoomToJoin
 {
 	text-align: center;
+}
+
+.joinInfoPassword
+{
+	width: 140px;
+}
+
+.joinPasswordInput
+{
+	position: relative;
+	width: 20px;
+	border: 1px black solid;
+	outline: none;
+	margin-right: 10px;
+	margin-left: 10px;
+	border-radius: 3px;
+}
+
+.joinSubmitBtn
+{
+	width: 45px;
+	background-color: #413368;
+	color: white;
+	border: none;
+	height: 25px;
+	cursor: pointer;
+	border-radius: 3px;
+}
+
+.joinSubmitBtn:hover
+{
+	background-color: #613981;
 }

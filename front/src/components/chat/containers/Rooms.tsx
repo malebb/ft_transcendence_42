@@ -203,8 +203,9 @@ function Rooms()
 		const [chatRoomsList, setChatRoomsList] = useState<ChatRoom[]>([]);
 		const [chatRoomSelected, setChatRoomSelected] = useState<string>('');
 		const [roomPassword, setRoomPassword] = useState<string>('');
-		const [passwordPlaceholder, setPasswordPlaceholder] = useState<string>('4 digits password');
 		const [chatRoomFilter, setChatRoomFilter] = useState<ChatRoomFilter>(ChatRoomFilter["JOINED"]);
+		const [infoPassword, setInfoPassword] = useState<string>('4 digits password : ');
+		const regexPassword = useRef(/^[0-9]*$/);
 
 		const updateChatRoomFilter = (e: React.FormEvent<HTMLSelectElement>) =>
 		{
@@ -263,7 +264,8 @@ function Rooms()
 
 		const updateRoomPassword = (e: React.FormEvent<HTMLInputElement>) =>
 		{
-			setRoomPassword(e.currentTarget.value);
+			if (regexPassword.current.test(e.currentTarget.value) && e.currentTarget.value.length <= 4)
+				setRoomPassword(e.currentTarget.value);
 		}
 
 		const checkPassword = async (e: React.FormEvent<HTMLFormElement>, chatRoom: ChatRoom) =>
@@ -273,7 +275,7 @@ function Rooms()
 				joinRoom(chatRoom.name);
 			else
 			{
-				setPasswordPlaceholder('Wrong password');
+				setInfoPassword('Wrong password');
 				setRoomPassword('');
 			}
 		}
@@ -291,12 +293,14 @@ function Rooms()
 						case 'PROTECTED':
 							return (<div>
 									<form onSubmit={(e) => checkPassword(e, chatRoom)}>
+										<label className="joinInfoPassword">{infoPassword}</label>
 										<input type="password"
-											placeholder={passwordPlaceholder} value={roomPassword}
+											className ="joinPasswordInput"
+											value={roomPassword}
 											onChange={updateRoomPassword}
 											autoComplete="on"
 											/>
-									<input type="submit" />
+									<input type="submit" className="joinSubmitBtn" value="enter"/>
 									</form>
 								</div>);
 						case 'PRIVATE':
@@ -312,9 +316,14 @@ function Rooms()
 						);
 			}
 
-			const updateSelectChatRoom = (chatRoomSelected: string) =>
+			const updateSelectChatRoom = (newChatRoomSelected: string) =>
 			{
-				setChatRoomSelected(chatRoomSelected);
+				if (chatRoomSelected != newChatRoomSelected)
+				{
+					setRoomPassword('');
+					setInfoPassword('4 digits password : ');
+				}
+				setChatRoomSelected(newChatRoomSelected);
 			}
 
 			return(
