@@ -4,9 +4,15 @@ import { useParams } from 'react-router-dom';
 import MessagesContainer from "./containers/Message";
 import { SocketContext } from "./context/socket.context";
 import EVENTS from "./config/events";
-// import { EVENTS } from 'ft_transcendence';
-
+import { useEffect, useRef, useState } from 'react';
+import { axiosToken } from '../../api/axios';
+import { AxiosInstance, AxiosResponse } from 'axios';
 import style from "./ChatRoom.module.css"
+import Headers from '../Headers';
+import Sidebar from '../Sidebar';
+import { RoomStatus } from './utils/RoomStatus';
+
+
 
 interface Room {
 	roomId: string;
@@ -20,8 +26,39 @@ const ChatRoomBase = () => {
 	const socket = SocketContext();
 
 	const { roomId } = useParams();
+	const axiosInstance = useRef<AxiosInstance | null>(null);
+	const [roomStatus, setRoomStatus] = useState<RoomStatus | null>(null);
 
+	useEffect(() => {
+		const checkRoom = async () =>
+		{
+			try
+			{
+				axiosInstance.current = await axiosToken();
+				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomId);
+
+				if (!room.data)
+					setRoomStatus(RoomStatus["NOT_EXIST" as keyof typeof RoomStatus]);
+				else
+				{
+					const member: AxiosResponse = await axiosInstance.current.get('/chatRoom/member/' + roomId);
+
+					if (member.data.members.length)
+						setRoomStatus(RoomStatus["JOINED" as keyof typeof RoomStatus])
+					else
+						setRoomStatus(RoomStatus["NOT_JOINED" as keyof typeof RoomStatus])
+				}
+			}
+			catch (error: any)
+			{
+				console.log("error: ", error);
+			}
+		}
+		checkRoom();
+	}, []);
+/*
 	if (!roomId?.length) return <></>
+
 
 	let newRoom: Room = {
 		admin: "ldermign",
@@ -30,7 +67,7 @@ const ChatRoomBase = () => {
 	  };
 
 	socket.emit(EVENTS.CLIENT.JOIN_ROOM, newRoom);
-
+*/
 	const genTitle = () => {
 		return (
 			<div className={style.title}>
@@ -42,13 +79,42 @@ const ChatRoomBase = () => {
 		)
 	}
 
-	return (
-		<div className="roomBase">
-			{genTitle()}
-			<div className={style.chat}>
-					<MessagesContainer />
+	const checkRoomStatus = () =>
+	{
+		if (roomStatus === 'JOINED')
+		{
+			return (
+			<>
+				{genTitle()}
+				<div className={style.chat}>
+						<MessagesContainer />
 				</div>
+			</>
+			);
+		}
+		else if (roomStatus === 'NOT_JOINED')
+		{
+			return (<p id={style.roomStatus}>You are not a member of {roomId} room</p>);
+		}
+		else if (roomStatus == 'NOT_EXIST')
+		{
+			return (<p id={style.roomStatus}>Room {roomId} does not exist</p>);
+		}
+		else if (!roomStatus)
+		{
+			return (<p id={style.roomStatus}>loading...</p>);
+		}
+	}
+
+	return (
+	<>
+	{/*
+		<Headers/>
+		<Sidebar/> */}
+		<div className={style.roomBase}>
+		{checkRoomStatus()}
 		</div>
+	</>
 	);
 };
 

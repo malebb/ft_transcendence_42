@@ -102,4 +102,21 @@ export class ChatRoomService
 			}
 		});
 	}
+
+	async getMember(userId: number, name: string)
+	{
+		const chatRoom = await this.prisma.chatRoom.findUnique({
+			where: {
+				name: name
+			},
+			include: {
+				members: {
+					where: {
+						id: userId
+					}
+				}
+			}
+		})
+		return (chatRoom);
+	}
 }

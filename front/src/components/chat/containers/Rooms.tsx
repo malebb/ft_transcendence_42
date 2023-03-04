@@ -62,7 +62,7 @@ function Rooms()
 		{
 			if (roomAccessibility === 'PROTECTED')
 			{
-				if (password.length != 4)
+				if (password.length !== 4)
 				{
 					setPasswordInfo('4 digits required :');
 					document.getElementById('passwordInfo')!.style.color = 'red';
@@ -242,7 +242,7 @@ function Rooms()
 
 		const enterRoom = async (roomName: string) =>
 		{
-			window.location.href = 'http://localhost:3000/room/' + roomName;
+			window.location.href = 'http://localhost:3000/chat/room/' + roomName;
 		}
 
 		const joinRoom = async (roomName: string) =>
@@ -319,7 +319,7 @@ function Rooms()
 
 			const updateSelectChatRoom = (newChatRoomSelected: string) =>
 			{
-				if (chatRoomSelected != newChatRoomSelected)
+				if (chatRoomSelected !== newChatRoomSelected)
 				{
 					setRoomPassword('');
 					setInfoPassword('4 digits password : ');

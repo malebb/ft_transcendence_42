@@ -32,3 +32,15 @@
 	position: absolute;
 	width: 98%;
 }
+
+#roomStatus
+{
+	color: white;
+	margin: auto;
+	margin-top: 150px;
+	text-align: center;
+}
+
+.roomBase
+{
+}
