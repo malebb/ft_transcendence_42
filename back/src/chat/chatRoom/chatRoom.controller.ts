@@ -1,10 +1,14 @@
-import { Controller, Get, Param, Post, Body, Headers} from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Headers, Patch } from '@nestjs/common';
 import { ChatRoomService } from './chatRoom.service';
 
 import { GetUser } from '../../auth/decorator';
 
 interface UserDto {
 	username: string
+}
+
+interface passwordDto {
+	password: string
 }
 
 @Controller('chatRoom')
@@ -55,6 +59,11 @@ class ChatRoomController
 		await this.chatRoomService.joinChatRoom(chatRoomName, user.username)
 	}
 
+	@Patch('password/:name')
+	async updateRoomPassword(@Param('name') chatRoomName: string, @Body() password: passwordDto)
+	{
+		await this.chatRoomService.updateRoomPassword(chatRoomName, password.password)
+	}
 }
 
 export default ChatRoomController;

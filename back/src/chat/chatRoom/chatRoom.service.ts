@@ -148,4 +148,17 @@ export class ChatRoomService
 		})
 		return (chatRoom);
 	}
+
+	async updateRoomPassword(chatRoomName: string, password: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				password: password,
+				accessibility: "PROTECTED"
+			}
+		});
+	}
 }

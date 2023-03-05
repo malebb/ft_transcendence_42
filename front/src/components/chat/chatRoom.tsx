@@ -12,6 +12,7 @@ import Headers from '../Headers';
 import Sidebar from '../Sidebar';
 import { RoomStatus } from './utils/RoomStatus';
 import { Accessibility } from 'ft_transcendence';
+import bcrypt from 'bcryptjs';
 
 
 
@@ -127,14 +128,43 @@ const ChatRoomBase = () => {
 		)
 	}
 
-	const handleChangePassword = (e: React.FormEvent<HTMLFormElement>) =>
+	const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) =>
 	{
 		e.preventDefault();
-		if (password.length !== 4)
+		try
 		{
-			setPasswordInfo('4 digits required :');
-			document.getElementById('passwordInfo')!.style.color = 'red';
+			axiosInstance.current = await axiosToken();
+			const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomId);
+			if (password.length !== 4)
+			{
+				setPasswordInfo('4 digits required :');
+				document.getElementById(style.passwordInfo)!.style.color = 'red';
+			}
+			else if (await bcrypt.compare(password, room.data.password))
+			{
+				setPasswordInfo('The password is not new :');
+				document.getElementById(style.passwordInfo)!.style.color = 'red';
+			}
+			else
+			{
+				const salt = await bcrypt.genSalt(10);
+				const passwordHashed: string = await bcrypt.hash(password, salt);
+
+				axiosInstance.current = await axiosToken();
+				await axiosInstance.current.patch('/chatRoom/password/' + roomId, "password=" + passwordHashed);
+				setPasswordInfo('Change the room password: ');
+				setPassword('');
+				document.getElementById(style.passwordInfo)!.style.color = 'white';
+				alert('Password updated successfully!');
+				return ;
+			}
+			return ;
 		}
+		catch (error: any)
+		{
+			console.log("error: ", error);
+		}
+
 	}
 
 	const updatePassword = (e: React.FormEvent<HTMLInputElement>) =>
@@ -144,7 +174,7 @@ const ChatRoomBase = () => {
 		if (!regexPassword.current.test(e.currentTarget.value))
 		{
 			setPasswordInfo('only digits :');
-			document.getElementById('passwordInfo')!.style.color = 'red';
+			document.getElementById(style.passwordInfo)!.style.color = 'red';
 		}
 	}
 
