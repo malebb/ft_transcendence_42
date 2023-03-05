@@ -275,12 +275,22 @@ function Rooms()
 		const checkPassword = async (e: React.FormEvent<HTMLFormElement>, chatRoom: ChatRoom) =>
 		{
 			e.preventDefault();
-			if (await bcrypt.compare(roomPassword, chatRoom.password))
-				joinRoom(chatRoom.name);
-			else
+			try
 			{
-				setInfoPassword('Wrong password');
-				setRoomPassword('');
+				axiosInstance.current = await axiosToken();
+				const room: AxiosResponse = await axiosInstance.current.get('chatRoom/' + chatRoom.name);
+
+				if (await bcrypt.compare(roomPassword, room.data.password))
+					joinRoom(chatRoom.name);
+				else
+				{
+					setInfoPassword('Wrong password');
+					setRoomPassword('');
+				}
+			}
+			catch (error: any)
+			{
+				console.log('error: ', error);
 			}
 		}
 
