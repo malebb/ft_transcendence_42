@@ -9,6 +9,14 @@
   --bg-secondary: #141418;
 }
 
+p{
+  
+  color: white;
+}
+div{
+  
+  color: white;
+}
 body {
   /* :root {
 		--main: rgb(169, 169, 241);
@@ -21,7 +29,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: white;
-  color: blue;
+  color: white;
   background: rgb(39, 42, 47);
   background: linear-gradient(
     90deg,

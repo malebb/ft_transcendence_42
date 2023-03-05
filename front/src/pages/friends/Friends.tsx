@@ -32,7 +32,7 @@ type NeutralUser = {
   createdAt: Date;
   id42: string | null;
   username: string;
-  profilePicture: string | undefined;
+  profilePicture: string;
 };
 
 const Friends = () => {
@@ -91,9 +91,13 @@ const Friends = () => {
     setShowConfirmation(false);
   };
 
-  const handleSrc = (friend: FriendType) => {
+  const handleSrcFriend = (friend: FriendType) => {
     if (validURL(friend.profilePicture)) return friend.profilePicture;
     else return GET_PROFILE_PICTURE + friend.profilePicture.split("/")[2];
+  };
+  const handleSrcNeutral = (neutral: NeutralUser) => {
+    if (validURL(neutral.profilePicture)) return neutral.profilePicture;
+    else return GET_PROFILE_PICTURE + neutral.profilePicture.split("/")[2];
   };
 
   useEffect(() => {}, [friendArray, recvArray, sendArray]);
@@ -123,17 +127,17 @@ const Friends = () => {
               {friendArray?.map((friend: FriendType) => {
                 return (
                   <div key={friend.id}>
-                    <Link to={"/user/" + friend.id}>
+                    <Link className="link-user" to={"/user/" + friend.id}>
                       {
                         <img
                           id="profilePicture"
                           className="profilePicture"
-                          src={handleSrc(friend)}
+                          src={handleSrcFriend(friend)}
                         />
                       }
                       {friend.username}
                     </Link>
-                    <button onClick={handleUnfriendClick}>Unfriend</button>
+                    <button className="profileButtonCancel" onClick={handleUnfriendClick}>Unfriend</button>
                     {showConfirmation && (
                       <div>
                         <p>
@@ -171,8 +175,17 @@ const Friends = () => {
               {sendArray?.map((friend: NeutralUser) => {
                 return (
                   <div key={friend.id}>
-                    <Link to={"/user/" + friend.id}>{friend.username}</Link>
-                    <button onClick={handleUnfriendClick}>Cancel</button>
+                    <Link className="link-user" to={"/user/" + friend.id}>
+                        {
+                          <img
+                          id="profilePicture"
+                          className="profilePicture"
+                          src={handleSrcNeutral(friend)}
+                        />
+                        }
+                      {friend.username}
+                      </Link>
+                    <button className="profileButtonCancel" onClick={handleUnfriendClick}>Cancel</button>
                     {showConfirmation && (
                       <div>
                         <p>
@@ -210,11 +223,18 @@ const Friends = () => {
               {recvArray?.map((friend: NeutralUser) => {
                 return (
                   <div key={friend.id}>
-                    <Link to={"/user/" + friend.id}>{friend.username}</Link>
-                    <button onClick={(e: any) => acceptRequestWrap(friend.id)}>
+                    <Link className="link-user" to={"/user/" + friend.id}>
+                        {<img
+                          id="profilePicture"
+                          className="profilePicture"
+                          src={handleSrcNeutral(friend)}
+                        />}
+                      {friend.username}
+                      </Link>
+                    <button className="profileButtonAddFriend" onClick={(e: any) => acceptRequestWrap(friend.id)}>
                       Accept
                     </button>
-                    <button onClick={(e: any) => refuseRequestWrap(friend.id)}>
+                    <button className="profileButtonRefuse" onClick={(e: any) => refuseRequestWrap(friend.id)}>
                       Decline
                     </button>
                   </div>

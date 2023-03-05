@@ -9,16 +9,16 @@
   left: 0px;
   right: 0px;
   text-align: center;
-  background: rgb(67, 41, 81);
+  background: rgb(35, 35, 46);
   background: linear-gradient(
     90deg,
-    rgba(67, 41, 81, 1) 35%,
+    rgba(35, 35, 46, 1) 35%,
     rgba(84, 126, 190, 1) 100%
   );
   background: rgb(67, 41, 81);
   background: linear-gradient(
     137deg,
-    rgba(67, 41, 81, 1) 35%,
+    rgba(35, 35, 46, 1) 35%,
     rgba(84, 126, 190, 1) 100%
   );
   justify-content: space-between;

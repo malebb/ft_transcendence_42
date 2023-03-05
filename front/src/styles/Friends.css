@@ -3,6 +3,63 @@ main {
   margin-top: 6rem;
   padding: 1rem;
 }
+
+.link-user{
+  color: white;
+  text-decoration: none;
+}
+.link-user::hover{
+  color: white;
+  text-decoration: none;
+}
+
+.profileButtonCancel {
+  font-size: 10px;
+  margin: 3px 3px;
+  background-color: #c07622;
+  border: none;
+  padding: 5px 10px 5px 10px;
+  border-radius: 5px;
+}
+.profileButtonCancel:hover {
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+  opacity: 0.6;
+}
+.profileButtonCancel:active {
+  opacity: 0.3;
+}
+
+.profileButtonAddFriend {
+  font-size: 10px;
+  margin: 3px 3px;
+  background-color: #29632b;
+  border: none;
+  padding: 5px 10px 5px 10px;
+  border-radius: 5px;
+}
+.profileButtonAddFriend:hover {
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+  opacity: 0.6;
+}
+.profileButtonAddFriend:active {
+  opacity: 0.3;
+}
+.profileButtonRefuse {
+  font-size: 10px;
+  margin: 3px 3px;
+  background-color: #9a3535;
+  border: none;
+  padding: 5px 10px 5px 10px;
+  border-radius: 5px;
+}
+.profileButtonRefuse:hover {
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+  opacity: 0.6;
+}
+.profileButtonRefuse:active {
+  opacity: 0.3;
+}
+
 .accordion {
   box-sizing: border-box;
   display: flex;
