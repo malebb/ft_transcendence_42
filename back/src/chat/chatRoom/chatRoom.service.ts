@@ -16,7 +16,7 @@ export class ChatRoomService
 						email: chatRoom.owner.email,
 					}
 				},
-				admins: {
+				admin: {
 					connect: {
 						email: chatRoom.owner.email,
 					}

@@ -1,91 +1,80 @@
 import { useEffect, useRef, useState } from "react";
-import EVENTS from "../config/events";
 import { SocketContext } from "../context/socket.context";
 import InputButton from "../inputs/InputButton";
-import { AxiosInstance, AxiosResponse } from "axios";
-
-import "./message.style.css";
-import style from "../ChatRoom.module.css"
-
-
-import { type } from "os";
+import { AxiosInstance } from "axios";
 import { axiosToken } from "src/api/axios";
 import Sidebar from "src/components/Sidebar";
 import Headers from "src/components/Headers";
 import { useParams } from "react-router-dom";
+import { ChatRoom } from "ft_transcendence";
+import { User } from "ft_transcendence";
+import { Message } from "ft_transcendence";
 
-// interface partialMessage {
-//   username: string;
-//   message: string;
-//   time: number;
-// }
-
-// interface messageTmp extends partialMessage {
-//   roomId: string;
-// }
-
-type mesageType = "current" | "other";
-
-interface Message {
-  username: string;
-  userId: number;
-  message: string;
-  sendAt: Date;
-  hours: string;
-  minutes: string;
-  room: boolean;
-  roomId: string;
-}
+import "./message.style.css";
+import style from "../ChatRoom.module.css"
 
 function MessagesContainer() {
-  let newMessage: Message = {
-    username: "username",
-    userId: 0,
-    message: "",
-    sendAt: new Date(),
-    hours: "00",
-    minutes: "00",
-    room: false,
-    roomId: "",
-  };
 
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessage, setStateMessage] = useState<Message[]>([]);
-  const [user, setUser] = useState("");
-  const axiosInstance = useRef<AxiosInstance | null>(null);
+  const [currentUser, setCurrentUser] = useState<User>();
+  const [currentRoom, setCurrentRoom] = useState<ChatRoom>();
+  const axiosInstance = useRef<AxiosInstance|null>(null);
   const { roomId } = useParams();
-
-  let currentMessage: Message = { ...newMessage };
-
   const socket = SocketContext();
-  const userIdValue: string = sessionStorage.getItem("id") || "0";
-  const userId: number = parseInt(userIdValue);
+  let newMessage: Message;
 
+  // reference a l'element DOM contenant les messages (js)
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+// fait defiler la page vers le bas : utilise scrollview
+// pour defiler jusqu'a la fin de la div
+messagesContainerRef.current?.scrollIntoView({ behavior: "smooth"});
+};
+
+// https://devtrium.com/posts/async-functions-useeffect
   useEffect(() => {
-    const getCurrentUser = async () => {
-      axiosInstance.current = await axiosToken();
-      await axiosInstance.current!.get("/users/me").then((response) => {
-        setUser(response.data.username);
-      });
-    };
-    getCurrentUser();
-    console.log(currentMessage.username);
-    socket.on("ROOM_MESSAGE", (message) => {
-      setStateMessage([...stateMessage, message]);
-    });
-  });
 
-  //   const getCurrentUser = async () => {
-  // 	axiosInstance.current = await axiosToken();
-  // 	await axiosInstance.current!.get("/users/me").then((response) => {
-  // 	  setUser(response.data);
-  // 	});
-  //   };
-  //   getCurrentUser();
+	// declare the async data fetching function
+	const fetchData = async () => {
+	  // get the data from the api
+	  axiosInstance.current = await axiosToken();
+	  await axiosInstance.current!.get("/users/me").then((response) => {
+		setCurrentUser(response.data);
+	  });
+	  axiosInstance.current = await axiosToken();
+	  await axiosInstance.current!.get("/chatRoom/" + roomId).then((response) => {
+		setCurrentRoom(response.data)
+	  });
+	  // set state with the result
+	}
+	// call the function
+	fetchData()
+	  // make sure to catch any error
+	  .catch(console.error);;
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
+	  socket.on("ROOM_MESSAGE", (message) => {
+	// pourquoi (stateMessage) avant ?
+	// les ... peuvent entraîner des problèmes de concurrence
+	// car l'état précédent est conservé dans la closure
+	// de la fonction de mise à jour (useEffect)
+	// Prend donc l'etat precedent, au lieu du tableau
+	// et retourne le nouveau
+		setStateMessage((stateMessage) => [...stateMessage, message]);
+	  });
+
+	}, []);
+
+useEffect(() => {
+	scrollToBottom();
+  }, [stateMessage]);
+
+
+function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
+
+	// https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
 
@@ -98,58 +87,58 @@ function MessagesContainer() {
 
     // debugger;
 
+	// ! a la fin = signifie que la variable et non nulle et non non-definie
     const dateTS = new Date();
-    currentMessage = {
-      ...newMessage,
-      message: inputMessage,
-      username: user,
-      userId: userId,
-      sendAt: dateTS,
-      hours: String(dateTS.getHours()).padStart(2, "0"),
-      minutes: String(dateTS.getMinutes()).padStart(2, "0"),
-    };
+	newMessage = {
+		user: currentUser!,
+		room: currentRoom!,
+		message: inputMessage,
+		sendAt: dateTS,
+	}
 
-    socket.emit("SEND_ROOM_MESSAGE", currentMessage);
+    socket.emit("SEND_ROOM_MESSAGE", newMessage);
 
-    setStateMessage([...stateMessage, currentMessage]);
+// besoin du (stateMessage) avant ? NON
+    setStateMessage([...stateMessage, newMessage]);
   }
 
   const GenMessages = () => {
+
     const genDate = (date: Message): string => {
-      return `${date.hours}:${date.minutes}`;
+		const newDate = new Date(date.sendAt)
+      return `${('0'+newDate.getHours()).slice(-2)}:${('0'+newDate.getMinutes()).slice(-2)}`;
     };
 
-    const genMessage = (isCurrentUser: boolean, currentMessage: Message) => {
+    const genMessage = (isCurrentUser: boolean, newMessage: Message) => {
       if (!isCurrentUser) {
         return (
           <>
             <div className="chat-receiver">
-              <span>{currentMessage.username + " : "}</span>
-              <span>{currentMessage.message}</span>
+              <span>{newMessage.user.username + " : "}</span>
+              <span>{newMessage.message}</span>
             </div>
-            <span className="date">{genDate(currentMessage)}</span>
+            <span className="date">{genDate(newMessage)}</span>
           </>
         );
       }
       return (
         <div className="chat-sender">
-          <span className="date">{genDate(currentMessage)}</span>
+          <span className="date">{genDate(newMessage)}</span>
           <div className="chat-username">
-            <span>{currentMessage.username + " : "}</span>
-            <span>{currentMessage.message}</span>
+            <span>{newMessage.user.username + " : "}</span>
+            <span>{newMessage.message}</span>
           </div>
         </div>
       );
     };
 
-    // if (currentMessage?.message === "") return <div id="liena"></div>;
     return (
       <>
         {stateMessage?.map((stateMessage, index) => {
-          const isCurrentUser = userId == stateMessage.userId;
+           const isCurrentUser = currentUser?.username == stateMessage.user.username;
 
           return (
-            <div key={index + 1} className="chat-wrapper">
+            <div key={index + 1} className="chat-wrapper"ref={messagesContainerRef}>
               {genMessage(isCurrentUser, stateMessage)}
             </div>
           );
@@ -181,7 +170,6 @@ function MessagesContainer() {
 		</div>
 	)
 }
-
 
   return (
 	<div className="chatPage">

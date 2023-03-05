@@ -25,7 +25,9 @@ import { Socket, Server } from 'socket.io';
 
 @Injectable()
 export class MessageService {
-  constructor(private prisma: PrismaService,   	private readonly chatRoomService: ChatRoomService
+  constructor(
+	private prisma: PrismaService,
+	private readonly chatRoomService: ChatRoomService
 	) {}
 
   async createMessage(firstMessage: Message) {
@@ -84,3 +86,4 @@ export class MessageService {
 Prisma client est genere du prisma.schema
 
 */
+

@@ -51,7 +51,7 @@ model ChatRoom {
   owner         User          @relation(fields: [ownerId], references: [id])
   ownerId       Int
   admin         User[]        @relation(name: "UserAdmin")
-  members				User[] @relation(name: "UserMember")
+  members		User[]			@relation(name: "UserMember")
   messages      Message[]
 }
 
