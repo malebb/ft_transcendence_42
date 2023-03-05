@@ -58,9 +58,11 @@ const ChatRoomBase = () =>
 
 		const checkIfOwner = async () =>
 		{
-			const initPasswordInfo = (accessibility: Accessibility) =>
+			const initPasswordInfo = (room: AxiosResponse) =>
 			{
-				if (accessibility == 'PROTECTED')
+				if (room.data.accessibility === 'PROTECTED' ||
+					room.data.accessibility === 'PRIVATE'
+					&& room.data.password !== '')
 				{
 					setPasswordInfo("Change the room password : ");
 					setBtnValue("Change");
@@ -79,7 +81,7 @@ const ChatRoomBase = () =>
 				const user: AxiosResponse = await axiosInstance.current.get('/users/me/');
 				if (user.data.username == room.data.owner.username)
 				{	
-					initPasswordInfo(room.data.accessibility);
+					initPasswordInfo(room);
 					setIsOwner(true);
 				}
 				else
@@ -134,6 +136,7 @@ const ChatRoomBase = () =>
 					await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomId, "accessibility=PROTECTED");
 				}
 				setPasswordInfo('Change the room password: ');
+				setBtnValue("Change password");
 				setPassword('');
 				document.getElementById(style.passwordInfo)!.style.color = 'white';
 				alert('Password updated successfully!');
@@ -145,7 +148,6 @@ const ChatRoomBase = () =>
 		{
 			console.log("error: ", error);
 		}
-
 	}
 
 	const handleRemovePassword = async (e: React.FormEvent<HTMLFormElement>) =>
@@ -187,7 +189,6 @@ const ChatRoomBase = () =>
 			document.getElementById(style.passwordInfo)!.style.color = 'red';
 		}
 	}
-
 
 	const passwordSection = () =>
 	{
