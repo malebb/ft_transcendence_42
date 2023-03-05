@@ -302,9 +302,10 @@ const UserProfile = () => {
 	}, []);
 
   return (
-    <div>
+    <>
         <Headers/>
         <Sidebar/>
+	<div id="userProfile">
         {errMsg}
 
 	<br/>
@@ -359,7 +360,8 @@ const UserProfile = () => {
 	<br/>
 	<br/>
 	{printAchievements()}
-    </div>
+	</div>
+    </>
   )
 }
 

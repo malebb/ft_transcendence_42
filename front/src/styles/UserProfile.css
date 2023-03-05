@@ -4,6 +4,12 @@ main{
     padding: 1rem;
 }
 
+#userProfile
+{
+	margin-top: 100px;
+	margin-left: 100px;
+}
+
 .profilePicture{
     margin: 0 auto;
     grid-area: pix;
@@ -158,9 +164,8 @@ main{
 
 #notFriend
 {
-	background-color: #547EBE;
+	color: white;
 	text-align: center;
 	width: 325px;
-	padding: 8px;
 	margin: auto;
 }

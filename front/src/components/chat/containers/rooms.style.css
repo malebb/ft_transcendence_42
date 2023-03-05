@@ -7,24 +7,145 @@
 
 #accessibility
 {
+	width: 80%;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	margin: 50px;
+}
+
+#checkboxes
+{
 	width: 100%;
 	display: flex;
 	justify-content: space-around;
 	padding: 0px;
-	margin: 20px;
 }
 
-.checkboxes
+#checkboxes > li
 {
 	list-style: none;
 	color: white;
+	display: flex;
+	margin-right: 20px;
+}
+
+.checkboxContainer
+{
+	display: block;
+	height: 20px;
+	width: 20px;
+	cursor: pointer;
+	margin-right: 10px;
+}
+
+.checkboxContainer > input
+{
+	position: absolute;
+	opacity: 0;
+	width: 0px;
+	height: 0px;
+}
+
+.customCheckbox
+{
+	position: absolute;
+	height: 20px;
+	width: 20px;
+	background-color: white;
+	border-radius: 3px;
+}
+
+.customCheckbox:hover
+{
+	background-color: #E5E8E8;
+}
+
+.checkboxContainer > input:checked ~ .customCheckbox
+{
+	background-color: #413368;
+}
+
+.customCheckbox:after
+{
+	content: "";
+	position: absolute;
+	display: none;
+}
+
+.checkboxContainer > input:checked ~ .customCheckbox:after
+{
+	display: block;
+}
+
+.customCheckbox:after
+{
+  left: 7px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+#creationPassword
+{
+	display: inline-block;
+	width: 400px;
+	height: 20px;
+	margin-right: 50px;
+	margin-left: 20px;
+	white-space: nowrap;
+}
+
+#creationPasswordInput
+{
+	position: relative;
+	width: 20px;
+	margin-left: 10px;
+	border: 1px black solid;
+	outline: none;
+	border-radius: 3px;
 }
 
 #rooms
 {
-	margin-left: 75px;
-	margin-right: 75px;
+	margin: 100px;
 	color: white;
+}
+
+#nameInfo
+{
+	margin: 5px;
+	height: 22px;
+}
+
+#filter
+{
+	text-align: center;
+}
+
+select
+{
+	margin: auto;
+	width: 375px;
+	height: 50px;
+	border: none;
+	border-radius: 3px;
+	background-color: #413368;
+	font-weight: bold;
+	font-size: 16px;
+	padding-left: 10px;
+	color: white;
+	cursor: pointer;
+}
+
+select:focus
+{
+	outline: none;
 }
 
 #roomList
@@ -36,22 +157,17 @@
 	padding-left: 90px;
 }
 
-.roomLink
-{
-   text-decoration: none;
-   color: inherit;
-   margin: 10px;
-}
-
 .chatRoom
 {
    width: 250px;
-   height: 75px;
+   height: 100px;
    background-color: var(--tertiary);
    border: 1px, solid;
    border-radius: 5px;
    list-style: none;
    text-align: center;
+   margin: 15px;
+   cursor: pointer;
 }
 
 .roomTitle
@@ -60,8 +176,56 @@
 	top: 10px;
 }
 
+.roomInfo
+{
+	height: 25px;
+	display: flex;
+	justify-content: space-around;
+}
+
+.owner
+{
+	margin: 0px;
+}
+
 #joinRoomTitle, #createRoomTitle
 {
 	padding: 10px;
 }
 
+#noRoomJoined, #noRoomToJoin
+{
+	text-align: center;
+}
+
+.joinInfoPassword
+{
+	width: 140px;
+}
+
+.joinPasswordInput
+{
+	position: relative;
+	width: 20px;
+	border: 1px black solid;
+	outline: none;
+	margin-right: 10px;
+	margin-left: 10px;
+	border-radius: 3px;
+}
+
+.joinSubmitBtn
+{
+	width: 45px;
+	background-color: #413368;
+	color: white;
+	border: none;
+	height: 25px;
+	cursor: pointer;
+	border-radius: 3px;
+}
+
+.joinSubmitBtn:hover
+{
+	background-color: #613981;
+}

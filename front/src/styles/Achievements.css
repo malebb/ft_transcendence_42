@@ -7,18 +7,19 @@
 
 .achievement
 {
-	background-color: #547EBE;
-	width: 400px;
+	color: white;
+	width: 325px;
 	text-align: center;
 	margin: 20px;
 	border-radius: 5px;
+   	background-color: var(--tertiary);
+	padding-bottom: 10px;
 }
 
 #achievementsTitle
 {
-	background-color: #547EBE;
 	text-align: center;
 	width: 400px;
-	padding: 8px;
 	margin: auto;
+	color: white;
 }

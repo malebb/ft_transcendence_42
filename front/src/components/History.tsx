@@ -33,15 +33,18 @@ const History = () =>
 			{
 				return (<div className="historyElem" id="gamePlayed" key={elem.value.date}>
 							<div className="gameDataContainer">
-								<h3 className="leftPlayer">{trimUsername(elem.value.leftUsername)}</h3>
-								<h3 className="score">{elem.value.leftScore} - {elem.value.rightScore}</h3>
-								<h3 className="rightPlayer">{trimUsername(elem.value.rightUsername)}</h3>
+								<p className="leftPlayer">{trimUsername(elem.value.leftUsername)}</p>
+								<p className="score">{elem.value.leftScore} - {elem.value.rightScore}</p>
+								<p className="rightPlayer">{trimUsername(elem.value.rightUsername)}</p>
 							</div>
 						</div>);
 			}
 			else if (elem.type === "achievement")
 			{
-				return (<div className="historyElem" id="achievementDone"key={elem.value.date}><h3 className="title">{elem.value.title}</h3><h4 className="desc">{elem.value.desc}</h4></div>);
+				return (<div className="historyElem" id="achievementDone"key={elem.value.date}>
+							<h4 className="title">{elem.value.title}</h4>
+							<p className="desc">{elem.value.desc}</p>
+						</div>);
 			}
 			else
 				return (<div>other</div>);
@@ -86,11 +89,13 @@ const History = () =>
 		initHistory();
 	}, []);
 	return (
-		<div id="history">
+	<>
         <Headers/>
         <Sidebar/>
+		<div id="history">
 		{printHistory()}
 		</div>
+	</>
 	);
 }
 

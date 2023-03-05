@@ -124,7 +124,7 @@ function MessagesContainer() {
         return (
           <>
             <div className="chat-receiver">
-              <span>{currentMessage.username}</span>
+              <span>{currentMessage.username + " : "}</span>
               <span>{currentMessage.message}</span>
             </div>
             <span className="date">{genDate(currentMessage)}</span>
@@ -135,7 +135,7 @@ function MessagesContainer() {
         <div className="chat-sender">
           <span className="date">{genDate(currentMessage)}</span>
           <div className="chat-username">
-            <span>{currentMessage.username}</span>
+            <span>{currentMessage.username + " : "}</span>
             <span>{currentMessage.message}</span>
           </div>
         </div>

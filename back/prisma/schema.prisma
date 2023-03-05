@@ -34,9 +34,11 @@ model User {
   gamePlayed      GamePlayed[]
   achievementDone AchievementDone[]
 
-  ownerChats ChatRoom[]
-  adminChats ChatRoom[] @relation(name: "UserAdmin")
-  Message    Message[]
+  ownerChats	ChatRoom[]
+  adminChats	ChatRoom[] @relation(name: "UserAdmin")
+  memberChats	ChatRoom[] @relation(name: "UserMember")
+
+  messages		Message[]
 
   @@map("users")
 }
@@ -49,6 +51,7 @@ model ChatRoom {
   owner         User          @relation(fields: [ownerId], references: [id])
   ownerId       Int
   admin         User[]        @relation(name: "UserAdmin")
+  members				User[] @relation(name: "UserMember")
   messages      Message[]
 }
 

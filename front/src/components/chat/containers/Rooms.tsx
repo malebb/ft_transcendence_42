@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-import EVENTS from "../config/events";
 import { SocketContext } from "../context/socket.context";
 import { useState, useRef, useEffect } from "react";
 import InputButton from "../inputs/InputButton";
@@ -9,6 +7,8 @@ import { axiosToken } from '../../../api/axios';
 import bcrypt from 'bcryptjs';
 import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
+import EVENTS from '../config/events';
+import { ChatRoomFilter } from '../utils/ChatRoomFilter';
 
 function Rooms()
 {
@@ -17,23 +17,32 @@ function Rooms()
 
 	const CreateRoom = () =>
 	{
-		const [roomAccessibility, setRoomAccessibility] = useState("PUBLIC");
+		const [roomAccessibility, setRoomAccessibility] = useState('');
 		const [password, setPassword] = useState("");
 		const [name, setName] = useState("");
-		
-		// errors
-
-		const [nameErr, setNameErr] = useState("");
-		const [passwordErr, setPasswordErr] = useState("");
+		const regexPassword = useRef(/^[0-9]*$/);
+		const [nameInfo, setNameInfo] = useState("");
+		const [passwordInfo, setPasswordInfo] = useState("4 digits password : ");
 
 		const updateAccessibility = (newAccessibility: string) =>
 		{
+			const passwordInfo = document.getElementById('creationPasswordInfo');
+
+			if (passwordInfo)
+				passwordInfo.style.color = 'white';
+			setPasswordInfo('4 digits password :');
 			setRoomAccessibility(newAccessibility);
 		}
 
 		const updatePassword = (e: React.FormEvent<HTMLInputElement>) =>
 		{
-			setPassword(e.currentTarget.value);
+			if (regexPassword.current.test(e.currentTarget.value) && e.currentTarget.value.length <= 4)
+				setPassword(e.currentTarget.value);
+			if (!regexPassword.current.test(e.currentTarget.value))
+			{
+				setPasswordInfo('only digits :');
+				document.getElementById('passwordInfo')!.style.color = 'red';
+			}
 		}
 
 		const updateName = (e: React.FormEvent<HTMLInputElement>) =>
@@ -41,7 +50,7 @@ function Rooms()
 			setName(e.currentTarget.value);
 		}
 
-		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div><label>{passwordErr}</label><input type="password" placeholder="Enter a password" value={password} onChange={updatePassword} /></div>: <></>;
+		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div id="creationPassword"><label id="passwordInfo">{passwordInfo}</label><input id="creationPasswordInput" type="password" value={password} onChange={updatePassword} autoComplete="on"/></div>: <></>;
 
 		const hashPassword = async (password: string) =>
 		{
@@ -53,8 +62,13 @@ function Rooms()
 		{
 			if (roomAccessibility === 'PROTECTED')
 			{
-				if (password.length < 10)
-					setPasswordErr('Password should contain minimum 10 characters');
+				if (password.length != 4)
+				{
+					setPasswordInfo('4 digits required :');
+					document.getElementById('passwordInfo')!.style.color = 'red';
+				}
+				else if (!/^[0-9]+$/.test(password))
+					setPasswordInfo('Only digits are accepted');
 				else
 					return (true);
 				return (false);
@@ -65,7 +79,20 @@ function Rooms()
 		const checkName = (roomName: string) =>
 		{
 			if (roomName.length < 4)
-				setNameErr('The room name should contain minimum 4 characters');
+			{
+				setNameInfo('Minimum 4 characters');
+				document.getElementById('nameInfo')!.style.color = 'red';
+			}
+			else if (roomName.length > 25)
+			{
+				setNameInfo('Maximum 25 characters');
+				document.getElementById('nameInfo')!.style.color = 'red';
+			}
+			else if (!/^[A-Za-z0-9 ]*$/.test(roomName))
+			{
+				setNameInfo('Only numbers or letters');
+				document.getElementById('nameInfo')!.style.color = 'red';
+			}
 			else
 				return (true);
 			return (false);
@@ -75,7 +102,7 @@ function Rooms()
 		{
 			if (chatRooms.data)
 			{
-				setNameErr("There is already a " + name + " room");
+				setNameInfo("There is already a " + name + " room");
 				return (false);
 			}
 			return (true);
@@ -83,8 +110,8 @@ function Rooms()
 
   		async function handleCreateRoom(event: React.FormEvent<HTMLFormElement>)
 		{
-			setNameErr('');
-			setPasswordErr('');
+			setNameInfo('');
+			setPasswordInfo('');
 			try
 			{
 				event.preventDefault();
@@ -113,34 +140,51 @@ function Rooms()
 				setName('');
 				setPassword('');
 				window.location.reload();
-				console.log("new room to be created = ", newRoom);
 			}
 			catch (error: any)
 			{
 				console.log('error during room creation: ', error);
 			}
    		}
+
+		const formatAccessibility = (accessibility: string) =>
+		{
+			return ((accessibility.toLowerCase().charAt(0).toUpperCase() + accessibility.slice(1).toLowerCase()));
+		}
+
+		useEffect(() =>
+		{
+			setRoomAccessibility("PUBLIC");
+		}, []);
+
 		return (
 		<>
 		<h3 id="createRoomTitle">Create a new room ... </h3>
 		<div id="createRoom">
-		<ul id="accessibility">
-			{
-				accessibilities.map((accessibility: string, index: number) =>
-				{
-					return (
-							<li key={index} className="checkboxes">
-								<input type="checkbox" name={accessibility}
-								checked={accessibility === roomAccessibility }
-								onChange={() => updateAccessibility(accessibility)}/>
-								<label> {accessibility.toLowerCase()}</label>
-							</li>
-					);
-				})
-			}
-			{passwordField()}
-		</ul>
-			<label>{nameErr}</label>
+			<form id="accessibility">
+				<ul id="checkboxes">
+					{
+						accessibilities.map((accessibility: string, index: number) =>
+						{
+							return (
+									<li key={index}>
+
+										<label className="checkboxContainer">
+											<input type="checkbox" name={accessibility}
+											checked={accessibility === roomAccessibility}
+											onChange={() => updateAccessibility(accessibility)}
+											/>
+											<span className="customCheckbox"></span>
+										</label>
+										<label> {formatAccessibility(accessibility)}</label>
+									</li>
+							);
+						})
+					}
+				</ul>
+				{passwordField()}
+			</form>
+			<label id="nameInfo">{nameInfo}</label>
 			<InputButton
           		onSubmit={handleCreateRoom}
           		inputProps={{
@@ -157,52 +201,223 @@ function Rooms()
 
 	const RoomList = () =>
 	{
-		const [chatRoomList, setChatRoomList] = useState<ChatRoom[]>([]);
-		const displayChatRooms = () =>
+		const [chatRoomsList, setChatRoomsList] = useState<ChatRoom[]>([]);
+		const [chatRoomSelected, setChatRoomSelected] = useState<string>('');
+		const [roomPassword, setRoomPassword] = useState<string>('');
+		const [chatRoomFilter, setChatRoomFilter] = useState<ChatRoomFilter>(ChatRoomFilter["JOINED"]);
+		const [infoPassword, setInfoPassword] = useState<string>('4 digits password : ');
+		const regexPassword = useRef(/^[0-9]*$/);
+
+		const updateChatRoomFilter = (e: React.FormEvent<HTMLSelectElement>) =>
 		{
-			if (!chatRoomList.length)
-				return (<p>No room chat have been created</p>);
+			setChatRoomFilter(ChatRoomFilter[e.currentTarget.value as keyof typeof ChatRoomFilter]);
+		}
+
+		const filterChatRoom = () =>
+		{
+			return (
+			<div id="filter">
+				<select value={chatRoomFilter} onChange={updateChatRoomFilter}>
+          	  		<option value="JOINED">Rooms joined</option>
+					<option value="NOT_JOINED">Rooms not joined</option>
+				</select>
+			</div>
+			);
+		}
+
+		const accessibilityLogo = (accessibility: Accessibility) =>
+		{
+			const logoWidth = 25;
+
+			switch (accessibility)
+			{
+				case 'PUBLIC':
+					return (<img src="http://localhost:3000/images/public.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+				case 'PRIVATE':
+					return (<img src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+				case 'PROTECTED':
+					return (<img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+			}
+		}
+
+		const enterRoom = async (roomName: string) =>
+		{
+			window.location.href = 'http://localhost:3000/room/' + roomName;
+		}
+
+		const joinRoom = async (roomName: string) =>
+		{
+			try {
+				axiosInstance.current = await axiosToken();
+				const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
+
+				await axiosInstance.current.post('/chatRoom/' + roomName,
+					{username: user.data.email},
+					{headers: {'Content-Type': 'application/json'},
+				});
+				enterRoom(roomName);
+			}
+			catch (error: any)
+			{
+				console.log("An error occured when joining the room: ", error);
+			}
+		}
+
+		const updateRoomPassword = (e: React.FormEvent<HTMLInputElement>) =>
+		{
+			if (regexPassword.current.test(e.currentTarget.value) && e.currentTarget.value.length <= 4)
+				setRoomPassword(e.currentTarget.value);
+		}
+
+		const checkPassword = async (e: React.FormEvent<HTMLFormElement>, chatRoom: ChatRoom) =>
+		{
+			e.preventDefault();
+			if (await bcrypt.compare(roomPassword, chatRoom.password))
+				joinRoom(chatRoom.name);
+			else
+			{
+				setInfoPassword('Wrong password');
+				setRoomPassword('');
+			}
+		}
+
+		const displayNotJoinedChatRooms = () =>
+		{
+			if (!chatRoomsList.length)
+				return (<p id="noRoomToJoin">No room to join</p>);
+			const printRoomInfo = (chatRoom: ChatRoom) =>
+			{
+				if (chatRoomSelected === chatRoom.name)
+				{
+					switch (chatRoom.accessibility)
+					{
+						case 'PROTECTED':
+							return (<div>
+									<form onSubmit={(e) => checkPassword(e, chatRoom)}>
+										<label className="joinInfoPassword">{infoPassword}</label>
+										<input type="password"
+											className ="joinPasswordInput"
+											value={roomPassword}
+											onChange={updateRoomPassword}
+											autoComplete="on"
+											/>
+									<input type="submit" className="joinSubmitBtn" value="enter"/>
+									</form>
+								</div>);
+						case 'PRIVATE':
+							return (<span>This room is private</span>);
+						case 'PUBLIC':
+							joinRoom(chatRoom.name);
+					}
+				}
+				return (	<>
+								<p className="owner">Owner : {chatRoom.owner.username}</p>
+								{accessibilityLogo(chatRoom.accessibility)}
+							</>
+						);
+			}
+
+			const updateSelectChatRoom = (newChatRoomSelected: string) =>
+			{
+				if (chatRoomSelected != newChatRoomSelected)
+				{
+					setRoomPassword('');
+					setInfoPassword('4 digits password : ');
+				}
+				setChatRoomSelected(newChatRoomSelected);
+			}
+
 			return(
 				<ul id="roomList">
 				{
-					chatRoomList.map((chatRoom) => {
+					chatRoomsList.map((chatRoom) => {
 						return (
-						<Link className="roomLink" to={`/room/${chatRoom.name}`} key={chatRoom.name}>
-							<li className="chatRoom">
-								{<h3 className="roomTitle">{chatRoom.name}</h3>}
-								<p>Owner : {chatRoom.owner.username}</p>
+							<li className="chatRoom" key={chatRoom.name} onClick={() => updateSelectChatRoom(chatRoom.name)}>
+								<h3 className="roomTitle">{chatRoom.name}</h3>
+						<div className="roomInfo">
+								{printRoomInfo(chatRoom)}
+						</div>
 							</li>
-						</Link>);
+						);
 					})
 				}
 				</ul>
 			)
-				
 		}
 
-		useEffect(() =>
+		const displayJoinedChatRooms = () =>
 		{
-			const initChatRoomList = async () => 
+			if (!chatRoomsList.length)
+				return (<p id="noRoomJoined">You haven't joined any room yet</p>);
+			else
+				return (
+				<ul id="roomList">
+				{
+					chatRoomsList.map((chatRoom) => {
+						return (
+							<li className="chatRoom" key={chatRoom.name} onClick={() => enterRoom(chatRoom.name)}>
+								<h3 className="roomTitle">{chatRoom.name}</h3>
+							</li>
+						);
+					})
+				}
+				</ul>
+				);
+		}
+
+		const displayChatRooms = () =>
+		{
+			switch (chatRoomFilter)
 			{
-				try
+				case 'NOT_JOINED':
+					return (displayNotJoinedChatRooms());
+				case 'JOINED':
+					return (displayJoinedChatRooms());
+			}
+		}
+
+		const fetchRooms = async () =>
+		{
+			try
+			{
+				let chatRooms: AxiosResponse;
+				axiosInstance.current = await axiosToken();
+				const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
+				if (chatRoomFilter === 'JOINED')
 				{
 					axiosInstance.current = await axiosToken();
-					const chatRooms = await axiosInstance.current!.get('/chatRoom/');
-					setChatRoomList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
-					(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
+					chatRooms = await axiosInstance.current!.get('/chatRoom/joined' + user.data.username);
 				}
-				catch (error: any)
+				else
 				{
-					console.log("error while displaying chat rooms: ", error);
+					axiosInstance.current = await axiosToken();
+					chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined' + user.data.username);
 				}
+				setChatRoomsList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
+				(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
 			}
-			initChatRoomList();
-		}, []);
+			catch (error: any)
+			{
+				console.log("error while fetching chat rooms: ", error);
+			}
+		}
+	
+		useEffect(() =>
+		{
+			fetchRooms();
+		}, [chatRoomFilter]);
 
 		return (
 			<div>
-				<h3 id="joinRoomTitle">... Or join one!</h3>
-				{displayChatRooms()}
+				<h3 id="joinRoomTitle">... Or join one !</h3>
+				<>
+					{filterChatRoom()}
+				</>
+				<br/>
+				<br/>
+				<>
+					{displayChatRooms()}
+				</>
 			</div>
 		);
 	}

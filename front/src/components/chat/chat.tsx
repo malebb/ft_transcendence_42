@@ -12,11 +12,13 @@ import SideBar from "../Sidebar";
 
 const Chat = () => {
 	return (
-		<div id="chat">
+	<>
   			<Header/>
   			<SideBar/>
+		<div id="chat">
 			<Rooms/>
 		</div>
+	</>
   );
 };
 

@@ -102,6 +102,12 @@ CREATE TABLE "_UserAdmin" (
 );
 
 -- CreateTable
+CREATE TABLE "_UserMember" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
+-- CreateTable
 CREATE TABLE "_GamePlayedToUser" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
@@ -129,6 +135,12 @@ CREATE UNIQUE INDEX "_UserAdmin_AB_unique" ON "_UserAdmin"("A", "B");
 CREATE INDEX "_UserAdmin_B_index" ON "_UserAdmin"("B");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "_UserMember_AB_unique" ON "_UserMember"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_UserMember_B_index" ON "_UserMember"("B");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "_GamePlayedToUser_AB_unique" ON "_GamePlayedToUser"("A", "B");
 
 -- CreateIndex
@@ -148,6 +160,12 @@ ALTER TABLE "_UserAdmin" ADD CONSTRAINT "_UserAdmin_A_fkey" FOREIGN KEY ("A") RE
 
 -- AddForeignKey
 ALTER TABLE "_UserAdmin" ADD CONSTRAINT "_UserAdmin_B_fkey" FOREIGN KEY ("B") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_UserMember" ADD CONSTRAINT "_UserMember_A_fkey" FOREIGN KEY ("A") REFERENCES "ChatRoom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_UserMember" ADD CONSTRAINT "_UserMember_B_fkey" FOREIGN KEY ("B") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_GamePlayedToUser" ADD CONSTRAINT "_GamePlayedToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "GamePlayed"("id") ON DELETE CASCADE ON UPDATE CASCADE;
