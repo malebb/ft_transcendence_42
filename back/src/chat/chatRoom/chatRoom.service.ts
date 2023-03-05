@@ -149,6 +149,23 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
+	async getMembers(chatRoomName: string)
+	{
+		const chatRoom = await this.prisma.chatRoom.findUnique({
+			where: {
+				name: chatRoomName,
+			},
+			include: {
+				members: {
+					orderBy: {
+						username: 'asc'
+					}
+				}
+			}
+		})
+		return (chatRoom);
+	}
+
 	async updateRoomPassword(chatRoomName: string, password: string)
 	{
 		await this.prisma.chatRoom.update({

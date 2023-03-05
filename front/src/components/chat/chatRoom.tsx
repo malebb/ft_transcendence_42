@@ -13,6 +13,7 @@ import Sidebar from '../Sidebar';
 import { RoomStatus } from './utils/RoomStatus';
 import { Accessibility } from 'ft_transcendence';
 import bcrypt from 'bcryptjs';
+import { User } from 'ft_transcendence';
 
 
 
@@ -35,6 +36,7 @@ const ChatRoomBase = () => {
 	const [password, setPassword] = useState<string>('');
 	const [passwordInfo, setPasswordInfo] = useState("4 digits password : ");
 	const [btnValue, setBtnValue] = useState("set");
+	const [membersList, setMembersList] = useState<User[]>([]);
 	const regexPassword = useRef(/^[0-9]*$/);
 
 	useEffect(() => {
@@ -105,6 +107,7 @@ const ChatRoomBase = () => {
 		}
 		checkIfOwner();
 	}, []);
+
 /*
 	if (!roomId?.length) return <></>
 
@@ -196,6 +199,47 @@ const ChatRoomBase = () => {
 			);
 	}
 
+	const handleMembersDisplay = async () =>
+	{
+		try
+		{
+			let members: HTMLElement = document.getElementById(style.members)!;
+			let membersDisplay = window.getComputedStyle(members).getPropertyValue('display');
+
+			if (membersDisplay === "none")
+			{
+				members.style.display = "block";
+			}
+			else
+				members.style.display = "none";
+			axiosInstance.current = await axiosToken();
+			const room = await axiosInstance.current.get('/chatRoom/members/' + roomId);
+			setMembersList(room.data.members);
+		}
+		catch (error: any)
+		{
+			console.log("error: ", error);
+		}
+	}
+
+	const memberList = () =>
+	{
+		return (
+			<ul id={style.memberList}>
+				<li>
+					<h4 className={style.membersTitle} onClick={handleMembersDisplay}>Members</h4>
+					<ul id={style.members} >
+						{membersList.map((member: User) => {
+							return (
+								<li className={style.member} key={member.email}>{member.username}</li>
+							);
+						})}
+					</ul>
+				</li>
+			</ul>
+		);
+	}
+
 	const checkRoomStatus = () =>
 	{
 		if (roomStatus === 'JOINED')
@@ -203,7 +247,10 @@ const ChatRoomBase = () => {
 			return (
 			<>
 				{genTitle()}
-				{passwordSection()}
+				<div id={style.chatDataSection}>
+					{memberList()}
+					{passwordSection()}
+				</div>
 				<div className={style.chat}>
 						<MessagesContainer />
 				</div>

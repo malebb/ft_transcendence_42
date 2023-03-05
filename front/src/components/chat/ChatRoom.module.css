@@ -48,7 +48,7 @@
 #passwordForm
 {
 	margin: 20px;
-	margin-left: 30px;
+	margin-left: 300px;
 }
 
 .passwordInput
@@ -80,4 +80,60 @@
 #passwordInfo
 {
 	color: white;
+}
+
+#memberList
+{
+	position: absolute;
+	left: 30px;
+	z-index: 2;
+}
+
+#chatDataSection
+{
+	height: 70px;
+	width: 50%;
+	display: flex;
+}
+
+.membersTitle
+{
+	width: 200px;
+	color: white;
+	margin: 0px;
+	padding: 10px;
+	background-color: #413368;
+	cursor: pointer;
+}
+
+#members
+{
+	display: none;
+	Overflow-y:auto;
+	height: 150px;
+}
+
+.member
+{
+	height: 30px;
+	background-color: white;
+	border-bottom: solid #E5E7E9 1px;
+	padding-left: 10px;
+	padding-top: 10px;
+}
+
+.member:hover
+{
+	background-color: #E5E7E9;
+}
+
+
+li
+{
+	list-style: none;
+}
+
+ul
+{
+	padding: 0px;
 }
