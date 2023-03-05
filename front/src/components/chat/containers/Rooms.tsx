@@ -67,8 +67,6 @@ function Rooms()
 					setPasswordInfo('4 digits required :');
 					document.getElementById('passwordInfo')!.style.color = 'red';
 				}
-				else if (!/^[0-9]+$/.test(password))
-					setPasswordInfo('Only digits are accepted');
 				else
 					return (true);
 				return (false);
@@ -157,11 +155,16 @@ function Rooms()
 			setRoomAccessibility("PUBLIC");
 		}, []);
 
+		const handleAccessibilityForm = (e: React.FormEvent<HTMLFormElement>) =>
+		{
+			e.preventDefault();
+		}
+
 		return (
 		<>
 		<h3 id="createRoomTitle">Create a new room ... </h3>
 		<div id="createRoom">
-			<form id="accessibility">
+			<form id="accessibility" onSubmit={handleAccessibilityForm}>
 				<ul id="checkboxes">
 					{
 						accessibilities.map((accessibility: string, index: number) =>

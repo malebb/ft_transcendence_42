@@ -43,6 +43,12 @@ class ChatRoomController
 		return (await this.chatRoomService.getMember(userId, name));
 	}
 
+	@Get('owner/:name')
+	async getOwner(@Param('name') name: string)
+	{
+		return (await this.chatRoomService.getOwner(name));
+	}
+
 	@Post(':name')
 	async joinChatRoom(@Param('name') chatRoomName: string, @Body() user: UserDto)
 	{

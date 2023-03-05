@@ -11,6 +11,7 @@ import style from "./ChatRoom.module.css"
 import Headers from '../Headers';
 import Sidebar from '../Sidebar';
 import { RoomStatus } from './utils/RoomStatus';
+import { Accessibility } from 'ft_transcendence';
 
 
 
@@ -23,11 +24,17 @@ interface Room {
  
 const ChatRoomBase = () => {
 
-	const socket = SocketContext();
+//	const socket = SocketContext();
 
 	const { roomId } = useParams();
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 	const [roomStatus, setRoomStatus] = useState<RoomStatus | null>(null);
+	const [isOwner, setIsOwner] = useState<boolean>(false);
+	const [accessibility, setAccessibility] = useState<Accessibility | null>(null);
+	const [password, setPassword] = useState<string>('');
+	const [passwordInfo, setPasswordInfo] = useState("4 digits password : ");
+	const [btnValue, setBtnValue] = useState("set");
+	const regexPassword = useRef(/^[0-9]*$/);
 
 	useEffect(() => {
 		const checkRoom = async () =>
@@ -47,6 +54,7 @@ const ChatRoomBase = () => {
 						setRoomStatus(RoomStatus["JOINED" as keyof typeof RoomStatus])
 					else
 						setRoomStatus(RoomStatus["NOT_JOINED" as keyof typeof RoomStatus])
+
 				}
 			}
 			catch (error: any)
@@ -55,6 +63,46 @@ const ChatRoomBase = () => {
 			}
 		}
 		checkRoom();
+	}, []);
+
+	useEffect(() => 
+	{
+
+		const checkIfOwner = async () =>
+		{
+			const initPasswordInfo = (accessibility: Accessibility) =>
+			{
+				if (accessibility == 'PROTECTED')
+				{
+					setPasswordInfo("Change the room password : ");
+					setBtnValue("Change");
+				}
+				else
+				{
+					setPasswordInfo("Add a password : ");
+					setBtnValue("Set");
+				}
+			}
+
+			try
+			{
+				axiosInstance.current = await axiosToken();
+				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/owner/' + roomId);
+				const user: AxiosResponse = await axiosInstance.current.get('/users/me/');
+				if (user.data.username == room.data.owner.username)
+				{	
+					initPasswordInfo(room.data.accessibility);
+					setIsOwner(true);
+				}
+				else
+					setIsOwner(false);
+			}
+			catch (error: any)
+			{
+				console.log("error: ", error);
+			}
+		}
+		checkIfOwner();
 	}, []);
 /*
 	if (!roomId?.length) return <></>
@@ -79,6 +127,45 @@ const ChatRoomBase = () => {
 		)
 	}
 
+	const handleChangePassword = (e: React.FormEvent<HTMLFormElement>) =>
+	{
+		e.preventDefault();
+		if (password.length !== 4)
+		{
+			setPasswordInfo('4 digits required :');
+			document.getElementById('passwordInfo')!.style.color = 'red';
+		}
+	}
+
+	const updatePassword = (e: React.FormEvent<HTMLInputElement>) =>
+	{
+		if (regexPassword.current.test(e.currentTarget.value) && e.currentTarget.value.length <= 4)
+			setPassword(e.currentTarget.value);
+		if (!regexPassword.current.test(e.currentTarget.value))
+		{
+			setPasswordInfo('only digits :');
+			document.getElementById('passwordInfo')!.style.color = 'red';
+		}
+	}
+
+	const passwordSection = () =>
+	{
+			return (
+				isOwner ? (
+				<form onSubmit={handleChangePassword} id={style.passwordForm}>
+				<label id={style.passwordInfo}>{passwordInfo}</label>
+					<input type="password"
+							onChange={updatePassword}
+							autoComplete="on"
+							value={password}
+							className={style.passwordInput}
+					/>
+					<input type="submit" value={btnValue}
+					className={style.passwordSubmitBtn}/>
+				</form> ) : <></>
+			);
+	}
+
 	const checkRoomStatus = () =>
 	{
 		if (roomStatus === 'JOINED')
@@ -86,6 +173,7 @@ const ChatRoomBase = () => {
 			return (
 			<>
 				{genTitle()}
+				{passwordSection()}
 				<div className={style.chat}>
 						<MessagesContainer />
 				</div>

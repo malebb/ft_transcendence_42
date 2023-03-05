@@ -44,3 +44,40 @@
 .roomBase
 {
 }
+
+#passwordForm
+{
+	margin: 20px;
+	margin-left: 30px;
+}
+
+.passwordInput
+{
+	position: relative;
+	width: 20px;
+	border: 1px black solid;
+	outline: none;
+	margin-right: 10px;
+	margin-left: 10px;
+	border-radius: 3px;
+}
+
+.passwordSubmitBtn
+{
+	background-color: #413368;
+	color: white;
+	border: none;
+	height: 25px;
+	cursor: pointer;
+	border-radius: 3px;
+}
+
+.passwordSubmitBtn:hover
+{
+	background-color: #613981;
+}
+
+#passwordInfo
+{
+	color: white;
+}

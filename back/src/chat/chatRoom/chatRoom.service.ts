@@ -119,4 +119,33 @@ export class ChatRoomService
 		})
 		return (chatRoom);
 	}
+
+	async getOwner(name: string)
+	{
+		const chatRoom = await this.prisma.chatRoom.findUnique({
+			where: {
+				name: name
+			},
+			include: {
+				owner: true
+			}
+		})
+		return (chatRoom);
+	}
+	async getMemberFromRoom(userId: number, name: string)
+	{
+		const chatRoom = await this.prisma.chatRoom.findUnique({
+			where: {
+				name: name
+			},
+			include: {
+				members: {
+					where: {
+						id: userId
+					}
+				}
+			}
+		})
+		return (chatRoom);
+	}
 }
