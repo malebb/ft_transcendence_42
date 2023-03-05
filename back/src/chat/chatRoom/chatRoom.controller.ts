@@ -3,12 +3,18 @@ import { ChatRoomService } from './chatRoom.service';
 
 import { GetUser } from '../../auth/decorator';
 
+import { Accessibility } from 'ft_transcendence';
+
 interface UserDto {
 	username: string
 }
 
 interface passwordDto {
 	password: string
+}
+
+interface AccessibilityDto {
+	accessibility: Accessibility;
 }
 
 @Controller('chatRoom')
@@ -69,6 +75,18 @@ class ChatRoomController
 	async updateRoomPassword(@Param('name') chatRoomName: string, @Body() password: passwordDto)
 	{
 		await this.chatRoomService.updateRoomPassword(chatRoomName, password.password)
+	}
+
+	@Patch('removePassword/:name')
+	async removePassword(@Param('name') chatRoomName: string)
+	{
+		await this.chatRoomService.removePassword(chatRoomName);
+	}
+
+	@Patch('changeAccessibility/:name')
+	async changeAccessibility(@Param('name') chatRoomName: string, @Body() accessibility: AccessibilityDto)
+	{
+		await this.chatRoomService.changeAccessibility(chatRoomName, accessibility.accessibility);
 	}
 }
 

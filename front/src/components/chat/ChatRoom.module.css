@@ -49,6 +49,8 @@
 {
 	margin: 20px;
 	margin-left: 300px;
+	white-space: nowrap;
+	margin-right: 5px;
 }
 
 .passwordInput
@@ -80,6 +82,12 @@
 #passwordInfo
 {
 	color: white;
+}
+
+.removePassword
+{
+	margin: 0px;
+	padding-top: 20px;
 }
 
 #memberList

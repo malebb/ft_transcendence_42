@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChatRoom } from 'ft_transcendence';
+import { Accessibility } from 'ft_transcendence';
 
 @Injectable()
 export class ChatRoomService
@@ -174,8 +175,32 @@ export class ChatRoomService
 			},
 			data: {
 				password: password,
-				accessibility: "PROTECTED"
 			}
 		});
 	}
+
+	async removePassword(chatRoomName: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				password: '',
+			}
+		});
+	}
+
+	async changeAccessibility(chatRoomName: string, accessibility: Accessibility)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				accessibility: accessibility
+			}
+		});
+	}
+
 }

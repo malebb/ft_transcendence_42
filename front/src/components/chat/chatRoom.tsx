@@ -1,9 +1,6 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 import MessagesContainer from "./containers/Message";
-import { SocketContext } from "./context/socket.context";
-import EVENTS from "./config/events";
 import { useEffect, useRef, useState } from 'react';
 import { axiosToken } from '../../api/axios';
 import { AxiosInstance, AxiosResponse } from 'axios';
@@ -15,24 +12,12 @@ import { Accessibility } from 'ft_transcendence';
 import bcrypt from 'bcryptjs';
 import { User } from 'ft_transcendence';
 
-
-
-interface Room {
-	roomId: string;
-	admin: string;
-	// members: ChatRoomUser[];
-	createdAt: Date;
-  }
- 
-const ChatRoomBase = () => {
-
-//	const socket = SocketContext();
-
+const ChatRoomBase = () =>
+{
 	const { roomId } = useParams();
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 	const [roomStatus, setRoomStatus] = useState<RoomStatus | null>(null);
 	const [isOwner, setIsOwner] = useState<boolean>(false);
-	const [accessibility, setAccessibility] = useState<Accessibility | null>(null);
 	const [password, setPassword] = useState<string>('');
 	const [passwordInfo, setPasswordInfo] = useState("4 digits password : ");
 	const [btnValue, setBtnValue] = useState("set");
@@ -108,18 +93,6 @@ const ChatRoomBase = () => {
 		checkIfOwner();
 	}, []);
 
-/*
-	if (!roomId?.length) return <></>
-
-
-	let newRoom: Room = {
-		admin: "ldermign",
-		roomId: roomId,
-		createdAt: new Date(),
-	  };
-
-	socket.emit(EVENTS.CLIENT.JOIN_ROOM, newRoom);
-*/
 	const genTitle = () => {
 		return (
 			<div className={style.title}>
@@ -155,6 +128,11 @@ const ChatRoomBase = () => {
 
 				axiosInstance.current = await axiosToken();
 				await axiosInstance.current.patch('/chatRoom/password/' + roomId, "password=" + passwordHashed);
+				if (room.data.accessibility === 'PUBLIC')
+				{
+					axiosInstance.current = await axiosToken();
+					await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomId, "accessibility=PROTECTED");
+				}
 				setPasswordInfo('Change the room password: ');
 				setPassword('');
 				document.getElementById(style.passwordInfo)!.style.color = 'white';
@@ -170,6 +148,35 @@ const ChatRoomBase = () => {
 
 	}
 
+	const handleRemovePassword = async (e: React.FormEvent<HTMLFormElement>) =>
+	{
+		e.preventDefault();
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomId);
+			if (room.data.password === '')
+			{
+				setPasswordInfo('No password to remove');
+				document.getElementById(style.passwordInfo)!.style.color = 'red';
+				return ;
+			}
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current.patch('/chatRoom/removePassword/' + roomId);
+			if (room.data.accessibility === 'PROTECTED')
+			{
+				axiosInstance.current = await axiosToken();
+				await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomId, "accessibility=PUBLIC");
+			}
+			window.location.reload();
+			alert('Password removed successfully');
+		}
+		catch (error: any)
+		{
+			console.log("error: ", error);
+		}
+	}
+
 	const updatePassword = (e: React.FormEvent<HTMLInputElement>) =>
 	{
 		if (regexPassword.current.test(e.currentTarget.value) && e.currentTarget.value.length <= 4)
@@ -181,21 +188,30 @@ const ChatRoomBase = () => {
 		}
 	}
 
+
 	const passwordSection = () =>
 	{
 			return (
 				isOwner ? (
-				<form onSubmit={handleChangePassword} id={style.passwordForm}>
-				<label id={style.passwordInfo}>{passwordInfo}</label>
-					<input type="password"
-							onChange={updatePassword}
-							autoComplete="on"
-							value={password}
-							className={style.passwordInput}
-					/>
-					<input type="submit" value={btnValue}
-					className={style.passwordSubmitBtn}/>
-				</form> ) : <></>
+				<>
+					<form onSubmit={handleChangePassword} id={style.passwordForm}>
+					<label id={style.passwordInfo}>{passwordInfo}</label>
+						<input type="password"
+								onChange={updatePassword}
+								autoComplete="on"
+								value={password}
+								className={style.passwordInput}
+						/>
+						<input type="submit" value={btnValue}
+						className={style.passwordSubmitBtn}/>
+					</form> 
+					<form onSubmit={handleRemovePassword} className={style.removePassword}>
+						<input type="submit" value="remove password"
+							className={style.passwordSubmitBtn}/>
+					</form>
+				</>
+
+				) : <></>
 			);
 	}
 
@@ -284,5 +300,3 @@ const ChatRoomBase = () => {
 };
 
 export default ChatRoomBase;
-
-//TODO changer le chemin pour EVENTS

@@ -132,7 +132,7 @@ function Rooms()
 					owner: {...user.data},
 					name: form.get("roomName")!.toString().trim(),
 					accessibility: Accessibility[roomAccessibility as keyof typeof Accessibility],
-					password: await hashPassword(password)
+					password: roomAccessibility == 'PROTECTED' ? await hashPassword(password) : ''
 				};
 				socket.emit(EVENTS.CLIENT.CREATE_ROOM, newRoom);
 				setName('');
@@ -302,9 +302,8 @@ function Rooms()
 			{
 				if (chatRoomSelected === chatRoom.name)
 				{
-					switch (chatRoom.accessibility)
+					if (chatRoom.accessibility === 'PROTECTED' || chatRoom.accessibility === 'PRIVATE' && chatRoom.password !== '')
 					{
-						case 'PROTECTED':
 							return (<div>
 									<form onSubmit={(e) => checkPassword(e, chatRoom)}>
 										<label className="joinInfoPassword">{infoPassword}</label>
@@ -317,11 +316,11 @@ function Rooms()
 									<input type="submit" className="joinSubmitBtn" value="enter"/>
 									</form>
 								</div>);
-						case 'PRIVATE':
-							return (<span>This room is private</span>);
-						case 'PUBLIC':
-							joinRoom(chatRoom.name);
 					}
+					else if (chatRoom.accessibility === 'PRIVATE')
+						return (<span>This room is private</span>);
+					else if (chatRoom.accessibility === 'PUBLIC')
+							joinRoom(chatRoom.name);
 				}
 				return (	<>
 								<p className="owner">Owner : {chatRoom.owner.username}</p>
