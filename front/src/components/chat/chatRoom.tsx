@@ -18,10 +18,12 @@ const ChatRoomBase = () =>
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 	const [roomStatus, setRoomStatus] = useState<RoomStatus | null>(null);
 	const [isOwner, setIsOwner] = useState<boolean>(false);
+	const owner = useRef<User | null>(null);
 	const [password, setPassword] = useState<string>('');
 	const [passwordInfo, setPasswordInfo] = useState("4 digits password : ");
 	const [btnValue, setBtnValue] = useState("set");
 	const [membersList, setMembersList] = useState<User[]>([]);
+	const [leaveRoomInfo, setLeaveRoomInfo] = useState("");
 	const regexPassword = useRef(/^[0-9]*$/);
 
 	useEffect(() => {
@@ -76,7 +78,7 @@ const ChatRoomBase = () =>
 			try
 			{
 				axiosInstance.current = await axiosToken();
-				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/owner/' + roomName);
+				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
 				axiosInstance.current = await axiosToken();
 				const user: AxiosResponse = await axiosInstance.current.get('/users/me/');
 				if (user.data.username == room.data.owner.username)
@@ -230,13 +232,49 @@ const ChatRoomBase = () =>
 			else
 				members.style.display = "none";
 			axiosInstance.current = await axiosToken();
-			const room = await axiosInstance.current.get('/chatRoom/members/' + roomName);
+			const room = await axiosInstance.current.get('/chatRoom/' + roomName);
+			owner.current = room.data.owner;
 			setMembersList(room.data.members);
+			axiosInstance.current = await axiosToken();
+			const user = await axiosInstance.current.get('/users/me');
+			if (user.data.email === owner.current!.email)
+			{
+				setIsOwner(true);
+			}
+
 		}
 		catch (error: any)
 		{
 			console.log("error: ", error);
 		}
+	}
+
+	const makeOwner = async (member: User) =>
+	{
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			axiosInstance.current.patch('/chatRoom/changeOwner/' + roomName, {username: member.username});
+			alert(member.username + " is the new owner");
+			window.location.reload();
+		}
+		catch (error: any)
+		{
+			console.log("error: ", error);
+		}
+	}
+
+	const makeOwnerLogo = (member: User) =>
+	{
+		return (isOwner ? 
+		(
+			owner.current!.email !== member.email ?
+			<img className={style.makeOwner} src="http://localhost:3000/images/makeOwner.png" 
+			alt="make Owner" title="make owner"
+			width="20" height="20"
+			onClick={() => makeOwner(member)}/> : <></>
+		)
+		: <></>);
 	}
 
 	const memberList = () =>
@@ -248,7 +286,7 @@ const ChatRoomBase = () =>
 					<ul id={style.members} >
 						{membersList.map((member: User) => {
 							return (
-								<li className={style.member} key={member.email}>{member.username}</li>
+								<li className={style.member} key={member.email}>{member.username}{makeOwnerLogo(member)}</li>
 							);
 						})}
 					</ul>
@@ -263,8 +301,18 @@ const ChatRoomBase = () =>
 		try
 		{
 			axiosInstance.current = await axiosToken();
-			axiosInstance.current.patch('/chatRoom/leaveRoom/' + roomName);
-			window.location.href = 'http://localhost:3000/chat/';
+			const user = await axiosInstance.current.get('/users/me');
+			axiosInstance.current = await axiosToken();
+			const room = await axiosInstance.current.get('/chatRoom/' + roomName);
+			if (user.data.email !== room.data.owner.email)
+			{
+				axiosInstance.current.patch('/chatRoom/leaveRoom/' + roomName);
+				window.location.href = 'http://localhost:3000/chat/';
+			}
+			else
+			{
+				setLeaveRoomInfo('make someone owner to leave');
+			}
 		}
 		catch (error: any)
 		{
@@ -277,6 +325,7 @@ const ChatRoomBase = () =>
 		return (
 			<div id={style.leaveRoom}>
 				<form onSubmit={handleLeaveRoom}>
+					<label id={style.leaveRoomInfo}>{leaveRoomInfo}</label>
 					<input type="submit" value="leave room"
 					className={style.leaveBtn}/>
 				</form>

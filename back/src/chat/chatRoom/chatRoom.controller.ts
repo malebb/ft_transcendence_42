@@ -53,22 +53,16 @@ class ChatRoomController
 		return (await this.chatRoomService.getMember(userId, name));
 	}
 
-	@Get('members/:name')
-	async getMembers(@Param('name') name: string)
-	{
-		return (await this.chatRoomService.getMembers(name));
-	}
-
-	@Get('owner/:name')
-	async getOwner(@Param('name') name: string)
-	{
-		return (await this.chatRoomService.getOwner(name));
-	}
-
 	@Post(':name')
 	async joinChatRoom(@Param('name') chatRoomName: string, @Body() user: UserDto)
 	{
 		await this.chatRoomService.joinChatRoom(chatRoomName, user.username)
+	}
+
+	@Patch('changeOwner/:name')
+	async updateOwner(@Param('name') chatRoomName: string, @Body() user: UserDto)
+	{
+		await this.chatRoomService.updateOwner(chatRoomName, user.username);
 	}
 
 	@Patch('password/:name')

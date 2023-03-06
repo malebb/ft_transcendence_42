@@ -39,6 +39,14 @@ export class ChatRoomService
 		const chatRoom = await this.prisma.chatRoom.findUnique({
 			where: {
 				name: name,
+			},
+			include: {
+				owner: true,
+				members: {
+					orderBy: {
+						username: 'asc'
+					}
+				}
 			}
 		})
 		return (chatRoom);
@@ -121,18 +129,6 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
-	async getOwner(name: string)
-	{
-		const chatRoom = await this.prisma.chatRoom.findUnique({
-			where: {
-				name: name
-			},
-			include: {
-				owner: true
-			}
-		})
-		return (chatRoom);
-	}
 	async getMemberFromRoom(userId: number, name: string)
 	{
 		const chatRoom = await this.prisma.chatRoom.findUnique({
@@ -143,23 +139,6 @@ export class ChatRoomService
 				members: {
 					where: {
 						id: userId
-					}
-				}
-			}
-		})
-		return (chatRoom);
-	}
-
-	async getMembers(chatRoomName: string)
-	{
-		const chatRoom = await this.prisma.chatRoom.findUnique({
-			where: {
-				name: chatRoomName,
-			},
-			include: {
-				members: {
-					orderBy: {
-						username: 'asc'
 					}
 				}
 			}
@@ -210,9 +189,31 @@ export class ChatRoomService
 				name: chatRoomName
 			},
 			data: {
-				members: {
-					disconnect: [{id: userId}],
+				members: { disconnect: [{id: userId}],
+				},
+				admins: { disconnect: [{id: userId}],
 				}
+			}
+		});
+	}
+
+	async updateOwner(chatRoomName: string, username: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				owner: {
+					connect: {
+						email: username,
+					}
+				},
+				admins: {
+					connect: {
+						email: username,
+					}
+				},
 			}
 		});
 	}

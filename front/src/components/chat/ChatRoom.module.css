@@ -68,6 +68,9 @@
 	padding: 10px;
 	background-color: #413368;
 	cursor: pointer;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 #members
@@ -106,6 +109,19 @@ ul
 	position: relative;
 	left: 275px;
 	top: 22px;
+}
+
+#leaveRoomInfo
+{
+	position: absolute;
+	bottom: 75px;
+	width: 150px;
+	color: red;
+}
+
+.makeOwner
+{
+	cursor: pointer;
 }
 
 #passwordForm
