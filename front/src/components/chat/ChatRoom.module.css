@@ -80,13 +80,18 @@
 	height: 150px;
 }
 
-.member
+.member, .currentMember
 {
 	height: 30px;
 	background-color: white;
 	border-bottom: solid #E5E7E9 1px;
 	padding-left: 10px;
 	padding-top: 10px;
+}
+
+.currentMember
+{
+	background-color: #F0E5FF;
 }
 
 .member:hover
@@ -120,6 +125,11 @@ ul
 }
 
 .makeOwner
+{
+	cursor: pointer;
+}
+
+.makeAdmin
 {
 	cursor: pointer;
 }

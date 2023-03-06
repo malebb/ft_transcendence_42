@@ -23,7 +23,9 @@ const ChatRoomBase = () =>
 	const [passwordInfo, setPasswordInfo] = useState("4 digits password : ");
 	const [btnValue, setBtnValue] = useState("set");
 	const [membersList, setMembersList] = useState<User[]>([]);
+	const [admins, setAdmins] = useState<User[]>([]);
 	const [leaveRoomInfo, setLeaveRoomInfo] = useState("");
+	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	const regexPassword = useRef(/^[0-9]*$/);
 
 	useEffect(() => {
@@ -88,6 +90,7 @@ const ChatRoomBase = () =>
 				}
 				else
 					setIsOwner(false);
+				setCurrentUser(user.data);
 			}
 			catch (error: any)
 			{
@@ -234,8 +237,10 @@ const ChatRoomBase = () =>
 			axiosInstance.current = await axiosToken();
 			const room = await axiosInstance.current.get('/chatRoom/' + roomName);
 			owner.current = room.data.owner;
+			setAdmins(room.data.admins);
 			setMembersList(room.data.members);
 			axiosInstance.current = await axiosToken();
+
 			const user = await axiosInstance.current.get('/users/me');
 			if (user.data.email === owner.current!.email)
 			{
@@ -277,6 +282,52 @@ const ChatRoomBase = () =>
 		: <></>);
 	}
 
+	const makeAdmin = async (member: User) =>
+	{
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current.patch('/chatRoom/addAdmin/' + roomName, "username=" + member.username);
+			window.location.reload();
+		}
+		catch (error: any)
+		{
+			console.log("error: ", error);
+		}
+	}
+
+	const isAdmin = (member: User) : boolean =>
+	{
+		for(var i: number = 0; i < admins.length; ++i)
+		{
+			if (admins[i].email === member.email)
+			{
+				return (true);
+			}
+		}
+		return (false);
+	}
+
+	const makeAdminLogo = (member: User) =>
+	{
+		return (!isAdmin(member) && (isOwner || isAdmin(currentUser!))? 
+			<img className={style.makeAdmin} src="http://localhost:3000/images/admin.png" 
+			alt="make Admin" title="make admin"
+			width="20"
+			onClick={() => makeAdmin(member)}/> : <></>
+		 );
+	}
+
+	const printRole = (member: User) =>
+	{
+		if (owner.current!.email === member.email)
+			return (<span>(owner)</span>);
+		else if (isAdmin(member))
+			return (<span>(admin)</span>);
+		else
+			return (<span>(member)</span>);
+	}
+
 	const memberList = () =>
 	{
 		return (
@@ -286,7 +337,14 @@ const ChatRoomBase = () =>
 					<ul id={style.members} >
 						{membersList.map((member: User) => {
 							return (
-								<li className={style.member} key={member.email}>{member.username}{makeOwnerLogo(member)}</li>
+								<li className={currentUser && currentUser.email
+								!== member.email ? style.member : 
+								style.currentMember} key={member.email}>
+									{member.username}
+									{printRole(member)}
+									{makeOwnerLogo(member)}
+									{makeAdminLogo(member)}
+								</li>
 							);
 						})}
 					</ul>

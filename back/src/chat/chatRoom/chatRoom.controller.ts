@@ -65,6 +65,12 @@ class ChatRoomController
 		await this.chatRoomService.updateOwner(chatRoomName, user.username);
 	}
 
+	@Patch('addAdmin/:name')
+	async addAdmin(@Param('name') chatRoomName: string, @Body() user: UserDto)
+	{
+		await this.chatRoomService.addAdmin(chatRoomName, user.username);
+	}
+
 	@Patch('password/:name')
 	async updateRoomPassword(@Param('name') chatRoomName: string, @Body() password: passwordDto)
 	{

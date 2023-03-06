@@ -42,6 +42,7 @@ export class ChatRoomService
 			},
 			include: {
 				owner: true,
+				admins: true,
 				members: {
 					orderBy: {
 						username: 'asc'
@@ -209,6 +210,22 @@ export class ChatRoomService
 						email: username,
 					}
 				},
+				admins: {
+					connect: {
+						email: username,
+					}
+				},
+			}
+		});
+	}
+
+	async addAdmin(chatRoomName: string, username: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
 				admins: {
 					connect: {
 						email: username,
