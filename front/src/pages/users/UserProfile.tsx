@@ -10,13 +10,6 @@ import Stats from "./components/Stats";
 import Achievements from "./components/Achievements";
 import { FriendType } from "../friends/Friends";
 import Popup from "../../components/Popup";
-import "bootstrap/dist/css/bootstrap.min.css";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
-import ModalBody from "react-bootstrap/ModalBody";
-import ModalHeader from "react-bootstrap/ModalHeader";
-import ModalFooter from "react-bootstrap/ModalFooter";
-import ModalTitle from "react-bootstrap/ModalTitle";
 
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
 const GET_STATUS_PATH = "/users/request-status/";
@@ -65,12 +58,12 @@ const UserProfile = () => {
     "Are you sure you want to remove this person from your waiting list? This action is final and you will not be able to recover it.";
 
   const handleUnfriendClick = (): void => {
-    setShowConfirmation(true);
     setPopupContent(popupContentRemoveFriend);
+    setShowConfirmation(true);
   };
   const handleUnWaitClick = (): void => {
-    setShowConfirmation(true);
     setPopupContent(popupContentRemoveWait);
+    setShowConfirmation(true);
   };
 
   const AddFriendReq = async (): Promise<string> => {
@@ -322,7 +315,7 @@ const UserProfile = () => {
           <div className="profileFriendButton">
             {friendStatus === "accepted" && (
               <div className="cyan">
-                <Button
+                <button
                   className="profileButtonCancel btn btn-primary"
                   onClick={handleUnfriendClick}
                   type="button"
@@ -330,7 +323,7 @@ const UserProfile = () => {
                   data-target="#exampleModalCenter"
                 >
                   Unfriend
-                </Button>
+                </button>
                 {/* /* (
         <div className='profileConfirmPopup'>
           <p className='popupText'>

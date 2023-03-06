@@ -49,8 +49,7 @@ function SearchBar() {
   };
 
   return (
-    <div>
-      <div>
+    <div className="searchbar-container">
         <input
           className="Nav-Searchbar"
           type="text"
@@ -58,12 +57,11 @@ function SearchBar() {
           onChange={handleInputChange}
           placeholder="Search for a friend..."
         />
-      </div>
-        <ul className="Nav-Result">
+        <ul className={(results.length === 0) ? "hiden" : "Nav-Result"}>
           {results.map((item) => (
-            <li key={item.id}>
-              <Link to={"/user/" + item.id}>{item.username}</Link>
-            </li>
+            <Link className="list-profile" to={"/user/" + item.id} key={item.id}>
+              <li className="link-profile" >{item.username}
+            </li></Link>
           ))}
         </ul>
     </div>

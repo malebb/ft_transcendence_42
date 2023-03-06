@@ -2,3 +2,21 @@
   background-color: rgb(212, 39, 39) !important;
   border-color: rgb(212, 39, 39) !important;
 }
+
+.modal-header{
+  background-color: blueviolet!important;
+}
+.modal-body{
+  background-color: blueviolet!important;
+}
+.modal-footer{
+  background-color: blueviolet!important;
+}
+
+.btn{
+ background-color: aliceblue; 
+}
+
+.hiden{
+  visibility: hidden;
+}

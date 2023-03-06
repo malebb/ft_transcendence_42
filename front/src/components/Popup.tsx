@@ -1,17 +1,8 @@
 import React from "react";
-import "../styles/Popup.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import {
-  Button,
-  Modal,
-  ModalTitle,
-  ModalDialog,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "react-bootstrap/";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from "@mui/material";
+import "../styles/Popup.css";
 
 const Popup = ({
   apparent,
@@ -26,29 +17,30 @@ const Popup = ({
   handleTrue: any;
   handleFalse: any;
 }) => {
+  console.log(title);
+  console.log(content);
+
   return (
-    <Modal show={apparent}>
-      <ModalHeader>
-        <ModalTitle>
-          <FontAwesomeIcon
-            className="svg-definecolor"
-            icon={faTriangleExclamation}
-          />
-          {title}
-          <FontAwesomeIcon
-            className="svg-definecolor"
-            icon={faTriangleExclamation}
-          />
-        </ModalTitle>
-      </ModalHeader>
-      <ModalBody>{content}</ModalBody>
-      <ModalFooter>
-        <Button onClick={handleTrue}>Yes</Button>
-        <Button className="btn-no" onClick={handleFalse}>
-          No
+    <Dialog
+      open={apparent}
+      onClose={handleFalse}
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
+    >
+      <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-description">
+          {content}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleFalse}>No</Button>
+        <Button onClick={handleTrue}>
+          Yes
         </Button>
-      </ModalFooter>
-    </Modal>
+      </DialogActions>
+    </Dialog>
+    // <p className={apparent ? "" : "hiden"}>hello</p>
   );
 };
 

@@ -4,7 +4,7 @@ import axios from "axios";
 import { getToken, axiosMain, axiosToken } from "../../api/axios";
 import { Link } from "react-router-dom";
 import { acceptRequest, deleteRequest, refuseRequest } from "src/api/friend";
-import Popup from "reactjs-popup";
+import Popup from "src/components/Popup";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
 import "../../styles/Friends.css";
@@ -39,9 +39,28 @@ const Friends = () => {
   const [friendArray, setFriendArray] = useState<FriendType[]>();
   const [recvArray, setRecvArray] = useState<NeutralUser[]>();
   const [sendArray, setSendArray] = useState<NeutralUser[]>();
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const [popupContent, setPopupContent] = useState<string>("");
+  const [list, setList] = useState<number>(0);
 
-  const handleUnfriendClick = (): void => setShowConfirmation(true);
+  const popupTitle = "WARNING";
+  const popupContentRemoveFriend =
+    "Are you sure you want to remove this person from your friends list? This action is final and you will not be able to recover it.";
+  const popupContentRemoveWait =
+    "Are you sure you want to remove this person from your waiting list? This action is final and you will not be able to recover it.";
+
+
+  const handleUnfriendClick = (): void => 
+  {
+    setShowConfirmation(true);
+    setPopupContent(popupContentRemoveFriend);
+    setList(0);
+  }
+  const handleUnWaitClick = (): void => {
+    setShowConfirmation(true);
+    setPopupContent(popupContentRemoveWait);
+    setList(1);
+  };
 
   const getRecvArray = async () => {
     const response: AxiosResponse = await (
@@ -111,7 +130,7 @@ const Friends = () => {
     <>
       <Headers />
       <Sidebar />
-      <main>
+      <main> 
         <div className="accordion">
           <input
             type="radio"
@@ -127,6 +146,17 @@ const Friends = () => {
               {friendArray?.map((friend: FriendType) => {
                 return (
                   <div key={friend.id}>
+          <Popup
+            apparent={showConfirmation}
+            title={popupTitle}
+            content={popupContent}
+            handleTrue={(e: any) =>
+                            deleteRequestWrap(friend.id, list, true)
+                          }
+            handleFalse={(e: any) =>
+                            deleteRequestWrap(friend.id, list, false)
+                          }
+          />
                     <Link className="link-user" to={"/user/" + friend.id}>
                       {
                         <img
@@ -138,7 +168,7 @@ const Friends = () => {
                       {friend.username}
                     </Link>
                     <button className="profileButtonCancel" onClick={handleUnfriendClick}>Unfriend</button>
-                    {showConfirmation && (
+                    {/* {showConfirmation && (
                       <div>
                         <p>
                           Are you sure you want to remove this person from your
@@ -160,7 +190,7 @@ const Friends = () => {
                           Cancel
                         </button>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 );
               })}
@@ -186,7 +216,7 @@ const Friends = () => {
                       {friend.username}
                       </Link>
                     <button className="profileButtonCancel" onClick={handleUnfriendClick}>Cancel</button>
-                    {showConfirmation && (
+                    {/* {showConfirmation && (
                       <div>
                         <p>
                           Are you sure you want to remove this person from your
@@ -208,7 +238,7 @@ const Friends = () => {
                           No
                         </button>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 );
               })}

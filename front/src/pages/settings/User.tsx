@@ -5,11 +5,14 @@ import userEvent from "@testing-library/user-event";
 import { SemanticClassificationFormat, setSourceMapRange } from "typescript";
 import { useState, useEffect, useRef } from "react";
 import { Buffer } from "buffer";
+import { Switch } from "@mui/material";
 //var speakeasy = require('speakeasy');
 //var qrcode = require('qrcode');
 // import qrcode from 'qrcode';
 // import { createSecretKey } from 'crypto';
 import { useNavigate, Link } from "react-router-dom";
+import Popup from "src/components/Popup";
+import { faL } from "@fortawesome/free-solid-svg-icons";
 //var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
@@ -97,12 +100,21 @@ const User = () => {
   const [code, setCode] = useState("");
   const [validCode, setValidCode] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
+  const [modelDisplay, setModelDisplay] = useState<boolean>(false);
+  const [modelContent, setModelContent] = useState<string>("");
+  const [handleConfirm, setHandleConfirm] = useState<() => void>()
+  const [pathConfirm, setPathConfirm] = useState<string>("");
 
   const [Login, setLogin] = useState("");
   const [validLogin, setValidLogin] = useState<boolean>(false);
 
   const [errMsg, setErrMsg] = useState("");
 
+  const popupTitle = "WARNING";
+  const popupChangeContent =
+    "Are you sure you want to change your 2FA code ? This action is final and after validating the process you want be able to use it anymore";
+  const popupDeleteContent =
+    "Are you sure you want to delete your 2FA code ? This action is final and after validating the process you want be able to use it anymore";
   function validURL(str: string) {
     var pattern = new RegExp(
       "^(https?:\\/\\/)?" + // protocol
@@ -244,19 +256,12 @@ const User = () => {
     setValidUser(false);
     const getToken = async () => {
       const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
-      console.log("propos");
       //if (jwt) {
       const profile = await getMe(jwt["access_token"]);
       if (errMsg === "" && profile.id !== undefined) {
         setUser(profile);
         console.log("id = " + profile.id);
         setValidUser(true);
-        console.log(
-          "profilePicture = " + JSON.stringify(profile.profilePicture)
-        );
-        console.log(
-          "split = " + JSON.stringify(user?.profilePicture.split("/")[2])
-        );
         if (validURL(profile.profilePicture))
           setPicture(profile.profilePicture);
         else
@@ -266,25 +271,34 @@ const User = () => {
         if (picture === null) setPicture(DEFAULT_IMG);
         setLogin(profile.email);
         setIsTFA(profile.isTFA);
-        console.log("profile = " + JSON.stringify(profile));
       }
       //}
     };
     getToken();
   }, []);
 
-  console.log("user = " + JSON.stringify(user));
-  console.log("pciture = " + JSON.stringify(picture));
-  console.log("bool =" + validUser);
-  // const jwt = JSON.parse(sessionStorage.getItem("tokens") || '{}');
-  //console.log(jwt['access_token']);
-  //aria-invalid={validLogin ? "false" : "true"}
-  //aria-describedby="uidnote"
-  console.log("image to print = " + image);
-  console.log("errMsg = " + errMsg);
 
+  const handleActiv = () => {
+    navigate("/2factivate");
+  };
+
+  const display2faModel = (content: string, path: string) => {
+    setModelContent(content);
+    setPathConfirm(path);
+    setModelDisplay(true);
+  };
+
+
+  console.log(isTFA);
   return (
     <div>
+      <Popup
+        apparent={modelDisplay}
+        title={popupTitle}
+        content={modelContent}
+        handleTrue={(e: any ) => navigate(pathConfirm)}
+        handleFalse={(e: any) => setModelDisplay(false)}
+      />
       {validUser ? (
         <>
           <section>
@@ -298,7 +312,7 @@ const User = () => {
                 id="avatar"
                 name="avatar"
                 accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-              ></input>
+              />
               <input
                 type={"text"}
                 id="username"
@@ -314,19 +328,12 @@ const User = () => {
             <h1>SETTINGS</h1>
             <label>Activate Google Authentificator 2FA</label>
             {/* <input type={'checkbox'} checked={isTFA} onChange={printQrCode}/> */}
-            {isTFA ? (
-              <>
-                <Link className="Nav-Qrcode" to="/2famodif">
-                  <button /*onClick={QrCodePage}*/>Change</button>
-                </Link>
-                <Link className="Nav-Qrcode" to="/2fadelete">
-                  <button /*onClick={QrCodePage}*/>Delete</button>
-                </Link>
-              </>
-            ) : (
-              <Link className="Nav-Qrcode" to="/2factivate">
-                <button /*onClick={QrCodePage}*/>Activate</button>
-              </Link>
+            <Switch
+              checked={isTFA}
+              onChange={isTFA ? (e:any) => display2faModel(popupDeleteContent, "/2fadelete") : handleActiv}
+            />
+            {isTFA && (
+                  <button onClick={(e:any) => display2faModel(popupChangeContent, "/2fachange")}>Change</button>
             )}
           </section>
         </>
