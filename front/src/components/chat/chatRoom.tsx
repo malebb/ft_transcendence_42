@@ -359,6 +359,21 @@ const ChatRoomBase = () =>
 		return (username.length < 15 ? username : username.slice(0, 13) + '..');
 	}
 
+	const challenge = async (member: User) =>
+	{
+
+	}
+
+	const challengeLogo = (member: User) =>
+	{
+		return (currentUser!.email !== member.email ? 
+			<img className={style.memberAction} src="http://localhost:3000/images/challenge.png" 
+			alt={"challenge" + member.email} title={"challenge" + member.email}
+			width="20"
+			onClick={() => challenge(member)}/> : <></>
+		);
+	}
+
 	const memberList = () =>
 	{
 		return (
@@ -376,6 +391,7 @@ const ChatRoomBase = () =>
 									{makeOwnerLogo(member)}
 									{makeAdminLogo(member)}
 									{removeAdminLogo(member)}
+									{challengeLogo(member)}
 								</li>
 							);
 						})}
@@ -463,7 +479,7 @@ const ChatRoomBase = () =>
 		<Headers/>
 		<Sidebar/> */}
 		<div className={style.roomBase}>
-		{checkRoomStatus()}
+			{checkRoomStatus()}
 		</div>
 	</>
 	);
