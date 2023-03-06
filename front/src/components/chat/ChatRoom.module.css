@@ -62,7 +62,7 @@
 
 .membersTitle
 {
-	width: 200px;
+	width: 350px;
 	color: white;
 	margin: 0px;
 	padding: 10px;
@@ -89,6 +89,13 @@
 	padding-top: 10px;
 }
 
+.role
+{
+	font-style: italic;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
 .currentMember
 {
 	background-color: #F0E5FF;
@@ -109,11 +116,25 @@ ul
 	padding: 0px;
 }
 
+#chatSettings
+{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-left: 20px;
+	width: 500px;
+	position: relative;
+	left: 400px;
+}
+
+#chatPassword
+{
+	width: 400px;
+	display: flex;
+}
+
 #leaveRoom
 {
-	position: relative;
-	left: 275px;
-	top: 22px;
 }
 
 #leaveRoomInfo
@@ -124,21 +145,15 @@ ul
 	color: red;
 }
 
-.makeOwner
+.memberAction
 {
 	cursor: pointer;
+	margin-left: 5px;
 }
 
-.makeAdmin
-{
-	cursor: pointer;
-}
 
 #passwordForm
 {
-	position: relative;
-	left: 315px;
-	top: 22px;
 	white-space: nowrap;
 	margin-right: 5px;
 }
@@ -176,8 +191,5 @@ ul
 
 .removePassword
 {
-	margin: 0px;
-	top: 22px;
-	position: relative;
-	left: 315px;
+	left: 465px;
 }

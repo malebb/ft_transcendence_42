@@ -199,7 +199,7 @@ const ChatRoomBase = () =>
 	{
 			return (
 				isOwner ? (
-				<>
+				<div id={style.chatPassword}>
 					<form onSubmit={handleChangePassword} id={style.passwordForm}>
 					<label id={style.passwordInfo}>{passwordInfo}</label>
 						<input type="password"
@@ -215,7 +215,7 @@ const ChatRoomBase = () =>
 						<input type="submit" value="remove password"
 							className={style.passwordSubmitBtn}/>
 					</form>
-				</>
+					</div>
 
 				) : <></>
 			);
@@ -274,7 +274,7 @@ const ChatRoomBase = () =>
 		return (isOwner ? 
 		(
 			owner.current!.email !== member.email ?
-			<img className={style.makeOwner} src="http://localhost:3000/images/makeOwner.png" 
+			<img className={style.memberAction} src="http://localhost:3000/images/makeOwner.png" 
 			alt="make Owner" title="make owner"
 			width="20" height="20"
 			onClick={() => makeOwner(member)}/> : <></>
@@ -312,7 +312,7 @@ const ChatRoomBase = () =>
 	const makeAdminLogo = (member: User) =>
 	{
 		return (!isAdmin(member) && (isOwner || isAdmin(currentUser!))? 
-			<img className={style.makeAdmin} src="http://localhost:3000/images/admin.png" 
+			<img className={style.memberAction} src="http://localhost:3000/images/admin.png" 
 			alt="make admin" title="make admin"
 			width="20"
 			onClick={() => makeAdmin(member)}/> : <></>
@@ -322,11 +322,11 @@ const ChatRoomBase = () =>
 	const printRole = (member: User) =>
 	{
 		if (owner.current!.email === member.email)
-			return (<span>(owner)</span>);
+			return (<span className={style.role}>(owner)</span>);
 		else if (isAdmin(member))
-			return (<span>(admin)</span>);
+			return (<span className={style.role}>(admin)</span>);
 		else
-			return (<span>(member)</span>);
+			return (<span className={style.role}>(member)</span>);
 	}
 
 	const removeAdmin = async (member: User) =>
@@ -347,11 +347,16 @@ const ChatRoomBase = () =>
 	const removeAdminLogo = (member: User) =>
 	{
 		return (isOwner && isAdmin(member) && owner.current!.email !== member.email ? 
-			<img className={style.makeAdmin} src="http://localhost:3000/images/removeAdmin.png" 
+			<img className={style.memberAction} src="http://localhost:3000/images/removeAdmin.png" 
 			alt="remove admin" title="remove admin"
 			width="24"
 			onClick={() => removeAdmin(member)}/> : <></>
 		);
+	}
+
+	const trimUsername = (username: string) =>
+	{
+		return (username.length < 15 ? username : username.slice(0, 13) + '..');
 	}
 
 	const memberList = () =>
@@ -366,7 +371,7 @@ const ChatRoomBase = () =>
 								<li className={currentUser && currentUser.email
 								!== member.email ? style.member : 
 								style.currentMember} key={member.email}>
-									{member.username}
+									{trimUsername(member.username)}
 									{printRole(member)}
 									{makeOwnerLogo(member)}
 									{makeAdminLogo(member)}
@@ -427,8 +432,10 @@ const ChatRoomBase = () =>
 				{genTitle()}
 				<div id={style.chatDataSection}>
 					{memberList()}
-					{leaveBtn()}
-					{passwordSection()}
+					<div id={style.chatSettings}>
+						{leaveBtn()}
+						{passwordSection()}
+					</div>
 				</div>
 				<div className={style.chat}>
 						<MessagesContainer />
