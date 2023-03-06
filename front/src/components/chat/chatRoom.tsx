@@ -288,6 +288,7 @@ const ChatRoomBase = () =>
 		{
 			axiosInstance.current = await axiosToken();
 			await axiosInstance.current.patch('/chatRoom/addAdmin/' + roomName, "username=" + member.username);
+			alert(member.email + " is now admin");
 			window.location.reload();
 		}
 		catch (error: any)
@@ -312,7 +313,7 @@ const ChatRoomBase = () =>
 	{
 		return (!isAdmin(member) && (isOwner || isAdmin(currentUser!))? 
 			<img className={style.makeAdmin} src="http://localhost:3000/images/admin.png" 
-			alt="make Admin" title="make admin"
+			alt="make admin" title="make admin"
 			width="20"
 			onClick={() => makeAdmin(member)}/> : <></>
 		 );
@@ -326,6 +327,31 @@ const ChatRoomBase = () =>
 			return (<span>(admin)</span>);
 		else
 			return (<span>(member)</span>);
+	}
+
+	const removeAdmin = async (member: User) =>
+	{
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current.patch('/chatRoom/removeAdmin/' + roomName, "username=" + member.username);
+			alert(member.email + " is not admin anymore");
+			window.location.reload();
+		}
+		catch (error: any)
+		{
+			console.log("error: ", error);
+		}
+	}
+
+	const removeAdminLogo = (member: User) =>
+	{
+		return (isOwner && isAdmin(member) && owner.current!.email !== member.email ? 
+			<img className={style.makeAdmin} src="http://localhost:3000/images/removeAdmin.png" 
+			alt="remove admin" title="remove admin"
+			width="24"
+			onClick={() => removeAdmin(member)}/> : <></>
+		);
 	}
 
 	const memberList = () =>
@@ -344,6 +370,7 @@ const ChatRoomBase = () =>
 									{printRole(member)}
 									{makeOwnerLogo(member)}
 									{makeAdminLogo(member)}
+									{removeAdminLogo(member)}
 								</li>
 							);
 						})}

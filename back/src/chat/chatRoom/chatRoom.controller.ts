@@ -71,6 +71,12 @@ class ChatRoomController
 		await this.chatRoomService.addAdmin(chatRoomName, user.username);
 	}
 
+	@Patch('removeAdmin/:name')
+	async removeAdmin(@Param('name') chatRoomName: string, @Body() user: UserDto)
+	{
+		await this.chatRoomService.removeAdmin(user.username, chatRoomName);
+	}
+
 	@Patch('password/:name')
 	async updateRoomPassword(@Param('name') chatRoomName: string, @Body() password: passwordDto)
 	{

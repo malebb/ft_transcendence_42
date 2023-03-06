@@ -234,4 +234,16 @@ export class ChatRoomService
 			}
 		});
 	}
+
+	async removeAdmin(username: string, chatRoomName: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				admins: { disconnect: [{email: username}]}
+			}
+		});
+	}
 }
