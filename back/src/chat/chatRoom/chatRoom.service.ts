@@ -203,4 +203,17 @@ export class ChatRoomService
 		});
 	}
 
+	async removeUserFromRoom(userId: number, chatRoomName: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				members: {
+					disconnect: [{id: userId}],
+				}
+			}
+		});
+	}
 }

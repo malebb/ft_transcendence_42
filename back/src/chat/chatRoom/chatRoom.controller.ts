@@ -88,6 +88,12 @@ class ChatRoomController
 	{
 		await this.chatRoomService.changeAccessibility(chatRoomName, accessibility.accessibility);
 	}
+
+	@Patch('leaveRoom/:name')
+	async leaveRoom(@Param('name') chatRoomName: string, @GetUser('id') userId: number)
+	{
+		await this.chatRoomService.removeUserFromRoom(userId, chatRoomName);
+	}
 }
 
 export default ChatRoomController;

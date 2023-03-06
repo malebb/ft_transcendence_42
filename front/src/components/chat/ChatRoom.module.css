@@ -45,50 +45,6 @@
 {
 }
 
-#passwordForm
-{
-	margin: 20px;
-	margin-left: 300px;
-	white-space: nowrap;
-	margin-right: 5px;
-}
-
-.passwordInput
-{
-	position: relative;
-	width: 20px;
-	border: 1px black solid;
-	outline: none;
-	margin-right: 10px;
-	margin-left: 10px;
-	border-radius: 3px;
-}
-
-.passwordSubmitBtn
-{
-	background-color: #413368;
-	color: white;
-	border: none;
-	height: 25px;
-	cursor: pointer;
-	border-radius: 3px;
-}
-
-.passwordSubmitBtn:hover
-{
-	background-color: #613981;
-}
-
-#passwordInfo
-{
-	color: white;
-}
-
-.removePassword
-{
-	margin: 0px;
-	padding-top: 20px;
-}
 
 #memberList
 {
@@ -135,7 +91,6 @@
 	background-color: #E5E7E9;
 }
 
-
 li
 {
 	list-style: none;
@@ -144,4 +99,59 @@ li
 ul
 {
 	padding: 0px;
+}
+
+#leaveRoom
+{
+	position: relative;
+	left: 275px;
+	top: 22px;
+}
+
+#passwordForm
+{
+	position: relative;
+	left: 315px;
+	top: 22px;
+	white-space: nowrap;
+	margin-right: 5px;
+}
+
+.passwordInput
+{
+	position: relative;
+	width: 20px;
+	border: 1px black solid;
+	outline: none;
+	margin-right: 10px;
+	margin-left: 10px;
+	border-radius: 3px;
+}
+
+.passwordSubmitBtn, .leaveBtn
+{
+	background-color: #413368;
+	color: white;
+	border: none;
+	height: 25px;
+	cursor: pointer;
+	border-radius: 3px;
+}
+
+.passwordSubmitBtn:hover, .leaveBtn:hover
+{
+	background-color: #613981;
+}
+
+#passwordInfo
+{
+	color: white;
+}
+
+.removePassword
+{
+	margin: 0px;
+	top: 22px;
+	position: relative;
+	left: 315px;
 }

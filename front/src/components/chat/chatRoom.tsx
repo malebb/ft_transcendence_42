@@ -14,7 +14,7 @@ import { User } from 'ft_transcendence';
 
 const ChatRoomBase = () =>
 {
-	const { roomId } = useParams();
+	const { roomName } = useParams();
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 	const [roomStatus, setRoomStatus] = useState<RoomStatus | null>(null);
 	const [isOwner, setIsOwner] = useState<boolean>(false);
@@ -30,13 +30,13 @@ const ChatRoomBase = () =>
 			try
 			{
 				axiosInstance.current = await axiosToken();
-				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomId);
+				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
 
 				if (!room.data)
 					setRoomStatus(RoomStatus["NOT_EXIST" as keyof typeof RoomStatus]);
 				else
 				{
-					const member: AxiosResponse = await axiosInstance.current.get('/chatRoom/member/' + roomId);
+					const member: AxiosResponse = await axiosInstance.current.get('/chatRoom/member/' + roomName);
 
 					if (member.data.members.length)
 						setRoomStatus(RoomStatus["JOINED" as keyof typeof RoomStatus])
@@ -55,7 +55,6 @@ const ChatRoomBase = () =>
 
 	useEffect(() => 
 	{
-
 		const checkIfOwner = async () =>
 		{
 			const initPasswordInfo = (room: AxiosResponse) =>
@@ -77,7 +76,8 @@ const ChatRoomBase = () =>
 			try
 			{
 				axiosInstance.current = await axiosToken();
-				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/owner/' + roomId);
+				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/owner/' + roomName);
+				axiosInstance.current = await axiosToken();
 				const user: AxiosResponse = await axiosInstance.current.get('/users/me/');
 				if (user.data.username == room.data.owner.username)
 				{	
@@ -98,7 +98,7 @@ const ChatRoomBase = () =>
 	const genTitle = () => {
 		return (
 			<div className={style.title}>
-				<h1 className={style.logo}>{roomId}</h1>
+				<h1 className={style.logo}>{roomName}</h1>
 				<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
 				  <path fill="#413368" d="M37.7,-48.2C52.8,-41,71.7,-35.2,78.9,-23.2C86.1,-11.3,81.6,6.9,71.8,19.2C62.1,31.4,47.1,37.8,34.2,45.1C21.4,52.4,10.7,60.7,-0.1,60.9C-11,61,-21.9,53.1,-36.1,46.2C-50.2,39.3,-67.6,33.5,-75.2,21.7C-82.8,9.9,-80.7,-7.8,-73.8,-22.3C-66.8,-36.8,-54.9,-48,-41.8,-55.8C-28.7,-63.7,-14.3,-68.2,-1.5,-66.1C11.3,-64,22.6,-55.4,37.7,-48.2Z" transform="translate(100 100)" />
 				</svg>
@@ -112,7 +112,7 @@ const ChatRoomBase = () =>
 		try
 		{
 			axiosInstance.current = await axiosToken();
-			const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomId);
+			const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
 			if (password.length !== 4)
 			{
 				setPasswordInfo('4 digits required :');
@@ -129,11 +129,11 @@ const ChatRoomBase = () =>
 				const passwordHashed: string = await bcrypt.hash(password, salt);
 
 				axiosInstance.current = await axiosToken();
-				await axiosInstance.current.patch('/chatRoom/password/' + roomId, "password=" + passwordHashed);
+				await axiosInstance.current.patch('/chatRoom/password/' + roomName, "password=" + passwordHashed);
 				if (room.data.accessibility === 'PUBLIC')
 				{
 					axiosInstance.current = await axiosToken();
-					await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomId, "accessibility=PROTECTED");
+					await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomName, "accessibility=PROTECTED");
 				}
 				setPasswordInfo('Change the room password: ');
 				setBtnValue("Change password");
@@ -156,7 +156,7 @@ const ChatRoomBase = () =>
 		try
 		{
 			axiosInstance.current = await axiosToken();
-			const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomId);
+			const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
 			if (room.data.password === '')
 			{
 				setPasswordInfo('No password to remove');
@@ -164,11 +164,11 @@ const ChatRoomBase = () =>
 				return ;
 			}
 			axiosInstance.current = await axiosToken();
-			await axiosInstance.current.patch('/chatRoom/removePassword/' + roomId);
+			await axiosInstance.current.patch('/chatRoom/removePassword/' + roomName);
 			if (room.data.accessibility === 'PROTECTED')
 			{
 				axiosInstance.current = await axiosToken();
-				await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomId, "accessibility=PUBLIC");
+				await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomName, "accessibility=PUBLIC");
 			}
 			window.location.reload();
 			alert('Password removed successfully');
@@ -230,7 +230,7 @@ const ChatRoomBase = () =>
 			else
 				members.style.display = "none";
 			axiosInstance.current = await axiosToken();
-			const room = await axiosInstance.current.get('/chatRoom/members/' + roomId);
+			const room = await axiosInstance.current.get('/chatRoom/members/' + roomName);
 			setMembersList(room.data.members);
 		}
 		catch (error: any)
@@ -257,6 +257,33 @@ const ChatRoomBase = () =>
 		);
 	}
 
+	const handleLeaveRoom = async (e: React.FormEvent<HTMLFormElement>) =>
+	{
+		e.preventDefault();
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			axiosInstance.current.patch('/chatRoom/leaveRoom/' + roomName);
+			window.location.href = 'http://localhost:3000/chat/';
+		}
+		catch (error: any)
+		{
+			
+		}
+	}
+
+	const leaveBtn = () =>
+	{
+		return (
+			<div id={style.leaveRoom}>
+				<form onSubmit={handleLeaveRoom}>
+					<input type="submit" value="leave room"
+					className={style.leaveBtn}/>
+				</form>
+			</div>
+		);
+	}
+
 	const checkRoomStatus = () =>
 	{
 		if (roomStatus === 'JOINED')
@@ -266,6 +293,7 @@ const ChatRoomBase = () =>
 				{genTitle()}
 				<div id={style.chatDataSection}>
 					{memberList()}
+					{leaveBtn()}
 					{passwordSection()}
 				</div>
 				<div className={style.chat}>
@@ -276,11 +304,11 @@ const ChatRoomBase = () =>
 		}
 		else if (roomStatus === 'NOT_JOINED')
 		{
-			return (<p id={style.roomStatus}>You are not a member of {roomId} room</p>);
+			return (<p id={style.roomStatus}>You are not a member of {roomName} room</p>);
 		}
 		else if (roomStatus == 'NOT_EXIST')
 		{
-			return (<p id={style.roomStatus}>Room {roomId} does not exist</p>);
+			return (<p id={style.roomStatus}>Room {roomName} does not exist</p>);
 		}
 		else if (!roomStatus)
 		{
