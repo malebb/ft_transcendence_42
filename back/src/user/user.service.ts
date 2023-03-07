@@ -35,22 +35,27 @@ export class UserService {
     delete user.hash;
     return user;
   }
-  async editEmail(userId: number, dto: EditUserDto) {
+  async editUsername(userId: number, dto: EditUserDto) {
+    // try {
     const user = await this.prisma.user.update({
       where: {
         id: userId,
       },
       data: {
-        email: dto.login,
+        username: dto.login,
       },
     });
 
     delete user.hash;
     return user;
+    // } catch (err: any) {
+    // return null;
+    // }
   }
 
   //TODO maybe delete the old profile picture
   async uploadPicture(userId: number, imagePath: string) {
+    // try {
     const img_to_del = await this.prisma.user.findUnique({
       where: {
         id: userId,
@@ -78,6 +83,9 @@ export class UserService {
     }
     delete user.hash;
     return user;
+    // } catch (err: any) {
+    //   return null;
+    // }
   }
 
   async getCustomisation(username: string) {
@@ -291,7 +299,8 @@ export class UserService {
     console.log(JSON.stringify(friendArray));
     return friendArray;
   }
-  async getRecvPendingRequest(userId: number): Promise<NeutralUser[]> { //TODO maybe create a particular mapping to remove email from not friend user
+  async getRecvPendingRequest(userId: number): Promise<NeutralUser[]> {
+    //TODO maybe create a particular mapping to remove email from not friend user
     let waitingArray: NeutralUser[] = [];
     console.log('momi');
     let recv_request = await this.prisma.friendRequest.findMany({
@@ -316,7 +325,8 @@ export class UserService {
     console.log(JSON.stringify(waitingArray));
     return waitingArray;
   }
-  async getCreatedPendingRequest(userId: number): Promise<NeutralUser[]> { //TODO maybe create a particular mapping to remove email from not friend user
+  async getCreatedPendingRequest(userId: number): Promise<NeutralUser[]> {
+    //TODO maybe create a particular mapping to remove email from not friend user
     let pendingArray: NeutralUser[] = [];
     let crea_request = await this.prisma.friendRequest.findMany({
       where: {

@@ -6,13 +6,20 @@ import { SemanticClassificationFormat, setSourceMapRange } from "typescript";
 import { useState, useEffect, useRef } from "react";
 import { Buffer } from "buffer";
 import { Switch } from "@mui/material";
+import '../../styles/User.css';
+import { faFileImage } from "@fortawesome/free-solid-svg-icons";
+import AddPhotoAlternateTwoToneIcon from '@mui/icons-material/AddPhotoAlternateTwoTone';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import { SvgIcon } from "@mui/material";
 //var speakeasy = require('speakeasy');
 //var qrcode = require('qrcode');
 // import qrcode from 'qrcode';
 // import { createSecretKey } from 'crypto';
 import { useNavigate, Link } from "react-router-dom";
 import Popup from "src/components/Popup";
-import { faL } from "@fortawesome/free-solid-svg-icons";
+import Sidebar from "src/components/Sidebar";
+import Headers from "src/components/Headers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 //var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
@@ -24,12 +31,13 @@ const DEFAULT_IMG = "default_profile_picture.png";
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
 
 type UserType = {
-  email: string;
+  username: string;
   profilePicture: string;
   id: number;
   isTFA: boolean;
 };
-
+//TODO add snack bar on update success, modif tfa success, delete success and fail
+//TODO gerer les pb de meme username etc
 /*const secret = speakhexgenerateSecret({
   name: "broMagicBasketIsSuchAMovie"
 })
@@ -102,13 +110,15 @@ const User = () => {
   const [verified, setVerified] = useState<boolean>(false);
   const [modelDisplay, setModelDisplay] = useState<boolean>(false);
   const [modelContent, setModelContent] = useState<string>("");
-  const [handleConfirm, setHandleConfirm] = useState<() => void>()
+  const [handleConfirm, setHandleConfirm] = useState<() => void>();
   const [pathConfirm, setPathConfirm] = useState<string>("");
 
   const [Login, setLogin] = useState("");
   const [validLogin, setValidLogin] = useState<boolean>(false);
 
   const [errMsg, setErrMsg] = useState("");
+
+  const myRef = useRef<HTMLInputElement>(null);
 
   const popupTitle = "WARNING";
   const popupChangeContent =
@@ -147,7 +157,7 @@ const User = () => {
       console.log("good file");
       formData.append("file", selectedFile);
     }
-    if (Login !== user?.email) {
+    if (Login !== user?.username) {
       const v1 = USER_REGEX.test(Login);
       if (!v1) {
         setErrMsg("Invalid Entry");
@@ -166,11 +176,6 @@ const User = () => {
         }
       );
       console.log(response.data);
-      //`setSuccess(true);
-      // setToken(response.data.token);
-      //sessionStorage.setItem("tokens", JSON.stringify(response.data));
-      console.log(response.data.access_token);
-      //console.log(token);
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");
@@ -269,14 +274,13 @@ const User = () => {
             GET_PROFILE_PICTURE + profile.profilePicture.split("/")[2]
           );
         if (picture === null) setPicture(DEFAULT_IMG);
-        setLogin(profile.email);
+        setLogin(profile.username);
         setIsTFA(profile.isTFA);
       }
       //}
     };
     getToken();
   }, []);
-
 
   const handleActiv = () => {
     navigate("/2factivate");
@@ -288,59 +292,91 @@ const User = () => {
     setModelDisplay(true);
   };
 
-
+  const redirectClick = (e : React.MouseEvent<HTMLElement>) => {
+    if (myRef.current)
+      myRef.current.click();
+  }
   console.log(isTFA);
   return (
-    <div>
+    <>
+      <Sidebar />
+      <Headers />
       <Popup
         apparent={modelDisplay}
         title={popupTitle}
         content={modelContent}
-        handleTrue={(e: any ) => navigate(pathConfirm)}
+        handleTrue={(e: any) => navigate(pathConfirm)}
         handleFalse={(e: any) => setModelDisplay(false)}
       />
       {validUser ? (
-        <>
-          <section>
-            <img src={image ? image : picture} alt="profile_picture" />
-            <form onSubmit={handleSubmit}>
-              <label htmlFor="avatar">Choose a profile picture:</label>
-              <input
-                type="file"
-                onChange={onImageChange}
-                className="user_file_input"
-                id="avatar"
-                name="avatar"
-                accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-              />
+        <main className="grid-container-User">
+          <section className="section-modif-User">
+            <div className="profilePicture-User">
+            <img
+              src={image ? image : picture}
+              className="picture-User"
+              alt="profile_picture"
+            />
+                <button className="show button-changePicture reverse-btn btn-file" onClick={redirectClick}>
+                <SvgIcon component={UploadFileIcon}/>
+</button>
+</div>
+            <form className="form-User display-flex-column" onSubmit={handleSubmit}>
+              <label className="hiden" htmlFor="avatar">
+                <p className="display-none">Choose a profile picture:</p>
+                <input
+                  type="file"
+                  onChange={onImageChange}
+                  className="display-none"
+                  id="avatar"
+                  name="avatar"
+                  ref={myRef}
+                  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+                />
+              </label>
               <input
                 type={"text"}
+                className="name-field-User"
                 id="username"
                 value={Login}
                 autoComplete="off"
                 onChange={(e) => setLogin(e.target.value)}
                 required
               />
-              <button disabled={!validLogin ? true : false}>Save</button>
+              <button className={  + validLogin? "save-btn-User btn-transparent fit-content save-btn-valid-User" : "save-btn-User btn-transparent fit-content save-btn-unvalid-User "} disabled={!validLogin ? true : false}>Save</button>
             </form>
           </section>
-          <section>
-            <h1>SETTINGS</h1>
+          <section className="section-settings-User">
+            <h1 className="settings-User">SETTINGS</h1>
+            <div className="tfa-User">
             <label>Activate Google Authentificator 2FA</label>
             {/* <input type={'checkbox'} checked={isTFA} onChange={printQrCode}/> */}
             <Switch
               checked={isTFA}
-              onChange={isTFA ? (e:any) => display2faModel(popupDeleteContent, "/2fadelete") : handleActiv}
+              onChange={
+                isTFA
+                  ? (e: any) =>
+                      display2faModel(popupDeleteContent, "/2fadelete")
+                  : handleActiv
+              }
             />
             {isTFA && (
-                  <button onClick={(e:any) => display2faModel(popupChangeContent, "/2fachange")}>Change</button>
+              <button
+                onClick={(e: any) =>
+                  display2faModel(popupChangeContent, "/2fachange")
+                }
+              >
+                Change
+              </button>
             )}
+          </div>
+          <button className="del-acc-User fit-content">Delete Account</button>
           </section>
-        </>
+        </main>
       ) : (
-        <section></section>
+        <main></main>
       )}
-    </div>
+    </>
   );
 };
 

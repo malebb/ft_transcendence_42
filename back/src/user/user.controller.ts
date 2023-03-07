@@ -90,12 +90,18 @@ export class UserController {
     @Body() dto: EditUserDto,
   ) {
     //    console.log("file = " + file);
-    let ret_user;
+    let ret_pic;
+    let ret_login;
     console.log('PROFILE PATCH DTO = ' + JSON.stringify(dto.login));
     if (file !== undefined)
-      ret_user = this.userService.uploadPicture(user.id, file.path);
-    if (dto.login !== undefined) this.userService.editEmail(user.id, dto);
+      ret_pic = this.userService.uploadPicture(user.id, file.path);
+    if (dto.login !== undefined) {
+      ret_login = this.userService.editUsername(user.id, dto);
+      // if (ret_login == null) return 1;
+    }
     //this.userService.editUser(user.id, dto);
+    //if (ret_pic == null) return 2;
+    //return 0;
   }
 
   @Get('send-friend-request/:userid')

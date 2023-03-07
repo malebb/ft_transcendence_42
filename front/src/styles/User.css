@@ -1,0 +1,248 @@
+/* .grid-container-User{  display: grid; 
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr; 
+    grid-template-rows: 1fr 1fr; 
+    gap: 0px 0px; 
+    grid-template-areas: 
+      "pix form form"
+      "pix form form";
+  }
+  
+  .profilePicture-User { 
+    grid-area: pix;
+
+}
+  
+  .form-User { grid-area: form; } */
+  /* .grid-container-User {  display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+  }
+  
+  .profilePicture-User { grid-area: 1 / 1 / 5 / 5; }
+  
+  .form-User { grid-area: 2 / 5 / 4 / 9; }
+  
+  .name-field-User { grid-area: 2 / 5 / 3 / 9; }
+  
+  .save-btn-User { grid-area: 3 / 5 / 4 / 7; }
+  
+  .settings-User { grid-area: 6 / 4 / 7 / 8; }
+  
+  .tfa-User { grid-area: 7 / 1 / 8 / 6; }
+  
+  .supp-acc-User { grid-area: 8 / 1 / 9 / 3; }
+  
+  .section-modif-User { grid-area: 1 / 1 / 5 / 13; }
+  
+  .section-settings-User { grid-area: 5 / 1 / 10 / 13; }
+   */
+   /* .grid-container-User {  display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-auto-columns: 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: column;
+    align-items: stretch;
+    grid-template-areas:
+      "section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User"
+      "section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User"
+      "section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User"
+      "section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User"
+      "section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User"
+      "section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User"
+      "section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User"
+      "section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User"
+      "section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User";
+  }
+  
+  .section-modif-User {  display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      "profilePicture-User profilePicture-User profilePicture-User . . . . . . . . ."
+      "profilePicture-User profilePicture-User profilePicture-User form-User form-User form-User . . . . . ."
+      "profilePicture-User profilePicture-User profilePicture-User form-User form-User form-User . . . . . ."
+      "profilePicture-User profilePicture-User profilePicture-User . . . . . . . . .";
+    grid-area: section-modif-User;
+  }
+  
+  .profilePicture-User {
+    align-items: center;
+    justify-content: center;
+  margin: 0 auto;
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
+  object-fit: cover;
+  object-position: center;
+  border-width: 2px;
+  vertical-align: middle;
+    grid-area: profilePicture-User;
+}
+  
+  .form-User {  display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-auto-rows: 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      "name-field-User"
+      "save-btn-User";
+    grid-area: form-User;
+  }
+  
+  .name-field-User { grid-area: name-field-User; }
+  .save-btn-User { grid-area: save-btn-User; }
+  
+  .section-settings-User {  display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      ". . . settings-User settings-User settings-User settings-User . . . . ."
+      ". . . . . . . . . . . ."
+      "tfa-User tfa-User tfa-User tfa-User tfa-User . . . . . . ."
+      "del-acc-User del-acc-User del-acc-User del-acc-User del-acc-User . . . . . . ."
+      ". . . . . . . . . . . .";
+    grid-area: section-settings-User;
+  }
+  
+  .settings-User { grid-area: settings-User; }
+  
+  .tfa-User { grid-area: tfa-User; }
+  
+  .del-acc-User { grid-area: del-acc-User; } */
+  .container {  display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-auto-columns: 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: column;
+    align-items: stretch;
+    grid-template-areas:
+      "section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User"
+      "section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User"
+      "section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User"
+      "section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User section-modif-User"
+      "section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User"
+      "section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User"
+      "section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User"
+      "section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User"
+      "section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User section-settings-User";
+  }
+  
+  .section-modif-User {  display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      "profilePicture-User profilePicture-User profilePicture-User . . . . . . . . ."
+      "profilePicture-User profilePicture-User profilePicture-User form-User form-User form-User . . . . . ."
+      "profilePicture-User profilePicture-User profilePicture-User form-User form-User form-User . . . . . ."
+      "profilePicture-User profilePicture-User profilePicture-User . . . . . . . . .";
+    grid-area: section-modif-User;
+  }
+ 
+  .picture-User{
+    display: table-cell;
+  margin: 0 auto;
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
+  object-fit: cover;
+  object-position: center;
+  border-width: 2px;
+  vertical-align: middle;
+  }
+  
+  .profilePicture-User {
+    grid-area: profilePicture-User;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1.5fr 0.5fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      " . "
+      "btn-file";
+    grid-area: profilePicture-User;
+    width: 10em;
+    height: 10em;
+  }
+  
+  .btn-file {
+    grid-area: btn-file;
+}
+  
+  .form-User {  display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-auto-rows: 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      "name-field-User"
+      ".";
+    grid-area: form-User;
+  }
+  
+  .name-field-User { grid-area: name-field-User; }
+  
+  .section-settings-User {  display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      ". . . settings-User settings-User settings-User settings-User . . . . ."
+      "tfa-User tfa-User tfa-User tfa-User tfa-User . . . . . . ."
+      "del-acc-User del-acc-User del-acc-User del-acc-User del-acc-User . . . . . . ."
+      ". . . . . . . . . . . .";
+    grid-area: section-settings-User;
+  }
+  
+  .settings-User { grid-area: settings-User; }
+  
+  .tfa-User { grid-area: tfa-User; }
+  
+  .del-acc-User {
+    grid-area: del-acc-User;
+    height: 3rem;
+    display: flex;
+    justify-content: center;
+}
+   
+.button-changePicture{
+    position: absolute;
+    top: 13rem;
+    left: 10rem;
+    background-color: #3ba340;
+    width: fit-content;
+    padding: 8px 11px;
+    margin: 0px;
+    border-style: none;
+    border-radius: 40px;
+    margin: 0 auto;
+}
+
+.save-btn-User{
+    color: #3ba340;
+    border-color: #3ba340;
+}
+.save-btn-valid-User:hover{
+    color: var(--bg-primary);
+    background-color: #3ba340;
+}
+
+.save-btn-unvalid-User{
+
+    color: #ccbc30;
+    border-color: #ccbc30;
+}
