@@ -5,7 +5,7 @@ import { Ball, Room, Player, PlayerData } from "ft_transcendence";
 import LinkZone from "../interfaces/LinkZone";
 import { axiosToken, getToken } from '../api/axios';
 import { AxiosInstance} from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { CANVAS_FONT, FONT_COLOR } from '../classes/Draw';
 
 interface CheckboxData
@@ -35,6 +35,7 @@ export default function Canvas()
 	const powerUpMode			= useRef<boolean>(false);
 	const axiosInstance			= useRef<AxiosInstance | null>(null);
 	const navigate 				= useRef(useNavigate());
+	const {challenge}			= useParams()
 
 	useEffect(() =>
 	{
@@ -291,6 +292,48 @@ export default function Canvas()
 			menu();
 		}
 
+
+		async function challengeMatchmaking()
+		{
+			let cancelLink: Function[];
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
+
+			background.onload = async function()
+			{
+				draw.current!.outGameBackground(background);
+				draw.current!.matchmaking();
+
+				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+
+				let zones = [cancelZone];
+				let playerData: PlayerData = {id: "", username: "", skin: "", powerUpMode: powerUpMode.current};
+
+				axiosInstance.current = await axiosToken();
+				playerData.skin = (await axiosInstance.current!.get('/users/me', {})).data.skin;
+				axiosInstance.current = await axiosToken();
+				playerData.username = (await axiosInstance.current!.get('/users/me', {})).data.email;
+
+				socket.current = io(`ws://localhost:3333/pong`,
+				{
+					transports: ["websocket"],
+					query:	{
+								playerData: JSON.stringify(playerData),
+								spectator: false
+							},
+					forceNew: true
+				});
+				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
+				socket.current!.on("connect", async () => {
+					await findRoom().then(data => {
+						room.current = JSON.parse(data).room;
+						position.current = JSON.parse(data).position;
+					});
+					destroyLink(cancelLink);
+					await launchGame();
+				});
+			} 
+		}
+
 		async function matchmaking()
 		{
 			let cancelLink: Function[];
@@ -488,7 +531,10 @@ export default function Canvas()
 			let googleFont = draw.current!.initFont();
 			document.fonts.add(googleFont);
 			googleFont.load().then(() => {
-				menu();
+				if (challenge ===  undefined)
+					menu();
+				else
+					challengeMatchmaking();
 			});
 			return (true);
 		}

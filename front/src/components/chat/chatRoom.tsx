@@ -8,9 +8,11 @@ import style from "./ChatRoom.module.css"
 import Headers from '../Headers';
 import Sidebar from '../Sidebar';
 import { RoomStatus } from './utils/RoomStatus';
-import { Accessibility } from 'ft_transcendence';
 import bcrypt from 'bcryptjs';
 import { User } from 'ft_transcendence';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
+import alertStyle from './alertBox.module.css';
 
 const ChatRoomBase = () =>
 {
@@ -55,7 +57,7 @@ const ChatRoomBase = () =>
 			}
 		}
 		checkRoom();
-	}, []);
+	}, [roomName]);
 
 	useEffect(() => 
 	{
@@ -64,8 +66,8 @@ const ChatRoomBase = () =>
 			const initPasswordInfo = (room: AxiosResponse) =>
 			{
 				if (room.data.accessibility === 'PROTECTED' ||
-					room.data.accessibility === 'PRIVATE'
-					&& room.data.password !== '')
+					(room.data.accessibility === 'PRIVATE'
+					&& room.data.password !== ''))
 				{
 					setPasswordInfo("Change the room password : ");
 					setBtnValue("Change");
@@ -83,7 +85,7 @@ const ChatRoomBase = () =>
 				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
 				axiosInstance.current = await axiosToken();
 				const user: AxiosResponse = await axiosInstance.current.get('/users/me/');
-				if (user.data.username == room.data.owner.username)
+				if (user.data.username === room.data.owner.username)
 				{	
 					initPasswordInfo(room);
 					setIsOwner(true);
@@ -98,7 +100,7 @@ const ChatRoomBase = () =>
 			}
 		}
 		checkIfOwner();
-	}, []);
+	}, [roomName]);
 
 	const genTitle = () => {
 		return (
@@ -359,18 +361,47 @@ const ChatRoomBase = () =>
 		return (username.length < 15 ? username : username.slice(0, 13) + '..');
 	}
 
-	const challenge = async (member: User) =>
-	{
 
+	const challenge = (member: User, powerUpMode: boolean) =>
+	{
+		alert('challenge '+member.username+ ' to '+  powerUpMode);
+	}
+
+	const selectMode = (member: User) =>
+	{
+    	confirmAlert({
+     		customUI: ({onClose}) => {
+       		return (
+				<div id={alertStyle.boxContainer}>
+					<h1>Challenge {trimUsername(member.username)}</h1>
+					<p>Select a pong mode</p>
+				<div id={alertStyle.alertBoxBtn}>
+             	 <button onClick={() =>
+						{
+					 		challenge(member, false);
+							onClose();
+						}
+					}>normal</button>
+              <button onClick={() =>
+			  			{
+							challenge(member, true)
+							onClose();
+						}}>power-up</button>
+
+            </div>
+          </div>
+        );
+      }
+    });
 	}
 
 	const challengeLogo = (member: User) =>
 	{
 		return (currentUser!.email !== member.email ? 
 			<img className={style.memberAction} src="http://localhost:3000/images/challenge.png" 
-			alt={"challenge" + member.email} title={"challenge" + member.email}
+			alt={"challenge" + member.email} title={"challenge " + member.email}
 			width="20"
-			onClick={() => challenge(member)}/> : <></>
+			onClick={() => selectMode(member)}/> : <></>
 		);
 	}
 
@@ -463,7 +494,7 @@ const ChatRoomBase = () =>
 		{
 			return (<p id={style.roomStatus}>You are not a member of {roomName} room</p>);
 		}
-		else if (roomStatus == 'NOT_EXIST')
+		else if (roomStatus === 'NOT_EXIST')
 		{
 			return (<p id={style.roomStatus}>Room {roomName} does not exist</p>);
 		}

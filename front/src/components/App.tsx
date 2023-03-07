@@ -22,6 +22,7 @@ import Callback from './Callback';
 import UserProfile from './UserProfile';
 import Chat from './chat/chat';
 import ChatRoomBase from './chat/chatRoom';
+import Challenge from './Challenge';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path='/history' element={<History/>}/>
           <Route path='/friends' element={<Friends/>}/>
           <Route path='/games/:gameId?' element={<Games/>}/>
+          <Route path='/challenge/:challenge' element={<Challenge/>}/>
           <Route path='/friends' element={<Friends/>}/>
           <Route path='/games/:gameId?' element={<Games/>}/>
 		  <Route path='/chat' element={<Chat/>}/>

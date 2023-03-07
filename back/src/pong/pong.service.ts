@@ -24,6 +24,7 @@ export class PongService {
 	rooms 							= [];
 	sizeCanvas: 	Size			= { width: 600, height: 350 };
 	scoreToWin:		number			= 11;
+	challenges: 	PlayerData[]	= [];
 
 	addToQueue(player: PlayerData, queue: PlayerData[])
 	{
@@ -66,7 +67,6 @@ export class PongService {
 			this.removeFromQueue(player.id);
 			this.removeFromQueue(opponent.id);
 		}
-		console.log("ROOM id = ", roomId);
 		return ({ roomId: roomId, opponent: opponent });
 	}
 
