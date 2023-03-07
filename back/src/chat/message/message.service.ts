@@ -49,11 +49,11 @@ export class MessageService {
 	console.log(rep);
   }
 
-  // async getMessage(name: string)
+  // async getAllMessages(nameRoom: string)
   // {
   // 	const message = await this.prisma.message.findUnique({
   // 		where: {
-  // 			name: name,
+  // 			name: nameRoom,
   // 		}
   // 	})
   // 	return (message);

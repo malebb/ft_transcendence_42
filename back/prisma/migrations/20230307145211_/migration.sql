@@ -40,7 +40,7 @@ CREATE TABLE "ChatRoom" (
 CREATE TABLE "Message" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
-    "message" TEXT,
+    "message" TEXT NOT NULL,
     "chatRoomId" INTEGER NOT NULL,
     "sendAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
