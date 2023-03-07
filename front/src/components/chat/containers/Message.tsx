@@ -31,12 +31,11 @@ function MessagesContainer() {
     // fait defiler la page vers le bas : utilise scrollview
     // pour defiler jusqu'a la fin de la div
     //messagesContainerRef.current?.scrollIntoView({ behavior: "smooth" });
-	document.getElementById("chatContainer")?.scrollTo({
-		top: document.getElementById("chatContainer")?.scrollHeight,
-	 	 behavior: "smooth"
-	});
-		
-	};
+    document.getElementById("chatContainer")?.scrollTo({
+      top: document.getElementById("chatContainer")?.scrollHeight,
+      behavior: "smooth",
+    });
+  };
 
   // https://devtrium.com/posts/async-functions-useeffect
   useEffect(() => {
@@ -75,19 +74,23 @@ function MessagesContainer() {
     scrollToBottom();
   }, [stateMessage]);
 
-  const getAllMessages = async () => {
-    try {
-      axiosInstance.current = await axiosToken();
-      const test: AxiosResponse = await axiosInstance.current.get("");
-    //   console.log({ test });
-    } catch (error: any) {
-      console.log("error while fetching messages room: ", error);
-    }
-  };
+//   const getAllMessages = async () => {
+//     try {
+//       axiosInstance.current = await axiosToken();
+//       const allMSGS = await axiosInstance.current.get(
+//         "/room/" + currentRoom?.name + "all-messages"
+// 		// "/messages/" + "all-messages"
+//       );
+//         console.log(allMSGS);
+//     } catch (error: any) {
+//       console.log("error while fetching messages room: ", error);
+//     }
+//   };
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    getAllMessages();
+    // getAllMessages();
 
+	
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();

@@ -62,13 +62,11 @@ function Rooms()
 		{
 			if (roomAccessibility === 'PROTECTED')
 			{
-				if (password.length != 4)
+				if (password.length !== 4)
 				{
 					setPasswordInfo('4 digits required :');
 					document.getElementById('passwordInfo')!.style.color = 'red';
 				}
-				else if (!/^[0-9]+$/.test(password))
-					setPasswordInfo('Only digits are accepted');
 				else
 					return (true);
 				return (false);
@@ -134,7 +132,7 @@ function Rooms()
 					owner: {...user.data},
 					name: form.get("roomName")!.toString().trim(),
 					accessibility: Accessibility[roomAccessibility as keyof typeof Accessibility],
-					password: await hashPassword(password)
+					password: roomAccessibility == 'PROTECTED' ? await hashPassword(password) : ''
 				};
 				socket.emit(EVENTS.CLIENT.CREATE_ROOM, newRoom);
 				setName('');
@@ -157,11 +155,16 @@ function Rooms()
 			setRoomAccessibility("PUBLIC");
 		}, []);
 
+		const handleAccessibilityForm = (e: React.FormEvent<HTMLFormElement>) =>
+		{
+			e.preventDefault();
+		}
+
 		return (
 		<>
 		<h3 id="createRoomTitle">Create a new room ... </h3>
 		<div id="createRoom">
-			<form id="accessibility">
+			<form id="accessibility" onSubmit={handleAccessibilityForm}>
 				<ul id="checkboxes">
 					{
 						accessibilities.map((accessibility: string, index: number) =>
@@ -242,7 +245,7 @@ function Rooms()
 
 		const enterRoom = async (roomName: string) =>
 		{
-			window.location.href = 'http://localhost:3000/room/' + roomName;
+			window.location.href = 'http://localhost:3000/chat/room/' + roomName;
 		}
 
 		const joinRoom = async (roomName: string) =>
@@ -272,12 +275,22 @@ function Rooms()
 		const checkPassword = async (e: React.FormEvent<HTMLFormElement>, chatRoom: ChatRoom) =>
 		{
 			e.preventDefault();
-			if (await bcrypt.compare(roomPassword, chatRoom.password))
-				joinRoom(chatRoom.name);
-			else
+			try
 			{
-				setInfoPassword('Wrong password');
-				setRoomPassword('');
+				axiosInstance.current = await axiosToken();
+				const room: AxiosResponse = await axiosInstance.current.get('chatRoom/' + chatRoom.name);
+
+				if (await bcrypt.compare(roomPassword, room.data.password))
+					joinRoom(chatRoom.name);
+				else
+				{
+					setInfoPassword('Wrong password');
+					setRoomPassword('');
+				}
+			}
+			catch (error: any)
+			{
+				console.log('error: ', error);
 			}
 		}
 
@@ -289,9 +302,8 @@ function Rooms()
 			{
 				if (chatRoomSelected === chatRoom.name)
 				{
-					switch (chatRoom.accessibility)
+					if (chatRoom.accessibility === 'PROTECTED' || chatRoom.accessibility === 'PRIVATE' && chatRoom.password !== '')
 					{
-						case 'PROTECTED':
 							return (<div>
 									<form onSubmit={(e) => checkPassword(e, chatRoom)}>
 										<label className="joinInfoPassword">{infoPassword}</label>
@@ -304,11 +316,11 @@ function Rooms()
 									<input type="submit" className="joinSubmitBtn" value="enter"/>
 									</form>
 								</div>);
-						case 'PRIVATE':
-							return (<span>This room is private</span>);
-						case 'PUBLIC':
-							joinRoom(chatRoom.name);
 					}
+					else if (chatRoom.accessibility === 'PRIVATE')
+						return (<span>This room is private</span>);
+					else if (chatRoom.accessibility === 'PUBLIC')
+							joinRoom(chatRoom.name);
 				}
 				return (	<>
 								<p className="owner">Owner : {chatRoom.owner.username}</p>
@@ -319,7 +331,7 @@ function Rooms()
 
 			const updateSelectChatRoom = (newChatRoomSelected: string) =>
 			{
-				if (chatRoomSelected != newChatRoomSelected)
+				if (chatRoomSelected !== newChatRoomSelected)
 				{
 					setRoomPassword('');
 					setInfoPassword('4 digits password : ');

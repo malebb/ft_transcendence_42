@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Controller, Get, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Message } from 'ft_transcendence';
 import { ChatRoomService } from '../chatRoom/chatRoom.service';
@@ -21,6 +21,7 @@ import { Socket, Server } from 'socket.io';
 // du model chatRoom/User
 // La relation est representee par le lien entre ces deux clefs
 
+@Controller('messages')
 @Injectable()
 export class MessageService {
   constructor(
@@ -29,24 +30,23 @@ export class MessageService {
   ) {}
 
   async createMessage(newMessage: Message, roomName: string) {
-    await this.prisma.message.create({
+    const rep = await this.prisma.message.create({
       data: {
         user: {
           connect: {
             email: newMessage.user.email,
           },
         },
-        // room: {
-        //   connect: {
-        //     name: roomName,
-		// 	// id: ,
-
-        //   },
-        // },
-        message: newMessage.message,
+		message: newMessage.message,
+        room: {
+          connect: {
+            name: roomName,
+          },
+        },
         sendAt: new Date(),
       },
     });
+	console.log(rep);
   }
 
   // async getMessage(name: string)
@@ -80,8 +80,13 @@ export class MessageService {
     //   https://gist.github.com/crtr0/2896891
   }
 
-  async getAllMessages() {
-    const message = await this.prisma.message.findMany();
+
+  async getAllMessagesByRoomName() {
+    const message = await this.prisma.message.findMany({
+		// where: {
+
+		// }
+	});
     return message;
   }
 

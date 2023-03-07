@@ -13,7 +13,6 @@ On appel ce fichier dans les pages room, message, etc. en utilisant :
 //! lien : https://dev.to/bravemaster619/how-to-use-socket-io-client-correctly-in-react-app-o65
 (vraiment tres bien)
 
-
 **/
 
 export const socket = io("ws://localhost:3333/chat", {

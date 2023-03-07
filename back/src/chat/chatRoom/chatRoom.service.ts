@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChatRoom } from 'ft_transcendence';
+import { Accessibility } from 'ft_transcendence';
 
 @Injectable()
 export class ChatRoomService
@@ -38,6 +39,15 @@ export class ChatRoomService
 		const chatRoom = await this.prisma.chatRoom.findUnique({
 			where: {
 				name: name,
+			},
+			include: {
+				owner: true,
+				admins: true,
+				members: {
+					orderBy: {
+						username: 'asc'
+					}
+				}
 			}
 		})
 		return (chatRoom);
@@ -99,6 +109,140 @@ export class ChatRoomService
 						name: chatRoomName
 					}
 				}
+			}
+		});
+	}
+
+	async getMember(userId: number, name: string)
+	{
+		const chatRoom = await this.prisma.chatRoom.findUnique({
+			where: {
+				name: name
+			},
+			include: {
+				members: {
+					where: {
+						id: userId
+					}
+				}
+			}
+		})
+		return (chatRoom);
+	}
+
+	async getMemberFromRoom(userId: number, name: string)
+	{
+		const chatRoom = await this.prisma.chatRoom.findUnique({
+			where: {
+				name: name
+			},
+			include: {
+				members: {
+					where: {
+						id: userId
+					}
+				}
+			}
+		})
+		return (chatRoom);
+	}
+
+	async updateRoomPassword(chatRoomName: string, password: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				password: password,
+			}
+		});
+	}
+
+	async removePassword(chatRoomName: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				password: '',
+			}
+		});
+	}
+
+	async changeAccessibility(chatRoomName: string, accessibility: Accessibility)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				accessibility: accessibility
+			}
+		});
+	}
+
+	async removeUserFromRoom(userId: number, chatRoomName: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				members: { disconnect: [{id: userId}],
+				},
+				admins: { disconnect: [{id: userId}],
+				}
+			}
+		});
+	}
+
+	async updateOwner(chatRoomName: string, username: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				owner: {
+					connect: {
+						email: username,
+					}
+				},
+				admins: {
+					connect: {
+						email: username,
+					}
+				},
+			}
+		});
+	}
+
+	async addAdmin(chatRoomName: string, username: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				admins: {
+					connect: {
+						email: username,
+					}
+				},
+			}
+		});
+	}
+
+	async removeAdmin(username: string, chatRoomName: string)
+	{
+		await this.prisma.chatRoom.update({
+			where: {
+				name: chatRoomName
+			},
+			data: {
+				admins: { disconnect: [{email: username}]}
 			}
 		});
 	}
