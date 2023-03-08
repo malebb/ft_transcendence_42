@@ -362,9 +362,17 @@ const ChatRoomBase = () =>
 	}
 
 
-	const challenge = (member: User, powerUpMode: boolean) =>
+	const challenge = async (member: User, powerUpMode: boolean) =>
 	{
-		alert('challenge '+member.username+ ' to '+  powerUpMode);
+		const challengeName = currentUser!.username + member.username;
+
+		axiosInstance.current = await axiosToken();
+		const challenge = await axiosInstance.current.post('/challenge/', {name: challengeName, powerUpMode: powerUpMode, senderId: currentUser!.id, receiverId: member.id}, {
+			headers: {
+				"Content-Type": "application/json"
+			}
+		});
+		window.location.href = 'http://localhost:3000/challenge/' + challenge.data.id;
 	}
 
 	const selectMode = (member: User) =>
@@ -375,21 +383,20 @@ const ChatRoomBase = () =>
 				<div id={alertStyle.boxContainer}>
 					<h1>Challenge {trimUsername(member.username)}</h1>
 					<p>Select a pong mode</p>
-				<div id={alertStyle.alertBoxBtn}>
-             	 <button onClick={() =>
-						{
-					 		challenge(member, false);
-							onClose();
-						}
-					}>normal</button>
-              <button onClick={() =>
-			  			{
-							challenge(member, true)
-							onClose();
-						}}>power-up</button>
-
-            </div>
-          </div>
+					<div id={alertStyle.alertBoxBtn}>
+						<button onClick={() =>
+								{
+							 		challenge(member, false);
+									onClose();
+								}
+							}>normal</button>
+						<button onClick={() =>
+					  			{
+									challenge(member, true)
+									onClose();
+							}}>power-up</button>
+					</div>
+          		</div>
         );
       }
     });

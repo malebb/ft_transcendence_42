@@ -1,10 +1,10 @@
 import { useRef, useEffect } from "react";
 import Draw from "../classes/Draw";
 import { io, Socket } from "socket.io-client";
-import { Ball, Room, Player, PlayerData } from "ft_transcendence";
+import { Ball, Room, Player, PlayerData, User} from "ft_transcendence";
 import LinkZone from "../interfaces/LinkZone";
 import { axiosToken, getToken } from '../api/axios';
-import { AxiosInstance} from 'axios';
+import { AxiosInstance, AxiosResponse } from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CANVAS_FONT, FONT_COLOR } from '../classes/Draw';
 
@@ -35,7 +35,7 @@ export default function Canvas()
 	const powerUpMode			= useRef<boolean>(false);
 	const axiosInstance			= useRef<AxiosInstance | null>(null);
 	const navigate 				= useRef(useNavigate());
-	const {challenge}			= useParams()
+	const {challengeId}			= useParams()
 
 	useEffect(() =>
 	{
@@ -292,46 +292,59 @@ export default function Canvas()
 			menu();
 		}
 
-
-		async function challengeMatchmaking()
+		function getOpponentUsername(user: AxiosResponse, challenge: AxiosResponse)
 		{
-			let cancelLink: Function[];
-			let background: HTMLImageElement = draw.current!.initOutGameBackground();
+			return (user.data.username === challenge.data.sender.username ? challenge.data.receiver.username : challenge.data.sender.username);
+		}
 
-			background.onload = async function()
+		async function initChallenge()
+		{
+			try
 			{
-				draw.current!.outGameBackground(background);
-				draw.current!.matchmaking();
-
-				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
-
-				let zones = [cancelZone];
-				let playerData: PlayerData = {id: "", username: "", skin: "", powerUpMode: powerUpMode.current};
-
+				let cancelLink: Function[];
+				let challenge: AxiosResponse = await axiosInstance.current!.get('/challenge/' + challengeId);
 				axiosInstance.current = await axiosToken();
-				playerData.skin = (await axiosInstance.current!.get('/users/me', {})).data.skin;
-				axiosInstance.current = await axiosToken();
-				playerData.username = (await axiosInstance.current!.get('/users/me', {})).data.email;
+				let user: AxiosResponse = await axiosInstance.current!.get('/users/me');
+				let background: HTMLImageElement = draw.current!.initOutGameBackground();
+//				console.log('src = ', background.src);
 
-				socket.current = io(`ws://localhost:3333/pong`,
+				background.onload = async function()
 				{
-					transports: ["websocket"],
-					query:	{
-								playerData: JSON.stringify(playerData),
-								spectator: false
-							},
-					forceNew: true
-				});
-				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
-				socket.current!.on("connect", async () => {
-					await findRoom().then(data => {
-						room.current = JSON.parse(data).room;
-						position.current = JSON.parse(data).position;
+					draw.current!.outGameBackground(background);
+					draw.current!.challenge(getOpponentUsername(user, challenge));
+	
+					let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+	
+					let zones = [cancelZone];
+					let playerData: PlayerData = {id: "", username: user.data.username, skin: user.data.skin, powerUpMode: challenge.data.powerUpMode};
+	
+					socket.current = io(`ws://localhost:3333/pong`,
+					{
+						transports: ["websocket"],
+						query:	{
+									playerData: JSON.stringify(playerData),
+									spectator: false,
+									challenge: true,
+									challengeId: challenge.data.id
+								},
+						forceNew: true
 					});
-					destroyLink(cancelLink);
-					await launchGame();
-				});
-			} 
+					cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
+					socket.current!.on("connect", async () => {
+						await findRoom().then(data => {
+							room.current = JSON.parse(data).room;
+							position.current = JSON.parse(data).position;
+						});
+						destroyLink(cancelLink);
+						await launchGame();
+					});
+				}
+//				background.src = "../images/purple.png";
+			}
+			catch (error: any)
+			{
+				console.log('error: ', error);
+			}
 		}
 
 		async function matchmaking()
@@ -359,7 +372,8 @@ export default function Canvas()
 					transports: ["websocket"],
 					query:	{
 								playerData: JSON.stringify(playerData),
-								spectator: false
+								spectator: false,
+								challenge: false
 							},
 					forceNew: true
 				});
@@ -531,10 +545,10 @@ export default function Canvas()
 			let googleFont = draw.current!.initFont();
 			document.fonts.add(googleFont);
 			googleFont.load().then(() => {
-				if (challenge ===  undefined)
+				if (challengeId ===  undefined)
 					menu();
 				else
-					challengeMatchmaking();
+					initChallenge();
 			});
 			return (true);
 		}

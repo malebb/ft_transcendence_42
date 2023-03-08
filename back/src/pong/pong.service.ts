@@ -11,6 +11,13 @@ import { winSteps, levelSteps, modeExplorer,
 import { Stats } from './Stats';
 import { Customisation } from './Customisation';
 
+interface Challenger
+{
+	challengerId: string;
+	challengeId: number;
+	challenger: PlayerData;
+}
+
 @Injectable()
 export class PongService {
 
@@ -21,10 +28,10 @@ export class PongService {
 
 	queue: 			PlayerData[] 	= [];
 	powerUpQueue:	PlayerData[] 	= [];
+	challengers:	Challenger[]	= [];
 	rooms 							= [];
 	sizeCanvas: 	Size			= { width: 600, height: 350 };
 	scoreToWin:		number			= 11;
-	challenges: 	PlayerData[]	= [];
 
 	addToQueue(player: PlayerData, queue: PlayerData[])
 	{
@@ -41,6 +48,10 @@ export class PongService {
 			if (this.powerUpQueue[i].id == playerId)
 				this.powerUpQueue.splice(i, 1);
 		}
+		for (let i = 0; i < this.challengers.length; ++i) {
+			if (this.challengers[i].challengerId == playerId)
+				this.challengers.splice(i, 1);
+		}
 	}
 
 	spectateRoom(roomId: string, spectator: Socket)
@@ -52,6 +63,46 @@ export class PongService {
 		}
 		else
 			spectator.emit(spectator.id, JSON.stringify({joined: false}));
+	}
+
+	checkChallengers(challengeId: number, player: Socket)
+	{
+		let roomId: string = "";
+		let opponent: PlayerData;
+
+		for (let i = 0; i < this.challengers.length; ++i)
+		{
+			if (this.challengers[i].challengeId === challengeId)
+			{
+				roomId = this.challengers[i].challengerId < player.id ? this.challengers[i].challengerId + player.id : player.id + this.challengers[i].challengerId;
+				opponent = this.challengers[i].challenger;
+				this.removeFromQueue(player.id);
+			}
+		}
+		return ({roomId: roomId, opponent: opponent});
+	}
+
+	challenge(server: Server, player: Socket, challengeId: number, playerData: PlayerData)
+	{
+		let challenger: Challenger = {challengeId: challengeId, challengerId: player.id, challenger: playerData};
+		let challengerResearch = {roomId: null, opponent: null};
+
+		playerData.id = player.id;
+		challengerResearch = this.checkChallengers(challengeId, player)
+		if (challengerResearch.roomId.length)
+		{
+			let room: Room;
+			room = this.initRoom(challengerResearch.roomId, challengerResearch.opponent, playerData);
+			this.rooms[room.id] = room;
+			server.emit(challengerResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
+			server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
+			this.runRoom(room.id, server);
+		}
+		else
+			this.challengers.push(challenger);
+		player.on("disconnecting", () => {
+			this.stopRoom(player);
+		});
 	}
 
 	checkQueue(player: PlayerData, queue: PlayerData[])

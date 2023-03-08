@@ -37,14 +37,21 @@ model User {
   ownerChats	ChatRoom[]
   adminChats	ChatRoom[] @relation(name: "UserAdmin")
   memberChats	ChatRoom[] @relation(name: "UserMember")
+
+  challengesReceived	Challenge[] @relation(name: "ChallengeRecv")
+  challengesSent		Challenge[] @relation(name: "ChallengeSent")
+
   @@map("users")
 }
 
 model Challenge {
 	id       		 	Int    			  @id @default(autoincrement())
-	roonName			String
+	powerUpMode			Boolean
+	receiver			User			@relation(name: "ChallengeRecv", fields: [receiverId], references: [id])
+	receiverId			Int
+	sender				User			@relation(name: "ChallengeSent", fields: [senderId], references: [id])
+	senderId			Int
 }
-
 
 model ChatRoom {
 	id       		 	Int    			  @id @default(autoincrement())

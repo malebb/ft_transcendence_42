@@ -133,6 +133,7 @@ const Games = () =>
 				{
 					transports: ["websocket"],
 					query: {
+						challenge: false,
 						spectator: true,
 						roomId: gameId
 					}

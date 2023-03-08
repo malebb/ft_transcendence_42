@@ -9,14 +9,14 @@ export const FONT_COLOR:string = 'white';
 export default class Draw
 {
 	skins : Skin[] = [];
-	mapList = [{name: "basic", path: "./images/basic.png"},
-			{name: "beach", path: "./images/beach.png"},
-			{name: "city", path: "./images/city.jpg"},
-			{name: "jungle", path: "./images/jungle.png"},
-			{name: "lava", path: "./images/lava.jpg"},
-			{name: "nature", path: "./images/nature.jpg"},
-			{name: "snow", path: "./images/snow.jpg"},
-			{name: "space", path: "./images/space.jpg"}];
+	mapList = [{name: "basic", path: "/images/basic.png"},
+			{name: "beach", path: "/images/beach.png"},
+			{name: "city", path: "/images/city.jpg"},
+			{name: "jungle", path: "/images/jungle.png"},
+			{name: "lava", path: "/images/lava.jpg"},
+			{name: "nature", path: "/images/nature.jpg"},
+			{name: "snow", path: "/images/snow.jpg"},
+			{name: "space", path: "/images/space.jpg"}];
 	checkboxStatus: boolean = false;
 
 	constructor(public readonly ctx : CanvasRenderingContext2D | null)
@@ -49,7 +49,7 @@ export default class Draw
 	{
 		const img = new Image();
 
-		img.src = './images/purple.png';
+		img.src = 'http://localhost:3000/images/purple.png';
 		return (img);
 	}
 
@@ -64,7 +64,7 @@ export default class Draw
 
 		this.mapList.forEach(map => {
 			if (map.name === mapName)
-				img.src = map.path;
+				img.src = 'http://localhost:3000' + map.path;
 		});
 		return (img);
 	}
@@ -79,7 +79,7 @@ export default class Draw
 	{
 		const img = new Image();
 
-		img.src = './images/speedPowerUp.png';
+		img.src = 'http://localhost:3000/images/speedPowerUp.png';
 		return (img);
 	}
 
@@ -110,9 +110,9 @@ export default class Draw
 		this.text("looking for player...", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
 
-	challengeWaitScreen()
+	challenge(opponentUsername: string)
 	{
-		this.text("looking for player...", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
+		this.text("Waiting for " + opponentUsername + ' ...', this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
 
 	opponentDisconnection()
@@ -183,7 +183,7 @@ export default class Draw
 			}
 			maps.push(mapData)
 			mapZones.push(mapData.mapZone);
-			mapImg.src = map.path;
+			mapImg.src = 'http://localhost:3000' + map.path;
 		});
 		return (mapZones);
 	}

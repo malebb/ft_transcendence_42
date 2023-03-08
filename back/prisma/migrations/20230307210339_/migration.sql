@@ -26,6 +26,16 @@ CREATE TABLE "users" (
 );
 
 -- CreateTable
+CREATE TABLE "Challenge" (
+    "id" SERIAL NOT NULL,
+    "powerUpMode" BOOLEAN NOT NULL,
+    "receiverId" INTEGER NOT NULL,
+    "senderId" INTEGER NOT NULL,
+
+    CONSTRAINT "Challenge_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "ChatRoom" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
@@ -145,6 +155,12 @@ CREATE UNIQUE INDEX "_GamePlayedToUser_AB_unique" ON "_GamePlayedToUser"("A", "B
 
 -- CreateIndex
 CREATE INDEX "_GamePlayedToUser_B_index" ON "_GamePlayedToUser"("B");
+
+-- AddForeignKey
+ALTER TABLE "Challenge" ADD CONSTRAINT "Challenge_receiverId_fkey" FOREIGN KEY ("receiverId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Challenge" ADD CONSTRAINT "Challenge_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ChatRoom" ADD CONSTRAINT "ChatRoom_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

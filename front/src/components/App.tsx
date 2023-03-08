@@ -33,7 +33,7 @@ function App() {
           <Route path='/history' element={<History/>}/>
           <Route path='/friends' element={<Friends/>}/>
           <Route path='/games/:gameId?' element={<Games/>}/>
-          <Route path='/challenge/:challenge' element={<Challenge/>}/>
+          <Route path='/challenge/:challengeId' element={<Challenge/>}/>
           <Route path='/friends' element={<Friends/>}/>
           <Route path='/games/:gameId?' element={<Games/>}/>
 		  <Route path='/chat' element={<Chat/>}/>
