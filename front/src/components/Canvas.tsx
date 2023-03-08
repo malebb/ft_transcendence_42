@@ -1,12 +1,13 @@
 import { useRef, useEffect, useState } from "react";
 import Draw from "../classes/Draw";
 import { io, Socket } from "socket.io-client";
-import { Ball, Room, Player, PlayerData, User} from "ft_transcendence";
+import { Ball, Room, Player, PlayerData } from "ft_transcendence";
 import LinkZone from "../interfaces/LinkZone";
 import { axiosToken, getToken } from '../api/axios';
 import { AxiosInstance, AxiosResponse } from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link} from 'react-router-dom';
 import { CANVAS_FONT, FONT_COLOR } from '../classes/Draw';
+import style from '../styles/canvas.module.css';
 
 interface CheckboxData
 {
@@ -592,7 +593,12 @@ export default function Canvas()
 			);
 		}
 		else
-			return (<p>You can not access this challenge</p>);
+			return (
+			<div id={style.noChallenge}>
+				<p id={style.challengeFinished}>You can not access this challenge</p>
+					<Link to={`/`}><button id={style.homeBtn}>Home</button></Link>
+			</div>
+			);
 	}
 
 	return (
