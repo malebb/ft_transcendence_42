@@ -7,3 +7,4 @@ export * from './ChatRoom';
 export * from './Events';
 export * from './achievements';
 export * from './User';
+export * from './Message';
