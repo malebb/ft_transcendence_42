@@ -49,7 +49,7 @@ function MessagesContainer()  {
       // checker si besoin du 2eme 
       // axiosInstance.current = await axiosToken();
       await axiosInstance
-        .current!.get("/room/" + roomId)
+        .current!.get("/chatRoom/" + roomId)
         .then((response) => {
           setCurrentRoom(response.data);
           console.log({currentRoom});

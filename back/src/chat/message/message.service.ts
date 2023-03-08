@@ -1,7 +1,6 @@
 import { Controller, Get, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Message } from 'ft_transcendence';
-import { ChatRoomService } from '../chatRoom/chatRoom.service';
 import { ChatRoom } from 'ft_transcendence';
 import { Socket, Server } from 'socket.io';
 
@@ -26,7 +25,7 @@ import { Socket, Server } from 'socket.io';
 export class MessageService {
   constructor(
     private prisma: PrismaService,
-    private readonly chatRoomService: ChatRoomService,
+    // private readonly chatRoomService: ChatRoomService,
   ) {}
 
   async createMessage(newMessage: Message, roomName: string) {
