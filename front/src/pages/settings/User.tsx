@@ -1,6 +1,6 @@
 import React from "react";
-import { axiosMain } from "../../api/axios";
-import axios, { AxiosResponse } from "axios";
+import { axiosMain, axiosAuthReq, HTTP_METHOD } from "../../api/axios";
+import axios, { AxiosHeaders, AxiosResponse } from "axios";
 import userEvent from "@testing-library/user-event";
 import { SemanticClassificationFormat, setSourceMapRange } from "typescript";
 import { useState, useEffect, useRef } from "react";
@@ -98,6 +98,7 @@ const User = () => {
   const [user, setUser] = useState<UserType>();
   const [validUser, setValidUser] = useState<boolean>(false);
   const [picture, setPicture] = useState("");
+  const [resp, setResp] = useState<UserType>();
 
   const [image, setImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -232,8 +233,13 @@ const User = () => {
 
   useEffect(() => {
     setErrMsg("");
+    axiosAuthReq<UserType | undefined>(HTTP_METHOD.GET,
+        "http://localhost:3333/users/me",
+        {} as AxiosHeaders, {},setErrMsg, setResp);
   }, []);
 
+    console.log("errMSG == " + JSON.stringify(errMsg));
+    console.log("Resp ==" + JSON.stringify(resp));
   /*{boolQrcode ? (
         <>
           <img src={TfaQrcode}/>
