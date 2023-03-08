@@ -17,7 +17,7 @@ export class ChatRoomService
 						email: chatRoom.owner.email,
 					}
 				},
-				admin: {
+				admins: {
 					connect: {
 						email: chatRoom.owner.email,
 					}
@@ -42,7 +42,7 @@ export class ChatRoomService
 			},
 			include: {
 				owner: true,
-				admin: true,
+				admins: true,
 				members: {
 					orderBy: {
 						username: 'asc'
@@ -192,7 +192,7 @@ export class ChatRoomService
 			data: {
 				members: { disconnect: [{id: userId}],
 				},
-				admin: { disconnect: [{id: userId}],
+				admins: { disconnect: [{id: userId}],
 				}
 			}
 		});
@@ -210,7 +210,7 @@ export class ChatRoomService
 						email: username,
 					}
 				},
-				admin: {
+				admins: {
 					connect: {
 						email: username,
 					}
@@ -226,7 +226,7 @@ export class ChatRoomService
 				name: chatRoomName
 			},
 			data: {
-				admin: {
+				admins: {
 					connect: {
 						email: username,
 					}
@@ -242,7 +242,7 @@ export class ChatRoomService
 				name: chatRoomName
 			},
 			data: {
-				admin: { disconnect: [{email: username}]}
+				admins: { disconnect: [{email: username}]}
 			}
 		});
 	}
