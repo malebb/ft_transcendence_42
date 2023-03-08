@@ -69,8 +69,8 @@ export class MessageGateway
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
 // enregistrer la socket dan sun channel
+console.log('User ' + client.id + ' joined room ');
     this.messageService.joinRoom(client, room);
-    // console.log('User ' + client.id + ' joined room ');
   }
 
   afterInit(server: Server) {

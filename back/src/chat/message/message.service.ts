@@ -21,7 +21,7 @@ import { Socket, Server } from 'socket.io';
 // du model chatRoom/User
 // La relation est representee par le lien entre ces deux clefs
 
-@Controller('messages')
+// @Controller('messages')
 @Injectable()
 export class MessageService {
   constructor(
@@ -64,6 +64,7 @@ export class MessageService {
   } */
 
   joinRoom(client: Socket, room: ChatRoom) {
+    console.log({room})
     client.join(room.name);
     client.on('SEND_ROOM_MESSAGE', (message: Message) => {
       this.createMessage(message, message.room.name);

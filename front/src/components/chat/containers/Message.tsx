@@ -13,7 +13,7 @@ import { Message } from "ft_transcendence";
 import "./message.style.css";
 import style from "../ChatRoom.module.css";
 
-function MessagesContainer() {
+function MessagesContainer()  {
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessage, setStateMessage] = useState<Message[]>([]);
@@ -46,11 +46,14 @@ function MessagesContainer() {
       await axiosInstance.current!.get("/users/me").then((response) => {
         setCurrentUser(response.data);
       });
-      axiosInstance.current = await axiosToken();
+      // checker si besoin du 2eme 
+      // axiosInstance.current = await axiosToken();
       await axiosInstance
-        .current!.get("/chatRoom/" + roomId)
+        .current!.get("/room/" + roomId)
         .then((response) => {
           setCurrentRoom(response.data);
+          console.log({currentRoom});
+          socket?.emit('JOIN_ROOM', currentRoom);
         });
       // set state with the result
     };
@@ -69,6 +72,11 @@ function MessagesContainer() {
       setStateMessage((stateMessage) => [...stateMessage, message]);
     });
   }, []);
+
+  // useEffect(() => {
+  //   console.log({currentRoom});
+  //   socket?.emit('JOIN_ROOM', currentRoom);
+  // }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -89,7 +97,7 @@ function MessagesContainer() {
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
     // getAllMessages();
-
+console.log("merde");
 	
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
@@ -120,6 +128,7 @@ function MessagesContainer() {
   }
 
   const GenMessages = () => {
+
     const genDate = (date: Message): string => {
       const newDate = new Date(date.sendAt);
       return `${("0" + newDate.getHours()).slice(-2)}:${(
@@ -194,20 +203,23 @@ function MessagesContainer() {
     );
   };
 
+
   return (
-    <div className="chatPage">
-      <div className="headerAndSidebar">
-        <Headers />
-        <Sidebar />
-      </div>
+    <>
+        {/* <Headers />
+        <Sidebar /> */}
+      {/* <div className="headerAndSidebar">
+      </div> */}
+     <div className="chatPage">
       <div id="content">
-        <GenTitle />
+        {/* <GenTitle /> */}
         <div id="chatContainer" ref={messagesContainerRef}>
           <GenMessages />
         </div>
         <GenInputButton />
       </div>
     </div>
+    </>
   );
 }
 
