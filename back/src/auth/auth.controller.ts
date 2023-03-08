@@ -99,7 +99,7 @@ export class AuthController {
   }
 
   @Get('verify')
-  verify(@Req() req: Request) {
+  verify(@Req() req: Request): boolean | undefined {
     const token = req.get('authorization').replace('Bearer', '').trim();
     return this.authService.verify(token);
   }

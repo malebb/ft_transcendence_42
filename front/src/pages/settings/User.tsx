@@ -29,6 +29,7 @@ const CODE_REGEX = /^[0-9]{6}$/;
 const PATCH_PATH = "/users/patchme";
 const DEFAULT_IMG = "default_profile_picture.png";
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
+const GETME_PATH = "/users/me/";
 
 type UserType = {
   username: string;
@@ -200,31 +201,6 @@ const User = () => {
     setCode(event.target.value);
   };
 
-  const getMe = async (jwt: string): Promise<UserType> => {
-    try {
-      console.log("jwt = " + jwt);
-      const response: AxiosResponse = await axios.get(
-        "http://localhost:3333/users/me",
-        {
-          headers: {
-            Authorization: "Bearer " + jwt,
-          },
-        }
-      );
-      console.log("getMe = " + JSON.stringify(response.data));
-      return response.data;
-    } catch (err: any) {
-      console.log("error getme");
-      if (!err?.response) {
-        setErrMsg("No Server Response");
-      } else if (err.response?.status === 403) {
-        setErrMsg("Invalid Credentials");
-      } else {
-        setErrMsg("Unauthorized");
-      }
-      return {} as UserType;
-    }
-  };
 
   const navigate = useNavigate();
   const QrCodePage = () => {
@@ -233,13 +209,8 @@ const User = () => {
 
   useEffect(() => {
     setErrMsg("");
-    axiosAuthReq<UserType | undefined>(HTTP_METHOD.GET,
-        "http://localhost:3333/users/me",
-        {} as AxiosHeaders, {},setErrMsg, setResp);
   }, []);
 
-    console.log("errMSG == " + JSON.stringify(errMsg));
-    console.log("Resp ==" + JSON.stringify(resp));
   /*{boolQrcode ? (
         <>
           <img src={TfaQrcode}/>
@@ -258,20 +229,15 @@ const User = () => {
 
   useEffect(() => {
     const result = USER_REGEX.test(Login);
-    console.log(result);
-    console.log(Login);
     setValidLogin(result);
   }, [Login]);
 
   useEffect(() => {
     setValidUser(false);
-    const getToken = async () => {
-      const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
-      //if (jwt) {
-      const profile = await getMe(jwt["access_token"]);
-      if (errMsg === "" && profile.id !== undefined) {
-        setUser(profile);
-        console.log("id = " + profile.id);
+    const getProfile = async () => {
+      const profile = await axiosAuthReq(HTTP_METHOD.GET, GETME_PATH, {} as AxiosHeaders, {}, setErrMsg, setUser);
+      if(profile !== undefined)
+      {
         setValidUser(true);
         if (validURL(profile.profilePicture))
           setPicture(profile.profilePicture);
@@ -283,14 +249,9 @@ const User = () => {
         setLogin(profile.username);
         setIsTFA(profile.isTFA);
       }
-      //}
     };
-    getToken();
+    getProfile();
   }, []);
-
-  const handleActiv = () => {
-    navigate("/2factivate");
-  };
 
   const display2faModel = (content: string, path: string) => {
     setModelContent(content);
@@ -314,6 +275,7 @@ const User = () => {
         handleTrue={(e: any) => navigate(pathConfirm)}
         handleFalse={(e: any) => setModelDisplay(false)}
       />
+      <h1>{errMsg}</h1>
       {validUser ? (
         <main className="grid-container-User">
           <section className="section-modif-User">
@@ -349,7 +311,7 @@ const User = () => {
                 onChange={(e) => setLogin(e.target.value)}
                 required
               />
-              <button className={  + validLogin? "save-btn-User btn-transparent fit-content save-btn-valid-User" : "save-btn-User btn-transparent fit-content save-btn-unvalid-User "} disabled={!validLogin ? true : false}>Save</button>
+              <button className={validLogin? "save-btn-User btn-transparent fit-content save-btn-valid-User" : "save-btn-User btn-transparent fit-content save-btn-unvalid-User "} disabled={!validLogin ? true : false}>Save</button>
             </form>
           </section>
           <section className="section-settings-User">
@@ -363,7 +325,7 @@ const User = () => {
                 isTFA
                   ? (e: any) =>
                       display2faModel(popupDeleteContent, "/2fadelete")
-                  : handleActiv
+                  : (e: any) => navigate("/2factivate")
               }
             />
             {isTFA && (

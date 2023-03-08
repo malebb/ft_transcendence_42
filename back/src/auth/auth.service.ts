@@ -104,7 +104,8 @@ export class AuthService {
         return response;
     }*/
 
-  async callback42(code): Promise<Object> { //TODO may change || "" by so;ething more accurate
+  async callback42(code): Promise<Object> {
+    //TODO may change || "" by so;ething more accurate
     //const response : AxiosResponse = await this.get42AT(code);
     const client_id = this.config.get('OAUTH_CLIENT_UID');
     const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
@@ -231,16 +232,18 @@ export class AuthService {
     return tokens;
   }
 
-  verify(token: string) {
+  verify(token: string): boolean | undefined {
     try {
       const secret = this.config.get('JWT_SECRET');
       const jet = this.jwt.verify(token, { secret: secret });
       //console.log(jet);
       if (jet) return true;
+      else return false;
     } catch (err: any) {
       console.log(err);
     }
   }
+
   async create2FA(userId: number) {
     const secret = speakeasy.generateSecret({
       name: 'transcendence',

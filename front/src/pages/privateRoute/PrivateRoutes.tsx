@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import axios from "axios";
+import {Axios, AxiosHeaders} from "axios";
 import { AxiosResponse } from "axios";
-import { axiosMain, axiosToken } from "../../api/axios";
+import { axiosAuthReq, axiosMain, axiosToken, HTTP_METHOD } from "../../api/axios";
 import Loading from "../Loading";
 
-const VERIF_PATH = "/auth/verify";
+const AUTH_VERIF_PATH = "/auth/verify";
 
 async function verify() {
   try {
@@ -20,11 +20,14 @@ async function verify() {
 const PrivateRoutes = () => {
   const [isAuth, setIsAuth] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [errMsg, setErrMsg] = useState<string>("");
+  const [data, setData] = useState<boolean>();
 
   useEffect(() => {
     const checkAuth = async () => {
-        const user = await verify();
-        if (user) setIsAuth(true);
+      const user = await axiosAuthReq(HTTP_METHOD.GET, AUTH_VERIF_PATH, {} as AxiosHeaders, {}, setErrMsg, setData);
+        if (user !== undefined) 
+          setIsAuth(user);
       setIsChecking(false);
     };
     checkAuth();
@@ -34,9 +37,8 @@ const PrivateRoutes = () => {
     return <Loading />;
   }
 
-  {
-    console.log(isAuth);
-  }
+  console.log("err ==" + JSON.stringify(errMsg));
+
   return isAuth ? <Outlet /> : <Navigate to="/signin" />;
 };
 
