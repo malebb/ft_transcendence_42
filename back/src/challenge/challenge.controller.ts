@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, ParseIntPipe} from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, ParseIntPipe, Delete} from '@nestjs/common';
 import { ChallengeService } from './challenge.service';
 
 interface ChallengeDto
@@ -23,6 +23,12 @@ class ChallengeController
 	async getChallenge(@Param('id', ParseIntPipe) challengeId: number)
 	{
 		return (await this.challengeService.getChallenge(challengeId));
+	}
+
+	@Delete(':id')
+	async deletechallenge(@Param('id', ParseIntPipe) challengeId: number)
+	{
+		await (this.challengeService.deleteChallenge(challengeId))
 	}
 }
 

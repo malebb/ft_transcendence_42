@@ -299,6 +299,20 @@ export default function Canvas()
 			return (user.data.username === challenge.data.sender.username ? challenge.data.receiver.username : challenge.data.sender.username);
 		}
 
+		async function cancelChallenge()
+		{
+			try
+			{
+				axiosInstance.current = await axiosToken();
+				await axiosInstance.current!.delete('/challenge/' + challengeId);
+				window.location.href = "http://localhost:3000/";
+			}
+			catch (error: any)
+			{
+				console.log('error: ', error);
+			}
+		}
+
 		async function initChallenge()
 		{
 			try
@@ -315,7 +329,7 @@ export default function Canvas()
 					draw.current!.outGameBackground(background);
 					draw.current!.challenge(getOpponentUsername(user, challenge));
 	
-					let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+					let cancelZone = draw.current!.text("cancel challenge", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
 	
 					let zones = [cancelZone];
 					let playerData: PlayerData = {id: "", username: user.data.username, skin: user.data.skin, powerUpMode: challenge.data.powerUpMode};
@@ -331,7 +345,7 @@ export default function Canvas()
 								},
 						forceNew: true
 					});
-					cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
+					cancelLink = addLink(cancelZone, cancelChallenge, zones, 0);
 					socket.current!.on("connect", async () => {
 						await findRoom().then(data => {
 							room.current = JSON.parse(data).room;
