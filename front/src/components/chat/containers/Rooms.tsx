@@ -132,7 +132,7 @@ function Rooms()
 					owner: {...user.data},
 					name: form.get("roomName")!.toString().trim(),
 					accessibility: Accessibility[roomAccessibility as keyof typeof Accessibility],
-					password: roomAccessibility == 'PROTECTED' ? await hashPassword(password) : ''
+					password: roomAccessibility === 'PROTECTED' ? await hashPassword(password) : ''
 				};
 				socket.emit(EVENTS.CLIENT.CREATE_ROOM, newRoom);
 				setName('');
@@ -302,7 +302,9 @@ function Rooms()
 			{
 				if (chatRoomSelected === chatRoom.name)
 				{
-					if (chatRoom.accessibility === 'PROTECTED' || chatRoom.accessibility === 'PRIVATE' && chatRoom.password !== '')
+					if (chatRoom.accessibility === 'PROTECTED' ||
+					(chatRoom.accessibility === 'PRIVATE' &&
+					chatRoom.password !== ''))
 					{
 							return (<div>
 									<form onSubmit={(e) => checkPassword(e, chatRoom)}>
@@ -388,34 +390,34 @@ function Rooms()
 			}
 		}
 
-		const fetchRooms = async () =>
-		{
-			try
-			{
-				let chatRooms: AxiosResponse;
-				axiosInstance.current = await axiosToken();
-				const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
-				if (chatRoomFilter === 'JOINED')
-				{
-					axiosInstance.current = await axiosToken();
-					chatRooms = await axiosInstance.current!.get('/chatRoom/joined' + user.data.username);
-				}
-				else
-				{
-					axiosInstance.current = await axiosToken();
-					chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined' + user.data.username);
-				}
-				setChatRoomsList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
-				(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
-			}
-			catch (error: any)
-			{
-				console.log("error while fetching chat rooms: ", error);
-			}
-		}
 	
 		useEffect(() =>
 		{
+			const fetchRooms = async () =>
+			{
+				try
+				{
+					let chatRooms: AxiosResponse;
+					axiosInstance.current = await axiosToken();
+					const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
+					if (chatRoomFilter === 'JOINED')
+					{
+						axiosInstance.current = await axiosToken();
+						chatRooms = await axiosInstance.current!.get('/chatRoom/joined' + user.data.username);
+					}
+					else
+					{
+						axiosInstance.current = await axiosToken();
+						chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined' + user.data.username);
+					}
+					setChatRoomsList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
+					(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
+				}
+				catch (error: any)
+				{
+					console.log("error while fetching chat rooms: ", error);
+				}
+			}
 			fetchRooms();
 		}, [chatRoomFilter]);
 

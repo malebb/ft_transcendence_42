@@ -610,7 +610,7 @@ export default function Canvas()
 				stopGame();
 		}
 
-	}, []);
+	}, [challengeId]);
 
 	const displayCanvas = () =>
 	{
