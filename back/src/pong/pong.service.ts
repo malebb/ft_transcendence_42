@@ -5,6 +5,7 @@ import { GameService } from '../game/game.service';
 import { StatsService } from '../stats/stats.service';
 import { HistoryService } from '../history/history.service';
 import { UserService } from '../user/user.service';
+import { ChallengeService } from '../challenge/challenge.service';
 import { levels } from './levels';
 import { winSteps, levelSteps, modeExplorer,
 		fashionWeek, traveler, failureKnowledge} from 'ft_transcendence';
@@ -24,7 +25,8 @@ export class PongService {
 	constructor(private readonly gameService: GameService,
 			   	private readonly statsService: StatsService,
 			   	private readonly historyService: HistoryService,
-			   	private readonly userService: UserService) {}
+			   	private readonly userService: UserService,
+			   	private readonly challengeService: ChallengeService) {}
 
 	queue: 			PlayerData[] 	= [];
 	powerUpQueue:	PlayerData[] 	= [];
@@ -77,6 +79,7 @@ export class PongService {
 				roomId = this.challengers[i].challengerId < player.id ? this.challengers[i].challengerId + player.id : player.id + this.challengers[i].challengerId;
 				opponent = this.challengers[i].challenger;
 				this.removeFromQueue(player.id);
+				this.challengeService.deleteChallenge(challengeId);
 			}
 		}
 		return ({roomId: roomId, opponent: opponent});

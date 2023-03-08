@@ -6,7 +6,6 @@ export class ChallengeService {
     constructor(private prisma: PrismaService) {}
 	async createChallenge(receiverId: number, senderId: number, powerUpMode: boolean)
 	{
-		console.log(senderId, ' ', receiverId, ' ', powerUpMode);
 		const challenge = await this.prisma.challenge.create(
 		{
 			data : {
@@ -24,6 +23,16 @@ export class ChallengeService {
 			}
 		});
 		return (challenge);
+	}
+
+	async deleteChallenge(challengeId: number)
+	{
+		await this.prisma.challenge.delete(
+		{
+			where : {
+				id: challengeId
+			}
+		});
 	}
 
 	async getChallenge(challengeId: number)

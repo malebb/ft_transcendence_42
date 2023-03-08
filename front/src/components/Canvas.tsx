@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import Draw from "../classes/Draw";
 import { io, Socket } from "socket.io-client";
 import { Ball, Room, Player, PlayerData, User} from "ft_transcendence";
@@ -17,25 +17,26 @@ interface CheckboxData
 
 export default function Canvas()
 {
-	const canvasRef				= useRef(document.createElement("canvas"));
-	const size					= useRef({width: 600, height: 350});
-	const ctx					= useRef<CanvasRenderingContext2D | null>(null);
-	const ball					= useRef<Ball>();
-	const leftPlayer			= useRef<Player | null>(null);
-	const rightPlayer			= useRef<Player | null>(null);
-	const animationFrameId		= useRef<number>(0);
-	const kd					= useRef(require('keydrown'));
-	const keyPressed			= useRef<boolean>(false);
-	const socket				= useRef<Socket | null>(null);
-	const draw					= useRef<Draw | null>(null);
-	const room					= useRef<Room | null>(null);
-	const position				= useRef<string>("");
-	const map					= useRef<HTMLImageElement | null>(null);
-	const speedPowerUp			= useRef<HTMLImageElement | null>(null);
-	const powerUpMode			= useRef<boolean>(false);
-	const axiosInstance			= useRef<AxiosInstance | null>(null);
-	const navigate 				= useRef(useNavigate());
-	const {challengeId}			= useParams()
+	const canvasRef							= useRef(document.createElement("canvas"));
+	const size								= useRef({width: 600, height: 350});
+	const ctx								= useRef<CanvasRenderingContext2D | null>(null);
+	const ball								= useRef<Ball>();
+	const leftPlayer						= useRef<Player | null>(null);
+	const rightPlayer						= useRef<Player | null>(null);
+	const animationFrameId					= useRef<number>(0);
+	const kd								= useRef(require('keydrown'));
+	const keyPressed						= useRef<boolean>(false);
+	const socket							= useRef<Socket | null>(null);
+	const draw								= useRef<Draw | null>(null);
+	const room								= useRef<Room | null>(null);
+	const position							= useRef<string>("");
+	const map								= useRef<HTMLImageElement | null>(null);
+	const speedPowerUp						= useRef<HTMLImageElement | null>(null);
+	const powerUpMode						= useRef<boolean>(false);
+	const axiosInstance						= useRef<AxiosInstance | null>(null);
+	const navigate 							= useRef(useNavigate());
+	const {challengeId}						= useParams()
+	const [isChallenger, setIsChallenger]	= useState(true);
 
 	useEffect(() =>
 	{
@@ -302,11 +303,11 @@ export default function Canvas()
 			try
 			{
 				let cancelLink: Function[];
+				axiosInstance.current = await axiosToken();
 				let challenge: AxiosResponse = await axiosInstance.current!.get('/challenge/' + challengeId);
 				axiosInstance.current = await axiosToken();
 				let user: AxiosResponse = await axiosInstance.current!.get('/users/me');
 				let background: HTMLImageElement = draw.current!.initOutGameBackground();
-//				console.log('src = ', background.src);
 
 				background.onload = async function()
 				{
@@ -339,7 +340,6 @@ export default function Canvas()
 						await launchGame();
 					});
 				}
-//				background.src = "../images/purple.png";
 			}
 			catch (error: any)
 			{
@@ -532,6 +532,26 @@ export default function Canvas()
 			}
 		}
 
+		if (challengeId !== undefined)
+		{
+			axiosInstance.current = await axiosToken();
+			let challenge: AxiosResponse = await axiosInstance.current!.get('/challenge/' + challengeId);
+
+			if (challenge.data === '')
+			{
+				setIsChallenger(false);
+				return ;
+			}
+			axiosInstance.current = await axiosToken();
+			let user: AxiosResponse = await axiosInstance.current!.get('/users/me');
+
+			if (user.data.id !== challenge.data.sender.id &&
+				user.data.id !== challenge.data.receiver.id)
+			{
+				setIsChallenger(false);
+				return ;
+			}
+		}
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
 		if (getToken() == null)
@@ -562,9 +582,22 @@ export default function Canvas()
 		}
 
 	}, []);
+
+	const displayCanvas = () =>
+	{
+		if (challengeId === undefined || isChallenger)
+		{
+			return (
+				<center><canvas id="canvas" style={{marginTop: 150}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>
+			);
+		}
+		else
+			return (<p>You can not access this challenge</p>);
+	}
+
 	return (
-	<center>
-		<canvas id="canvas" style={{marginTop: 150}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas>
-	</center>
+	<>
+		{displayCanvas()}
+	</>
 	);
 }
