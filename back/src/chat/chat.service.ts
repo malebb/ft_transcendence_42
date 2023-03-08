@@ -15,8 +15,6 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { Chat } from './chat.entity';
-import { ChatRoom } from 'ft_transcendence';
-import { ChatRoomService } from './chatRoom/chatRoom.service';
 // import { User } from '@prisma/client';
 
 // interfaces :
@@ -28,7 +26,6 @@ import { ChatRoomService } from './chatRoom/chatRoom.service';
 @Injectable()
 export class ChatService {
   constructor(
-  	private readonly chatRoomService: ChatRoomService
   ){}
 	// private userController: UserController,
 	// private jwtService: JwtService,
@@ -39,13 +36,9 @@ export class ChatService {
   // async createMessage(chat: Chat) {
   // return await this.chatRepository.save(chat);
   // }
-	createRoom(client: Socket, room: ChatRoom)
-	{
-		this.chatRoomService.createChatRoom(room);
-	}
 
-	joinRoom(server: Server, client: Socket, room: ChatRoom)
-	{
+//	joinRoom(server: Server, client: Socket, room: ChatRoom)
+//	{
 	// console.log(client);
 	// console.log(this.userController.getMe(this.user));
 	/*
@@ -55,7 +48,7 @@ export class ChatService {
 	  });
 	  */
 	//   https://gist.github.com/crtr0/2896891
-    }
+ //   }
 
   // async getMessages(): Promise<Chat[]> {
   // return await this.chatRepository.find();

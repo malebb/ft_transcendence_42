@@ -1,4 +1,3 @@
-import { SocketContext } from "../context/socket.context";
 import { useState, useRef, useEffect } from "react";
 import InputButton from "../inputs/InputButton";
 import { accessibilities } from "../utils/RoomAccessibilities";
@@ -12,7 +11,6 @@ import { ChatRoomFilter } from '../utils/ChatRoomFilter';
 
 function Rooms()
 {
-	const socket = SocketContext();
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 
 	const CreateRoom = () =>
@@ -134,7 +132,12 @@ function Rooms()
 					accessibility: Accessibility[roomAccessibility as keyof typeof Accessibility],
 					password: roomAccessibility == 'PROTECTED' ? await hashPassword(password) : ''
 				};
-				socket.emit(EVENTS.CLIENT.CREATE_ROOM, newRoom);
+				axiosInstance.current = await axiosToken();
+				await axiosInstance.current!.post('/chatRoom/',
+					newRoom,
+					{headers: {'Content-Type': 'application/json'},
+				});
+
 				setName('');
 				setPassword('');
 				window.location.reload();

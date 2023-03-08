@@ -5,6 +5,8 @@ import { GetUser } from '../../auth/decorator';
 
 import { Accessibility } from 'ft_transcendence';
 
+import { ChatRoom } from 'ft_transcendence';
+
 interface UserDto {
 	username: string
 }
@@ -27,6 +29,12 @@ class ChatRoomController
 	async getAllRooms()
 	{
 		return (await this.chatRoomService.getAllRooms());
+	}
+
+	@Post('')
+	async createRoom(@Body() chatRoom: ChatRoom)
+	{
+		return (await this.chatRoomService.createChatRoom(chatRoom));
 	}
 
 	@Get('notJoined:username')
