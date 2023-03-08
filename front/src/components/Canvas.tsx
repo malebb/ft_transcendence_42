@@ -164,6 +164,11 @@ export default function Canvas()
 			}
 		}
 
+		function redirectAfterChallenge()
+		{
+			window.location.href = 'http://localhost:3000/';
+		}
+
 		function result(status: string)
 		{
 			let background: HTMLImageElement = draw.current!.initOutGameBackground();
@@ -176,12 +181,21 @@ export default function Canvas()
 				else
 					draw.current!.youLost();
 
-				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
-				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
-				let zones = [newGameZone, menuZone];
+				if (challengeId === undefined)
+				{
+					let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+					let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+					let zones = [newGameZone, menuZone];
 
-				addLink(newGameZone, matchmaking, zones, 0);
-				addLink(menuZone, menu, zones, 0);
+					addLink(newGameZone, matchmaking, zones, 0);
+					addLink(menuZone, menu, zones, 0);
+				}
+				else
+				{
+					let menuZone = draw.current!.text("menu", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+					let zones = [menuZone];
+					addLink(menuZone, redirectAfterChallenge, zones, 0);
+				}
 			}
 		}
 
