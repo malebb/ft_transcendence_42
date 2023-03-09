@@ -581,6 +581,8 @@ export default function Canvas()
 				return ;
 			}
 		}
+		else
+			setIsChallenger(false);
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
 		if (getToken() == null)
@@ -612,12 +614,20 @@ export default function Canvas()
 
 	}, [challengeId]);
 
+	const challengeTitle = () =>
+	{
+		return (isChallenger ? <h4 id={style.challengeTitle}>Challenge</h4> : <></>);
+	}
+
 	const displayCanvas = () =>
 	{
 		if (challengeId === undefined || isChallenger)
 		{
 			return (
+			<>
+				{challengeTitle()}
 				<center><canvas id="canvas" style={{marginTop: 50}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>
+			</>
 			);
 		}
 		else
