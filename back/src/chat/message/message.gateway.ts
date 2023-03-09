@@ -60,13 +60,12 @@ export class MessageGateway
   //     this.server.emit('recMessage', payload);
   //   }
 
-  /* @SubscribeMessage('CREATE_ROOM')
-  createRoom(client: Socket, room: ChatRoom) {
-    this.messageService.createRoom(client, room);
-  } */
-
+//  @SubscribeMessage('CREATE_ROOM')
+  //createRoom(client: Socket, room: ChatRoom) {
+    //this.chatService.createRoom(client, room);
+  //}
   // async??
-  @SubscribeMessage('JOIN_ROOM')
+ @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
 // enregistrer la socket dan sun channel
 console.log('User ' + client.id + ' joined room ');
