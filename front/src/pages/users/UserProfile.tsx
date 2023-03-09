@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { AxiosResponse, AxiosInstance } from "axios";
+import { AxiosResponse, AxiosInstance, AxiosHeaders } from "axios";
 import axios from "axios";
-import { getToken, axiosMain, axiosToken } from "../../api/axios";
+import { getToken, axiosMain, axiosToken, axiosAuthReq, HTTP_METHOD } from "../../api/axios";
 import "../../styles/UserProfile.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
@@ -12,6 +12,7 @@ import { FriendType } from "../friends/Friends";
 import Popup from "../../components/Popup";
 
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
+const GET_USER_PROFILE = "users/profile/";
 const GET_STATUS_PATH = "/users/request-status/";
 const ADD_FRIEND_PATH = "/users/send-friend-request/";
 const CHECK_SENDER_PATH = "/users/check-sender/";
@@ -21,7 +22,7 @@ type NeutralUser = {
   createdAt: Date;
   id42: string | null;
   username: string;
-  profilePicture: string | undefined;
+  profilePicture: string;
 };
 
 function validURL(str: string) {
@@ -37,25 +38,36 @@ function validURL(str: string) {
   return !!pattern.test(str);
 }
 
+interface i_renderProfile {
+  user: NeutralUser;
+  picture: string;
+  friendStatus: string;
+  isFriend: boolean;
+}
+
 const UserProfile = () => {
   const { userId } = useParams();
+
+  const [renderProfile, setRenderProfile] = useState<i_renderProfile>();
   const [user, setUser] = useState<NeutralUser>();
-  const [token, setToken] = useState("");
   const [picture, setPicture] = useState("");
-  const [errMsg, setErrMsg] = useState("");
   const [friendStatus, setFriendStatus] = useState<string>("");
+  const [isFriend, setIsFriend] = useState<boolean>(false);
+
+  const [errMsg, setErrMsg] = useState("");
+
   const [sendingStatus, setSendingStatus] = useState<string>("");
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
-  const userSessionId = JSON.parse(sessionStorage.getItem("id")!);
-  const axiosInstance = useRef<AxiosInstance | null>(null);
-  const [isFriend, setIsFriend] = useState<boolean>(false);
   const [popupContent, setPopupContent] = useState<string>("");
+
+  const axiosInstance = useRef<AxiosInstance | null>(null);
 
   const popupTitle = "WARNING";
   const popupContentRemoveFriend =
     "Are you sure you want to remove this person from your friends list? This action is final and you will not be able to recover it.";
   const popupContentRemoveWait =
     "Are you sure you want to remove this person from your waiting list? This action is final and you will not be able to recover it.";
+  const userSessionId = JSON.parse(sessionStorage.getItem("id")!);
 
   const handleUnfriendClick = (): void => {
     setPopupContent(popupContentRemoveFriend);
@@ -148,16 +160,16 @@ const UserProfile = () => {
 
   useEffect(() => {
     const treatData = async () => {
-      const profile = await getUserProfile();
-      //if (profile.profilePicture !== undefined)
-      if (validURL(profile.profilePicture)) setPicture(profile.profilePicture);
-      else
-        setPicture(GET_PROFILE_PICTURE + profile.profilePicture.split("/")[2]);
-      console.log(picture);
-      setUser(profile);
-      setFriendStatus(await checkIsFriend(profile.id));
+      const profile = await axiosAuthReq(HTTP_METHOD.GET, GET_USER_PROFILE + userId, {} as AxiosHeaders, {}, setErrMsg, setUser);
+      if (profile === undefined) return ;
+      if (profile !== undefined){
+        if (validURL(profile.profilePicture)) setPicture(profile.profilePicture);
+        else
+          setPicture(GET_PROFILE_PICTURE + profile.profilePicture.split("/")[2]);
+        console.log(picture);
+        await axiosAuthReq(HTTP_METHOD.GET, GET_STATUS_PATH + userId, {} as AxiosHeaders, {}, setErrMsg, setFriendStatus);
+      }
     };
-    setToken(getToken().access_token);
     treatData();
   }, [userId]);
 
@@ -291,7 +303,6 @@ const UserProfile = () => {
       <Sidebar />
       {errMsg}
 
-      <br />
       <main className="userProfile">
         <div className={"container"}>
           {/* <div className='divprofilePicture'> */}

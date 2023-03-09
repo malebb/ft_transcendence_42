@@ -48,36 +48,36 @@ if (secret.otpauth_url !== undefined)
   if (err) return err;
 })
 console.log(qrcode_img);*/
-const getPic = async (jwt: string) => {
-  try {
-    console.log("jwt = " + jwt);
-    const response: AxiosResponse = await axios.get(
-      "http://localhost:3333/users/profile-image/media_16ad2258cac6171d66942b13b8cd4839f0b6be6f3.pnge5ac4441-06e8-4956-9e34-0941006e7bf8.png",
-      {
-        headers: {
-          Authorization: "Bearer " + jwt,
-        },
-      }
-    );
-    console.log("getPic = " + response.data);
-    return response.data;
-  } catch (err: any) {
-    console.log("error getPic");
-    return null;
-  }
-};
-function validURL(str: string) {
-  var pattern = new RegExp(
-    "^(https?:\\/\\/)?" + // protocol
-      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
-      "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
-      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
-      "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
-      "(\\#[-a-z\\d_]*)?$",
-    "i"
-  ); // fragment locator
-  return !!pattern.test(str);
-}
+// const getPic = async (jwt: string) => {
+//   try {
+//     console.log("jwt = " + jwt);
+//     const response: AxiosResponse = await axios.get(
+//       "http://localhost:3333/users/profile-image/media_16ad2258cac6171d66942b13b8cd4839f0b6be6f3.pnge5ac4441-06e8-4956-9e34-0941006e7bf8.png",
+//       {
+//         headers: {
+//           Authorization: "Bearer " + jwt,
+//         },
+//       }
+//     );
+//     console.log("getPic = " + response.data);
+//     return response.data;
+//   } catch (err: any) {
+//     console.log("error getPic");
+//     return null;
+//   }
+// };
+// function validURL(str: string) {
+//   var pattern = new RegExp(
+//     "^(https?:\\/\\/)?" + // protocol
+//       "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+//       "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+//       "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+//       "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+//       "(\\#[-a-z\\d_]*)?$",
+//     "i"
+//   ); // fragment locator
+//   return !!pattern.test(str);
+// }
 
 /*<form onSubmit={handleSubmit}>
         <label htmlFor='username'>
@@ -169,6 +169,7 @@ const User = () => {
     }
     //console.log("Form = " + formData.getAll("login"));
     try {
+      // const response: AxiosResponse = await axiosAuthReq(HTTP_METHOD.POST, PATCH_PATH, formData, {} as AxiosHeaders, setErrMsg, set)
       const response: AxiosResponse = await axiosMain.post(
         PATCH_PATH,
         formData,

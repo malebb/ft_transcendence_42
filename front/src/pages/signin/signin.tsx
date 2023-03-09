@@ -8,11 +8,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { axiosMain } from "../../api/axios";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import TokenContext from "../../context/TokenContext";
 import VerifTfa from "../settings/components/VerifTfa";
 import { useNavigate } from "react-router-dom";
+import { useSnackbar } from "notistack";
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_@.]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,24}$/;
@@ -34,11 +35,13 @@ const Signin = () => {
   const [pwdFocus, setPwdFocus] = useState(false);
 
   const [isTfa, setIsTfa] = useState<boolean>(false);
+  const [TfaSuccess, setTfaSuccess] = useState<boolean>(false);
 
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
 
   const navigate = useNavigate();
+  const snackBar = useSnackbar();
 
   useEffect(() => {
     // userRef.current.focus();
@@ -100,8 +103,8 @@ const Signin = () => {
       sessionStorage.setItem("id", JSON.stringify(response.data.userId));
       console.log(response.data.access_token);
       console.log(token);
-      if (response.data.isTfa === false) navigate("/");
-      else navigate("/2faverif");
+      // if (response.data.isTfa === false) navigate("/");
+      // else navigate("/2faverif");
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");
@@ -142,12 +145,15 @@ button img{position: relative;
       <style>{CSS}</style>
       {success ? (
         <section>
-          {isTfa && <VerifTfa />}
-          {!isTfa && (
-            <div>
-              <h1>Success!</h1>
-              <Link to="/">Go to Home</Link>
-            </div>
+          {isTfa && <VerifTfa setTfaSuccess={setTfaSuccess}/>}
+          {(TfaSuccess || !isTfa) &&(
+            <>
+              {snackBar.enqueueSnackbar("Hello, " + user, {
+                variant: "success",
+                anchorOrigin: { vertical: "bottom", horizontal: "right" },
+              })}
+              <Navigate to={"/"}/>
+            </>
           )}
         </section>
       ) : (

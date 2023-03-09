@@ -7,8 +7,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { axiosMain } from "../../api/axios";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { AxiosError, AxiosResponse } from "axios";
+import { useSnackbar } from "notistack";
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_@.]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,24}$/;
@@ -33,6 +34,7 @@ const Signup = () => {
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
 
+  const snackBar = useSnackbar();
   useEffect(() => {
     // userRef.current.focus();
   }, []);
@@ -97,10 +99,13 @@ const Signup = () => {
   return (
     <>
       {success ? (
-        <section>
-          <h1>Success!</h1>
-          <Link to="/">Go to Home</Link>
-        </section>
+            <>
+              {snackBar.enqueueSnackbar("Success, welcome " + user, {
+                variant: "success",
+                anchorOrigin: { vertical: "bottom", horizontal: "right" },
+              })}
+              <Navigate to={"/"}/>
+            </>
       ) : (
         <section>
           <p

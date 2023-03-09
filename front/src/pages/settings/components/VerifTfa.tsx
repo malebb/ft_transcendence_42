@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { useState, useEffect } from "react";
 import { axiosMain, axiosToken } from "src/api/axios";
 import axios, { AxiosResponse } from "axios";
@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
-const VerifTfa = () => {
+const VerifTfa = ({setTfaSuccess} : {setTfaSuccess : Dispatch<SetStateAction<boolean>>}) => {
   const [TfaQrcode, setTfaQrcode] = useState("");
   const [boolQrcode, setboolQrcode] = useState<boolean>(false);
 
@@ -49,7 +49,7 @@ const VerifTfa = () => {
       token: code,
     }) */
     if (verif === true) {
-      navigate("/");
+      setTfaSuccess(true);
     } else setBadAttempt(true);
     //setVerified(verif);
   };

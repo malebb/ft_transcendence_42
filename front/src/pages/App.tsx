@@ -17,12 +17,14 @@ import UserProfile from "./users/UserProfile";
 import Chat from "./chat/chat";
 import ChatRoomBase from "./chat/chatRoom";
 import PrivateRoutes from "./privateRoute/PrivateRoutes";
+import { SnackbarProvider } from "notistack";
 
 /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
 function App() {
   return (
     <AuthProvider>
+      <SnackbarProvider maxSnack={4}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Main />} />
@@ -41,11 +43,11 @@ function App() {
             <Route path="/room/:roomId" element={<ChatRoomBase />} />
             <Route path="/2factivate" element={<SetTfa />} />
             <Route path="/2fadelete" element={<DeleteTfa />} />
-            <Route path="/2faverif" element={<VerifTfa />} />
+            {/* <Route path="/2faverif" element={<VerifTfa setTfaSuccess={}/>} /> */}
             <Route path="user/:userId" element={<UserProfile />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+      </BrowserRouter></SnackbarProvider>
     </AuthProvider>
   );
 }
