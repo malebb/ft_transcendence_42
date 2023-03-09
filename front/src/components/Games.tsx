@@ -15,7 +15,7 @@ const Games = () =>
 	const ctx = useRef<CanvasRenderingContext2D | null>(null);
 	const [gamesList, setGamesList] = useState<Game[]>([]);
 	const { gameId } = useParams();
-	const size = useRef({ width: 600, height: 350 });
+	const size = useRef({ width: 700, height: 450 });
 	const canvasRef = useRef(document.createElement("canvas"));
 	const socket = useRef<Socket | null>(null);
 	const leftPlayer = useRef<Player | null>(null);

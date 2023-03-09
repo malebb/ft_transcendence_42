@@ -19,7 +19,7 @@ interface CheckboxData
 export default function Canvas()
 {
 	const canvasRef							= useRef(document.createElement("canvas"));
-	const size								= useRef({width: 600, height: 350});
+	const size								= useRef({width: 700, height: 450});
 	const ctx								= useRef<CanvasRenderingContext2D | null>(null);
 	const ball								= useRef<Ball>();
 	const leftPlayer						= useRef<Player | null>(null);
@@ -617,7 +617,7 @@ export default function Canvas()
 		if (challengeId === undefined || isChallenger)
 		{
 			return (
-				<center><canvas id="canvas" style={{marginTop: 150}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>
+				<center><canvas id="canvas" style={{marginTop: 50}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>
 			);
 		}
 		else

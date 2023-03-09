@@ -25,7 +25,6 @@ export default class Draw
 
 	initFont()
 	{
-	//	return (new FontFace("Tilt Warp", "url('http://localhost:3000/fonts/TiltWarp-Regular.ttf')"));
 		return (new FontFace("Poppins", "url('http://localhost:3000/fonts/Poppins-SemiBold.ttf')"));
 	}
 
@@ -127,7 +126,7 @@ export default class Draw
 
 	skin(name : string) : LinkZone
 	{
-		let margin : number = 100;
+		let margin : number = 125;
 		let nbInRow : number = 5;
 		let skin : Skin = new Skin(name, this.ctx!.canvas.width / 60, this.ctx!.canvas.height / nbInRow);
 		let skinZone : LinkZone = {posX : (this.ctx!.canvas.width / nbInRow) * (this.skins.length % nbInRow) + this.ctx!.canvas.width / (nbInRow * 2), posY : (skin.height * 2) * Math.floor(this.skins.length / nbInRow) + margin, width : skin.width, height : skin.height};
@@ -145,7 +144,7 @@ export default class Draw
 
 	map(): LinkZone[]
 	{
-		let margin : number = 100;
+		let margin : number = 125;
 		let nbInRow : number = 4;
 		let width = this.ctx!.canvas.width / 6;
 		let height = this.ctx!.canvas.height / 5;

@@ -32,7 +32,7 @@ export class PongService {
 	powerUpQueue:	PlayerData[] 	= [];
 	challengers:	Challenger[]	= [];
 	rooms 							= [];
-	sizeCanvas: 	Size			= { width: 600, height: 350 };
+	sizeCanvas: 	Size			= { width: 700, height: 450 };
 	scoreToWin:		number			= 11;
 
 	addToQueue(player: PlayerData, queue: PlayerData[])
