@@ -53,6 +53,10 @@ export class MessageService {
           name: roomName,
         },
       },
+      include: {
+        user: true,
+        room: true,
+      },
     });
     // console.log(message);
     return message;

@@ -13,16 +13,14 @@ import { Message } from "ft_transcendence";
 import "./message.style.css";
 import style from "../ChatRoom.module.css";
 
-
 function MessagesContainer() {
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
-  const [stateMessage, setStateMessage] = useState<Message[]>([]);
-  let currentUser: User;
-  let currentRoom: ChatRoom;
-  // const [currentUser, setCurrentUser] = useState<User>();
-  // const [currentRoom, setCurrentRoom] = useState<ChatRoom>();
-  const [allMessages, setAllMessages] = useState<Message[]>([]);
+  const [stateMessages, setStateMessages] = useState<Message[]>([]);
+  const currentUser = useRef<User | null>(null);
+  const currentRoom = useRef<ChatRoom | null>(null);
+  // const allMessages = useRef<Message[]>([]);
+  // const [allMessages, setAllMessages] = useState<Message[]>([]);
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const roomId = useParams();
   const socket = SocketContext();
@@ -48,84 +46,51 @@ function MessagesContainer() {
       // get the data from the api
       axiosInstance.current = await axiosToken();
       await axiosInstance.current!.get("/users/me").then((response) => {
-        // setCurrentUser(response.data);
-        currentUser = response.data;
-        console.log(currentUser);
+        currentUser.current = response.data;
       });
-      // checker si besoin du 2eme
-      // axiosInstance.current = await axiosToken();
+      axiosInstance.current = await axiosToken();
       await axiosInstance
         .current!.get("/chatRoom/" + roomId.roomName)
         .then((response) => {
-          // setCurrentRoom(response.data);
-          currentRoom = response.data;
-          console.log(currentRoom);
-          socket?.emit("JOIN_ROOM", currentRoom);
+          currentRoom.current = response.data;
+          socket?.emit("JOIN_ROOM", currentRoom.current);
         });
-      // set state with the result
     };
-    // call the function
-    fetchData()
-      // make sure to catch any error
-      .catch(console.error);
-
-
-
+    fetchData().catch(console.error);
   }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [stateMessage]);
-  
+  }, [stateMessages]);
+
   useEffect(() => {
     socket.on("ROOM_MESSAGE", (message) => {
-      console.log(message.room.name);
-      // pourquoi (stateMessage) avant ?
+      // pourquoi (stateMessages) avant ?
       // les ... peuvent entraîner des problèmes de concurrence
       // car l'état précédent est conservé dans la closure
       // de la fonction de mise à jour (useEffect)
       // Prend donc l'etat precedent, au lieu du tableau
       // et retourne le nouveau
-      setStateMessage((stateMessage) => [...stateMessage, message]);
+      setStateMessages((stateMessages) => [...stateMessages, message]);
     });
-  })
-  
+  }, []);
+
   useEffect(() => {
-    // socket?.emit("disconnected");
-    // socket?.emit("connection");
-    // console.log({currentRoom});
-    // socket?.emit("JOIN_ROOM", {currentRoom});
     const getMessages = async () => {
       axiosInstance.current = await axiosToken();
       await axiosInstance
         .current!.get("/message/all-messages")
         .then((response) => {
-          setAllMessages(response.data);
+          console.log(response);
+          setStateMessages(response.data);
+          // allMessages.current = response.data;
+          // setAllMessages(response.data);
         });
     };
     getMessages();
-
-    // setStateMessage(setAllMessages => setAllMessages.concat(stateMessage));
-    // console.log(allMessages);    
-    // console.log(stateMessage);
   }, []);
 
-
-    // const getAllMessages = async () => {
-    //   try {
-    //     axiosInstance.current = await axiosToken();
-    //     const allMSGS = await axiosInstance.current.get(
-    //       "/room/" + currentRoom?.name + "all-messages"
-  	// 	// "/messages/" + "all-messages"
-    //     );
-    //       console.log(allMSGS);
-    //   } catch (error: any) {
-    //     console.log("error while fetching messages room: ", error);
-    //   }
-    // };
-
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
-
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
@@ -142,20 +107,18 @@ function MessagesContainer() {
     // ! a la fin = signifie que la variable et non nulle et non non-definie
     const dateTS = new Date();
     newMessage = {
-      user: currentUser!,
-      room: currentRoom!,
+      user: currentUser.current!,
+      room: currentRoom.current!,
       message: inputMessage,
       sendAt: dateTS,
     };
-    console.log(newMessage);
 
     socket.emit("SEND_ROOM_MESSAGE", newMessage);
-
-    // besoin du (stateMessage) avant ? NON
-    setStateMessage([...stateMessage, newMessage]);
+    setStateMessages([...stateMessages, newMessage]);
   }
 
   const GenMessages = () => {
+
     const genDate = (date: Message): string => {
       const newDate = new Date(date.sendAt);
       return `${("0" + newDate.getHours()).slice(-2)}:${(
@@ -168,7 +131,7 @@ function MessagesContainer() {
         return (
           <>
             <div className="chat-receiver">
-              <span>{newMessage.user.username + " : "}</span>
+              <span>{newMessage?.user?.username + " : "}</span>
               <span>{newMessage.message}</span>
             </div>
             <span className="date">{genDate(newMessage)}</span>
@@ -188,13 +151,13 @@ function MessagesContainer() {
 
     return (
       <>
-        {stateMessage?.map((stateMessage, index) => {
+        {stateMessages?.map((message, index) => {
           const isCurrentUser =
-            currentUser?.username == stateMessage?.user?.username;
+            currentUser.current!.username === message?.user?.username;
 
           return (
             <div key={index + 1} className="chat-wrapper">
-              {genMessage(isCurrentUser, stateMessage)}
+              {genMessage(isCurrentUser, message)}
             </div>
           );
         })}
