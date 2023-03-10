@@ -5,6 +5,8 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 
@@ -13,10 +15,7 @@ import { Socket, Server } from 'socket.io';
 import { MessageService } from './message.service';
 
 // interfaces :
-
-import { UserService } from 'src/user/user.service';
-import { ChatRoom } from 'ft_transcendence';
-
+import { ChatRoom, Message } from 'ft_transcendence';
 
 // import { AuthService } from '../auth/auth.service';
 // import { UserService } from '../user/user.service';
@@ -38,19 +37,18 @@ export class MessageGateway
 {
   // va bind l'application MessageService
   constructor(
-    private messageService: MessageService, // private authService: AuthService,
-  ) // private userService: UserService
-  {}
+    private messageService: MessageService, // private authService: AuthService, // private userService: UserService
+  ) {}
 
   // creation d'une instance server
   @WebSocketServer()
   server: Server;
+  
 
   handleConnection(client: Socket) {
-    // console.log('Connected '+ client.id);
+    console.log('Connected ' + client.id);
     // a faire
   }
-
 
   // ecoute les evenements venant du client/user (websocketgateway)
   // qui va donner acces a socket.io
@@ -60,25 +58,39 @@ export class MessageGateway
   //     this.server.emit('recMessage', payload);
   //   }
 
-//  @SubscribeMessage('CREATE_ROOM')
+  //  @SubscribeMessage('CREATE_ROOM')
   //createRoom(client: Socket, room: ChatRoom) {
-    //this.chatService.createRoom(client, room);
+  //this.chatService.createRoom(client, room);
   //}
   // async??
- @SubscribeMessage('JOIN_ROOM')
-  joinRoom(client: Socket, room: ChatRoom) {
-// enregistrer la socket dan sun channel
-console.log('User ' + client.id + ' joined room ');
-    this.messageService.joinRoom(client, room);
+  @SubscribeMessage('JOIN_ROOM')
+  joinRoom(client: Socket, room: ChatRoom, @MessageBody() msg: any, @ConnectedSocket() currentsocket: Socket) {
+    // enregistrer la socket dans un channel
+    client.join(room.name);
+    // console.log(JSON.stringify(this.server.in(room.name).fetchSockets()));
+    client.on('SEND_ROOM_MESSAGE', (message: Message) => {
+      this.messageService.createMessage(message, message.room.name);
+      client.in(room.name).emit('ROOM_MESSAGE', message);
+    });
+
   }
 
   afterInit(server: Server) {
-    console.log(server);
+    // console.log(server);
     // a faire
   }
 
+  // @SubscribeMessage('all-messages')
+  // getAllMessages(room: ChatRoom) {
+  //   this.messageService.getAllMessagesByRoomName(room.name);
+  // }
+
+  @SubscribeMessage('disconnected')
   handleDisconnect(client: Socket) {
-    // console.log(`Disconnected: ${client.id}`);
+    // client.on('disconnected', () => {
+      client.disconnect();
+      console.log('Disconnected ' + client.id);
+    // });
     // a faire
   }
 }

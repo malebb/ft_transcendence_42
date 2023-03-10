@@ -1,8 +1,6 @@
-import { Controller, Get, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Message } from 'ft_transcendence';
-import { ChatRoom } from 'ft_transcendence';
-import { Socket, Server } from 'socket.io';
 
 // Database, model Message:
 // relation 1-1 avec la ChatRoomService
@@ -25,8 +23,8 @@ import { Socket, Server } from 'socket.io';
 export class MessageService {
   constructor(
     private prisma: PrismaService,
-    // private readonly chatRoomService: ChatRoomService,
-  ) {}
+  )
+  {}
 
   async createMessage(newMessage: Message, roomName: string) {
     const rep = await this.prisma.message.create({
@@ -36,7 +34,7 @@ export class MessageService {
             email: newMessage.user.email,
           },
         },
-		message: newMessage.message,
+        message: newMessage.message,
         room: {
           connect: {
             name: roomName,
@@ -45,7 +43,7 @@ export class MessageService {
         sendAt: new Date(),
       },
     });
-	console.log(rep);
+    // console.log("for " + roomName + " = " + rep);
   }
 
   // async getAllMessages(nameRoom: string)
@@ -62,31 +60,18 @@ export class MessageService {
 	  this.chatRoomService.createChatRoom(room);
   } */
 
-  joinRoom(client: Socket, room: ChatRoom) {
-    console.log({room})
-    client.join(room.name);
-    client.on('SEND_ROOM_MESSAGE', (message: Message) => {
-      this.createMessage(message, message.room.name);
-      client.to(room.name).emit('ROOM_MESSAGE', message);
-    });
-    // console.log(client);
-    // console.log(this.userController.getMe(this.user));
-    /*
-  client.join(room.roomId);
-  client.on('SEND_ROOM_MESSAGE', (message) => {
-	client.to(room.roomId).emit('ROOM_MESSAGE', message);
-	});
-	*/
-    //   https://gist.github.com/crtr0/2896891
-  }
 
-
-  async getAllMessagesByRoomName() {
+  async getAllMessagesByRoomName(roomName: string) {
     const message = await this.prisma.message.findMany({
-		// where: {
+      where: {
+        room: {
+          name: roomName,
+        },
+      },
+    });
+    console.log(message);
+    // console.log("for " + roomName + " = " + {message});
 
-		// }
-	});
     return message;
   }
 

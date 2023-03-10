@@ -7,10 +7,13 @@ class MessageController
 	constructor(private messageService: MessageService) {}
 
 	@Get('all-messages')
-	async getAllMessages()
+	async getAllMessages(room: string)
 	{
-		return (await this.messageService.getAllMessagesByRoomName());
+		return (await this.messageService.getAllMessagesByRoomName(room));
 	}
+
+	// @Get('')
+
 
 }
 

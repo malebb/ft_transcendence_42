@@ -8,8 +8,6 @@ import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
 import EVENTS from '../config/events';
 import { ChatRoomFilter } from '../utils/ChatRoomFilter';
-import Headers from "src/components/Headers";
-import Sidebar from "src/components/Sidebar";
 
 function Rooms()
 {

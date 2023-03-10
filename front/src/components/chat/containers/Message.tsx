@@ -13,14 +13,16 @@ import { Message } from "ft_transcendence";
 import "./message.style.css";
 import style from "../ChatRoom.module.css";
 
-function MessagesContainer()  {
+
+function MessagesContainer() {
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessage, setStateMessage] = useState<Message[]>([]);
   const [currentUser, setCurrentUser] = useState<User>();
   const [currentRoom, setCurrentRoom] = useState<ChatRoom>();
+  const [allMessages, setAllMessages] = useState<Message[]>([]);
   const axiosInstance = useRef<AxiosInstance | null>(null);
-  const { roomId } = useParams();
+  const roomId = useParams();
   const socket = SocketContext();
   let newMessage: Message;
 
@@ -46,14 +48,12 @@ function MessagesContainer()  {
       await axiosInstance.current!.get("/users/me").then((response) => {
         setCurrentUser(response.data);
       });
-      // checker si besoin du 2eme 
+      // checker si besoin du 2eme
       // axiosInstance.current = await axiosToken();
       await axiosInstance
-        .current!.get("/chatRoom/" + roomId)
+        .current!.get("/chatRoom/" + roomId.roomName)
         .then((response) => {
           setCurrentRoom(response.data);
-          console.log({currentRoom});
-          socket?.emit('JOIN_ROOM', currentRoom);
         });
       // set state with the result
     };
@@ -73,32 +73,44 @@ function MessagesContainer()  {
     });
   }, []);
 
-  // useEffect(() => {
-  //   console.log({currentRoom});
-  //   socket?.emit('JOIN_ROOM', currentRoom);
-  // }, []);
-
   useEffect(() => {
     scrollToBottom();
   }, [stateMessage]);
+  
+  useEffect(() => {
+    // socket?.emit("disconnected");
+    // socket?.emit("connection");
+    socket?.emit("JOIN_ROOM", { currentRoom });
+    const getMessages = async () => {
+      axiosInstance.current = await axiosToken();
+      await axiosInstance
+        .current!.get("/message/all-messages")
+        .then((response) => {
+          setAllMessages(response.data);
+        });
+    };
+    getMessages();
 
-//   const getAllMessages = async () => {
-//     try {
-//       axiosInstance.current = await axiosToken();
-//       const allMSGS = await axiosInstance.current.get(
-//         "/room/" + currentRoom?.name + "all-messages"
-// 		// "/messages/" + "all-messages"
-//       );
-//         console.log(allMSGS);
-//     } catch (error: any) {
-//       console.log("error while fetching messages room: ", error);
-//     }
-//   };
+    // setStateMessage(setAllMessages => setAllMessages.concat(stateMessage));
+    // console.log(allMessages);    
+    // console.log(stateMessage);
+  }, []);
+
+    // const getAllMessages = async () => {
+    //   try {
+    //     axiosInstance.current = await axiosToken();
+    //     const allMSGS = await axiosInstance.current.get(
+    //       "/room/" + currentRoom?.name + "all-messages"
+  	// 	// "/messages/" + "all-messages"
+    //     );
+    //       console.log(allMSGS);
+    //   } catch (error: any) {
+    //     console.log("error while fetching messages room: ", error);
+    //   }
+    // };
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    // getAllMessages();
-console.log("merde");
-	
+
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
@@ -128,7 +140,6 @@ console.log("merde");
   }
 
   const GenMessages = () => {
-
     const genDate = (date: Message): string => {
       const newDate = new Date(date.sendAt);
       return `${("0" + newDate.getHours()).slice(-2)}:${(
@@ -191,7 +202,7 @@ console.log("merde");
   const GenTitle = () => {
     return (
       <div className={style.title}>
-        <h1 className={style.logo}>{roomId}</h1>
+        <h1 className={style.logo}>roomId</h1>
         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
           <path
             fill="#413368"
@@ -203,22 +214,21 @@ console.log("merde");
     );
   };
 
-
   return (
     <>
-        {/* <Headers />
+      {/* <Headers />
         <Sidebar /> */}
       {/* <div className="headerAndSidebar">
       </div> */}
-     <div className="chatPage">
-      <div id="content">
-        {/* <GenTitle /> */}
-        <div id="chatContainer" ref={messagesContainerRef}>
-          <GenMessages />
+      <div className="chatPage">
+        <div id="content">
+          {/* <GenTitle /> */}
+          <div id="chatContainer" ref={messagesContainerRef}>
+            <GenMessages />
+          </div>
+          <GenInputButton />
         </div>
-        <GenInputButton />
       </div>
-    </div>
     </>
   );
 }
