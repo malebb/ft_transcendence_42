@@ -29,7 +29,7 @@ export class ChatRoomService
 					}
 				},
 				name: chatRoom.name,
-				password: await argon2.hash(chatRoom.password),
+				password: chatRoom.password.length ? await argon2.hash(chatRoom.password): '',
 				accessibility: chatRoom.accessibility
 			}
 		})

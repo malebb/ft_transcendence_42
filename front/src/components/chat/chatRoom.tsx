@@ -127,12 +127,16 @@ const ChatRoomBase = () =>
 			}
 			try
 			{
-				axiosInstance.current = await axiosToken();
-				const checkPassword = await axiosInstance.current.post('/chatRoom/checkPassword/' + roomName,
-					{password: password}, { headers: {"Content-Type": "application/json"}});
-				setPasswordInfo('The password is not new :');
-				document.getElementById(style.passwordInfo)!.style.color = 'red';
-				return ;
+				if (room.data.accessibility === 'PROTECTED'
+				|| (room.data.accessibility === 'PRIVATE' && room.data.password.length))
+				{
+					axiosInstance.current = await axiosToken();
+					await axiosInstance.current.post('/chatRoom/checkPassword/' + roomName,
+						{password: password}, { headers: {"Content-Type": "application/json"}});
+					setPasswordInfo('The password is not new :');
+					document.getElementById(style.passwordInfo)!.style.color = 'red';
+					return ;
+				}
 			}
 			catch (error: any) {}
 			axiosInstance.current = await axiosToken();

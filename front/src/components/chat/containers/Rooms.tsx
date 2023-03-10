@@ -199,6 +199,7 @@ function Rooms()
 	{
 		const [chatRoomsList, setChatRoomsList] = useState<ChatRoom[]>([]);
 		const [chatRoomSelected, setChatRoomSelected] = useState<string>('');
+		const accessibilityAfterSelect = useRef();
 		const [roomPassword, setRoomPassword] = useState<string>('');
 		const [chatRoomFilter, setChatRoomFilter] = useState<ChatRoomFilter>(ChatRoomFilter["JOINED"]);
 		const [infoPassword, setInfoPassword] = useState<string>('4 digits password : ');
@@ -273,10 +274,23 @@ function Rooms()
 				axiosInstance.current = await axiosToken();
 				const room: AxiosResponse = await axiosInstance.current.get('chatRoom/' + chatRoom.name);
 
-				axiosInstance.current = await axiosToken();
-				const checkPassword = await axiosInstance.current.post('/chatRoom/checkPassword/' + chatRoom.name,
-					{password: roomPassword}, { headers: {"Content-Type": "application/json"}});
-				joinRoom(chatRoom.name);
+				if (room.data.password.length)
+				{
+					axiosInstance.current = await axiosToken();
+					const checkPassword = await axiosInstance.current.post('/chatRoom/checkPassword/' + chatRoom.name,
+						{password: roomPassword}, { headers: {"Content-Type": "application/json"}});
+					joinRoom(chatRoom.name);
+				}
+				else
+				{
+					if (room.data.accessibility === 'PUBLIC')
+						joinRoom(chatRoom.name);
+					else if (room.data.accessibility === 'PRIVATE')
+					{
+						setInfoPassword('password removed');
+						setRoomPassword('');
+					}
+				}
 			}
 			catch (error: any)
 			{
@@ -298,8 +312,8 @@ function Rooms()
 			{
 				if (chatRoomSelected === chatRoom.name)
 				{
-					if (chatRoom.accessibility === 'PROTECTED' ||
-					(chatRoom.accessibility === 'PRIVATE' &&
+					if (accessibilityAfterSelect.current === 'PROTECTED' ||
+					(accessibilityAfterSelect.current === 'PRIVATE' &&
 					chatRoom.password !== ''))
 					{
 							return (<div>
@@ -315,10 +329,11 @@ function Rooms()
 									</form>
 								</div>);
 					}
-					else if (chatRoom.accessibility === 'PRIVATE')
+					else if (accessibilityAfterSelect.current === 'PRIVATE')
 						return (<span>This room is private</span>);
-					else if (chatRoom.accessibility === 'PUBLIC')
+					else if (accessibilityAfterSelect.current === 'PUBLIC')
 							joinRoom(chatRoom.name);
+					console.log(accessibilityAfterSelect.current);
 				}
 				return (	<>
 								<p className="owner">Owner : {chatRoom.owner.username}</p>
@@ -327,14 +342,24 @@ function Rooms()
 						);
 			}
 
-			const updateSelectChatRoom = (newChatRoomSelected: string) =>
+			const updateSelectChatRoom = async (newChatRoomSelected: string) =>
 			{
-				if (chatRoomSelected !== newChatRoomSelected)
+				try
 				{
-					setRoomPassword('');
-					setInfoPassword('4 digits password : ');
+					if (chatRoomSelected !== newChatRoomSelected)
+					{
+						setRoomPassword('');
+						setInfoPassword('4 digits password : ');
+					}
+					axiosInstance.current = await axiosToken();
+					const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + newChatRoomSelected);
+					accessibilityAfterSelect.current = room.data.accessibility;
+					setChatRoomSelected(newChatRoomSelected);
 				}
-				setChatRoomSelected(newChatRoomSelected);
+				catch (error: any)
+				{
+					console.log('error (check accessibility after select) :', error);
+				}
 			}
 
 			return(
