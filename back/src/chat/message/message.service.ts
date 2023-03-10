@@ -31,7 +31,7 @@ export class MessageService {
       data: {
         user: {
           connect: {
-            email: newMessage.user.email,
+            email: newMessage?.user?.email,
           },
         },
         message: newMessage.message,
@@ -46,21 +46,6 @@ export class MessageService {
     // console.log("for " + roomName + " = " + rep);
   }
 
-  // async getAllMessages(nameRoom: string)
-  // {
-  // 	const message = await this.prisma.message.findUnique({
-  // 		where: {
-  // 			name: nameRoom,
-  // 		}
-  // 	})
-  // 	return (message);
-  // }
-  /* createRoom(client: Socket, room: ChatRoom)
-  {
-	  this.chatRoomService.createChatRoom(room);
-  } */
-
-
   async getAllMessagesByRoomName(roomName: string) {
     const message = await this.prisma.message.findMany({
       where: {
@@ -69,28 +54,18 @@ export class MessageService {
         },
       },
     });
-    console.log(message);
-    // console.log("for " + roomName + " = " + {message});
-
+    // console.log(message);
     return message;
   }
 
-  //   async addMessageToChatRoom(newMessage: Message, chatRoom: ChatRoom) {
-  //     await this.prisma.chatRoom.update({
-  //       where: {
-  //         name: newMessage.room.name,
-  //       },
-  //       data: {
-  //         messages: {
-  //           connect:
-  // 		  }
-  //         }
-  //       },
-  //     });
-  //   }
-
-  async deleteAllMessages() {
-    const deleteMessages = await this.prisma.message.deleteMany({});
+  async deleteAllMessagesByRoomName(roomName: string) {
+    const deleteMessages = await this.prisma.message.deleteMany({
+      where: {
+        room: {
+          name: roomName,
+        },
+      },
+    });
   }
 }
 

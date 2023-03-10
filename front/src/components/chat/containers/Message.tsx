@@ -18,8 +18,10 @@ function MessagesContainer() {
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessage, setStateMessage] = useState<Message[]>([]);
-  const [currentUser, setCurrentUser] = useState<User>();
-  const [currentRoom, setCurrentRoom] = useState<ChatRoom>();
+  let currentUser: User;
+  let currentRoom: ChatRoom;
+  // const [currentUser, setCurrentUser] = useState<User>();
+  // const [currentRoom, setCurrentRoom] = useState<ChatRoom>();
   const [allMessages, setAllMessages] = useState<Message[]>([]);
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const roomId = useParams();
@@ -46,14 +48,19 @@ function MessagesContainer() {
       // get the data from the api
       axiosInstance.current = await axiosToken();
       await axiosInstance.current!.get("/users/me").then((response) => {
-        setCurrentUser(response.data);
+        // setCurrentUser(response.data);
+        currentUser = response.data;
+        console.log(currentUser);
       });
       // checker si besoin du 2eme
       // axiosInstance.current = await axiosToken();
       await axiosInstance
         .current!.get("/chatRoom/" + roomId.roomName)
         .then((response) => {
-          setCurrentRoom(response.data);
+          // setCurrentRoom(response.data);
+          currentRoom = response.data;
+          console.log(currentRoom);
+          socket?.emit("JOIN_ROOM", currentRoom);
         });
       // set state with the result
     };
@@ -62,7 +69,17 @@ function MessagesContainer() {
       // make sure to catch any error
       .catch(console.error);
 
+
+
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [stateMessage]);
+  
+  useEffect(() => {
     socket.on("ROOM_MESSAGE", (message) => {
+      console.log(message.room.name);
       // pourquoi (stateMessage) avant ?
       // les ... peuvent entraîner des problèmes de concurrence
       // car l'état précédent est conservé dans la closure
@@ -71,16 +88,13 @@ function MessagesContainer() {
       // et retourne le nouveau
       setStateMessage((stateMessage) => [...stateMessage, message]);
     });
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [stateMessage]);
+  })
   
   useEffect(() => {
     // socket?.emit("disconnected");
     // socket?.emit("connection");
-    socket?.emit("JOIN_ROOM", { currentRoom });
+    // console.log({currentRoom});
+    // socket?.emit("JOIN_ROOM", {currentRoom});
     const getMessages = async () => {
       axiosInstance.current = await axiosToken();
       await axiosInstance
@@ -95,6 +109,7 @@ function MessagesContainer() {
     // console.log(allMessages);    
     // console.log(stateMessage);
   }, []);
+
 
     // const getAllMessages = async () => {
     //   try {
@@ -132,6 +147,7 @@ function MessagesContainer() {
       message: inputMessage,
       sendAt: dateTS,
     };
+    console.log(newMessage);
 
     socket.emit("SEND_ROOM_MESSAGE", newMessage);
 
@@ -163,7 +179,7 @@ function MessagesContainer() {
         <div className="chat-sender">
           <span className="date">{genDate(newMessage)}</span>
           <div className="chat-username">
-            <span>{newMessage.user.username + " : "}</span>
+            <span>{newMessage?.user?.username + " : "}</span>
             <span>{newMessage.message}</span>
           </div>
         </div>
@@ -174,7 +190,7 @@ function MessagesContainer() {
       <>
         {stateMessage?.map((stateMessage, index) => {
           const isCurrentUser =
-            currentUser?.username == stateMessage.user.username;
+            currentUser?.username == stateMessage?.user?.username;
 
           return (
             <div key={index + 1} className="chat-wrapper">
