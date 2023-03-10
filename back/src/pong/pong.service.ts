@@ -8,7 +8,7 @@ import { UserService } from '../user/user.service';
 import { ChallengeService } from '../challenge/challenge.service';
 import { levels } from './levels';
 import { winSteps, levelSteps, modeExplorer,
-		fashionWeek, traveler, failureKnowledge} from 'ft_transcendence';
+		fashionWeek, traveler, failureKnowledge } from 'ft_transcendence';
 import { Stats } from './Stats';
 import { Customisation } from './Customisation';
 
@@ -223,7 +223,7 @@ export class PongService {
 				}
 				catch (error: any)
 				{
-					console.log('error (remove game to spectate) : ', error);
+					console.log('error (remove game to spectate) :', error);
 				}
 				player.to(roomToLeave).emit("opponentDisconnection");
 				this.rooms[roomToLeave].playerGoneCount++;

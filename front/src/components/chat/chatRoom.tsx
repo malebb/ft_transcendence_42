@@ -8,7 +8,6 @@ import style from "./ChatRoom.module.css"
 import Headers from '../Headers';
 import Sidebar from '../Sidebar';
 import { RoomStatus } from './utils/RoomStatus';
-import bcrypt from 'bcryptjs';
 import { User } from 'ft_transcendence';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
@@ -124,31 +123,30 @@ const ChatRoomBase = () =>
 			{
 				setPasswordInfo('4 digits required :');
 				document.getElementById(style.passwordInfo)!.style.color = 'red';
+				return;
 			}
-			else if (await bcrypt.compare(password, room.data.password))
+			try
 			{
+				axiosInstance.current = await axiosToken();
+				const checkPassword = await axiosInstance.current.post('/chatRoom/checkPassword/' + roomName,
+					{password: password}, { headers: {"Content-Type": "application/json"}});
 				setPasswordInfo('The password is not new :');
 				document.getElementById(style.passwordInfo)!.style.color = 'red';
-			}
-			else
-			{
-				const salt = await bcrypt.genSalt(10);
-				const passwordHashed: string = await bcrypt.hash(password, salt);
-
-				axiosInstance.current = await axiosToken();
-				await axiosInstance.current.patch('/chatRoom/password/' + roomName, "password=" + passwordHashed);
-				if (room.data.accessibility === 'PUBLIC')
-				{
-					axiosInstance.current = await axiosToken();
-					await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomName, "accessibility=PROTECTED");
-				}
-				setPasswordInfo('Change the room password: ');
-				setBtnValue("Change password");
-				setPassword('');
-				document.getElementById(style.passwordInfo)!.style.color = 'white';
-				alert('Password updated successfully!');
 				return ;
 			}
+			catch (error: any) {}
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current.patch('/chatRoom/password/' + roomName, "password=" + password);
+			if (room.data.accessibility === 'PUBLIC')
+			{
+				axiosInstance.current = await axiosToken();
+				await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomName, "accessibility=PROTECTED");
+			}
+			setPasswordInfo('Change the room password: ');
+			setBtnValue("Change password");
+			setPassword('');
+			document.getElementById(style.passwordInfo)!.style.color = 'white';
+			alert('Password updated successfully!');
 			return ;
 		}
 		catch (error: any)

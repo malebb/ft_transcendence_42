@@ -64,6 +64,12 @@ class ChatRoomController
 		await this.chatRoomService.joinChatRoom(chatRoomName, chatRoomDto.userId)
 	}
 
+	@Post('checkPassword/:name')
+	async checkPassword(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
+	{
+		await this.chatRoomService.checkPassword(chatRoomName, chatRoomDto.password);
+	}
+
 	@Patch('changeOwner/:name')
 	async updateOwner(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
 	{

@@ -4,7 +4,6 @@ import InputButton from "../inputs/InputButton";
 import { accessibilities } from "../utils/RoomAccessibilities";
 import { AxiosInstance, AxiosResponse } from 'axios';
 import { axiosToken } from '../../../api/axios';
-import bcrypt from 'bcryptjs';
 import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
 import EVENTS from '../config/events';
@@ -51,12 +50,6 @@ function Rooms()
 		}
 
 		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div id="creationPassword"><label id="passwordInfo">{passwordInfo}</label><input id="creationPasswordInput" type="password" value={password} onChange={updatePassword} autoComplete="on"/></div>: <></>;
-
-		const hashPassword = async (password: string) =>
-		{
-			const salt = await bcrypt.genSalt(10);
-			return (await bcrypt.hash(password, salt));
-		}
 
 		const checkPassword = (): boolean => 
 		{
@@ -132,7 +125,7 @@ function Rooms()
 					owner: {...user.data},
 					name: form.get("roomName")!.toString().trim(),
 					accessibility: Accessibility[roomAccessibility as keyof typeof Accessibility],
-					password: roomAccessibility === 'PROTECTED' ? await hashPassword(password) : ''
+					password: roomAccessibility === 'PROTECTED' ? password : ''
 				};
 				socket.emit(EVENTS.CLIENT.CREATE_ROOM, newRoom);
 				setName('');
@@ -280,17 +273,20 @@ function Rooms()
 				axiosInstance.current = await axiosToken();
 				const room: AxiosResponse = await axiosInstance.current.get('chatRoom/' + chatRoom.name);
 
-				if (await bcrypt.compare(roomPassword, room.data.password))
-					joinRoom(chatRoom.name);
-				else
+				axiosInstance.current = await axiosToken();
+				const checkPassword = await axiosInstance.current.post('/chatRoom/checkPassword/' + chatRoom.name,
+					{password: roomPassword}, { headers: {"Content-Type": "application/json"}});
+				joinRoom(chatRoom.name);
+			}
+			catch (error: any)
+			{
+				if (error.response.status === 403)
 				{
 					setInfoPassword('Wrong password');
 					setRoomPassword('');
 				}
-			}
-			catch (error: any)
-			{
-				console.log('error: ', error);
+				else
+					console.log('error (check password) :', error);
 			}
 		}
 

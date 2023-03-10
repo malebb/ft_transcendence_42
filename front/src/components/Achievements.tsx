@@ -113,6 +113,7 @@ const Achievements = () =>
 			{
 				axiosInstance.current = await axiosToken();
 				const user: AxiosResponse = (await axiosInstance.current.get('users/profile/' + userId));
+				axiosInstance.current = await axiosToken();
 				const stats: AxiosResponse = await axiosInstance.current.get('/stats/' + user.data.id);
 				setStats(stats.data);
 			}

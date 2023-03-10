@@ -331,7 +331,7 @@ export default function Canvas()
 			}
 			catch (error: any)
 			{
-				console.log('error (cancel challenge) : ', error);
+				console.log('error (cancel challenge) :', error);
 			}
 		}
 
@@ -380,7 +380,7 @@ export default function Canvas()
 			}
 			catch (error: any)
 			{
-				console.log('error (init challenge) : ', error);
+				console.log('error (init challenge) :', error);
 			}
 		}
 
@@ -424,7 +424,7 @@ export default function Canvas()
 				}
 				catch (error: any)
 				{
-					console.log('error (matchmaking) : ', error);
+					console.log('error (matchmaking) :', error);
 				}
 			} 
 		}

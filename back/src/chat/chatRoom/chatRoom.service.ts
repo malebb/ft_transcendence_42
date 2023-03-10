@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChatRoom } from 'ft_transcendence';
 import { Accessibility } from 'ft_transcendence';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class ChatRoomService
@@ -28,10 +29,22 @@ export class ChatRoomService
 					}
 				},
 				name: chatRoom.name,
-				password: chatRoom.password,
+				password: await argon2.hash(chatRoom.password),
 				accessibility: chatRoom.accessibility
 			}
 		})
+	}
+
+	async checkPassword(chatRoomName: string, password: string)
+	{
+		const room = await this.prisma.chatRoom.findUnique({
+			where: {
+				name: chatRoomName
+			}
+		});
+
+		if (!(await argon2.verify(room.password, password)))
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
 	async getChatRoom(name: string)
@@ -154,7 +167,7 @@ export class ChatRoomService
 				name: chatRoomName
 			},
 			data: {
-				password: password,
+				password: await argon2.hash(password),
 			}
 		});
 	}
