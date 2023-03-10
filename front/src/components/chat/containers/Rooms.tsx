@@ -222,7 +222,7 @@ function Rooms()
 			);
 		}
 
-		const accessibilityLogo = (accessibility: Accessibility) =>
+		const accessibilityLogo = (accessibility: Accessibility, password: string) =>
 		{
 			const logoWidth = 25;
 
@@ -231,7 +231,8 @@ function Rooms()
 				case 'PUBLIC':
 					return (<img src="http://localhost:3000/images/public.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 				case 'PRIVATE':
-					return (<img src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+					return (password.length ? <img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>
+					: <img src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 				case 'PROTECTED':
 					return (<img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 			}
@@ -277,7 +278,7 @@ function Rooms()
 				if (room.data.password.length)
 				{
 					axiosInstance.current = await axiosToken();
-					const checkPassword = await axiosInstance.current.post('/chatRoom/checkPassword/' + chatRoom.name,
+					await axiosInstance.current.post('/chatRoom/checkPassword/' + chatRoom.name,
 						{password: roomPassword}, { headers: {"Content-Type": "application/json"}});
 					joinRoom(chatRoom.name);
 				}
@@ -333,11 +334,10 @@ function Rooms()
 						return (<span>This room is private</span>);
 					else if (accessibilityAfterSelect.current === 'PUBLIC')
 							joinRoom(chatRoom.name);
-					console.log(accessibilityAfterSelect.current);
 				}
 				return (	<>
 								<p className="owner">Owner : {chatRoom.owner.username}</p>
-								{accessibilityLogo(chatRoom.accessibility)}
+								{accessibilityLogo(chatRoom.accessibility, chatRoom.password)}
 							</>
 						);
 			}
