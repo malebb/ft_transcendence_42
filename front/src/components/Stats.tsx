@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useRef, useState, useEffect } from 'react'
-import { AxiosInstance } from 'axios';
+import { AxiosInstance, AxiosResponse } from 'axios';
 import { axiosToken } from '../api/axios'
 import StatsData from '../interfaces/StatsData';
 import '../styles/Stats.css';
@@ -16,18 +16,25 @@ const Stats = () => {
 	useEffect(() => {
 
 			const initStats = async () => {
-				axiosInstance.current = await axiosToken();
-				const username = (await axiosInstance.current.get('users/profile/' + userId, {})).data.username;
-				axiosInstance.current = await axiosToken();
-				let stats: StatsData = (await axiosInstance.current.get('/stats/' + username)).data;
-				setVictory(stats.victory);
-				setDefeat(stats.defeat);
-				setXp(stats.xp);
-				setLevel(stats.level);
+				try
+				{
+					axiosInstance.current = await axiosToken();
+					let stats: AxiosResponse = await axiosInstance.current.get('/stats/' + userId);
+					let statsData: StatsData = stats.data
+
+					setVictory(statsData.victory);
+					setDefeat(statsData.defeat);
+					setXp(statsData.xp);
+					setLevel(statsData.level);
+				}
+				catch (error: any)
+				{
+					console.log("error (init stats) : ", error);
+				}
 			}
 			initStats();
 
-	}, []);
+	}, [userId]);
 	return (
 	<div>
 	  <div id="stats">

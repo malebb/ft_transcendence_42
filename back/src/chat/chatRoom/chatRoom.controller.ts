@@ -1,20 +1,25 @@
-import { Controller, Get, Param, Post, Body, Headers, Patch } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Patch,
+ParseIntPipe} from '@nestjs/common';
+import { IsInt, IsString, IsOptional } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 import { ChatRoomService } from './chatRoom.service';
 
 import { GetUser } from '../../auth/decorator';
 
 import { Accessibility } from 'ft_transcendence';
 
-interface UserDto {
-	username: string
-}
+class ChatRoomDto {
+	@IsInt()
+	@IsOptional()
+	@Type(() => Number)
+	userId?: number;
 
-interface passwordDto {
-	password: string
-}
+	@IsString()
+	@IsOptional()
+	password?: string;
 
-interface AccessibilityDto {
-	accessibility: Accessibility;
+	@IsOptional()
+	accessibility?: Accessibility;
 }
 
 @Controller('chatRoom')
@@ -29,16 +34,16 @@ class ChatRoomController
 		return (await this.chatRoomService.getAllRooms());
 	}
 
-	@Get('notJoined:username')
-	async getNotJoinedRooms(@Param('username') username: string)
+	@Get('notJoined/:userId')
+	async getNotJoinedRooms(@Param('userId', ParseIntPipe) userId: number)
 	{
-		return (await this.chatRoomService.getNotJoinedRooms(username));
+		return (await this.chatRoomService.getNotJoinedRooms(userId));
 	}
 
-	@Get('joined:username')
-	async getJoinedRooms(@Param('username') username: string)
+	@Get('joined/:userId')
+	async getJoinedRooms(@Param('userId', ParseIntPipe) userId: number)
 	{
-		return (await this.chatRoomService.getJoinedRooms(username));
+		return (await this.chatRoomService.getJoinedRooms(userId));
 	}
 
 	@Get(':name')
@@ -54,33 +59,33 @@ class ChatRoomController
 	}
 
 	@Post(':name')
-	async joinChatRoom(@Param('name') chatRoomName: string, @Body() user: UserDto)
+	async joinChatRoom(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
 	{
-		await this.chatRoomService.joinChatRoom(chatRoomName, user.username)
+		await this.chatRoomService.joinChatRoom(chatRoomName, chatRoomDto.userId)
 	}
 
 	@Patch('changeOwner/:name')
-	async updateOwner(@Param('name') chatRoomName: string, @Body() user: UserDto)
+	async updateOwner(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
 	{
-		await this.chatRoomService.updateOwner(chatRoomName, user.username);
+		await this.chatRoomService.updateOwner(chatRoomName, chatRoomDto.userId);
 	}
 
 	@Patch('addAdmin/:name')
-	async addAdmin(@Param('name') chatRoomName: string, @Body() user: UserDto)
+	async addAdmin(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
 	{
-		await this.chatRoomService.addAdmin(chatRoomName, user.username);
+		await this.chatRoomService.addAdmin(chatRoomName, chatRoomDto.userId);
 	}
 
 	@Patch('removeAdmin/:name')
-	async removeAdmin(@Param('name') chatRoomName: string, @Body() user: UserDto)
+	async removeAdmin(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
 	{
-		await this.chatRoomService.removeAdmin(user.username, chatRoomName);
+		await this.chatRoomService.removeAdmin(chatRoomDto.userId, chatRoomName);
 	}
 
 	@Patch('password/:name')
-	async updateRoomPassword(@Param('name') chatRoomName: string, @Body() password: passwordDto)
+	async updateRoomPassword(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
 	{
-		await this.chatRoomService.updateRoomPassword(chatRoomName, password.password)
+		await this.chatRoomService.updateRoomPassword(chatRoomName, chatRoomDto.password)
 	}
 
 	@Patch('removePassword/:name')
@@ -90,9 +95,9 @@ class ChatRoomController
 	}
 
 	@Patch('changeAccessibility/:name')
-	async changeAccessibility(@Param('name') chatRoomName: string, @Body() accessibility: AccessibilityDto)
+	async changeAccessibility(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
 	{
-		await this.chatRoomService.changeAccessibility(chatRoomName, accessibility.accessibility);
+		await this.chatRoomService.changeAccessibility(chatRoomName, chatRoomDto.accessibility);
 	}
 
 	@Patch('leaveRoom/:name')

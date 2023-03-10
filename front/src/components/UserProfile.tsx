@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { AxiosResponse, AxiosInstance } from 'axios'
-import axios from 'axios'
 import {getToken, axiosMain, axiosToken} from '../api/axios'
 import '../styles/UserProfile.css';
 import Sidebar from './Sidebar';
@@ -282,21 +281,24 @@ const UserProfile = () => {
 	{
 		const checkIfFriend = async () =>
 		{
-			let friendList: FriendType[] = [];
-			let profileUser: NeutralUser;
-			let myProfile: NeutralUser;
-
-			axiosInstance.current = await axiosToken();
-			friendList = (await axiosInstance.current.get('/users/friend-list')).data;
-			profileUser = (await axiosInstance.current.get('/users/profile/' + userId)).data;
-			myProfile = (await axiosInstance.current.get('/users/me')).data;
-			if (profileUser.username === myProfile.username)
-				setIsFriend(true);
-			friendList.forEach((friend) => 
+			try
 			{
-				if (friend.username === profileUser.username)
+				axiosInstance.current = await axiosToken();
+				let friendList: AxiosResponse = await axiosInstance.current.get('/users/friend-list');
+				const profileUser: AxiosResponse = await axiosInstance.current.get('/users/profile/' + userId);
+				const myProfile: AxiosResponse = await axiosInstance.current.get('/users/me');
+				if (profileUser.data.username === myProfile.data.username)
 					setIsFriend(true);
-			});
+				friendList.data.forEach((friend: FriendType) => 
+				{
+					if (friend.username === profileUser.data.username)
+						setIsFriend(true);
+				});
+			}
+			catch (error: any)
+			{
+				console.log('error (check friend) :', error);
+			}
 		}
 		checkIfFriend();
 	}, []);
@@ -332,7 +334,7 @@ const UserProfile = () => {
         </div>
         }
         {/* //  <button onClick={deleteRequest}>Unfriend</button>} */}
-        {friendStatus === "declined" && sendingStatus == "receiver" && <button className='profileButtonAddFriend' onClick={acceptRequest}>Add friend +</button>}
+        {friendStatus === "declined" && sendingStatus === "receiver" && <button className='profileButtonAddFriend' onClick={acceptRequest}>Add friend +</button>}
         {/* {friendStatus === "declined" && sendingStatus == "creator" && <button className='profileButtonWaiting' disabled>Not Accepted yet</button>} */}
         {friendStatus === "pending" && sendingStatus === "receiver" && <div><button className='profileButtonAddFriend' onClick={acceptRequest}>Accept req</button><button className='profileButtonRefuse' onClick={refuseRequest}>Reject Req</button></div>}
         {friendStatus === "pending" && sendingStatus === "creator" && <div> 
@@ -350,7 +352,7 @@ const UserProfile = () => {
         </div>
         }
         {/* <button disabled>Pending</button>} */}
-        {(friendStatus === "" && (userId != userSessionId)) ?
+        {(friendStatus === "" && (userId !== userSessionId)) ?
           <button className='profileButtonAddFriend' onClick={AddFriend}>Add friend +</button> : (<></>)
           }
         </div>

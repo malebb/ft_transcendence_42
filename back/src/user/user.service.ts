@@ -82,12 +82,12 @@ export class UserService {
         return user;
     }
 
-	async getCustomisation(username: string)
+	async getCustomisation(userId: number)
 	{
 		const customisation = await this.prisma.user.findUnique(
 		{
 			where: {
-				email: username,
+				id: userId,
 			},
 			select: {
 				skin: true,

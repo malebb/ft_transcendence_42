@@ -33,6 +33,11 @@ model User {
   stats Stats?
   gamePlayed GamePlayed[]
   achievementDone AchievementDone[]
+  leftPlayerToSpectate		Game[] @relation(name: "LeftPlayerToSpectate")
+  rightPlayerToSpectate		Game[] @relation(name: "RightPlayerToSpectate")
+  leftPlayerHistory		GamePlayed[] @relation(name: "LeftPlayerHistory")
+  rightPlayerHistory		GamePlayed[] @relation(name: "RightPlayerHistory")
+
 
   ownerChats	ChatRoom[]
   adminChats	ChatRoom[] @relation(name: "UserAdmin")
@@ -102,8 +107,10 @@ model Stats {
 
 model GamePlayed {
 	id				Int			@id @default(autoincrement())
-	leftUsername String
-	rightUsername String
+	leftPlayer 		User @relation(name: "LeftPlayerHistory", fields: [leftPlayerId], references: [id])
+	leftPlayerId	Int
+	rightPlayer		User @relation(name: "RightPlayerHistory", fields: [rightPlayerId], references: [id])
+	rightPlayerId	Int
 	leftScore		Int
 	rightScore		Int
   	date DateTime @default(now())
@@ -122,6 +129,8 @@ model AchievementDone {
 model Game {
 	id				Int			@id @default(autoincrement())
 	gameId			String		@unique
-	leftUsername 	String
-	rightUsername	String
+	leftPlayer 		User @relation(name: "LeftPlayerToSpectate", fields: [leftPlayerId], references: [id])
+	leftPlayerId	Int
+	rightPlayer		User @relation(name: "RightPlayerToSpectate", fields: [rightPlayerId], references: [id])
+	rightPlayerId	Int
 }

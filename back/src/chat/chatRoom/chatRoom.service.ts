@@ -14,17 +14,17 @@ export class ChatRoomService
 			data: {
 				owner: {
 					connect: {
-						email: chatRoom.owner.email,
+						id: chatRoom.owner.id,
 					}
 				},
 				admins: {
 					connect: {
-						email: chatRoom.owner.email,
+						id: chatRoom.owner.id,
 					}
 				},
 				members: {
 					connect: {
-						email: chatRoom.owner.email,
+						id: chatRoom.owner.id,
 					}
 				},
 				name: chatRoom.name,
@@ -53,13 +53,13 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
-	async getNotJoinedRooms(username: string)
+	async getNotJoinedRooms(userId: number)
 	{
 		const chatRoom = await this.prisma.chatRoom.findMany({
 			where: {
 				members: {
 					none : {
-						email: username
+						id: userId
 					}
 				},
 			},
@@ -70,13 +70,13 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
-	async getJoinedRooms(username: string)
+	async getJoinedRooms(userId: number)
 	{
 		const chatRoom = await this.prisma.chatRoom.findMany({
 			where: {
 				members: {
 					some: {
-							email: username,
+							id: userId,
 					},
 				},
 			},
@@ -97,11 +97,11 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
-	async joinChatRoom(chatRoomName: string, username: string)
+	async joinChatRoom(chatRoomName: string, userId: number)
 	{
 		await this.prisma.user.update({
 			where: {
-				email: username
+				id: userId
 			},
 			data : {
 				memberChats : {
@@ -198,7 +198,7 @@ export class ChatRoomService
 		});
 	}
 
-	async updateOwner(chatRoomName: string, username: string)
+	async updateOwner(chatRoomName: string, userId: number)
 	{
 		await this.prisma.chatRoom.update({
 			where: {
@@ -207,19 +207,19 @@ export class ChatRoomService
 			data: {
 				owner: {
 					connect: {
-						email: username,
+						id: userId,
 					}
 				},
 				admins: {
 					connect: {
-						email: username,
+						id: userId,
 					}
 				},
 			}
 		});
 	}
 
-	async addAdmin(chatRoomName: string, username: string)
+	async addAdmin(chatRoomName: string, userId: number)
 	{
 		await this.prisma.chatRoom.update({
 			where: {
@@ -228,21 +228,21 @@ export class ChatRoomService
 			data: {
 				admins: {
 					connect: {
-						email: username,
+						id: userId,
 					}
 				},
 			}
 		});
 	}
 
-	async removeAdmin(username: string, chatRoomName: string)
+	async removeAdmin(userId: number, chatRoomName: string)
 	{
 		await this.prisma.chatRoom.update({
 			where: {
 				name: chatRoomName
 			},
 			data: {
-				admins: { disconnect: [{email: username}]}
+				admins: { disconnect: [{id: userId}]}
 			}
 		});
 	}

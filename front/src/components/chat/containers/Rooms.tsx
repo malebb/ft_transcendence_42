@@ -252,10 +252,10 @@ function Rooms()
 		{
 			try {
 				axiosInstance.current = await axiosToken();
-				const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
+				const user: AxiosResponse = await axiosInstance.current.get('/users/me');
 
 				await axiosInstance.current.post('/chatRoom/' + roomName,
-					{username: user.data.email},
+					{userId: user.data.id},
 					{headers: {'Content-Type': 'application/json'},
 				});
 				enterRoom(roomName);
@@ -399,16 +399,16 @@ function Rooms()
 				{
 					let chatRooms: AxiosResponse;
 					axiosInstance.current = await axiosToken();
-					const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
+					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
 					if (chatRoomFilter === 'JOINED')
 					{
 						axiosInstance.current = await axiosToken();
-						chatRooms = await axiosInstance.current!.get('/chatRoom/joined' + user.data.username);
+						chatRooms = await axiosInstance.current!.get('/chatRoom/joined/' + user.data.id);
 					}
 					else
 					{
 						axiosInstance.current = await axiosToken();
-						chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined' + user.data.username);
+						chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined/' + user.data.id);
 					}
 					setChatRoomsList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
 					(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));

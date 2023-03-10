@@ -8,7 +8,7 @@ export class Player
 
 	constructor(public posX: number, public posY: number, public width: number,
 	public height: number, public vel: number, public skin: string, public readonly position: string,
-	public username: string, public ctx: CanvasRenderingContext2D | null, private canvasSize: Size | null)
+	public username: string, public id: number, public ctx: CanvasRenderingContext2D | null, private canvasSize: Size | null)
 	{
 	}
 

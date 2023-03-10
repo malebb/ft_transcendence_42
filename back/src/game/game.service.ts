@@ -7,21 +7,36 @@ export class GameService {
     {
 	}
 
-	async addGame(gameId: string, leftUsername: string, rightUsername: string)
+	async addGame(gameId: string, leftUserId: number, rightUserId: number)
 	{
 		await this.prisma.game.create(
 		{
   			data: {
+				 leftPlayer: {
+					connect : {
+						id: leftUserId
+					}
+				 },
+				 rightPlayer: {
+					connect : {
+						id: rightUserId
+					}	
+				 },
    				 gameId: gameId,
-				 leftUsername: leftUsername,
-				 rightUsername: rightUsername,
 			},
 		})
 	}
 
 	async getGames()
 	{
-		return (await this.prisma.game.findMany());
+		return (await this.prisma.game.findMany(
+		{
+			include: {
+				leftPlayer: true,
+				rightPlayer: true
+			}
+		}
+		));
 	}
 
 	async removeGame(gameId: string)

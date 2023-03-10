@@ -209,8 +209,8 @@ export default function Canvas()
 
 		async function launchGame()
 		{
-			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", null, null), room.current!.leftPlayer);
-			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", null, null), room.current!.rightPlayer);
+			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", 0, null, null), room.current!.leftPlayer);
+			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", 0, null, null), room.current!.rightPlayer);
 
 			leftPlayer.current.setCtx(ctx.current!);
 			rightPlayer.current.setCtx(ctx.current!);
@@ -280,15 +280,23 @@ export default function Canvas()
 			document.addEventListener('keyup', notifyKeyReleased);
 			// TODO fetch user selected map in database
 
-			axiosInstance.current = await axiosToken();
-			map.current = draw.current!.initGameMap((await axiosInstance.current!.get('/users/me', {})).data.map);
-			map.current!.onload = function()
+			try
 			{
-				speedPowerUp.current = draw.current!.initSpeedPowerUp();
-				speedPowerUp.current!.onload = function()
+				axiosInstance.current = await axiosToken();
+				const user: AxiosResponse = await axiosInstance.current!.get('/users/me');
+				map.current = draw.current!.initGameMap(user.data.map);
+				map.current!.onload = function()
 				{
-					render();
+					speedPowerUp.current = draw.current!.initSpeedPowerUp();
+					speedPowerUp.current!.onload = function()
+					{
+						render();
+					}
 				}
+			}
+			catch (error: any)
+			{
+				console.log('error (init game map) :', error);
 			}
 		}
 
@@ -323,7 +331,7 @@ export default function Canvas()
 			}
 			catch (error: any)
 			{
-				console.log('error: ', error);
+				console.log('error (cancel challenge) : ', error);
 			}
 		}
 
@@ -346,8 +354,8 @@ export default function Canvas()
 					let cancelZone = draw.current!.text("cancel challenge", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
 	
 					let zones = [cancelZone];
-					let playerData: PlayerData = {id: "", username: user.data.username, skin: user.data.skin, powerUpMode: challenge.data.powerUpMode};
-	
+					let playerData: PlayerData = {userId: user.data.id, id: "", username: user.data.username, skin: user.data.skin, powerUpMode: challenge.data.powerUpMode};
+
 					socket.current = io(`ws://localhost:3333/pong`,
 					{
 						transports: ["websocket"],
@@ -372,7 +380,7 @@ export default function Canvas()
 			}
 			catch (error: any)
 			{
-				console.log('error: ', error);
+				console.log('error (init challenge) : ', error);
 			}
 		}
 
@@ -383,47 +391,57 @@ export default function Canvas()
 
 			background.onload = async function()
 			{
-				draw.current!.outGameBackground(background);
-				draw.current!.matchmaking();
-
-				let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
-
-				let zones = [cancelZone];
-				let playerData: PlayerData = {id: "", username: "", skin: "", powerUpMode: powerUpMode.current};
-
-				axiosInstance.current = await axiosToken();
-				playerData.skin = (await axiosInstance.current!.get('/users/me', {})).data.skin;
-				axiosInstance.current = await axiosToken();
-				playerData.username = (await axiosInstance.current!.get('/users/me', {})).data.email;
-
-				socket.current = io(`ws://localhost:3333/pong`,
+				try
 				{
-					transports: ["websocket"],
-					query:	{
-								playerData: JSON.stringify(playerData),
-								spectator: false,
-								challenge: false
-							},
-					forceNew: true
-				});
-				cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
-				socket.current!.on("connect", async () => {
-					await findRoom().then(data => {
-						room.current = JSON.parse(data).room;
-						position.current = JSON.parse(data).position;
+					draw.current!.outGameBackground(background);
+					draw.current!.matchmaking();
+					axiosInstance.current = await axiosToken();
+					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
+
+					let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+
+						let zones = [cancelZone];
+					let playerData: PlayerData = {userId: user.data.id, id: "", username: user.data.username, skin: user.data.skin, powerUpMode: powerUpMode.current};
+					socket.current = io(`ws://localhost:3333/pong`,
+					{
+						transports: ["websocket"],
+						query:	{
+									playerData: JSON.stringify(playerData),
+									spectator: false,
+									challenge: false
+								},
+						forceNew: true
 					});
-					destroyLink(cancelLink);
-					await launchGame();
-				});
+					cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
+					socket.current!.on("connect", async () => {
+						await findRoom().then(data => {
+							room.current = JSON.parse(data).room;
+							position.current = JSON.parse(data).position;
+						});
+						destroyLink(cancelLink);
+						await launchGame();
+					});
+				}
+				catch (error: any)
+				{
+					console.log('error (matchmaking) : ', error);
+				}
 			} 
 		}
 
 		async function changeSkin(name : string)
 		{
-			draw.current!.skins = [];
-			axiosInstance.current = await axiosToken();
-			await axiosInstance.current!.post('/users/', {skin: name});
-			menu();
+			try
+			{
+				draw.current!.skins = [];
+				axiosInstance.current = await axiosToken();
+				await axiosInstance.current!.post('/users/', {skin: name});
+				menu();
+			}
+			catch (error: any)
+			{
+				console.log("error (change skin) :", error);
+			}
 		}
 
 		function skins()
@@ -448,9 +466,16 @@ export default function Canvas()
 
 		async function changeMap(name: string)
 		{
-			axiosInstance.current = await axiosToken();
-			axiosInstance.current!.post('/users/', {map: name});
-			menu();
+			try
+			{
+				axiosInstance.current = await axiosToken();
+				axiosInstance.current!.post('/users/', {map: name});
+				menu();
+			}
+			catch (error: any)
+			{
+				console.log('error: (change map) :', error);
+			}
 		}
 
 		function maps()
@@ -535,13 +560,6 @@ export default function Canvas()
 			animationFrameId.current = window.requestAnimationFrame(render)
 		}
 
-		async function initUser()
-		{
-
-			axiosInstance.current = await axiosToken();
-			await axiosInstance.current!.get('/users/me', {});
-		}
-
 		function redirectSignInPage()
 		{
 			navigate.current('/signin', { replace: true});
@@ -563,22 +581,29 @@ export default function Canvas()
 
 		if (challengeId !== undefined)
 		{
-			axiosInstance.current = await axiosToken();
-			let challenge: AxiosResponse = await axiosInstance.current!.get('/challenge/' + challengeId);
-
-			if (challenge.data === '')
+			try
 			{
-				setIsChallenger(false);
-				return ;
+				axiosInstance.current = await axiosToken();
+				let challenge: AxiosResponse = await axiosInstance.current!.get('/challenge/' + challengeId);
+
+				if (challenge.data === '')
+				{
+					setIsChallenger(false);
+					return ;
+				}
+				axiosInstance.current = await axiosToken();
+				let user: AxiosResponse = await axiosInstance.current!.get('/users/me');
+
+				if (user.data.id !== challenge.data.sender.id &&
+					user.data.id !== challenge.data.receiver.id)
+				{
+					setIsChallenger(false);
+					return ;
+				}
 			}
-			axiosInstance.current = await axiosToken();
-			let user: AxiosResponse = await axiosInstance.current!.get('/users/me');
-
-			if (user.data.id !== challenge.data.sender.id &&
-				user.data.id !== challenge.data.receiver.id)
+			catch (error: any)
 			{
-				setIsChallenger(false);
-				return ;
+				console.log('error (check challenger) :', error);
 			}
 		}
 		else
@@ -592,7 +617,6 @@ export default function Canvas()
 		}
 		else
 		{
-			await initUser();
 			let googleFont = draw.current!.initFont();
 			document.fonts.add(googleFont);
 			googleFont.load().then(() => {

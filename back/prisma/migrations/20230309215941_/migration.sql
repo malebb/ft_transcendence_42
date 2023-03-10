@@ -75,8 +75,8 @@ CREATE TABLE "Stats" (
 -- CreateTable
 CREATE TABLE "GamePlayed" (
     "id" SERIAL NOT NULL,
-    "leftUsername" TEXT NOT NULL,
-    "rightUsername" TEXT NOT NULL,
+    "leftPlayerId" INTEGER NOT NULL,
+    "rightPlayerId" INTEGER NOT NULL,
     "leftScore" INTEGER NOT NULL,
     "rightScore" INTEGER NOT NULL,
     "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -99,8 +99,8 @@ CREATE TABLE "AchievementDone" (
 CREATE TABLE "Game" (
     "id" SERIAL NOT NULL,
     "gameId" TEXT NOT NULL,
-    "leftUsername" TEXT NOT NULL,
-    "rightUsername" TEXT NOT NULL,
+    "leftPlayerId" INTEGER NOT NULL,
+    "rightPlayerId" INTEGER NOT NULL,
 
     CONSTRAINT "Game_pkey" PRIMARY KEY ("id")
 );
@@ -169,7 +169,19 @@ ALTER TABLE "ChatRoom" ADD CONSTRAINT "ChatRoom_ownerId_fkey" FOREIGN KEY ("owne
 ALTER TABLE "Stats" ADD CONSTRAINT "Stats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "GamePlayed" ADD CONSTRAINT "GamePlayed_leftPlayerId_fkey" FOREIGN KEY ("leftPlayerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GamePlayed" ADD CONSTRAINT "GamePlayed_rightPlayerId_fkey" FOREIGN KEY ("rightPlayerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "AchievementDone" ADD CONSTRAINT "AchievementDone_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Game" ADD CONSTRAINT "Game_leftPlayerId_fkey" FOREIGN KEY ("leftPlayerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Game" ADD CONSTRAINT "Game_rightPlayerId_fkey" FOREIGN KEY ("rightPlayerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_UserAdmin" ADD CONSTRAINT "_UserAdmin_A_fkey" FOREIGN KEY ("A") REFERENCES "ChatRoom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
