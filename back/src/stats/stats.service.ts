@@ -7,12 +7,12 @@ export class StatsService {
     {
 	}
 
-	async addVictory(username: string)
+	async addVictory(userId: number)
 	{
 		await this.prisma.user.update(
 		{
 			where: {
-					email: username
+					id: userId
 			},
 			data: {
 				stats: {
@@ -26,12 +26,12 @@ export class StatsService {
 		})
 	}
 
-	async addDefeat(username: string)
+	async addDefeat(userId: number)
 	{
 		await this.prisma.user.update(
 		{
 			where: {
-					email: username
+					id: userId
 			},
 			data: {
 				stats: {
@@ -45,12 +45,12 @@ export class StatsService {
 		})
 	}
 
-	async addXp(username: string, amount: number)
+	async addXp(userId: number, amount: number)
 	{
 		await this.prisma.user.update(
 		{
 			where: {
-					email: username
+					id: userId 
 			},
 			data: {
 				stats: {
@@ -64,12 +64,12 @@ export class StatsService {
 		})
 	}
 
-	async addLevel(username: string)
+	async addLevel(userId: number)
 	{
 		await this.prisma.user.update(
 		{
 			where: {
-					email: username
+					id: userId
 			},
 			data: {
 				stats: {
@@ -83,12 +83,12 @@ export class StatsService {
 		})
 	}
 
-	async updateLevel(username: string, newLevel: number)
+	async updateLevel(userId: number, newLevel: number)
 	{
 		await this.prisma.user.update(
 		{
 			where: {
-					email: username
+					id: userId
 			},
 			data: {
 				stats: {
@@ -100,12 +100,12 @@ export class StatsService {
 		})
 	}
 
-	async updateModeExplorer(username: string)
+	async updateModeExplorer(userId: number)
 	{
 		await this.prisma.user.update(
 		{
 			where: {
-					email: username
+					id: userId
 			},
 			data: {
 				stats: {
@@ -117,12 +117,12 @@ export class StatsService {
 		})
 	}
 
-	async updateFashionWeek(username: string)
+	async updateFashionWeek(userId: number)
 	{
 		await this.prisma.user.update(
 		{
 			where: {
-					email: username
+					id: userId
 			},
 			data: {
 				stats: {
@@ -134,12 +134,12 @@ export class StatsService {
 		})
 	}
 
-	async updateTraveler(username: string)
+	async updateTraveler(userId: number)
 	{
 		await this.prisma.user.update(
 		{
 			where: {
-					email: username
+					id: userId
 			},
 			data: {
 				stats: {
@@ -151,12 +151,12 @@ export class StatsService {
 		})
 	}
 
-	async updateFailureKnowledge(username: string)
+	async updateFailureKnowledge(userId: number)
 	{
 		await this.prisma.user.update(
 		{
 			where: {
-					email: username
+					id: userId
 			},
 			data: {
 				stats: {
@@ -168,12 +168,12 @@ export class StatsService {
 		})
 	}
 
-	async getStats(username: string)
+	async getStats(id: number)
 	{
 		const getUser = await this.prisma.user.findUnique(
 		{
   			where: {
-				email: username,
+				id: id,
   			},
 			select: {
 				stats: true

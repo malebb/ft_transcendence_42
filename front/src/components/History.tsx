@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { axiosToken } from '../api/axios'
-import { AxiosInstance } from 'axios';
+import { AxiosInstance, AxiosResponse } from 'axios';
 import '../styles/history.css';
 import Sidebar from './Sidebar'
 import Headers from './Headers'
@@ -33,9 +33,9 @@ const History = () =>
 			{
 				return (<div className="historyElem" id="gamePlayed" key={elem.value.date}>
 							<div className="gameDataContainer">
-								<p className="leftPlayer">{trimUsername(elem.value.leftUsername)}</p>
+								<p className="leftPlayer">{trimUsername(elem.value.leftPlayer.username)}</p>
 								<p className="score">{elem.value.leftScore} - {elem.value.rightScore}</p>
-								<p className="rightPlayer">{trimUsername(elem.value.rightUsername)}</p>
+								<p className="rightPlayer">{trimUsername(elem.value.rightPlayer.username)}</p>
 							</div>
 						</div>);
 			}
@@ -69,22 +69,29 @@ const History = () =>
 
 	useEffect(() => {
 		const initHistory = async () => {
-			axiosInstance.current = await axiosToken();
-			const username = (await axiosInstance.current.get('users/me', {})).data.email;
-			axiosInstance.current = await axiosToken();
-			const gamePlayed = (await axiosInstance.current.get('history/gamePlayed/' + username)).data.gamePlayed;
-			axiosInstance.current = await axiosToken();
-			const achievementDone = (await axiosInstance.current.get('history/achievementsDone/' + username)).data.achievementDone;
-			for (let i = 0; i < gamePlayed.length; ++i)
+			try
 			{
-				historyElem.current.push({type: "game", value: gamePlayed[i]});
+				axiosInstance.current = await axiosToken();
+				const user: AxiosResponse = (await axiosInstance.current.get('users/me'));
+				axiosInstance.current = await axiosToken();
+				const gamePlayed: AxiosResponse = await axiosInstance.current.get('history/gamePlayed/' + user.data.id);
+				axiosInstance.current = await axiosToken();
+				const achievementDone: AxiosResponse = await axiosInstance.current.get('history/achievementsDone/' + user.data.id);
+				for (let i = 0; i < gamePlayed.data.gamePlayed.length; ++i)
+				{
+					historyElem.current.push({type: "game", value: gamePlayed.data.gamePlayed[i]});
+				}
+				for (let i = 0; i < achievementDone.data.achievementDone.length; ++i)
+				{
+					historyElem.current.push({type: "achievement", value: achievementDone.data.achievementDone[i]});
+				}
+				historyElem.current.sort(compareElemDate);
+				setSorted(true);
 			}
-			for (let i = 0; i < achievementDone.length; ++i)
+			catch (error: any)
 			{
-				historyElem.current.push({type: "achievement", value: achievementDone[i]});
+				console.log('error (init history) : ', error);
 			}
-			historyElem.current.sort(compareElemDate);
-			setSorted(true);
 		};
 		initHistory();
 	}, []);

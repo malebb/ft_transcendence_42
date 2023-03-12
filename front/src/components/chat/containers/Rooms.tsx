@@ -3,7 +3,6 @@ import InputButton from "../inputs/InputButton";
 import { accessibilities } from "../utils/RoomAccessibilities";
 import { AxiosInstance, AxiosResponse } from 'axios';
 import { axiosToken } from '../../../api/axios';
-import bcrypt from 'bcryptjs';
 import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
 import EVENTS from '../config/events';
@@ -49,12 +48,6 @@ function Rooms()
 		}
 
 		const passwordField = () => roomAccessibility === 'PROTECTED' ? <div id="creationPassword"><label id="passwordInfo">{passwordInfo}</label><input id="creationPasswordInput" type="password" value={password} onChange={updatePassword} autoComplete="on"/></div>: <></>;
-
-		const hashPassword = async (password: string) =>
-		{
-			const salt = await bcrypt.genSalt(10);
-			return (await bcrypt.hash(password, salt));
-		}
 
 		const checkPassword = (): boolean => 
 		{
@@ -130,7 +123,7 @@ function Rooms()
 					owner: {...user.data},
 					name: form.get("roomName")!.toString().trim(),
 					accessibility: Accessibility[roomAccessibility as keyof typeof Accessibility],
-					password: roomAccessibility == 'PROTECTED' ? await hashPassword(password) : ''
+					password: roomAccessibility === 'PROTECTED' ? password : ''
 				};
 				axiosInstance.current = await axiosToken();
 				await axiosInstance.current!.post('/chatRoom/',
@@ -209,6 +202,7 @@ function Rooms()
 	{
 		const [chatRoomsList, setChatRoomsList] = useState<ChatRoom[]>([]);
 		const [chatRoomSelected, setChatRoomSelected] = useState<string>('');
+		const accessibilityAfterSelect = useRef();
 		const [roomPassword, setRoomPassword] = useState<string>('');
 		const [chatRoomFilter, setChatRoomFilter] = useState<ChatRoomFilter>(ChatRoomFilter["JOINED"]);
 		const [infoPassword, setInfoPassword] = useState<string>('4 digits password : ');
@@ -231,7 +225,7 @@ function Rooms()
 			);
 		}
 
-		const accessibilityLogo = (accessibility: Accessibility) =>
+		const accessibilityLogo = (accessibility: Accessibility, password: string) =>
 		{
 			const logoWidth = 25;
 
@@ -240,7 +234,8 @@ function Rooms()
 				case 'PUBLIC':
 					return (<img src="http://localhost:3000/images/public.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 				case 'PRIVATE':
-					return (<img src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+					return (password.length ? <img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>
+					: <img src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 				case 'PROTECTED':
 					return (<img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 			}
@@ -255,10 +250,10 @@ function Rooms()
 		{
 			try {
 				axiosInstance.current = await axiosToken();
-				const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
+				const user: AxiosResponse = await axiosInstance.current.get('/users/me');
 
 				await axiosInstance.current.post('/chatRoom/' + roomName,
-					{username: user.data.email},
+					{userId: user.data.id},
 					{headers: {'Content-Type': 'application/json'},
 				});
 				enterRoom(roomName);
@@ -283,17 +278,33 @@ function Rooms()
 				axiosInstance.current = await axiosToken();
 				const room: AxiosResponse = await axiosInstance.current.get('chatRoom/' + chatRoom.name);
 
-				if (await bcrypt.compare(roomPassword, room.data.password))
+				if (room.data.password.length)
+				{
+					axiosInstance.current = await axiosToken();
+					await axiosInstance.current.post('/chatRoom/checkPassword/' + chatRoom.name,
+						{password: roomPassword}, { headers: {"Content-Type": "application/json"}});
 					joinRoom(chatRoom.name);
+				}
 				else
 				{
-					setInfoPassword('Wrong password');
-					setRoomPassword('');
+					if (room.data.accessibility === 'PUBLIC')
+						joinRoom(chatRoom.name);
+					else if (room.data.accessibility === 'PRIVATE')
+					{
+						setInfoPassword('password removed');
+						setRoomPassword('');
+					}
 				}
 			}
 			catch (error: any)
 			{
-				console.log('error: ', error);
+				if (error.response.status === 403)
+				{
+					setInfoPassword('Wrong password');
+					setRoomPassword('');
+				}
+				else
+					console.log('error (check password) :', error);
 			}
 		}
 
@@ -305,7 +316,9 @@ function Rooms()
 			{
 				if (chatRoomSelected === chatRoom.name)
 				{
-					if (chatRoom.accessibility === 'PROTECTED' || chatRoom.accessibility === 'PRIVATE' && chatRoom.password !== '')
+					if (accessibilityAfterSelect.current === 'PROTECTED' ||
+					(accessibilityAfterSelect.current === 'PRIVATE' &&
+					chatRoom.password !== ''))
 					{
 							return (<div>
 									<form onSubmit={(e) => checkPassword(e, chatRoom)}>
@@ -320,26 +333,36 @@ function Rooms()
 									</form>
 								</div>);
 					}
-					else if (chatRoom.accessibility === 'PRIVATE')
+					else if (accessibilityAfterSelect.current === 'PRIVATE')
 						return (<span>This room is private</span>);
-					else if (chatRoom.accessibility === 'PUBLIC')
+					else if (accessibilityAfterSelect.current === 'PUBLIC')
 							joinRoom(chatRoom.name);
 				}
 				return (	<>
 								<p className="owner">Owner : {chatRoom.owner.username}</p>
-								{accessibilityLogo(chatRoom.accessibility)}
+								{accessibilityLogo(chatRoom.accessibility, chatRoom.password)}
 							</>
 						);
 			}
 
-			const updateSelectChatRoom = (newChatRoomSelected: string) =>
+			const updateSelectChatRoom = async (newChatRoomSelected: string) =>
 			{
-				if (chatRoomSelected !== newChatRoomSelected)
+				try
 				{
-					setRoomPassword('');
-					setInfoPassword('4 digits password : ');
+					if (chatRoomSelected !== newChatRoomSelected)
+					{
+						setRoomPassword('');
+						setInfoPassword('4 digits password : ');
+					}
+					axiosInstance.current = await axiosToken();
+					const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + newChatRoomSelected);
+					accessibilityAfterSelect.current = room.data.accessibility;
+					setChatRoomSelected(newChatRoomSelected);
 				}
-				setChatRoomSelected(newChatRoomSelected);
+				catch (error: any)
+				{
+					console.log('error (check accessibility after select) :', error);
+				}
 			}
 
 			return(
@@ -391,34 +414,34 @@ function Rooms()
 			}
 		}
 
-		const fetchRooms = async () =>
-		{
-			try
-			{
-				let chatRooms: AxiosResponse;
-				axiosInstance.current = await axiosToken();
-				const user: AxiosResponse = await axiosInstance.current.get('/users/me', {});
-				if (chatRoomFilter === 'JOINED')
-				{
-					axiosInstance.current = await axiosToken();
-					chatRooms = await axiosInstance.current!.get('/chatRoom/joined' + user.data.username);
-				}
-				else
-				{
-					axiosInstance.current = await axiosToken();
-					chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined' + user.data.username);
-				}
-				setChatRoomsList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
-				(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
-			}
-			catch (error: any)
-			{
-				console.log("error while fetching chat rooms: ", error);
-			}
-		}
 	
 		useEffect(() =>
 		{
+			const fetchRooms = async () =>
+			{
+				try
+				{
+					let chatRooms: AxiosResponse;
+					axiosInstance.current = await axiosToken();
+					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
+					if (chatRoomFilter === 'JOINED')
+					{
+						axiosInstance.current = await axiosToken();
+						chatRooms = await axiosInstance.current!.get('/chatRoom/joined/' + user.data.id);
+					}
+					else
+					{
+						axiosInstance.current = await axiosToken();
+						chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined/' + user.data.id);
+					}
+					setChatRoomsList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
+					(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
+				}
+				catch (error: any)
+				{
+					console.log("error while fetching chat rooms: ", error);
+				}
+			}
 			fetchRooms();
 		}, [chatRoomFilter]);
 

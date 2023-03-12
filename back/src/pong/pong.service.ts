@@ -5,11 +5,19 @@ import { GameService } from '../game/game.service';
 import { StatsService } from '../stats/stats.service';
 import { HistoryService } from '../history/history.service';
 import { UserService } from '../user/user.service';
+import { ChallengeService } from '../challenge/challenge.service';
 import { levels } from './levels';
 import { winSteps, levelSteps, modeExplorer,
-		fashionWeek, traveler, failureKnowledge} from 'ft_transcendence';
+		fashionWeek, traveler, failureKnowledge } from 'ft_transcendence';
 import { Stats } from './Stats';
 import { Customisation } from './Customisation';
+
+interface Challenger
+{
+	challengerId: string;
+	challengeId: number;
+	challenger: PlayerData;
+}
 
 @Injectable()
 export class PongService {
@@ -17,12 +25,14 @@ export class PongService {
 	constructor(private readonly gameService: GameService,
 			   	private readonly statsService: StatsService,
 			   	private readonly historyService: HistoryService,
-			   	private readonly userService: UserService) {}
+			   	private readonly userService: UserService,
+			   	private readonly challengeService: ChallengeService) {}
 
 	queue: 			PlayerData[] 	= [];
 	powerUpQueue:	PlayerData[] 	= [];
+	challengers:	Challenger[]	= [];
 	rooms 							= [];
-	sizeCanvas: 	Size			= { width: 600, height: 350 };
+	sizeCanvas: 	Size			= { width: 700, height: 450 };
 	scoreToWin:		number			= 11;
 
 	addToQueue(player: PlayerData, queue: PlayerData[])
@@ -40,6 +50,10 @@ export class PongService {
 			if (this.powerUpQueue[i].id == playerId)
 				this.powerUpQueue.splice(i, 1);
 		}
+		for (let i = 0; i < this.challengers.length; ++i) {
+			if (this.challengers[i].challengerId == playerId)
+				this.challengers.splice(i, 1);
+		}
 	}
 
 	spectateRoom(roomId: string, spectator: Socket)
@@ -51,6 +65,54 @@ export class PongService {
 		}
 		else
 			spectator.emit(spectator.id, JSON.stringify({joined: false}));
+	}
+
+	checkChallengers(challengeId: number, player: Socket)
+	{
+		let roomId: string = "";
+		let opponent: PlayerData;
+
+		for (let i = 0; i < this.challengers.length; ++i)
+		{
+			if (this.challengers[i].challengeId === challengeId)
+			{
+				roomId = this.challengers[i].challengerId < player.id ? this.challengers[i].challengerId + player.id : player.id + this.challengers[i].challengerId;
+				opponent = this.challengers[i].challenger;
+				this.removeFromQueue(player.id);
+				try
+				{
+					this.challengeService.deleteChallenge(challengeId);
+				}
+				catch (error: any)
+				{
+					console.log('error (delete challenge) :', error);
+				}
+			}
+		}
+		return ({roomId: roomId, opponent: opponent});
+	}
+
+	challenge(server: Server, player: Socket, challengeId: number, playerData: PlayerData)
+	{
+		let challenger: Challenger = {challengeId: challengeId, challengerId: player.id, challenger: playerData};
+		let challengerResearch = {roomId: null, opponent: null};
+
+		playerData.id = player.id;
+		challengerResearch = this.checkChallengers(challengeId, player)
+		if (challengerResearch.roomId.length)
+		{
+			let room: Room;
+			room = this.initRoom(challengerResearch.roomId, challengerResearch.opponent, playerData);
+			this.rooms[room.id] = room;
+			server.emit(challengerResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
+			server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
+			this.runRoom(room.id, server);
+		}
+		else
+			this.challengers.push(challenger);
+		player.on("disconnecting", () => {
+			this.stopRoom(player);
+		});
 	}
 
 	checkQueue(player: PlayerData, queue: PlayerData[])
@@ -66,13 +128,19 @@ export class PongService {
 			this.removeFromQueue(player.id);
 			this.removeFromQueue(opponent.id);
 		}
-		console.log("ROOM id = ", roomId);
 		return ({ roomId: roomId, opponent: opponent });
 	}
 
 	initRoom(roomId: string, leftPlayer: PlayerData, rightPlayer: PlayerData): Room
 	{
-		this.gameService.addGame(roomId, leftPlayer.username, rightPlayer.username);
+		try
+		{
+			this.gameService.addGame(roomId, leftPlayer.userId, rightPlayer.userId);
+		}
+		catch (error: any)
+		{
+			console.log('error (add game to spectate) :', error);
+		}
 		return (
 			{
 				id: roomId,
@@ -88,11 +156,12 @@ export class PongService {
 				leftPlayer: new Player(this.sizeCanvas.width / 30,
 					this.sizeCanvas.height / 23,
 					this.sizeCanvas.width / 60,
-					this.sizeCanvas.height / 6,
+					this.sizeCanvas.height / 7,
 					5,
 					leftPlayer.skin,
 					"left",
 					leftPlayer.username,
+					leftPlayer.userId,
 					null,
 					this.sizeCanvas),
 
@@ -101,11 +170,12 @@ export class PongService {
 					this.sizeCanvas.height -
 					(this.sizeCanvas.height / 23 + (this.sizeCanvas.height / 6)),
 					this.sizeCanvas.width / 60,
-					this.sizeCanvas.height / 6,
+					this.sizeCanvas.height / 7,
 					5,
 					rightPlayer.skin,
 					"right",
 					rightPlayer.username,
+					rightPlayer.userId,
 					null,
 					this.sizeCanvas),
 				leftPowerUpTimeout: null,
@@ -147,7 +217,14 @@ export class PongService {
 				this.rooms[roomToLeave].playerGoneCount++;
 			else
 			{
-				this.gameService.removeGame(roomToLeave);
+				try
+				{
+					this.gameService.removeGame(roomToLeave);
+				}
+				catch (error: any)
+				{
+					console.log('error (remove game to spectate) :', error);
+				}
 				player.to(roomToLeave).emit("opponentDisconnection");
 				this.rooms[roomToLeave].playerGoneCount++;
 			}
@@ -175,7 +252,7 @@ export class PongService {
 							 levelUp: boolean, powerUpMode: boolean, winner: boolean)
 	{
 		let playerCustomisation: Customisation = await
-			this.userService.getCustomisation(player.username);
+		this.userService.getCustomisation(player.id);
 
 		if (winner)
 		{
@@ -183,9 +260,9 @@ export class PongService {
 			{
 				if (playerStats.victory == winSteps[i].goal)
 				{
-					await this.historyService.addAchievementDone(player.username,
-							winSteps[i].title, winSteps[i].desc);
-					break;
+					await this.historyService.addAchievementDone(player.id,
+					winSteps[i].title, winSteps[i].desc);
+							break;
 				}
 			}
 		}
@@ -195,7 +272,7 @@ export class PongService {
 			{
 				if (playerStats.level == levelSteps[i].goal)
 				{
-					await this.historyService.addAchievementDone(player.username,
+					await this.historyService.addAchievementDone(player.id,
 							levelSteps[i].title, levelSteps[i].desc);
 					break;
 				}
@@ -203,39 +280,38 @@ export class PongService {
 		}
 		if (powerUpMode && !playerStats.modeExplorer)
 		{
-			await this.historyService.addAchievementDone(player.username,
+			await this.historyService.addAchievementDone(player.id,
 									modeExplorer.title, modeExplorer.desc);
-			await this.statsService.updateModeExplorer(player.username);
+			await this.statsService.updateModeExplorer(player.id);
 		}
 		if (playerCustomisation.skin != "white" && !playerStats.fashionWeek)
 		{
-			await this.historyService.addAchievementDone(player.username,
+			await this.historyService.addAchievementDone(player.id,
 									fashionWeek.title, fashionWeek.desc);
-			await this.statsService.updateFashionWeek(player.username);
+			await this.statsService.updateFashionWeek(player.id);
 		}
 		if (playerCustomisation.map != "basic" && !playerStats.traveler)
 		{
-			await this.historyService.addAchievementDone(player.username,
+			await this.historyService.addAchievementDone(player.id,
 									traveler.title, traveler.desc);
-			await this.statsService.updateTraveler(player.username);
+			await this.statsService.updateTraveler(player.id);
 		}
 		if (!winner && playerStats.defeat == failureKnowledge.goal)
 		{
-			await this.historyService.addAchievementDone(player.username,
+			await this.historyService.addAchievementDone(player.id,
 									failureKnowledge.title, failureKnowledge.desc);
-			await this.statsService.updateFailureKnowledge(player.username);
+			await this.statsService.updateFailureKnowledge(player.id);
 		}
-
 	}
 
 	async updateStats(winner: Player, loser: Player, powerUpMode: boolean)
 	{
-		await this.statsService.addVictory(winner.username);
-		await this.statsService.addDefeat(loser.username);
-		await this.statsService.addXp(winner.username, 500);
+		await this.statsService.addVictory(winner.id);
+		await this.statsService.addDefeat(loser.id);
+		await this.statsService.addXp(winner.id, 500);
 
-		let winnerStats: Stats = await this.statsService.getStats(winner.username);
-		let loserStats: Stats = await this.statsService.getStats(loser.username);
+		let winnerStats: Stats = await this.statsService.getStats(winner.id);
+		let loserStats: Stats = await this.statsService.getStats(loser.id);
 
 		let newWinnerLevel = 0;
 
@@ -247,7 +323,7 @@ export class PongService {
 		let levelUp = false;
 		if (newWinnerLevel != winnerStats.level)
 		{
-			await this.statsService.updateLevel(winner.username, newWinnerLevel);
+			await this.statsService.updateLevel(winner.id, newWinnerLevel);
 			winnerStats.level = newWinnerLevel;
 			levelUp = true;
 		}
@@ -255,11 +331,11 @@ export class PongService {
 		this.updateAchievements(loser, loserStats, levelUp, powerUpMode, false);
 	}
 
-	async updateHistory(leftUsername: string, rightUsername: string,
+	async updateHistory(leftId: number, rightId: number,
 						leftScore: number, rightScore: number)
 	{
-		this.historyService.addGamePlayed(leftUsername,
-						rightUsername, leftScore, rightScore);
+		this.historyService.addGamePlayed(leftId,
+						rightId, leftScore, rightScore);
 	}
 
 	runRoom(roomId: string, server: Server) {
@@ -289,14 +365,21 @@ export class PongService {
 						JSON.stringify({ scorer: scorer, score: this.rooms[roomId].leftPlayer.score }));
 						if (this.rooms[roomId].leftPlayer.score == this.scoreToWin)
 						{
-							this.updateStats(this.rooms[roomId].leftPlayer,
-											this.rooms[roomId].rightPlayer,
-											this.rooms[roomId].powerUpMode);
-							this.updateHistory(this.rooms[roomId].leftPlayer.username,
-											   this.rooms[roomId].rightPlayer.username,
-											  this.rooms[roomId].leftPlayer.score,
-											  this.rooms[roomId].rightPlayer.score);
-							server.to(roomId).emit('endGame', scorer);
+							try
+							{
+								this.updateStats(this.rooms[roomId].leftPlayer,
+												this.rooms[roomId].rightPlayer,
+												this.rooms[roomId].powerUpMode);
+								this.updateHistory(this.rooms[roomId].leftPlayer.id,
+												   this.rooms[roomId].rightPlayer.id,
+												  this.rooms[roomId].leftPlayer.score,
+												  this.rooms[roomId].rightPlayer.score);
+								server.to(roomId).emit('endGame', scorer);
+							}
+							catch (error: any)
+							{
+								console.log('error (updating history / stats / achievements) :', error);
+							}
 						}
 					}
 					else if (scorer == "right")
@@ -305,21 +388,28 @@ export class PongService {
 								JSON.stringify({ scorer: scorer, score: this.rooms[roomId].rightPlayer.score }));
 						if (this.rooms[roomId].rightPlayer.score == this.scoreToWin)
 						{
-							this.updateStats(this.rooms[roomId].rightPlayer,
-											 this.rooms[roomId].leftPlayer,
-											 this.rooms[roomId].powerUpMode);
-							this.updateHistory(this.rooms[roomId].leftPlayer.username,
-											   this.rooms[roomId].rightPlayer.username,
-											  this.rooms[roomId].leftPlayer.score,
-											  this.rooms[roomId].rightPlayer.score);
-							server.to(roomId).emit('endGame', scorer);
+							try
+							{
+								this.updateStats(this.rooms[roomId].rightPlayer,
+												 this.rooms[roomId].leftPlayer,
+												 this.rooms[roomId].powerUpMode);
+								this.updateHistory(this.rooms[roomId].leftPlayer.id,
+													   this.rooms[roomId].rightPlayer.id,
+												  this.rooms[roomId].leftPlayer.score,
+												  this.rooms[roomId].rightPlayer.score);
+								server.to(roomId).emit('endGame', scorer);
+							}
+							catch (error: any)
+							{
+								console.log('error (updating history / stats / achievements) :', error);
+							}
 						}
 					}
 					scorer = "";
 				}
 				server.to(roomId).emit('moveBall', JSON.stringify(this.rooms[roomId].ball));
 			}
-		}, 15);
+		}, 10);
 	}
 
 	programNextPowerUp(roomId: string, position: string, server: Server)

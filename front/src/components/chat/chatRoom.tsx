@@ -8,9 +8,10 @@ import style from "./ChatRoom.module.css"
 import Headers from '../Headers';
 import Sidebar from '../Sidebar';
 import { RoomStatus } from './utils/RoomStatus';
-import { Accessibility } from 'ft_transcendence';
-import bcrypt from 'bcryptjs';
 import { User } from 'ft_transcendence';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
+import alertStyle from './alertBox.module.css';
 
 const ChatRoomBase = () =>
 {
@@ -51,11 +52,11 @@ const ChatRoomBase = () =>
 			}
 			catch (error: any)
 			{
-				console.log("error: ", error);
+				console.log("error (check room) :", error);
 			}
 		}
 		checkRoom();
-	}, []);
+	}, [roomName]);
 
 	useEffect(() => 
 	{
@@ -64,8 +65,8 @@ const ChatRoomBase = () =>
 			const initPasswordInfo = (room: AxiosResponse) =>
 			{
 				if (room.data.accessibility === 'PROTECTED' ||
-					room.data.accessibility === 'PRIVATE'
-					&& room.data.password !== '')
+					(room.data.accessibility === 'PRIVATE'
+					&& room.data.password !== ''))
 				{
 					setPasswordInfo("Change the room password : ");
 					setBtnValue("Change");
@@ -83,7 +84,7 @@ const ChatRoomBase = () =>
 				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
 				axiosInstance.current = await axiosToken();
 				const user: AxiosResponse = await axiosInstance.current.get('/users/me/');
-				if (user.data.username == room.data.owner.username)
+				if (user.data.username === room.data.owner.username)
 				{	
 					initPasswordInfo(room);
 					setIsOwner(true);
@@ -94,11 +95,11 @@ const ChatRoomBase = () =>
 			}
 			catch (error: any)
 			{
-				console.log("error: ", error);
+				console.log("error (check owner) :", error);
 			}
 		}
 		checkIfOwner();
-	}, []);
+	}, [roomName]);
 
 	const genTitle = () => {
 		return (
@@ -122,36 +123,39 @@ const ChatRoomBase = () =>
 			{
 				setPasswordInfo('4 digits required :');
 				document.getElementById(style.passwordInfo)!.style.color = 'red';
+				return;
 			}
-			else if (await bcrypt.compare(password, room.data.password))
+			try
 			{
-				setPasswordInfo('The password is not new :');
-				document.getElementById(style.passwordInfo)!.style.color = 'red';
-			}
-			else
-			{
-				const salt = await bcrypt.genSalt(10);
-				const passwordHashed: string = await bcrypt.hash(password, salt);
-
-				axiosInstance.current = await axiosToken();
-				await axiosInstance.current.patch('/chatRoom/password/' + roomName, "password=" + passwordHashed);
-				if (room.data.accessibility === 'PUBLIC')
+				if (room.data.accessibility === 'PROTECTED'
+				|| (room.data.accessibility === 'PRIVATE' && room.data.password.length))
 				{
 					axiosInstance.current = await axiosToken();
-					await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomName, "accessibility=PROTECTED");
+					await axiosInstance.current.post('/chatRoom/checkPassword/' + roomName,
+						{password: password}, { headers: {"Content-Type": "application/json"}});
+					setPasswordInfo('The password is not new :');
+					document.getElementById(style.passwordInfo)!.style.color = 'red';
+					return ;
 				}
-				setPasswordInfo('Change the room password: ');
-				setBtnValue("Change password");
-				setPassword('');
-				document.getElementById(style.passwordInfo)!.style.color = 'white';
-				alert('Password updated successfully!');
-				return ;
 			}
+			catch (error: any) {}
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current.patch('/chatRoom/password/' + roomName, "password=" + password);
+			if (room.data.accessibility === 'PUBLIC')
+			{
+				axiosInstance.current = await axiosToken();
+				await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomName, "accessibility=PROTECTED");
+			}
+			setPasswordInfo('Change the room password: ');
+			setBtnValue("Change password");
+			setPassword('');
+			document.getElementById(style.passwordInfo)!.style.color = 'white';
+			alert('Password updated successfully!');
 			return ;
 		}
 		catch (error: any)
 		{
-			console.log("error: ", error);
+			console.log("error (change password) :", error);
 		}
 	}
 
@@ -180,7 +184,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			console.log("error: ", error);
+			console.log("error (remove password) : ", error);
 		}
 	}
 
@@ -242,7 +246,7 @@ const ChatRoomBase = () =>
 			axiosInstance.current = await axiosToken();
 
 			const user = await axiosInstance.current.get('/users/me');
-			if (user.data.email === owner.current!.email)
+			if (user.data.id === owner.current!.id)
 			{
 				setIsOwner(true);
 			}
@@ -250,7 +254,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			console.log("error: ", error);
+			console.log("error (display members) :", error);
 		}
 	}
 
@@ -259,13 +263,13 @@ const ChatRoomBase = () =>
 		try
 		{
 			axiosInstance.current = await axiosToken();
-			axiosInstance.current.patch('/chatRoom/changeOwner/' + roomName, {username: member.username});
+			axiosInstance.current.patch('/chatRoom/changeOwner/' + roomName, {userId: member.id});
 			alert(member.username + " is the new owner");
 			window.location.reload();
 		}
 		catch (error: any)
 		{
-			console.log("error: ", error);
+			console.log("error (make owner) :", error);
 		}
 	}
 
@@ -273,7 +277,7 @@ const ChatRoomBase = () =>
 	{
 		return (isOwner ? 
 		(
-			owner.current!.email !== member.email ?
+			owner.current!.id !== member.id ?
 			<img className={style.memberAction} src="http://localhost:3000/images/makeOwner.png" 
 			alt="make Owner" title="make owner"
 			width="20" height="20"
@@ -287,13 +291,13 @@ const ChatRoomBase = () =>
 		try
 		{
 			axiosInstance.current = await axiosToken();
-			await axiosInstance.current.patch('/chatRoom/addAdmin/' + roomName, "username=" + member.username);
-			alert(member.email + " is now admin");
+			await axiosInstance.current.patch('/chatRoom/addAdmin/' + roomName, "userId=" + member.id);
+			alert(member.username + " is now admin");
 			window.location.reload();
 		}
 		catch (error: any)
 		{
-			console.log("error: ", error);
+			console.log("error (make admin) :", error);
 		}
 	}
 
@@ -301,7 +305,7 @@ const ChatRoomBase = () =>
 	{
 		for(var i: number = 0; i < admins.length; ++i)
 		{
-			if (admins[i].email === member.email)
+			if (admins[i].id === member.id)
 			{
 				return (true);
 			}
@@ -321,7 +325,7 @@ const ChatRoomBase = () =>
 
 	const printRole = (member: User) =>
 	{
-		if (owner.current!.email === member.email)
+		if (owner.current!.id === member.id)
 			return (<span className={style.role}>(owner)</span>);
 		else if (isAdmin(member))
 			return (<span className={style.role}>(admin)</span>);
@@ -334,19 +338,20 @@ const ChatRoomBase = () =>
 		try
 		{
 			axiosInstance.current = await axiosToken();
-			await axiosInstance.current.patch('/chatRoom/removeAdmin/' + roomName, "username=" + member.username);
-			alert(member.email + " is not admin anymore");
+			console.log("c'est ", member.id);
+			await axiosInstance.current.patch('/chatRoom/removeAdmin/' + roomName, "userId=" + member.id);
+			alert(member.username + " is not admin anymore");
 			window.location.reload();
 		}
 		catch (error: any)
 		{
-			console.log("error: ", error);
+			console.log("error (remove admin): ", error);
 		}
 	}
 
 	const removeAdminLogo = (member: User) =>
 	{
-		return (isOwner && isAdmin(member) && owner.current!.email !== member.email ? 
+		return (isOwner && isAdmin(member) && owner.current!.id !== member.id ? 
 			<img className={style.memberAction} src="http://localhost:3000/images/removeAdmin.png" 
 			alt="remove admin" title="remove admin"
 			width="24"
@@ -359,18 +364,52 @@ const ChatRoomBase = () =>
 		return (username.length < 15 ? username : username.slice(0, 13) + '..');
 	}
 
-	const challenge = async (member: User) =>
-	{
 
+	const challenge = async (member: User, powerUpMode: boolean) =>
+	{
+		axiosInstance.current = await axiosToken();
+		const challenge = await axiosInstance.current.post('/challenge/', {powerUpMode: powerUpMode, senderId: currentUser!.id, receiverId: member.id}, {
+			headers: {
+				"Content-Type": "application/json"
+			}
+		});
+		window.location.href = 'http://localhost:3000/challenge/' + challenge.data.id;
+	}
+
+	const selectMode = (member: User) =>
+	{
+    	confirmAlert({
+     		customUI: ({onClose}) => {
+       		return (
+				<div id={alertStyle.boxContainer}>
+					<h1>Challenge {trimUsername(member.username)}</h1>
+					<p>Select a pong mode</p>
+					<div id={alertStyle.alertBoxBtn}>
+						<button onClick={() =>
+								{
+							 		challenge(member, false);
+									onClose();
+								}
+							}>normal</button>
+						<button onClick={() =>
+					  			{
+									challenge(member, true)
+									onClose();
+							}}>power-up</button>
+					</div>
+          		</div>
+        );
+      }
+    });
 	}
 
 	const challengeLogo = (member: User) =>
 	{
-		return (currentUser!.email !== member.email ? 
+		return (currentUser!.id !== member.id ? 
 			<img className={style.memberAction} src="http://localhost:3000/images/challenge.png" 
-			alt={"challenge" + member.email} title={"challenge" + member.email}
+			alt={"challenge" + member.username} title={"challenge " + member.username}
 			width="20"
-			onClick={() => challenge(member)}/> : <></>
+			onClick={() => selectMode(member)}/> : <></>
 		);
 	}
 
@@ -383,9 +422,9 @@ const ChatRoomBase = () =>
 					<ul id={style.members} >
 						{membersList.map((member: User) => {
 							return (
-								<li className={currentUser && currentUser.email
-								!== member.email ? style.member : 
-								style.currentMember} key={member.email}>
+								<li className={currentUser && currentUser.id
+								!== member.id? style.member : 
+								style.currentMember} key={member.id}>
 									{trimUsername(member.username)}
 									{printRole(member)}
 									{makeOwnerLogo(member)}
@@ -410,7 +449,7 @@ const ChatRoomBase = () =>
 			const user = await axiosInstance.current.get('/users/me');
 			axiosInstance.current = await axiosToken();
 			const room = await axiosInstance.current.get('/chatRoom/' + roomName);
-			if (user.data.email !== room.data.owner.email)
+			if (user.data.id !== room.data.owner.id)
 			{
 				axiosInstance.current.patch('/chatRoom/leaveRoom/' + roomName);
 				window.location.href = 'http://localhost:3000/chat/';
@@ -422,7 +461,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			
+			console.log('error (leave room) :', error);
 		}
 	}
 
@@ -463,7 +502,7 @@ const ChatRoomBase = () =>
 		{
 			return (<p id={style.roomStatus}>You are not a member of {roomName} room</p>);
 		}
-		else if (roomStatus == 'NOT_EXIST')
+		else if (roomStatus === 'NOT_EXIST')
 		{
 			return (<p id={style.roomStatus}>Room {roomName} does not exist</p>);
 		}

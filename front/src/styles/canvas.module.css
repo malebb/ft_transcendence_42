@@ -1,0 +1,30 @@
+#noChallenge
+{
+	width: 100%;
+	text-align: center;
+	margin-top: 200px;
+}
+
+#challengeFinished, #challengeTitle
+{
+	color: white;
+	text-align: center;
+	margin: 30px;
+}
+
+#homeBtn
+{
+	background-color: #413368;
+	color: white;
+	border: none;
+	height: 25px;
+	width: 100px;
+	cursor: pointer;
+	border-radius: 3px;
+}
+
+#homeBtn:hover
+{
+	background-color: #613981;
+}
+

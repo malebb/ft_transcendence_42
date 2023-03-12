@@ -9,14 +9,14 @@ export const FONT_COLOR:string = 'white';
 export default class Draw
 {
 	skins : Skin[] = [];
-	mapList = [{name: "basic", path: "./images/basic.png"},
-			{name: "beach", path: "./images/beach.png"},
-			{name: "city", path: "./images/city.jpg"},
-			{name: "jungle", path: "./images/jungle.png"},
-			{name: "lava", path: "./images/lava.jpg"},
-			{name: "nature", path: "./images/nature.jpg"},
-			{name: "snow", path: "./images/snow.jpg"},
-			{name: "space", path: "./images/space.jpg"}];
+	mapList = [{name: "basic", path: "/images/basic.png"},
+			{name: "beach", path: "/images/beach.png"},
+			{name: "city", path: "/images/city.jpg"},
+			{name: "jungle", path: "/images/jungle.png"},
+			{name: "lava", path: "/images/lava.jpg"},
+			{name: "nature", path: "/images/nature.jpg"},
+			{name: "snow", path: "/images/snow.jpg"},
+			{name: "space", path: "/images/space.jpg"}];
 	checkboxStatus: boolean = false;
 
 	constructor(public readonly ctx : CanvasRenderingContext2D | null)
@@ -25,7 +25,6 @@ export default class Draw
 
 	initFont()
 	{
-	//	return (new FontFace("Tilt Warp", "url('http://localhost:3000/fonts/TiltWarp-Regular.ttf')"));
 		return (new FontFace("Poppins", "url('http://localhost:3000/fonts/Poppins-SemiBold.ttf')"));
 	}
 
@@ -49,7 +48,7 @@ export default class Draw
 	{
 		const img = new Image();
 
-		img.src = './images/purple.png';
+		img.src = 'http://localhost:3000/images/purple.png';
 		return (img);
 	}
 
@@ -64,7 +63,7 @@ export default class Draw
 
 		this.mapList.forEach(map => {
 			if (map.name === mapName)
-				img.src = map.path;
+				img.src = 'http://localhost:3000' + map.path;
 		});
 		return (img);
 	}
@@ -79,7 +78,7 @@ export default class Draw
 	{
 		const img = new Image();
 
-		img.src = './images/speedPowerUp.png';
+		img.src = 'http://localhost:3000/images/speedPowerUp.png';
 		return (img);
 	}
 
@@ -110,6 +109,11 @@ export default class Draw
 		this.text("looking for player...", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
 
+	challenge(opponentUsername: string)
+	{
+		this.text("Waiting for " + opponentUsername + ' ...', this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
+	}
+
 	opponentDisconnection()
 	{
 		this.text("Opponent has left", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
@@ -122,7 +126,7 @@ export default class Draw
 
 	skin(name : string) : LinkZone
 	{
-		let margin : number = 100;
+		let margin : number = 125;
 		let nbInRow : number = 5;
 		let skin : Skin = new Skin(name, this.ctx!.canvas.width / 60, this.ctx!.canvas.height / nbInRow);
 		let skinZone : LinkZone = {posX : (this.ctx!.canvas.width / nbInRow) * (this.skins.length % nbInRow) + this.ctx!.canvas.width / (nbInRow * 2), posY : (skin.height * 2) * Math.floor(this.skins.length / nbInRow) + margin, width : skin.width, height : skin.height};
@@ -140,7 +144,7 @@ export default class Draw
 
 	map(): LinkZone[]
 	{
-		let margin : number = 100;
+		let margin : number = 125;
 		let nbInRow : number = 4;
 		let width = this.ctx!.canvas.width / 6;
 		let height = this.ctx!.canvas.height / 5;
@@ -178,7 +182,7 @@ export default class Draw
 			}
 			maps.push(mapData)
 			mapZones.push(mapData.mapZone);
-			mapImg.src = map.path;
+			mapImg.src = 'http://localhost:3000' + map.path;
 		});
 		return (mapZones);
 	}

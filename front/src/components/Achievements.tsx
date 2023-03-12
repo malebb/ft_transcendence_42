@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useRef, useState, useEffect } from 'react'
-import { AxiosInstance } from 'axios';
+import { AxiosInstance, AxiosResponse } from 'axios';
 import { axiosToken } from '../api/axios'
 import StatsData from '../interfaces/StatsData';
 import { AchievementsData, modeExplorer,
@@ -109,9 +109,18 @@ const Achievements = () =>
 		initAchievementNames();
 		const initAchievements = async () =>
 		{
-			axiosInstance.current = await axiosToken();
-			const username = (await axiosInstance.current.get('users/profile/' + userId, {})).data.username;
-			setStats((await axiosInstance.current.get('/stats/' + username)).data);
+			try
+			{
+				axiosInstance.current = await axiosToken();
+				const user: AxiosResponse = (await axiosInstance.current.get('users/profile/' + userId));
+				axiosInstance.current = await axiosToken();
+				const stats: AxiosResponse = await axiosInstance.current.get('/stats/' + user.data.id);
+				setStats(stats.data);
+			}
+			catch (error: any)
+			{
+				console.log("error (init achievements) : ", error);
+			}
 		}
 		initAchievements();
 

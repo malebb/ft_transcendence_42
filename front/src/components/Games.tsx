@@ -2,7 +2,7 @@ import { Ball, Player } from "ft_transcendence";
 import { io, Socket } from "socket.io-client";
 import { useState, useRef, useEffect } from 'react';
 import { axiosToken } from '../api/axios';
-import { AxiosInstance } from 'axios';
+import { AxiosInstance, AxiosResponse } from 'axios';
 import Game from '../interfaces/Game';
 import { Link, useParams } from "react-router-dom";
 import Draw from "../classes/Draw";
@@ -15,7 +15,7 @@ const Games = () =>
 	const ctx = useRef<CanvasRenderingContext2D | null>(null);
 	const [gamesList, setGamesList] = useState<Game[]>([]);
 	const { gameId } = useParams();
-	const size = useRef({ width: 600, height: 350 });
+	const size = useRef({ width: 700, height: 450 });
 	const canvasRef = useRef(document.createElement("canvas"));
 	const socket = useRef<Socket | null>(null);
 	const leftPlayer = useRef<Player | null>(null);
@@ -34,9 +34,9 @@ const Games = () =>
 		);
 		return (gamesList.map(game => {
 			return (
-				<Link className="gameLink" to={`/games/${game.gameId}`} key={game.gameId} >
+				<Link className="gameLink" to={`/games/${game.gameId}`} key={game.id} >
 					<div className="game">
-						<p>{trimUsername(game.leftUsername)} &nbsp;&nbsp; vs &nbsp;&nbsp; {trimUsername(game.rightUsername)}</p>
+						<p>{trimUsername(game.leftPlayer.username)} &nbsp;&nbsp; vs &nbsp;&nbsp; {trimUsername(game.rightPlayer.username)}</p>
 					</div>
 				</Link>
 			);
@@ -133,6 +133,7 @@ const Games = () =>
 				{
 					transports: ["websocket"],
 					query: {
+						challenge: false,
 						spectator: true,
 						roomId: gameId
 					}
@@ -162,8 +163,8 @@ const Games = () =>
 						background.src = '../images/purple.png';
 					}
 					else {
-						leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", null, null), JSON.parse(data).leftPlayer);
-						rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", null, null), JSON.parse(data).rightPlayer);
+						leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", 0, null, null), JSON.parse(data).leftPlayer);
+						rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", 0, null, null), JSON.parse(data).rightPlayer);
 						ball.current = Object.assign(new Ball(0, 0, 0, "white", 0, null, null), JSON.parse(data).ball);
 
 						leftPlayer.current!.setCtx(ctx.current!);
@@ -178,21 +179,29 @@ const Games = () =>
 		}
 
 		const initGames = async () => {
-			if (gameId)
+			try
 			{
-				ctx.current = canvasRef.current.getContext("2d");
-				draw.current = new Draw(ctx.current);
-
-				let googleFont = draw.current!.initFont();
-				document.fonts.add(googleFont);
-				googleFont.load().then(() =>
+				if (gameId)
 				{
-					initSocket();
-				});
+					ctx.current = canvasRef.current.getContext("2d");
+					draw.current = new Draw(ctx.current);
+	
+					let googleFont = draw.current!.initFont();
+					document.fonts.add(googleFont);
+					googleFont.load().then(() =>
+					{
+						initSocket();
+					});
+				}
+				else {
+					axiosInstance.current = await axiosToken();
+					const games: AxiosResponse = await axiosInstance.current.get('/game');
+					setGamesList(games.data);
+				}
 			}
-			else {
-				axiosInstance.current = await axiosToken();
-				setGamesList((await axiosInstance.current.get('/game')).data);
+			catch (error: any)
+			{
+				console.log('error (init games) : ', error);
 			}
 		}
 

@@ -32,7 +32,10 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 	handleConnection(player: Socket)
 	{
 		console.log('Player ' + player.id + ' joined');
-		if (player.handshake.query.spectator === 'false')
+		if (player.handshake.query.challenge === 'true')
+			this.pongService.challenge(this.server, player, JSON.parse(String(player.handshake.query.challengeId)),
+				JSON.parse(String(player.handshake.query.playerData)));
+		else if (player.handshake.query.spectator === 'false')
 			this.pongService.findRoom(this.server, player, JSON.parse(String(player.handshake.query.playerData)));
 		else
 			this.pongService.spectateRoom(String(player.handshake.query.roomId), player);

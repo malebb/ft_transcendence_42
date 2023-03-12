@@ -33,14 +33,33 @@ model User {
   stats           Stats?
   gamePlayed      GamePlayed[]
   achievementDone AchievementDone[]
+  leftPlayerToSpectate		Game[] @relation(name: "LeftPlayerToSpectate")
+  rightPlayerToSpectate		Game[] @relation(name: "RightPlayerToSpectate")
+  leftPlayerHistory		GamePlayed[] @relation(name: "LeftPlayerHistory")
+  rightPlayerHistory		GamePlayed[] @relation(name: "RightPlayerHistory")
+
 
   ownerChats	ChatRoom[]
   adminChats	ChatRoom[] @relation(name: "UserAdmin")
   memberChats	ChatRoom[] @relation(name: "UserMember")
 
+<<<<<<< HEAD
   messages		Message[]
+=======
+  challengesReceived	Challenge[] @relation(name: "ChallengeRecv")
+  challengesSent		Challenge[] @relation(name: "ChallengeSent")
+>>>>>>> master
 
   @@map("users")
+}
+
+model Challenge {
+	id       		 	Int    			  @id @default(autoincrement())
+	powerUpMode			Boolean
+	receiver			User			@relation(name: "ChallengeRecv", fields: [receiverId], references: [id])
+	receiverId			Int
+	sender				User			@relation(name: "ChallengeSent", fields: [senderId], references: [id])
+	senderId			Int
 }
 
 model ChatRoom {
@@ -102,6 +121,7 @@ model Stats {
 }
 
 model GamePlayed {
+<<<<<<< HEAD
   id            Int      @id @default(autoincrement())
   leftUsername  String
   rightUsername String
@@ -109,6 +129,17 @@ model GamePlayed {
   rightScore    Int
   date          DateTime @default(now())
   user          User[]
+=======
+	id				Int			@id @default(autoincrement())
+	leftPlayer 		User @relation(name: "LeftPlayerHistory", fields: [leftPlayerId], references: [id])
+	leftPlayerId	Int
+	rightPlayer		User @relation(name: "RightPlayerHistory", fields: [rightPlayerId], references: [id])
+	rightPlayerId	Int
+	leftScore		Int
+	rightScore		Int
+  	date DateTime @default(now())
+	user		User[]
+>>>>>>> master
 }
 
 model AchievementDone {
@@ -121,8 +152,17 @@ model AchievementDone {
 }
 
 model Game {
+<<<<<<< HEAD
   id            Int    @id @default(autoincrement())
   gameId        String @unique
   leftUsername  String
   rightUsername String
+=======
+	id				Int			@id @default(autoincrement())
+	gameId			String		@unique
+	leftPlayer 		User @relation(name: "LeftPlayerToSpectate", fields: [leftPlayerId], references: [id])
+	leftPlayerId	Int
+	rightPlayer		User @relation(name: "RightPlayerToSpectate", fields: [rightPlayerId], references: [id])
+	rightPlayerId	Int
+>>>>>>> master
 }

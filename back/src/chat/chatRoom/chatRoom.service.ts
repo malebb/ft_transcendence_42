@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChatRoom } from 'ft_transcendence';
 import { Accessibility } from 'ft_transcendence';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class ChatRoomService
@@ -14,24 +15,36 @@ export class ChatRoomService
 			data: {
 				owner: {
 					connect: {
-						email: chatRoom.owner.email,
+						id: chatRoom.owner.id,
 					}
 				},
 				admins: {
 					connect: {
-						email: chatRoom.owner.email,
+						id: chatRoom.owner.id,
 					}
 				},
 				members: {
 					connect: {
-						email: chatRoom.owner.email,
+						id: chatRoom.owner.id,
 					}
 				},
 				name: chatRoom.name,
-				password: chatRoom.password,
+				password: chatRoom.password.length ? await argon2.hash(chatRoom.password): '',
 				accessibility: chatRoom.accessibility
 			}
 		})
+	}
+
+	async checkPassword(chatRoomName: string, password: string)
+	{
+		const room = await this.prisma.chatRoom.findUnique({
+			where: {
+				name: chatRoomName
+			}
+		});
+
+		if (!(await argon2.verify(room.password, password)))
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
 	async getChatRoom(name: string)
@@ -53,13 +66,13 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
-	async getNotJoinedRooms(username: string)
+	async getNotJoinedRooms(userId: number)
 	{
 		const chatRoom = await this.prisma.chatRoom.findMany({
 			where: {
 				members: {
 					none : {
-						email: username
+						id: userId
 					}
 				},
 			},
@@ -70,13 +83,13 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
-	async getJoinedRooms(username: string)
+	async getJoinedRooms(userId: number)
 	{
 		const chatRoom = await this.prisma.chatRoom.findMany({
 			where: {
 				members: {
 					some: {
-							email: username,
+							id: userId,
 					},
 				},
 			},
@@ -97,11 +110,11 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
-	async joinChatRoom(chatRoomName: string, username: string)
+	async joinChatRoom(chatRoomName: string, userId: number)
 	{
 		await this.prisma.user.update({
 			where: {
-				email: username
+				id: userId
 			},
 			data : {
 				memberChats : {
@@ -154,7 +167,7 @@ export class ChatRoomService
 				name: chatRoomName
 			},
 			data: {
-				password: password,
+				password: await argon2.hash(password),
 			}
 		});
 	}
@@ -198,7 +211,7 @@ export class ChatRoomService
 		});
 	}
 
-	async updateOwner(chatRoomName: string, username: string)
+	async updateOwner(chatRoomName: string, userId: number)
 	{
 		await this.prisma.chatRoom.update({
 			where: {
@@ -207,19 +220,19 @@ export class ChatRoomService
 			data: {
 				owner: {
 					connect: {
-						email: username,
+						id: userId,
 					}
 				},
 				admins: {
 					connect: {
-						email: username,
+						id: userId,
 					}
 				},
 			}
 		});
 	}
 
-	async addAdmin(chatRoomName: string, username: string)
+	async addAdmin(chatRoomName: string, userId: number)
 	{
 		await this.prisma.chatRoom.update({
 			where: {
@@ -228,21 +241,21 @@ export class ChatRoomService
 			data: {
 				admins: {
 					connect: {
-						email: username,
+						id: userId,
 					}
 				},
 			}
 		});
 	}
 
-	async removeAdmin(username: string, chatRoomName: string)
+	async removeAdmin(userId: number, chatRoomName: string)
 	{
 		await this.prisma.chatRoom.update({
 			where: {
 				name: chatRoomName
 			},
 			data: {
-				admins: { disconnect: [{email: username}]}
+				admins: { disconnect: [{id: userId}]}
 			}
 		});
 	}

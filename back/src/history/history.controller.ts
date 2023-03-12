@@ -1,4 +1,4 @@
-import { Controller, Get, Param} from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { HistoryService } from './history.service';
 
 @Controller('history')
@@ -6,16 +6,16 @@ class HistoryController
 {
 	constructor(private historyService: HistoryService) {}
 
-	@Get('gamePlayed/:username')
-	async getGame(@Param('username') username: string)
+	@Get('gamePlayed/:id')
+	async getGame(@Param('id', ParseIntPipe) id: number)
 	{
-		return (await this.historyService.getGamePlayed(username));
+		return (await this.historyService.getGamePlayed(id));
 	}
 
-	@Get('achievementsDone/:username')
-	async getAchievementsDone(@Param('username') username: string)
+	@Get('achievementsDone/:id')
+	async getAchievementsDone(@Param('id', ParseIntPipe) id: number)
 	{
-		return (await this.historyService.getAchievementsDone(username));
+		return (await this.historyService.getAchievementsDone(id));
 	}
 
 }
