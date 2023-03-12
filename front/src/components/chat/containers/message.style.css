@@ -15,9 +15,9 @@
 }
 
 #content {
-	padding: 1rem;
-	margin-left: 4rem;
-	margin-top: 5rem;
+	/* padding: 1rem; */
+	/* margin-left: 4rem; */
+	/* margin-top: 5rem; */
 	/* position: relative; */
 	background-color: var(--main);
     overflow: scroll;

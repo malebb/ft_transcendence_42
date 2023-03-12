@@ -6,14 +6,14 @@
 .title > h1 {
 	/* padding:10%; */
 
-	padding: 1rem;
+	/* padding: 1rem;
 	margin-left: 3.5rem;
-	margin-top: 5.5rem;
+	margin-top: 5.5rem; */
 	position: absolute;
 	width: fit-content;
 	max-width: 600px;
 	text-align: right;
-	top: 26px;
+	/* top: 26px; */
 	font-size: 54px;
 	text-transform: capitalize;
 	left: 48px;
@@ -29,15 +29,16 @@
 	width: 100%;
 }
 .roomBase {
-	padding: 100px;
+	/* padding: 100px; */
 	background-color: #1D1E24;
 }
 .chat {
-	display: flex;
+	/* display: flex; */
 	/* checker pour la taille de la fenetre : */
-	height: calc(100vh - 50px);
-	position: absolute;
-	width: 98%;
+	/* height: calc(100vh - 50px); */
+	/* position: absolute; */
+	/* width: 98%; */
+	margin-right: 8px;
 }
 
 #roomStatus
@@ -46,10 +47,6 @@
 	margin: auto;
 	margin-top: 150px;
 	text-align: center;
-}
-
-.roomBase
-{
 }
 
 
