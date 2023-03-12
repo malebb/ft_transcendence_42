@@ -119,6 +119,12 @@ class ChatRoomController
 	{
 		await this.chatRoomService.removeUserFromRoom(userId, chatRoomName);
 	}
+
+	@Patch('removeUser/:name')
+	async removeUserWithId(@Param('name') chatRoomName: string,  @Body() chatRoomDto: ChatRoomDto)
+	{
+		await this.chatRoomService.removeUserFromRoom(chatRoomDto.userId, chatRoomName);
+	}
 }
 
 export default ChatRoomController;

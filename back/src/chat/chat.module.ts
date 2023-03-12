@@ -7,6 +7,7 @@ import { UserService } from 'src/user/user.service';
 import { UserModule } from 'src/user/user.module';
 import { JwtService } from '@nestjs/jwt';
 import { ChatRoomModule } from './chatRoom/chatRoom.module';
+import { PenaltyModule } from './penalty/penalty.module';
 // import { UserService } from 'src/user/user.service';
 // import { UserController } from 'src/user/user.controller';
 
@@ -15,6 +16,6 @@ import { ChatRoomModule } from './chatRoom/chatRoom.module';
   providers: [ChatService, ChatGateway, UserService, UserController, JwtService],
   exports: [ChatService],
   controllers: [ChatController],
-  imports: [UserModule, ChatRoomModule],
+  imports: [UserModule, ChatRoomModule, PenaltyModule],
 })
 export class ChatModule {}
