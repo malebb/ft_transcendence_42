@@ -56,6 +56,12 @@ export class ChatRoomService
 			include: {
 				owner: true,
 				admins: true,
+				penalties: {
+					include: {
+						author: true,
+						target: true,
+					}
+				},
 				members: {
 					orderBy: {
 						username: 'asc'

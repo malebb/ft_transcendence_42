@@ -1,4 +1,5 @@
-import { Controller, Body, Post } from '@nestjs/common';
+import { Controller, Body, Post, Param, Delete,
+ParseIntPipe } from '@nestjs/common';
 import PenaltyService from './penalty.service';
 import { PenaltyDto } from './Penalty';
 
@@ -17,4 +18,9 @@ export default class PenaltyController
 		await this.penaltyService.createPenalty(penalty);
 	}
 
+	@Delete(':id')
+	async deletePenalty(@Param('id', ParseIntPipe) penaltyId: number)
+	{
+		await this.penaltyService.deletePenalty(penaltyId);
+	}
 };

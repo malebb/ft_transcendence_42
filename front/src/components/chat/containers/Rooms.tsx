@@ -7,6 +7,7 @@ import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
 import EVENTS from '../config/events';
 import { ChatRoomFilter } from '../utils/ChatRoomFilter';
+import { Penalty } from '../utils/Penalty';
 
 function Rooms()
 {
@@ -203,6 +204,8 @@ function Rooms()
 		const [chatRoomsList, setChatRoomsList] = useState<ChatRoom[]>([]);
 		const [chatRoomSelected, setChatRoomSelected] = useState<string>('');
 		const accessibilityAfterSelect = useRef();
+		const bannedFromSelected = useRef<boolean>(false);
+		const timeBannedRemain = useRef<string>('');
 		const [roomPassword, setRoomPassword] = useState<string>('');
 		const [chatRoomFilter, setChatRoomFilter] = useState<ChatRoomFilter>(ChatRoomFilter["JOINED"]);
 		const [infoPassword, setInfoPassword] = useState<string>('4 digits password : ');
@@ -250,13 +253,14 @@ function Rooms()
 		{
 			try {
 				axiosInstance.current = await axiosToken();
+				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
+				axiosInstance.current = await axiosToken();
 				const user: AxiosResponse = await axiosInstance.current.get('/users/me');
-
-				await axiosInstance.current.post('/chatRoom/' + roomName,
-					{userId: user.data.id},
-					{headers: {'Content-Type': 'application/json'},
-				});
-				enterRoom(roomName);
+					await axiosInstance.current.post('/chatRoom/' + roomName,
+						{userId: user.data.id},
+						{headers: {'Content-Type': 'application/json'},
+					});
+					enterRoom(roomName);
 			}
 			catch (error: any)
 			{
@@ -316,13 +320,15 @@ function Rooms()
 			{
 				if (chatRoomSelected === chatRoom.name)
 				{
-					if (accessibilityAfterSelect.current === 'PROTECTED' ||
+					if (bannedFromSelected.current)
+						return (<p id="banned">You are banned ({timeBannedRemain.current})</p>);
+					else if (accessibilityAfterSelect.current === 'PROTECTED' ||
 					(accessibilityAfterSelect.current === 'PRIVATE' &&
 					chatRoom.password !== ''))
 					{
 							return (<div>
 									<form onSubmit={(e) => checkPassword(e, chatRoom)}>
-										<label className="joinInfoPassword">{infoPassword}</label>
+										<label className="joinInfoPassword" style={{color: infoPassword === "Wrong password" ? 'red': 'white'}}>{infoPassword}</label>
 										<input type="password"
 											className ="joinPasswordInput"
 											value={roomPassword}
@@ -334,7 +340,7 @@ function Rooms()
 								</div>);
 					}
 					else if (accessibilityAfterSelect.current === 'PRIVATE')
-						return (<span>This room is private</span>);
+						return (<span style={{color: 'red'}}>This room is private</span>);
 					else if (accessibilityAfterSelect.current === 'PUBLIC')
 							joinRoom(chatRoom.name);
 				}
@@ -345,19 +351,67 @@ function Rooms()
 						);
 			}
 
+			const formatRemainTime = (currentTime: Date, endPenaltyTime: Date) =>
+			{
+				const oneSecondInMs = 1000;
+				const oneMinuteInMs = oneSecondInMs * 60;
+				const oneHourInMs = oneMinuteInMs * 60;
+				const msToEnd  = endPenaltyTime.getTime() - currentTime.getTime();
+
+				if (msToEnd < oneMinuteInMs)
+				{
+					timeBannedRemain.current = Math.floor(msToEnd / oneSecondInMs) + ' second'
+					+ ((Math.floor(msToEnd / oneSecondInMs) > 1) ? 's' : '') + ' left';
+				}
+				else if (msToEnd < oneHourInMs)
+				{
+					timeBannedRemain.current = Math.floor(msToEnd / oneMinuteInMs) + ' minute'
+					+ ((Math.floor(msToEnd / oneMinuteInMs) > 1) ? 's' : '') + ' left';
+				}
+			}
+
 			const updateSelectChatRoom = async (newChatRoomSelected: string) =>
 			{
 				try
 				{
-					if (chatRoomSelected !== newChatRoomSelected)
-					{
-						setRoomPassword('');
-						setInfoPassword('4 digits password : ');
-					}
 					axiosInstance.current = await axiosToken();
 					const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + newChatRoomSelected);
 					accessibilityAfterSelect.current = room.data.accessibility;
+					const penalties: Penalty[] = room.data.penalties;
+					axiosInstance.current = await axiosToken();
+					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
+					let banned = false;
+					for(const penalty of penalties)
+					{
+						if (penalty.target.id === 
+						user.data.id && penalty.type === 'BAN')
+						{
+							const penaltyTimeInMin = 5;
+							const startPenaltyTime = new Date(penalty.date);
+							const endPenaltyTime = new Date(startPenaltyTime.getTime() + penaltyTimeInMin * 60000)
+							const currentTime = new Date(Date.now());
+							if (endPenaltyTime > currentTime)
+							{
+								formatRemainTime(currentTime, endPenaltyTime);
+								banned = true;
+								bannedFromSelected.current = true;
+							}
+							else
+							{
+								axiosInstance.current = await axiosToken();
+								axiosInstance.current.delete('/penalty/' + penalty.id);
+							}
+						}
+					}
+					const previousSelected = chatRoomSelected;
 					setChatRoomSelected(newChatRoomSelected);
+					if (previousSelected !== newChatRoomSelected)
+					{
+						setRoomPassword('');
+						setInfoPassword('4 digits password : ');
+						if (!banned)
+							bannedFromSelected.current = false;
+					}
 				}
 				catch (error: any)
 				{

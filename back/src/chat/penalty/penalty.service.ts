@@ -10,6 +10,7 @@ export default class PenaltyService
 	{
 		await this.prisma.penalty.create({
 			data: {
+				date: new Date(Date.now()),
 				chat: {
 					connect: {
 						name: penalty.roomName
@@ -26,6 +27,15 @@ export default class PenaltyService
 					}
 				},
 				type: penalty.type
+			}
+		});
+	}
+
+	async deletePenalty(penaltyId: number)
+	{
+		await this.prisma.penalty.delete({
+			where: {
+				id: penaltyId
 			}
 		});
 	}

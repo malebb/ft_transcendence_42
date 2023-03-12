@@ -8,6 +8,7 @@ import style from "./ChatRoom.module.css"
 import Headers from '../Headers';
 import Sidebar from '../Sidebar';
 import { RoomStatus } from './utils/RoomStatus';
+import { Penalty } from './utils/Penalty';
 import { User } from 'ft_transcendence';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
@@ -40,15 +41,7 @@ const ChatRoomBase = () =>
 				if (!room.data)
 					setRoomStatus(RoomStatus["NOT_EXIST" as keyof typeof RoomStatus]);
 				else
-				{
-					const member: AxiosResponse = await axiosInstance.current.get('/chatRoom/member/' + roomName);
-
-					if (member.data.members.length)
-						setRoomStatus(RoomStatus["JOINED" as keyof typeof RoomStatus])
-					else
-						setRoomStatus(RoomStatus["NOT_JOINED" as keyof typeof RoomStatus])
-
-				}
+					isUserStillMember();
 			}
 			catch (error: any)
 			{
@@ -229,9 +222,9 @@ const ChatRoomBase = () =>
 	{
 		try
 		{
-			updateRoomStatus().then(async (isStillMember) =>
+			isUserStillMember().then(async (ret: boolean) =>
 			{
-				if (isStillMember)
+				if (ret)
 				{
 					let members: HTMLElement = document.getElementById(style.members)!;
 					let membersDisplay = window.getComputedStyle(members).getPropertyValue('display');
@@ -418,7 +411,7 @@ const ChatRoomBase = () =>
 
 	const selectMode = (member: User) =>
 	{
-		updateRoomStatus().then(async (isStillMember) =>
+		isUserStillMember().then(async (isStillMember) =>
 		{
 			if (isStillMember)
 			{
@@ -459,7 +452,7 @@ const ChatRoomBase = () =>
 		);
 	}
 
-	const updateRoomStatus = async (): Promise<boolean> =>
+	const isUserStillMember = async (): Promise<boolean> =>
 	{
 		try
 		{
@@ -468,20 +461,39 @@ const ChatRoomBase = () =>
 
 			if (!member.data.members.length)
 			{
-				setRoomStatus(RoomStatus["NOT_JOINED" as keyof typeof RoomStatus])
+				axiosInstance.current = await axiosToken();
+				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
+				axiosInstance.current = await axiosToken();
+				const user: AxiosResponse = await axiosInstance.current.get('/users/me');
+				const penalties: Penalty[] = room.data.penalties;
+				let banned = false;
+				penalties.forEach((penalty: Penalty) =>
+				{
+					if (penalty.target.id === 
+					user.data.id && penalty.type === 'BAN')
+					{
+						setRoomStatus(RoomStatus["BANNED" as keyof typeof RoomStatus]);
+						banned = true;
+					}
+				});
+				if (!banned)
+					setRoomStatus(RoomStatus["NOT_JOINED" as keyof typeof RoomStatus])
 				return (new Promise(resolve => {resolve(false)}));
 			}
 			else
+			{
+				setRoomStatus(RoomStatus["JOINED" as keyof typeof RoomStatus])
 				return (new Promise(resolve => {resolve(true)}));
+			}
 		}
 		catch (error: any)
 		{
-			console.log('error (checking if current user is owner) :', error);
+			console.log('error (is user still in room) :', error);
 			return (new Promise(resolve => {resolve(false)}));
 		}
 	}
 
-	const checkIfAdmin = async (member: User) =>
+	const checkIfAdmin = async (member: User): Promise<boolean> =>
 	{
 		try
 		{
@@ -507,9 +519,9 @@ const ChatRoomBase = () =>
 	{
 		try
 		{
-			updateRoomStatus().then(async (isStillMember) =>
+			isUserStillMember().then(async (ret: boolean) =>
 			{
-				if (isStillMember)
+				if (ret)
 				{
 					axiosInstance.current = await axiosToken();
 					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
@@ -518,10 +530,6 @@ const ChatRoomBase = () =>
 						if (isOwner)
 						{
 							axiosInstance.current = await axiosToken();
-//							await axiosInstance.current.post('/penalty/',
-//							{type: 'KICK', authorId: currentUser!.id, targetId: member.id, roomName: roomName},
-//							{headers: {"Content-Type": "application/json"}});
-//							console.log("id = ", member.id);
 							await axiosInstance.current.patch('/chatRoom/removeUser/' + roomName, {userId: member.id});
 							window.location.reload();
 						}
@@ -545,6 +553,47 @@ const ChatRoomBase = () =>
 		);
 	}
 
+	const ban = (member: User) =>
+	{
+		try
+		{
+			isUserStillMember().then(async (ret: boolean) =>
+			{
+				if (ret)
+				{
+					axiosInstance.current = await axiosToken();
+					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
+					checkIfAdmin(user.data).then(async (ret: boolean) =>
+					{
+						if (ret)
+						{
+							axiosInstance.current = await axiosToken();
+							await axiosInstance.current.post('/penalty/',
+							{type: 'BAN', authorId: currentUser!.id, targetId: member.id, roomName: roomName},
+							{headers: {"Content-Type": "application/json"}});
+							await axiosInstance.current.patch('/chatRoom/removeUser/' + roomName, {userId: member.id});
+							window.location.reload();
+						}
+					})
+				}
+			})
+		}
+		catch (error: any)
+		{
+			console.log('error (while kicking) :', error);
+		}
+	}
+
+	const banLogo = (member: User) =>
+	{
+		return (isAdmin(currentUser!) && currentUser!.id !== member.id && member.id !== owner.current!.id ? 
+			<img className={style.memberAction} src="http://localhost:3000/images/ban.png" 
+			alt={"ban " + member.username} title={"ban " + member.username}
+			width="20"
+			onClick={() => ban(member)}/> : <></>
+		);
+	}
+
 	const memberList = () =>
 	{
 		return (
@@ -564,6 +613,7 @@ const ChatRoomBase = () =>
 									{removeAdminLogo(member)}
 									{challengeLogo(member)}
 									{kickLogo(member)}
+									{banLogo(member)}
 								</li>
 							);
 						})}
@@ -638,6 +688,10 @@ const ChatRoomBase = () =>
 		else if (roomStatus === 'NOT_EXIST')
 		{
 			return (<p id={style.roomStatus}>Room {roomName} does not exist</p>);
+		}
+		else if (roomStatus === 'BANNED')
+		{
+			return (<p id={style.roomStatus}>You have been temporarily banned from {roomName}, try later</p>);
 		}
 		else if (!roomStatus)
 		{
