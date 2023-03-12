@@ -19,8 +19,6 @@ function MessagesContainer() {
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const currentUser = useRef<User | null>(null);
   const currentRoom = useRef<ChatRoom | null>(null);
-  // const allMessages = useRef<Message[]>([]);
-  // const [allMessages, setAllMessages] = useState<Message[]>([]);
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const roomId = useParams();
   const socket = SocketContext();
@@ -69,8 +67,7 @@ function MessagesContainer() {
       // les ... peuvent entraîner des problèmes de concurrence
       // car l'état précédent est conservé dans la closure
       // de la fonction de mise à jour (useEffect)
-      // Prend donc l'etat precedent, au lieu du tableau
-      // et retourne le nouveau
+      // Prend donc l'etat precedent, au lieu du tableau et retourne le nouveau
       setStateMessages((stateMessages) => [...stateMessages, message]);
     });
   }, []);
@@ -81,10 +78,7 @@ function MessagesContainer() {
       await axiosInstance
         .current!.get("/message/all-messages")
         .then((response) => {
-          console.log(response);
           setStateMessages(response.data);
-          // allMessages.current = response.data;
-          // setAllMessages(response.data);
         });
     };
     getMessages();
