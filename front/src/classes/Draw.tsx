@@ -86,8 +86,8 @@ export default class Draw
 	{
 			let	textzone : TextMetrics = this.ctx!.measureText(text);
 
-			return ({posX : posX - textzone.actualBoundingBoxLeft, posY : posY - textzone.fontBoundingBoxAscent,
-			height: textzone.fontBoundingBoxAscent + textzone.fontBoundingBoxDescent,
+			return ({posX : posX - textzone.actualBoundingBoxLeft, posY : posY - textzone.actualBoundingBoxAscent,
+			height: textzone.actualBoundingBoxAscent + textzone.actualBoundingBoxDescent,
 			width : textzone.width});
 	}
 

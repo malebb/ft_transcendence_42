@@ -527,7 +527,7 @@ export default function Canvas()
 						draw.current!.text("Power-up", size.current.width / 2.1, size.current.height / 1.66, 16, FONT_COLOR, CANVAS_FONT);
 						let checkboxZone = draw.current!.checkbox(checkbox);
 						draw.current!.checked(checked);
-	
+
 						let zones = [newGameZone, skinsZone, mapsZone];
 	
 						addLink(newGameZone, matchmaking, zones, 0);
