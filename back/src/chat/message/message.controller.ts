@@ -13,8 +13,8 @@ class MessageController
 		return (await this.messageService.createMessage(message, room));
 	}
 
-	@Get('all-messages')
-	async getAllMessagesByRoomName(room: string)
+	@Get('all-messages/:room')
+	async getAllMessagesByRoomName(@Param('room') room: string)
 	{
 		return (await this.messageService.getAllMessagesByRoomName(room));
 	}
@@ -24,9 +24,6 @@ class MessageController
 	{
 		return (await this.messageService.deleteAllMessagesByRoomName(room));
 	}
-
-	// @Get('')
-
 
 }
 
