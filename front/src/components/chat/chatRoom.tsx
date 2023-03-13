@@ -9,7 +9,7 @@ import Headers from '../Headers';
 import Sidebar from '../Sidebar';
 import { RoomStatus } from './utils/RoomStatus';
 import { Penalty } from './utils/Penalty';
-import { User } from 'ft_transcendence';
+import { User, PenaltyType } from 'ft_transcendence';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import alertStyle from './alertBox.module.css';
@@ -556,7 +556,7 @@ const ChatRoomBase = () =>
 		);
 	}
 
-	const ban = (member: User, banDuration: number) =>
+	const applyPenalty = (member: User, duration: number, type: PenaltyType) =>
 	{
 		try{
 			isUserStillMember().then(async (ret: boolean) =>
@@ -571,11 +571,14 @@ const ChatRoomBase = () =>
 						{
 							axiosInstance.current = await axiosToken();
 							await axiosInstance.current.post('/penalty/',
-							{type: 'BAN', authorId: currentUser!.id, targetId: member.id,
-							roomName: roomName, durationInMin: banDuration},
+							{type: type, authorId: currentUser!.id, targetId: member.id,
+							roomName: roomName, durationInMin: duration},
 							{headers: {"Content-Type": "application/json"}});
-							await axiosInstance.current.patch('/chatRoom/removeUser/' + roomName, {userId: member.id});
-							window.location.reload();
+							if (type === 'BAN')
+							{
+								axiosInstance.current = await axiosToken();
+								await axiosInstance.current.patch('/chatRoom/removeUser/' + roomName, {userId: member.id});
+							}
 						}
 					})
 				}
@@ -587,30 +590,28 @@ const ChatRoomBase = () =>
 		}
 	}
 
-	const selectBanTime = (member: User) =>
+	const selectPenaltyTime = (member: User, type: PenaltyType) =>
 	{
   	 	confirmAlert(
 		{
     		customUI: ({onClose}) => {
        		return (
 				<div id={alertStyle.boxContainer}>
-					<h1>Ban {trimUsername(member.username)}</h1>
+					<h1>{type.charAt(0).toUpperCase() + type.toLowerCase().slice(1)} {trimUsername(member.username)}</h1>
 					<p>Select duration</p>
 					<div id={alertStyle.alertBoxBtn}>
-						<button onClick={() => ban(member, 1)}>1 min</button>
-						<button onClick={() => ban(member, 15)}>15 min</button>
-						<button onClick={() => ban(member, 60)}>1 hour</button>
-						<button onClick={() => ban(member, 360)}>6 hours</button>
-						<button onClick={() => ban(member, 1440)}>1 day</button>
-						<button onClick={() => ban(member, 10080)}>1 week</button>
+						<button onClick={() => {applyPenalty(member, 1, type); onClose()}}>1 min</button>
+						<button onClick={() => {applyPenalty(member, 15, type); onClose()}}>15 min</button>
+						<button onClick={() => {applyPenalty(member, 60, type); onClose()}}>1 hour</button>
+						<button onClick={() => {applyPenalty(member, 360, type); onClose()}}>6 hours</button>
+						<button onClick={() => {applyPenalty(member, 1440, type); onClose()}}>1 day</button>
+						<button onClick={() => {applyPenalty(member, 10080, type); onClose()}}>1 week</button>
 					</div>
           		</div>
         		);
       		}
     	});
 	}
-			/*
-		*/
 
 	const banLogo = (member: User) =>
 	{
@@ -618,7 +619,17 @@ const ChatRoomBase = () =>
 			<img className={style.memberAction} src="http://localhost:3000/images/ban.png" 
 			alt={"ban " + member.username} title={"ban " + member.username}
 			width="20"
-			onClick={() => selectBanTime(member)}/> : <></>
+			onClick={() => selectPenaltyTime(member, PenaltyType["BAN" as keyof typeof PenaltyType])}/> : <></>
+		);
+	}
+
+	const muteLogo = (member: User) =>
+	{
+		return (isAdmin(currentUser!) && currentUser!.id !== member.id && member.id !== owner.current!.id ? 
+			<img className={style.memberAction} src="http://localhost:3000/images/mute.png" 
+			alt={"mute " + member.username} title={"mute " + member.username}
+			width="20"
+			onClick={() => selectPenaltyTime(member, PenaltyType["MUTE" as keyof typeof PenaltyType])}/> : <></>
 		);
 	}
 
@@ -642,6 +653,7 @@ const ChatRoomBase = () =>
 									{challengeLogo(member)}
 									{kickLogo(member)}
 									{banLogo(member)}
+									{muteLogo(member)}
 								</li>
 							);
 						})}
