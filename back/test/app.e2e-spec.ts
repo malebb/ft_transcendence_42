@@ -1,6 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { prisma } from '@prisma/client';
+// import { prisma } from '@prisma/client';
 import { appendFile } from 'fs';
 import * as pactum from 'pactum';
 import { PrismaService } from '../src/prisma/prisma.service';

@@ -25,9 +25,7 @@ import {
     namespace: '/chat',
     cors: {
       origin: 'http://localhost:3333',
-      // eventuellement 'http://localhost:3333'
       credentials: true,
-      // methods: ['GET', 'POST']
     },
   })
   // les 3 instances implementees

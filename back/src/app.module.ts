@@ -13,11 +13,14 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard , RtGuard} from './auth/guard';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import  GameController from './game/game.controller';
-import { ChatModule } from './chat/chat.module';
+// import { ChatModule } from './chat/chat.module';
 import { ChallengeModule } from './challenge/challenge.module';
+import { ChatRoomModule } from './chat/chatRoom/chatRoom.module';
+import { MessageModule } from './chat/message/message.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, GameModule, HistoryModule, NestjsFormDataModule, ChatModule, ChallengeModule],
+  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, GameModule, HistoryModule, NestjsFormDataModule, ChatRoomModule, MessageModule, ChallengeModule],
   controllers: [AppController, GameController],
   providers: [AppService, {
     provide: APP_GUARD,

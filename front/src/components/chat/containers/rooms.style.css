@@ -159,6 +159,7 @@ select:focus
 
 .chatRoom
 {
+	position: static;;
    width: 250px;
    height: 100px;
    background-color: var(--tertiary);

@@ -18,16 +18,11 @@ import { MessageService } from './message.service';
 import { ChatRoom, Message } from 'ft_transcendence';
 import { Logger } from '@nestjs/common';
 
-// import { AuthService } from '../auth/auth.service';
-// import { UserService } from '../user/user.service';
-
 @WebSocketGateway({
   namespace: '/chat',
   cors: {
     origin: 'http://localhost:3333',
-    // eventuellement 'http://localhost:3333'
     credentials: true,
-    // methods: ['GET', 'POST']
   },
 })
 // les 3 instances implementees

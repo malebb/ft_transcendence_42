@@ -20,6 +20,9 @@
 	display: flex;
 	flex-direction: column;
 	height: calc(65vh - 100px);
+
+	overflow: hidden;
+
 }
 
 #roomContainer {
@@ -45,8 +48,11 @@
 	display: flex;
 	flex-direction: column;
 	row-gap: 1em;
-	overflow-y: scroll;
-	overflow: auto;
+	/* overflow-y: scroll;
+	overflow: auto; */
+
+	overflow: hidden;
+
 	margin-left: 8px;
 }
 
@@ -100,5 +106,7 @@
 }
 
 .chatPage {
-	overflow-y: scroll;
+	/* overflow-y: scroll;*/
+
+	overflow: hidden;
 }
