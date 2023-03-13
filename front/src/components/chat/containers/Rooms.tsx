@@ -5,7 +5,6 @@ import { AxiosInstance, AxiosResponse } from 'axios';
 import { axiosToken } from '../../../api/axios';
 import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
-import EVENTS from '../config/events';
 import { ChatRoomFilter } from '../utils/ChatRoomFilter';
 
 function Rooms()
