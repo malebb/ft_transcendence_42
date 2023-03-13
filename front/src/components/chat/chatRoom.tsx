@@ -13,8 +13,6 @@ import { User, PenaltyType } from 'ft_transcendence';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import alertStyle from './alertBox.module.css';
-//import * as NumericInput from "react-numeric-input";
-import NumericInput from 'react-numeric-input';
 
 const ChatRoomBase = () =>
 {
@@ -31,7 +29,6 @@ const ChatRoomBase = () =>
 	const [leaveRoomInfo, setLeaveRoomInfo] = useState("");
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	const regexPassword = useRef(/^[0-9]*$/);
-	const [banDuration, setBanDuration] = useState<number>(30);
 
 	useEffect(() => {
 		const checkRoom = async () =>
@@ -534,7 +531,7 @@ const ChatRoomBase = () =>
 						{
 							axiosInstance.current = await axiosToken();
 							await axiosInstance.current.patch('/chatRoom/removeUser/' + roomName, {userId: member.id});
-							window.location.reload();
+							removeMemberFromList(member);
 						}
 					})
 				}
@@ -554,6 +551,20 @@ const ChatRoomBase = () =>
 			width="20"
 			onClick={() => kick(member)}/> : <></>
 		);
+	}
+
+	const removeMemberFromList = (memberToRemove: User) =>
+	{
+		for (let i = 0; i < membersList.length; ++i)
+		{
+			if (membersList[i].id === memberToRemove.id)
+			{
+				let newMembersList: User[] = [...membersList];
+				newMembersList.splice(i, 1);
+				setMembersList(newMembersList);
+				break;
+			}
+		}
 	}
 
 	const applyPenalty = (member: User, duration: number, type: PenaltyType) =>
@@ -578,6 +589,7 @@ const ChatRoomBase = () =>
 							{
 								axiosInstance.current = await axiosToken();
 								await axiosInstance.current.patch('/chatRoom/removeUser/' + roomName, {userId: member.id});
+								removeMemberFromList(member);
 							}
 						}
 					})
@@ -586,7 +598,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			console.log('error (while kicking) :', error);
+			console.log('error (apply penalty) :', error);
 		}
 	}
 
