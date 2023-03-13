@@ -204,8 +204,8 @@ function Rooms()
 		const [chatRoomsList, setChatRoomsList] = useState<ChatRoom[]>([]);
 		const [chatRoomSelected, setChatRoomSelected] = useState<string>('');
 		const accessibilityAfterSelect = useRef();
-		const bannedFromSelected = useRef<boolean>(false);
-		const timeBannedRemain = useRef<string>('');
+		const [bannedFromSelected, setBannedFromSelected]= useState<boolean>(false);
+		const [timeBannedRemain, setTimeBannedRemain] = useState<string>('test 1 2');
 		const [roomPassword, setRoomPassword] = useState<string>('');
 		const [chatRoomFilter, setChatRoomFilter] = useState<ChatRoomFilter>(ChatRoomFilter["JOINED"]);
 		const [infoPassword, setInfoPassword] = useState<string>('4 digits password : ');
@@ -320,8 +320,8 @@ function Rooms()
 			{
 				if (chatRoomSelected === chatRoom.name)
 				{
-					if (bannedFromSelected.current)
-						return (<p id="banned">You are banned ({timeBannedRemain.current})</p>);
+					if (bannedFromSelected)
+						return (<p id="banned">You are banned ({timeBannedRemain})</p>);
 					else if (accessibilityAfterSelect.current === 'PROTECTED' ||
 					(accessibilityAfterSelect.current === 'PRIVATE' &&
 					chatRoom.password !== ''))
@@ -356,17 +356,28 @@ function Rooms()
 				const oneSecondInMs = 1000;
 				const oneMinuteInMs = oneSecondInMs * 60;
 				const oneHourInMs = oneMinuteInMs * 60;
+				const oneDayInMs = oneHourInMs * 24;
 				const msToEnd  = endPenaltyTime.getTime() - currentTime.getTime();
 
 				if (msToEnd < oneMinuteInMs)
 				{
-					timeBannedRemain.current = Math.floor(msToEnd / oneSecondInMs) + ' second'
-					+ ((Math.floor(msToEnd / oneSecondInMs) > 1) ? 's' : '') + ' left';
+					setTimeBannedRemain(Math.floor(msToEnd / oneSecondInMs) + ' second'
+					+ ((Math.floor(msToEnd / oneSecondInMs) > 1) ? 's' : '') + ' left');
 				}
 				else if (msToEnd < oneHourInMs)
 				{
-					timeBannedRemain.current = Math.floor(msToEnd / oneMinuteInMs) + ' minute'
-					+ ((Math.floor(msToEnd / oneMinuteInMs) > 1) ? 's' : '') + ' left';
+					setTimeBannedRemain(Math.floor(msToEnd / oneMinuteInMs) + ' minute'
+					+ ((Math.floor(msToEnd / oneMinuteInMs) > 1) ? 's' : '') + ' left');
+				}
+				else if (msToEnd < oneDayInMs)
+				{
+					setTimeBannedRemain(Math.floor(msToEnd / oneHourInMs) + ' hour'
+					+ ((Math.floor(msToEnd / oneHourInMs) > 1) ? 's' : '') + ' left');
+				}
+				else
+				{
+					setTimeBannedRemain(Math.floor(msToEnd / oneDayInMs) + ' day'
+					+ ((Math.floor(msToEnd / oneDayInMs) > 1) ? 's' : '') + ' left');
 				}
 			}
 
@@ -386,7 +397,7 @@ function Rooms()
 						if (penalty.target.id === 
 						user.data.id && penalty.type === 'BAN')
 						{
-							const penaltyTimeInMin = 5;
+							const penaltyTimeInMin = penalty.durationInMin;
 							const startPenaltyTime = new Date(penalty.date);
 							const endPenaltyTime = new Date(startPenaltyTime.getTime() + penaltyTimeInMin * 60000)
 							const currentTime = new Date(Date.now());
@@ -394,10 +405,11 @@ function Rooms()
 							{
 								formatRemainTime(currentTime, endPenaltyTime);
 								banned = true;
-								bannedFromSelected.current = true;
+								setBannedFromSelected(true);
 							}
 							else
 							{
+								setBannedFromSelected(false);
 								axiosInstance.current = await axiosToken();
 								axiosInstance.current.delete('/penalty/' + penalty.id);
 							}
@@ -410,7 +422,7 @@ function Rooms()
 						setRoomPassword('');
 						setInfoPassword('4 digits password : ');
 						if (!banned)
-							bannedFromSelected.current = false;
+							setBannedFromSelected(false);
 					}
 				}
 				catch (error: any)

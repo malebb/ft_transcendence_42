@@ -14,6 +14,11 @@ export class PenaltyDto
 	@Type(() => Number)
 	targetId?: number;
 
+	@IsInt()
+	@IsOptional()
+	@Type(() => Number)
+	durationInMin?: number;
+
 	@IsString()
 	@IsOptional()
 	roomName?: string;

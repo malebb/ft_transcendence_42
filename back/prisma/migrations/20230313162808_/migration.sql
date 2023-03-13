@@ -2,7 +2,7 @@
 CREATE TYPE "Accessibility" AS ENUM ('PUBLIC', 'PRIVATE', 'PROTECTED');
 
 -- CreateEnum
-CREATE TYPE "PenaltyType" AS ENUM ('BAN', 'MUTE', 'KICK');
+CREATE TYPE "PenaltyType" AS ENUM ('BAN', 'MUTE');
 
 -- CreateEnum
 CREATE TYPE "Status" AS ENUM ('pending', 'accepted', 'declined');
@@ -57,6 +57,7 @@ CREATE TABLE "Penalty" (
     "authorId" INTEGER NOT NULL,
     "targetId" INTEGER NOT NULL,
     "type" "PenaltyType" NOT NULL,
+    "durationInMin" INTEGER NOT NULL,
 
     CONSTRAINT "Penalty_pkey" PRIMARY KEY ("id")
 );

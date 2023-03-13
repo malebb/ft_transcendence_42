@@ -26,7 +26,8 @@ export default class PenaltyService
 						id: penalty.targetId
 					}
 				},
-				type: penalty.type
+				type: penalty.type,
+				durationInMin: penalty.durationInMin
 			}
 		});
 	}

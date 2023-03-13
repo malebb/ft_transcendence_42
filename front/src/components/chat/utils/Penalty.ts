@@ -7,4 +7,5 @@ export interface Penalty
 	author: User;
 	target: User;
 	type: PenaltyType;
+	durationInMin: number;
 }

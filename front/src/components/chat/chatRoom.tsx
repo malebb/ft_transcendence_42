@@ -13,6 +13,8 @@ import { User } from 'ft_transcendence';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import alertStyle from './alertBox.module.css';
+//import * as NumericInput from "react-numeric-input";
+import NumericInput from 'react-numeric-input';
 
 const ChatRoomBase = () =>
 {
@@ -29,6 +31,7 @@ const ChatRoomBase = () =>
 	const [leaveRoomInfo, setLeaveRoomInfo] = useState("");
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	const regexPassword = useRef(/^[0-9]*$/);
+	const [banDuration, setBanDuration] = useState<number>(30);
 
 	useEffect(() => {
 		const checkRoom = async () =>
@@ -553,10 +556,9 @@ const ChatRoomBase = () =>
 		);
 	}
 
-	const ban = (member: User) =>
+	const ban = (member: User, banDuration: number) =>
 	{
-		try
-		{
+		try{
 			isUserStillMember().then(async (ret: boolean) =>
 			{
 				if (ret)
@@ -569,7 +571,8 @@ const ChatRoomBase = () =>
 						{
 							axiosInstance.current = await axiosToken();
 							await axiosInstance.current.post('/penalty/',
-							{type: 'BAN', authorId: currentUser!.id, targetId: member.id, roomName: roomName},
+							{type: 'BAN', authorId: currentUser!.id, targetId: member.id,
+							roomName: roomName, durationInMin: banDuration},
 							{headers: {"Content-Type": "application/json"}});
 							await axiosInstance.current.patch('/chatRoom/removeUser/' + roomName, {userId: member.id});
 							window.location.reload();
@@ -584,13 +587,38 @@ const ChatRoomBase = () =>
 		}
 	}
 
+	const selectBanTime = (member: User) =>
+	{
+  	 	confirmAlert(
+		{
+    		customUI: ({onClose}) => {
+       		return (
+				<div id={alertStyle.boxContainer}>
+					<h1>Ban {trimUsername(member.username)}</h1>
+					<p>Select duration</p>
+					<div id={alertStyle.alertBoxBtn}>
+						<button onClick={() => ban(member, 1)}>1 min</button>
+						<button onClick={() => ban(member, 15)}>15 min</button>
+						<button onClick={() => ban(member, 60)}>1 hour</button>
+						<button onClick={() => ban(member, 360)}>6 hours</button>
+						<button onClick={() => ban(member, 1440)}>1 day</button>
+						<button onClick={() => ban(member, 10080)}>1 week</button>
+					</div>
+          		</div>
+        		);
+      		}
+    	});
+	}
+			/*
+		*/
+
 	const banLogo = (member: User) =>
 	{
 		return (isAdmin(currentUser!) && currentUser!.id !== member.id && member.id !== owner.current!.id ? 
 			<img className={style.memberAction} src="http://localhost:3000/images/ban.png" 
 			alt={"ban " + member.username} title={"ban " + member.username}
 			width="20"
-			onClick={() => ban(member)}/> : <></>
+			onClick={() => selectBanTime(member)}/> : <></>
 		);
 	}
 

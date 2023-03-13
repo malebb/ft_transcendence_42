@@ -89,6 +89,7 @@ model Penalty {
 	target				User @relation(name: "PenaltiesTarget", fields: [targetId], references: [id])
 	targetId			Int
 	type				PenaltyType
+	durationInMin		Int
 }
 
 enum PenaltyType {
