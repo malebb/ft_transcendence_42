@@ -96,11 +96,12 @@ export class MessageGateway
   handleDisconnect(client: Socket) {
     const sockets = this.server.sockets;
 
-    console.log(`Disconnected socket id: ${client.id} connected.`);
+    console.log(`Disconnected id: ${client.id}.`);
     // this.logger.log(`Disconnected socket id: ${client.id} connected.`);
     // this.logger.debug(`Number of connected sockets: ${sockets.listeners}`);
 
     // TODO = enlever le client de la socket
+    
   }
 }
 
