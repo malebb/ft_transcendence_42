@@ -4,41 +4,41 @@
 }
 
 .title > h1 {
-	/* padding:10%; */
-
-	/* padding: 1rem;
-	margin-left: 3.5rem;
-	margin-top: 5.5rem; */
+	margin-left: 5rem;
+	margin-top: 8.1rem;
 	position: absolute;
 	width: fit-content;
 	max-width: 600px;
 	text-align: right;
-	/* top: 26px; */
 	font-size: 54px;
 	text-transform: capitalize;
 	left: 48px;
 	color: white;
 }
+
+.title {
+	height: 22vh;;
+}
+
 .logo {
 	position: absolute;
 	top: 0;
 	left: 0;
 	z-index: 2;
 }
+
 .chat-receiver {
 	width: 100%;
 }
+
 .roomBase {
-	/* padding: 100px; */
+	margin-top: 6rem;
+	margin-left:5.2rem;
 	background-color: #1D1E24;
 }
+
 .chat {
-	/* display: flex; */
-	/* checker pour la taille de la fenetre : */
-	/* height: calc(100vh - 50px); */
-	/* position: absolute; */
-	/* width: 98%; */
-	margin-right: 8px;
+	margin-right: 10px;
 }
 
 #roomStatus
@@ -52,6 +52,7 @@
 
 #memberList
 {
+	margin-left: 5rem;
 	position: absolute;
 	left: 30px;
 	z-index: 2;
