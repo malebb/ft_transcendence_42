@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { AuthDto, TFADto } from './dto';
+import { AuthDto, TFADto, SignupDto } from './dto';
 import { Tokens } from './types';
 import { Request } from 'express';
 import { JwtGuard, RtGuard } from './guard';
@@ -28,7 +28,7 @@ export class AuthController {
 
   @Public()
   @Post('signup')
-  signup(@Body() dto: AuthDto, @Headers() headers): Promise<Object> {
+  signup(@Body() dto: SignupDto, @Headers() headers): Promise<Object> {
     console.log(headers);
     console.log(dto);
     return this.authService.signup(dto);

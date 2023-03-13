@@ -18,6 +18,7 @@ import Chat from "./chat/chat";
 import ChatRoomBase from "./chat/chatRoom";
 import PrivateRoutes from "./privateRoute/PrivateRoutes";
 import { SnackbarProvider } from "notistack";
+import NotAuthRoutes from "./privateRoute/NotAuthRoutes";
 
 /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
@@ -28,12 +29,13 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Main />} />
+          <Route element={<NotAuthRoutes />}>
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
           <Route
             path="/auth/signin/42login/callback"
             element={<Callback />}
-          />
+          /></Route>
           <Route element={<PrivateRoutes />}>
             <Route path="/user" element={<User />} />
             <Route path="/history" element={<History />} />

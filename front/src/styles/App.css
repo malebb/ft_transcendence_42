@@ -6,6 +6,8 @@
   --text-primary: #b6b6b6;
   --text-secondary: #ececec;
   --bg-primary: #23232e;
+  --bg-primary-lighter: #9e9eb5;
+  --bg-primary-darker: #1e1e28;
   --bg-secondary: #141418;
 }
 
@@ -85,8 +87,8 @@ body {
 .btn-transparent{
   border: solid;
   border-width: 1px;
-  border-radius: 7px;
-  padding: 6px 9px;
+  border-radius: 5px;
+  padding: 6px 7px;
   background-color: transparent;
   transition: background-color 0.1s ease-in;
   transition: color 0.1s ease-in;
