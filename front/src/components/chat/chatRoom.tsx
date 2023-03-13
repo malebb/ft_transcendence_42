@@ -514,9 +514,8 @@ const ChatRoomBase = () =>
 
 	return (
 	<>
-	{/*
 		<Headers/>
-		<Sidebar/> */}
+		<Sidebar/>
 		<div className={style.roomBase}>
 			{checkRoomStatus()}
 		</div>
