@@ -16,7 +16,7 @@ class MessageController
 	@Get(':room')
 	async getAllMessagesByRoomName(@Param('room') room: string)
 	{
-		console.log("controller = ", room);
+		// console.log("controller = ", room);
 		return (await this.messageService.getAllMessagesByRoomName(room));
 	}
 

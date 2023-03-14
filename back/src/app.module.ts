@@ -13,7 +13,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard , RtGuard} from './auth/guard';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import  GameController from './game/game.controller';
-// import { ChatModule } from './chat/chat.module';
 import { ChallengeModule } from './challenge/challenge.module';
 import { ChatRoomModule } from './chat/chatRoom/chatRoom.module';
 import { MessageModule } from './chat/message/message.module';
