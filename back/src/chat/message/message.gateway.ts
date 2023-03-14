@@ -50,18 +50,7 @@ export class MessageGateway
     // this.logger.debug(`Number of connected sockets: ${sockets.size}`);
   }
 
-  // ecoute les evenements venant du client/user (websocketgateway)
-  // qui va donner acces a socket.io
-  //   @SubscribeMessage('sendMessage')
-  //   async handleSendMessage(user: Socket, payload: Chat) {
-  //     await this.MessageService.createMessage(payload);
-  //     this.server.emit('recMessage', payload);
-  //   }
 
-  //  @SubscribeMessage('CREATE_ROOM')
-  //createRoom(client: Socket, room: ChatRoom) {
-  //this.chatService.createRoom(client, room);
-  //}
   // async??
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
@@ -75,12 +64,6 @@ export class MessageGateway
   }
 
 
-  // @SubscribeMessage('ONE_TO_ONE')
-  // oneToONeMessage(client: Socket, message: Message) {
-  //   // this.messageService.createMessage(message, message?.room?.name);
-  //   client.to(message.room?.name).emit('ROOM_MESSAGE', message);
-    
-  // }
 
 
   afterInit(server: Server) {

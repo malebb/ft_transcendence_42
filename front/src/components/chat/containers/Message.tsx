@@ -21,7 +21,6 @@ function MessagesContainer() {
   const currentRoom = useRef<ChatRoom | null>(null);
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const roomId = useParams();
-  // const socket = useRef<Socket | null>(null);
   const socket = SocketContext();
   let newMessage: Message;
 
@@ -54,6 +53,13 @@ function MessagesContainer() {
           currentRoom.current = response.data;
           socket?.emit("JOIN_ROOM", currentRoom.current);
         });
+        axiosInstance.current = await axiosToken();
+        await axiosInstance
+          .current!.get("/message/" + currentRoom.current?.name)
+          .then((response) => {
+            setStateMessages(response.data);
+            console.log(response.data);
+          });
     };
     fetchData().catch(console.error);
   }, []);
@@ -71,18 +77,6 @@ function MessagesContainer() {
       // Prend donc l'etat precedent, au lieu du tableau et retourne le nouveau
       setStateMessages((stateMessages) => [...stateMessages, message]);
     });
-  }, []);
-
-  useEffect(() => {
-    const getMessages = async () => {
-      axiosInstance.current = await axiosToken();
-      await axiosInstance
-        .current!.get("/message/all-messages/" + currentRoom.current?.name)
-        .then((response) => {
-          setStateMessages(response.data);
-        });
-    };
-    getMessages();
   }, []);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {

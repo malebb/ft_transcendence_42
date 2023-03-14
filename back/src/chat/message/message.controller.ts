@@ -13,9 +13,10 @@ class MessageController
 		return (await this.messageService.createMessage(message, room));
 	}
 
-	@Get('all-messages/:room')
+	@Get(':room')
 	async getAllMessagesByRoomName(@Param('room') room: string)
 	{
+		console.log("controller = ", room);
 		return (await this.messageService.getAllMessagesByRoomName(room));
 	}
 

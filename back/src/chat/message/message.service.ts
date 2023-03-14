@@ -47,6 +47,7 @@ export class MessageService {
   }
 
   async getAllMessagesByRoomName(roomName: string) {
+    console.log("service = ", roomName);
     const message = await this.prisma.message.findMany({
       where: {
         room: {
@@ -56,6 +57,12 @@ export class MessageService {
       include: {
         user: true,
         room: true,
+        
+        // message: {
+				// 	orderBy: {
+	
+				// 	}
+				// },
       },
     });
     // console.log(message);
