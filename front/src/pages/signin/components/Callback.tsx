@@ -6,6 +6,8 @@ import { Link, Navigate } from "react-router-dom";
 import Loading from "src/pages/Loading";
 import { useSnackbar } from "notistack";
 import VerifTfa from "src/pages/settings/components/VerifTfa";
+import { ResponseInterface, SignInterface } from "src/interfaces/Sign";
+import Headers from "src/components/Headers";
 
 const CALLBACK_PATH = "/auth/signin/42login/callback";
 
@@ -16,6 +18,10 @@ const Callback = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isTfa, setIsTfa] = useState<boolean>(false);
   const [TfaSuccess, setTfaSuccess] = useState<boolean>(false);
+  const [resp, setResp] = useState<ResponseInterface>({
+    tokens: undefined,
+    id: undefined,
+  });
 
   const snackBar = useSnackbar();
   const query = useQuery();
@@ -24,12 +30,19 @@ const Callback = () => {
     console.log("code = " + code);
     const callback42 = async () => {
       try {
-        const response: AxiosResponse = await axiosMain.post(CALLBACK_PATH, {
+        const response: AxiosResponse = await axiosMain.post<SignInterface>(CALLBACK_PATH, {
           code: code,
         });
-        console.log("response = " + JSON.stringify(response.data));
-        sessionStorage.setItem("id", JSON.stringify(response.data.userId));
+        console.log("response =+ " + JSON.stringify(response.data));
+      if (response.data.isTfa === false)
+      {
         sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
+        sessionStorage.setItem("id", JSON.stringify(response.data.userId));
+      }
+      else {
+        setResp((prev) => ({...prev, id: response.data.userId}))
+        setResp((prev) => ({...prev, tokens: response.data.tokens}))
+      }
         setUsername(response.data.username);
         setIsTfa(response.data.isTfa);
       } catch (err: any) {
@@ -45,9 +58,20 @@ const Callback = () => {
     };
     callback42();
   }, []);
+
+  useEffect(() => {
+    if (TfaSuccess)
+    {
+      sessionStorage.setItem("tokens", JSON.stringify(resp.tokens));
+      sessionStorage.setItem("id", JSON.stringify(resp.id));
+    }
+  }, [TfaSuccess])
+
+  console.log("resp.id = " + resp.id);
   if (isLoading) return <Loading />;
   return (
     <>
+    <Headers/>
       {errMsg ? (
         <>
           {snackBar.enqueueSnackbar("Oops something went wrong", {
@@ -57,8 +81,8 @@ const Callback = () => {
           <Navigate to={"/signin"} />
         </>
       ) : (
-        <>
-          {isTfa && <VerifTfa setTfaSuccess={setTfaSuccess} />}
+        <main>
+          {(isTfa && resp.id !== undefined) && <VerifTfa setTfaSuccess={setTfaSuccess} userId={resp.id} />}
           {(TfaSuccess || !isTfa) && (
             <>
               {snackBar.enqueueSnackbar("Hello, " + username, {
@@ -68,9 +92,8 @@ const Callback = () => {
               <Navigate to={"/"} />
             </>
           )}
-        </>
+        </main>
       )}
-      ;
     </>
   );
 };

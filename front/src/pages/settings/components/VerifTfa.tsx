@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useRef } from "react";
 import { useState, useEffect } from "react";
 import { axiosMain, axiosToken } from "src/api/axios";
 import axios, { AxiosResponse } from "axios";
@@ -6,36 +6,51 @@ import { useNavigate } from "react-router-dom";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
-const VerifTfa = ({setTfaSuccess} : {setTfaSuccess : Dispatch<SetStateAction<boolean>>}) => {
+const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAction<boolean>>, userId: number}) => {
   const [TfaQrcode, setTfaQrcode] = useState("");
   const [boolQrcode, setboolQrcode] = useState<boolean>(false);
 
   const [badAttempt, setBadAttempt] = useState<boolean>(false);
 
-  const [code, setCode] = useState("");
   const [validCode, setValidCode] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
 
+  const reftextInput1 = useRef<HTMLInputElement>(null);
+  const reftextInput2 = useRef<HTMLInputElement>(null);
+  const reftextInput3 = useRef<HTMLInputElement>(null);
+  const reftextInput4 = useRef<HTMLInputElement>(null);
+  const reftextInput5 = useRef<HTMLInputElement>(null);
+  const reftextInput6 = useRef<HTMLInputElement>(null);
+
   const navigate = useNavigate();
-  useEffect(() => {
-    const result = CODE_REGEX.test(code);
-    console.log(result);
-    console.log(code);
-    setValidCode(result);
-  }, [code]);
+  // useEffect(() => {
+  //   const result = CODE_REGEX.test(code);
+  //   console.log(result);
+  //   console.log(code);
+  //   setValidCode(result);
+  // }, [code]);
 
-  const onCodeChange = (event: any) => {
-    setCode(event.target.value);
-    if (badAttempt) setBadAttempt(false);
-  };
+  // const onCodeChange = (event: any) => {
+  //   setCode(event.target.value);
+  //   if (badAttempt) setBadAttempt(false);
+  // };
 
-  const handleCodeSubmit = async (e: React.FormEvent) => {
+  console.log("userId verif =" + userId);
+
+  const handleCodeSubmit = async (e: any) => {
     e.preventDefault();
-    console.log("jwt = " + getJWT());
+    let code: string = "";
+    code += e.target.n1.value; 
+    code += e.target.n2.value; 
+    code += e.target.n3.value; 
+    code += e.target.n4.value; 
+    code += e.target.n5.value; 
+    code += e.target.n6.value; 
+      
     const verif = (
       await axiosMain.post(
         "/auth/verify2FA",
-        { code: code },
+        { code: code, userId: userId },
         {
           headers: { Authorization: "Bearer " + getJWT() },
           //withCredentials: true
@@ -59,9 +74,32 @@ const VerifTfa = ({setTfaSuccess} : {setTfaSuccess : Dispatch<SetStateAction<boo
     console.log("totokens=" + JSON.stringify(jwt));
     return jwt["access_token"];
   };
+  const handleNextInput = (e : React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    console.log("ID atual: " + e.target.id);
+    console.log("length =" + Object.keys(e.target.value).length)
+    console.log("key =" + e.target.placeholder);
+    if (Object.keys(e.target.value).length > 1)
+    {
+      if(e.target.value[0] !== e.target.placeholder)
+      (e.target.value = e.target.value[0]);
+      else
+      (e.target.value = e.target.value[1]);
+    }
+    if (e.target.value !== "")
+    {
+    const fieldName = e.target.id.split('n')[1];
+    const nextSibiling = document.getElementById(`n${parseInt(fieldName) + 1}`);
+    console.log(nextSibiling);
+    if(nextSibiling !== null){
+        nextSibiling.focus();
+    }}
+    e.target.placeholder = e.target.value;
+    // setCode(code + e.target.value);
+  };
   return (
-    <>
-      <div>VerifTfa</div>
+
+/* <div>VerifTfa</div>
       {badAttempt ? <div>Attempt failed</div> : <></>}
       <form onSubmit={handleCodeSubmit}>
         <label htmlFor="avatar">2FA:</label>
@@ -71,7 +109,25 @@ const VerifTfa = ({setTfaSuccess} : {setTfaSuccess : Dispatch<SetStateAction<boo
           onChange={onCodeChange}
         />
         <button disabled={!validCode ? true : false}>Send Code</button>
-      </form>
+      </form> */
+
+    <>
+        <input id="submitted" type="checkbox" tabIndex={-1}/>
+
+<form onSubmit={handleCodeSubmit}>
+
+	<input type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n1" name="n1" autoFocus/>
+	<input type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n2" name="n2"/>
+	<input type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n3" name="n3"/>
+	<input type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n4" name="n4"/>
+	<input type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n5" name="n5"/>
+	<input type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n6" name="n6"/>
+
+	<button className="submit" itemType="button" tabIndex={0}  id="n7"disabled></button>
+
+	<span className="indicator"></span>
+
+</form>
     </>
   );
 };

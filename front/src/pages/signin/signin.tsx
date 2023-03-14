@@ -15,10 +15,29 @@ import VerifTfa from "../settings/components/VerifTfa";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import Headers from "src/components/Headers";
+import "../../styles/VerifTfa.css";
 
 const EMAIL_REGEX = /^[a-z0-9-_@.]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,24}$/;
 const SIGNIN_PATH = "/auth/signin";
+
+interface TokensInterface{
+    access_token: string,
+    crea_time: Date,
+    expireIn: number,
+    refresh_token: string,
+  }
+interface ResponseInterface{
+  tokens: TokensInterface | undefined,
+  id: number | undefined,
+}
+
+interface SignInterface {
+  tokens: TokensInterface;
+  isTfa: boolean;
+  userId: number;
+  username: string;
+}
 
 const Signin = () => {
   const { token = "", setToken = () => {} } =
@@ -27,6 +46,10 @@ const Signin = () => {
   const userRef = useRef<HTMLInputElement>(null);
   const errRef = useRef<HTMLParagraphElement>(null);
 
+  const [resp, setResp] = useState<ResponseInterface>({
+    tokens: undefined,
+    id: undefined,
+  });
   const [email, setEmail] = useState("");
   const [validEmail, setValidEmail] = useState(false);
   const [emailFocus, setEmailFocus] = useState(false);
@@ -89,7 +112,7 @@ const Signin = () => {
       return;
     }
     try {
-      const response: AxiosResponse = await axiosMain.post(
+      const response: AxiosResponse = await axiosMain.post<SignInterface>(
         SIGNIN_PATH,
         { email: email, password: pwd },
         {
@@ -103,10 +126,15 @@ const Signin = () => {
       setIsTfa(response.data.isTfa);
       setName(response.data.username);
       console.log("tfa === " + JSON.stringify(response.data));
+      console.log("tfa ==" + response.data.isTfa);
       if (response.data.isTfa === false)
       {
       sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
       sessionStorage.setItem("id", JSON.stringify(response.data.userId));
+      }
+      else {
+        setResp((prev) => ({...prev, id: response.data.userId}))
+        setResp((prev) => ({...prev, tokens: response.data.tokens}))
       }
       console.log(response.data.access_token);
       console.log(token);
@@ -126,8 +154,8 @@ const Signin = () => {
   useEffect(() => {
     if (TfaSuccess)
     {
-      sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
-      sessionStorage.setItem("id", JSON.stringify(response.data.userId));
+      sessionStorage.setItem("tokens", JSON.stringify(resp.tokens));
+      sessionStorage.setItem("id", JSON.stringify(resp.id));
     }
 
   }, [TfaSuccess])
@@ -161,7 +189,7 @@ button img{position: relative;
       <Headers/>
       {success ? (
         <section>
-          {isTfa && <VerifTfa setTfaSuccess={setTfaSuccess}/>}
+          {(isTfa && resp.id !== undefined)&& <VerifTfa setTfaSuccess={setTfaSuccess} userId={resp.id}/>}
           {(TfaSuccess || !isTfa) &&(
             <>
               {snackBar.enqueueSnackbar("Hello, " + name, {

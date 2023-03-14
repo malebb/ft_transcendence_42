@@ -14,6 +14,7 @@ import * as qrcode from 'qrcode';
 import { connected } from 'process';
 import { Response } from 'express';
 import axios, { AxiosResponse } from 'axios';
+import { SignInterface } from './interfaces';
 
 //require('oauth2');
 
@@ -35,7 +36,7 @@ export class AuthService {
     return hash;
   }
 
-  async signup(dto: SignupDto): Promise<Object> {
+  async signup(dto: SignupDto): Promise<SignInterface> {
     const hash = await argon.hash(dto.password);
     try {
       const user = await this.prismaService.user.create({
@@ -69,7 +70,7 @@ export class AuthService {
     //return (this.prismaService.)
   }
 
-  async signin(dto: AuthDto): Promise<Object> {
+  async signin(dto: AuthDto): Promise<SignInterface> {
     const user = await this.prismaService.user.findUnique({
       where: {
         email: dto.email,
@@ -114,7 +115,7 @@ export class AuthService {
         return response;
     }*/
 
-  async callback42(code): Promise<Object> {
+  async callback42(code): Promise<SignInterface> {
     //TODO may change || "" by so;ething more accurate
     //const response : AxiosResponse = await this.get42AT(code);
     const client_id = this.config.get('OAUTH_CLIENT_UID');

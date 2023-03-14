@@ -21,6 +21,7 @@ import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { CallbackDto } from './dto/callback.dto';
 import { User } from '@prisma/client';
+import { SignInterface } from './interfaces';
 
 @Controller('auth')
 export class AuthController {
@@ -28,7 +29,7 @@ export class AuthController {
 
   @Public()
   @Post('signup')
-  signup(@Body() dto: SignupDto, @Headers() headers): Promise<Object> {
+  signup(@Body() dto: SignupDto, @Headers() headers): Promise<SignInterface> {
     console.log(headers);
     console.log(dto);
     return this.authService.signup(dto);
@@ -37,7 +38,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('signin')
-  signin(@Body() dto: AuthDto, @Headers() headers): Promise<Object> {
+  signin(@Body() dto: AuthDto, @Headers() headers): Promise<SignInterface> {
     console.log(headers);
     return this.authService.signin(dto);
   }
@@ -59,7 +60,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('signin/42login/callback')
-  callback42(@Body() dto: CallbackDto): Promise<Object> {
+  callback42(@Body() dto: CallbackDto): Promise<SignInterface> {
     /*let origin;
         if (req.headers.origin)
         {
@@ -83,9 +84,8 @@ export class AuthController {
   //refreshToken(@GetUser() user: User, @Req() req: Request)
   refreshToken(
     @GetUser('sub') userId: number,
-    @GetUser('refreshToken') token,
-  ) //refreshToken(@Req() req: Request)
-  {
+    @GetUser('refreshToken') token, //refreshToken(@Req() req: Request)
+  ) {
     /*console.log(req);
         let rToken;
         console.log(user.id);
@@ -109,9 +109,10 @@ export class AuthController {
     console.log(user);
     return this.authService.create2FA(user.id);
   }
+  @Public()
   @Post('verify2FA')
-  verify2FA(@GetUser() user, @Body() dto: TFADto): Promise<boolean> {
-    return this.authService.verify2FA(user.id, dto.code);
+  verify2FA(@Body() dto: TFADto): Promise<boolean> {
+    return this.authService.verify2FA(dto.userId, dto.code);
   }
 
   @Get('set2FA')
