@@ -108,6 +108,23 @@ const ChatRoomBase = () =>
 		)
 	}
 
+	const printInfosBox = (infos: string) =>
+	{
+	 	confirmAlert({
+   		customUI: ({onClose}) =>
+		{
+			return (
+					<div id={alertStyle.boxContainer} onClick={() => onClose()} style={{width: 400}}>
+						<h2>{infos}</h2>
+						<div id={alertStyle.alertBoxBtn}>
+							<p>Click to continue</p>
+						</div>
+					</div>
+				   );
+		}
+		});
+	}
+
 	const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) =>
 	{
 		e.preventDefault();
@@ -146,7 +163,7 @@ const ChatRoomBase = () =>
 			setBtnValue("Change password");
 			setPassword('');
 			document.getElementById(style.passwordInfo)!.style.color = 'white';
-			alert('Password updated successfully!');
+			printInfosBox('Password updated successfully');
 			return ;
 		}
 		catch (error: any)
@@ -175,8 +192,11 @@ const ChatRoomBase = () =>
 				axiosInstance.current = await axiosToken();
 				await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomName, "accessibility=PUBLIC");
 			}
-			window.location.reload();
-			alert('Password removed successfully');
+			document.getElementById(style.passwordInfo)!.style.color = 'white';
+			setPasswordInfo('Add a password: ');
+			setBtnValue("set");
+			setPassword('');
+			printInfosBox('Password has been removed successfully');
 		}
 		catch (error: any)
 		{
@@ -290,17 +310,19 @@ const ChatRoomBase = () =>
 						{
 							axiosInstance.current = await axiosToken();
 							axiosInstance.current.patch('/chatRoom/changeOwner/' + roomName, {userId: member.id});
-							alert(member.username + " is the new owner");
+							owner.current = member;
+							setIsOwner(false);
+							printInfosBox(member.username + ' is the new owner');
 						}
 						else
 						{
-							alert(member.username + ' is not member anymore');
+							printInfosBox(member.username + ' is not member anymore');
 							removeMemberFromList(member);
-
 						}
 					});
 				}
-				window.location.reload();
+				else
+					printInfosBox('You are not owner anymore');
 			});
 		}
 		catch (error: any)
@@ -336,14 +358,14 @@ const ChatRoomBase = () =>
 						{
 							axiosInstance.current = await axiosToken();
 							await axiosInstance.current.patch('/chatRoom/addAdmin/' + roomName, "userId=" + member.id);
-							alert(member.username + " is now admin");
+							printInfosBox(member.username + ' is now admin');
 							const newAdmins: User[] = [...admins];
 							newAdmins.push(member);
 							setAdmins(newAdmins);
 						}
 						else
 						{
-							alert(member.username + ' is not member anymore');
+							printInfosBox(member.username + ' is not member anymore');
 							removeMemberFromList(member);
 						}
 					});
@@ -420,7 +442,7 @@ const ChatRoomBase = () =>
 						{
 							axiosInstance.current = await axiosToken();
 							await axiosInstance.current.patch('/chatRoom/removeAdmin/' + roomName, "userId=" + member.id);
-							alert(member.username + " is not admin anymore");
+							printInfosBox(member.username + ' is not admin anymore');
 							for (let i = 0; i < admins.length; ++i)
 							{
 								if (member.id === admins[i].id)
@@ -433,7 +455,7 @@ const ChatRoomBase = () =>
 						}
 						else
 						{
-							alert(member.username + ' is not member anymore');
+							printInfosBox(member.username + ' is not member anymore');
 							removeMemberFromList(member);
 						}
 					});
@@ -510,7 +532,7 @@ const ChatRoomBase = () =>
 					}
 					else
 					{
-						alert(member.username + ' is no longer member');
+						printInfosBox(member.username + ' is not member anymore');
 						removeMemberFromList(member);
 					}
 				});
@@ -616,13 +638,14 @@ const ChatRoomBase = () =>
 								{
 									axiosInstance.current = await axiosToken();
 									await axiosInstance.current.patch('/chatRoom/removeUser/' + roomName, {userId: member.id});
+									printInfosBox(member.username + ' has been kicked');
 									removeMemberFromList(member);
 								}
 							})
 						}
 						else
 						{
-							alert(member.username + ' has already been kicked');
+							printInfosBox(member.username + ' is not member anymore');
 							removeMemberFromList(member);
 						}
 
@@ -705,10 +728,12 @@ const ChatRoomBase = () =>
 											{
 												axiosInstance.current = await axiosToken();
 												await axiosInstance.current.patch('/chatRoom/removeUser/' + roomName, {userId: member.id});
+												printInfosBox(member.username + ' has been banned');
 												removeMemberFromList(member);
 											}
 											else if (type === 'MUTE')
 											{
+												printInfosBox(member.username + ' has been muted');
 												const newMembersMuted = [...membersMuted];
 												newMembersMuted.push(member);
 												setMembersMuted(newMembersMuted);
@@ -716,7 +741,7 @@ const ChatRoomBase = () =>
 										}
 										else
 										{
-											alert(member.username + ' is not member anymore');
+											printInfosBox(member.username + ' is not member anymore');
 											removeMemberFromList(member);
 										}
 									});
@@ -725,12 +750,12 @@ const ChatRoomBase = () =>
 								{
 									if (type === 'BAN')
 									{
-										alert(member.username + ' has already been banned');
+										printInfosBox(member.username + ' has already been banned');
 										removeMemberFromList(member);
 									}
 									else if (type === 'MUTE')
 									{
-										alert(member.username + ' has already been muted');
+										printInfosBox(member.username + ' has already been muted');
 										const newMembersMuted = [...membersMuted];
 										newMembersMuted.push(member);
 										setMembersMuted(newMembersMuted);
