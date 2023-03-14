@@ -1,0 +1,45 @@
+.button {
+    font-size: 10px;
+    margin: 3px 3px;
+    background-color: #29632B;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 650px;
+    height: 100%;
+    padding: 8px 16px;
+    font-size: 17px;
+}
+
+.open-button {
+    background-color: #0163d4;
+    color: #fff;
+    padding: 16px 20px;
+    border: none;
+    opacity: 0.8;
+    position: fixed;
+    cursor: pointer;
+    bottom: 20px;
+    right: 2000px;
+    width: 300px;
+    font-size: 20px;
+    letter-spacing: 2px;
+    border-radius: 28px;
+    box-shadow: 10px 10px 30px -20px #000;
+
+}
+
+.chat-popup {
+    display: none;
+    position: fixed;
+    bottom: 10px;
+    right: 200px;
+    border: 3px solid transparent;
+    border-radius: 10px;
+    z-index: 9;
+    box-shadow: 10px 10px 30px -20px #000;
+}
+
+.form-container {
+    
+}

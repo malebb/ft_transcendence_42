@@ -11,6 +11,7 @@ import { Message } from "ft_transcendence";
 
 import "./message.style.css";
 import style from "../ChatRoom.module.css";
+import PrivateMessages from "./PrivateMessages";
 // import { Socket } from "socket.io";
 
 function MessagesContainer() {
@@ -194,6 +195,7 @@ function MessagesContainer() {
             <GenMessages />
           </div>
           <GenInputButton />
+          <PrivateMessages />
         </div>
       </div>
     </>
