@@ -33,7 +33,7 @@
 	width: 98%;
 }
 
-#roomStatus
+#roomStatusMsg
 {
 	color: white;
 	margin: auto;
@@ -179,7 +179,23 @@ ul
 	border-radius: 3px;
 }
 
-.passwordSubmitBtn:hover, .leaveBtn:hover
+#roomsBtn, #roomStatusBtn
+{
+	width: 60px;
+	background-color: #413368;
+	color: white;
+	border: none;
+	padding: 5px;
+	padding-right: 20px;
+	padding-left: 20px;
+	cursor: pointer;
+	border-radius: 3px;
+	text-decoration: none;
+	text-align: center;
+	margin: 30px;
+}
+.passwordSubmitBtn:hover, .leaveBtn:hover,
+#roomStatusBtn:hover
 {
 	background-color: #613981;
 }
@@ -193,3 +209,11 @@ ul
 {
 	left: 465px;
 }
+
+#roomStatusContainer
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+

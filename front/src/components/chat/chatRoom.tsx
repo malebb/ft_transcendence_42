@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import MessagesContainer from "./containers/Message";
 import { useEffect, useRef, useState } from 'react';
 import { axiosToken } from '../../api/axios';
@@ -70,7 +70,7 @@ const ChatRoomBase = () =>
 				else
 				{
 					setPasswordInfo("Add a password : ");
-					setBtnValue("Set");
+					setBtnValue("set");
 				}
 			}
 
@@ -908,15 +908,28 @@ const ChatRoomBase = () =>
 		}
 		else if (roomStatus === 'NOT_JOINED')
 		{
-			return (<p id={style.roomStatus}>You are not a member of {roomName} room</p>);
+			return (
+					<div id={style.roomStatusContainer}>
+						<p id={style.roomStatusMsg}>You are not a member of {roomName} room</p>
+						<Link id={style.roomStatusBtn} to={`/chat/`}>rooms</Link>
+					</div>);
 		}
 		else if (roomStatus === 'NOT_EXIST')
 		{
-			return (<p id={style.roomStatus}>Room {roomName} does not exist</p>);
+			return (
+					<div id={style.roomStatusContainer}>
+						<p id={style.roomStatusMsg}>Room {roomName} does not exist</p>
+						<Link id={style.roomStatusBtn} to={`/chat/`}>rooms</Link>
+					</div>);
 		}
 		else if (roomStatus === 'BANNED')
 		{
-			return (<p id={style.roomStatus}>You have been temporarily banned from {roomName}, try later</p>);
+			return (
+					<div id={style.roomStatusContainer}>
+						<p id={style.roomStatusMsg}>You have been temporarily banned from {roomName} room, try later</p>
+						<Link id={style.roomStatusBtn} to={`/chat/`}>rooms</Link>
+					</div>
+					);
 		}
 		else if (!roomStatus)
 		{
