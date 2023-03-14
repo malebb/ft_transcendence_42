@@ -4,6 +4,10 @@ export declare enum Accessibility {
     PRIVATE = "PRIVATE",
     PROTECTED = "PROTECTED"
 }
+export declare enum PenaltyType {
+    BAN = "BAN",
+    MUTE = "MUTE"
+}
 export interface ChatRoom {
     owner: User;
     name: string;

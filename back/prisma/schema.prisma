@@ -48,6 +48,9 @@ model User {
 
   messages	Message[]
 
+  penaltiesAuthor		Penalty[] @relation(name: "PenaltiesAuthor")
+  penaltiesTarget		Penalty[] @relation(name: "PenaltiesTarget")
+
   @@map("users")
 }
 
@@ -67,9 +70,10 @@ model ChatRoom {
   accessibility Accessibility
   owner         User          @relation(fields: [ownerId], references: [id])
   ownerId       Int
-  admins         User[]        @relation(name: "UserAdmin")
+  admins        User[]        @relation(name: "UserAdmin")
   members		User[]			@relation(name: "UserMember")
   messages      Message[]
+  penalties		Penalty[]
 }
 
 model Message {
@@ -86,6 +90,24 @@ enum Accessibility {
   PUBLIC
   PRIVATE
   PROTECTED
+}
+
+model Penalty {
+	id       		 	Int    		@id @default(autoincrement())
+  	date 				DateTime	@default(now())
+	chat				ChatRoom	@relation(fields: [chatId], references: [id])
+	chatId				Int
+	author				User @relation(name: "PenaltiesAuthor", fields: [authorId], references: [id])
+	authorId			Int
+	target				User @relation(name: "PenaltiesTarget", fields: [targetId], references: [id])
+	targetId			Int
+	type				PenaltyType
+	durationInMin		Int
+}
+
+enum PenaltyType {
+	BAN
+	MUTE
 }
 
 model FriendRequest {

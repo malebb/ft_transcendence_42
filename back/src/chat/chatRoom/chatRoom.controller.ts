@@ -66,6 +66,13 @@ class ChatRoomController
 		return (await this.chatRoomService.getMember(userId, name));
 	}
 
+	@Get('member/:name/:id')
+	async getMemberById(@Param('name') roomName: string, @Param('id', ParseIntPipe) userId: number)
+	{
+		return (await this.chatRoomService.getMember(userId, roomName));
+	}
+
+
 	@Post(':name')
 	async joinChatRoom(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
 	{
@@ -118,6 +125,24 @@ class ChatRoomController
 	async leaveRoom(@Param('name') chatRoomName: string, @GetUser('id') userId: number)
 	{
 		await this.chatRoomService.removeUserFromRoom(userId, chatRoomName);
+	}
+
+	@Patch('removeUser/:name')
+	async removeUserWithId(@Param('name') chatRoomName: string,  @Body() chatRoomDto: ChatRoomDto)
+	{
+		await this.chatRoomService.removeUserFromRoom(chatRoomDto.userId, chatRoomName);
+	}
+
+	@Get('penalty/:name/:userId')
+	async getUserPenalties(@Param('name') chatRoomName: string, @Param('userId', ParseIntPipe) userId: number)
+	{
+		return (await this.chatRoomService.getUserPenalties(chatRoomName, userId));
+	}
+
+	@Get('mutes/:name')
+	async getMuted(@Param('name') chatRoomName: string)
+	{
+		return (await this.chatRoomService.getMutes(chatRoomName));
 	}
 }
 

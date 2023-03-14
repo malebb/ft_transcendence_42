@@ -31,7 +31,6 @@ export async function axiosToken()
 	const token = JSON.parse(sessionStorage.getItem('tokens')!);
 	const time = token['expireIn'];
 	const crea_time = new Date(token['crea_time']);
-	console.log(time);
 	if (date.getTime() >= crea_time.getTime() + (time - 10) * 1000)
 	{
 		console.log(getRefreshHeader());
