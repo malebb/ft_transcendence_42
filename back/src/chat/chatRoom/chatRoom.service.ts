@@ -265,4 +265,41 @@ export class ChatRoomService
 			}
 		});
 	}
+
+	async getUserPenalties(chatRoomName: string, userId: number)
+	{
+		const penalties = this.prisma.chatRoom.findUnique({
+			where: {
+				name: chatRoomName
+			},
+			include: {
+				penalties: {
+					where : {
+						targetId: userId
+					}
+				}
+			}
+		});
+		return (penalties);
+	}
+
+	async getMutes(chatRoomName: string)
+	{
+		const mutes = this.prisma.chatRoom.findUnique({
+			where: {
+				name: chatRoomName
+			},
+			include: {
+				penalties: {
+					where: {
+						type: 'MUTE'
+					},
+					include: {
+						target: true
+					}
+				}
+			}
+		})
+		return (mutes);
+	}
 }
