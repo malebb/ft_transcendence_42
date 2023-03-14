@@ -301,8 +301,10 @@ const ChatRoomBase = () =>
 					axiosInstance.current = await axiosToken();
 					await axiosInstance.current.patch('/chatRoom/addAdmin/' + roomName, "userId=" + member.id);
 					alert(member.username + " is now admin");
+					const newAdmins: User[] = [...admins];
+					newAdmins.push(member);
+					setAdmins(newAdmins);
 				}
-				window.location.reload();
 			});
 		}
 		catch (error: any)
@@ -372,8 +374,16 @@ const ChatRoomBase = () =>
 					axiosInstance.current = await axiosToken();
 					await axiosInstance.current.patch('/chatRoom/removeAdmin/' + roomName, "userId=" + member.id);
 					alert(member.username + " is not admin anymore");
+					for (let i = 0; i < admins.length; ++i)
+					{
+						if (member.id === admins[i].id)
+						{
+							let newAdmins: User[] = [...admins];
+							newAdmins.splice(i, 1);
+							setAdmins(newAdmins);
+						}
+					}
 				}
-				window.location.reload();
 			});
 		}
 		catch (error: any)
