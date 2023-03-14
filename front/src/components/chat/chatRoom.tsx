@@ -410,7 +410,6 @@ const ChatRoomBase = () =>
 			return (<span className={style.role}>(member)</span>);
 	}
 
-
 	const isCurrentUserOwner = async (): Promise<boolean> =>
 	{
 		try
@@ -482,7 +481,6 @@ const ChatRoomBase = () =>
 	{
 		return (username.length < 15 ? username : username.slice(0, 13) + '..');
 	}
-
 
 	const challenge = async (member: User, powerUpMode: boolean) =>
 	{
