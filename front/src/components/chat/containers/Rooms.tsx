@@ -7,6 +7,7 @@ import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
 import { ChatRoomFilter } from '../utils/ChatRoomFilter';
 import { Penalty } from '../utils/Penalty';
+import { trimUsername } from '../../../utils/trim';
 
 function Rooms()
 {
@@ -344,7 +345,7 @@ function Rooms()
 							joinRoom(chatRoom.name);
 				}
 				return (	<>
-								<p className="owner">Owner : {chatRoom.owner.username}</p>
+								<p className="owner">Owner : {trimUsername(chatRoom.owner.username, 15)}</p>
 								{accessibilityLogo(chatRoom.accessibility, chatRoom.password)}
 							</>
 						);
@@ -460,6 +461,7 @@ function Rooms()
 						return (
 							<li className="chatRoom" key={chatRoom.name} onClick={() => enterRoom(chatRoom.name)}>
 								<h3 className="roomTitle">{chatRoom.name}</h3>
+								<p>Owner: {trimUsername(chatRoom.owner.username, 15)}</p>
 							</li>
 						);
 					})

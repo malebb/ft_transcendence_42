@@ -8,6 +8,7 @@ import { AxiosInstance, AxiosResponse } from 'axios';
 import { useParams, useNavigate, Link} from 'react-router-dom';
 import { CANVAS_FONT, FONT_COLOR } from '../classes/Draw';
 import style from '../styles/canvas.module.css';
+import { trimUsername } from '../utils/trim';
 
 interface CheckboxData
 {
@@ -539,17 +540,13 @@ export default function Canvas()
 			}
 		}
 
-		const trimUsername = (username: string) => {
-			return (username.length < 15 ? username : username.slice(0, 13) + '..');
-		}
-
 		function game()
 		{
 			draw.current!.gameMap(map.current!);
 			leftPlayer.current!.draw_paddle();
 			rightPlayer.current!.draw_paddle();
 			draw.current!.score(leftPlayer.current!.score, rightPlayer.current!.score);
-			draw.current!.usernames(trimUsername(leftPlayer.current!.username), trimUsername(rightPlayer.current!.username));
+			draw.current!.usernames(trimUsername(leftPlayer.current!.username, 15), trimUsername(rightPlayer.current!.username, 15));
 			draw.current!.speedPowerUp(speedPowerUp.current!, leftPlayer.current!.speedPowerUp, rightPlayer.current!.speedPowerUp);
 			ball.current?.draw();
 		}

@@ -4,6 +4,7 @@ import { AxiosInstance, AxiosResponse } from 'axios';
 import '../styles/history.css';
 import Sidebar from './Sidebar'
 import Headers from './Headers'
+import { trimUsername } from '../utils/trim';
 
 interface HistoryElem
 {
@@ -17,11 +18,6 @@ const History = () =>
 	const historyElem = useRef<HistoryElem[]>([]);
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 
-	const trimUsername = (username: string) =>
-	{
-		return (username.length < 15 ? username : username.slice(0, 13) + '..');
-	}
-
 	const printHistory = () =>
 	{
 		if (sorted)
@@ -33,9 +29,9 @@ const History = () =>
 			{
 				return (<div className="historyElem" id="gamePlayed" key={elem.value.date}>
 							<div className="gameDataContainer">
-								<p className="leftPlayer">{trimUsername(elem.value.leftPlayer.username)}</p>
+								<p className="leftPlayer">{trimUsername(elem.value.leftPlayer.username, 15)}</p>
 								<p className="score">{elem.value.leftScore} - {elem.value.rightScore}</p>
-								<p className="rightPlayer">{trimUsername(elem.value.rightPlayer.username)}</p>
+								<p className="rightPlayer">{trimUsername(elem.value.rightPlayer.username, 15)}</p>
 							</div>
 						</div>);
 			}

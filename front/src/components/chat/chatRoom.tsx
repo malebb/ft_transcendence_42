@@ -13,6 +13,7 @@ import { User, PenaltyType } from 'ft_transcendence';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import alertStyle from './alertBox.module.css';
+import { trimUsername } from '../../utils/trim';
 
 const ChatRoomBase = () =>
 {
@@ -337,7 +338,7 @@ const ChatRoomBase = () =>
 		(
 			owner.current!.id !== member.id ?
 			<img className={style.memberAction} src="http://localhost:3000/images/makeOwner.png" 
-			alt="make Owner" title="make owner"
+			alt="Make Owner" title="Make owner"
 			width="20" height="20"
 			onClick={() => makeOwner(member)}/> : <></>
 		)
@@ -394,8 +395,8 @@ const ChatRoomBase = () =>
 	{
 		return (!isAdmin(member) && isOwner ?
 			<img className={style.memberAction} src="http://localhost:3000/images/admin.png" 
-			alt="make admin" title="make admin"
-			width="20"
+			alt="Make admin" title="Make admin"
+			width="20" height="21"
 			onClick={() => makeAdmin(member)}/> : <></>
 		 );
 	}
@@ -471,15 +472,10 @@ const ChatRoomBase = () =>
 	{
 		return (isOwner && isAdmin(member) && owner.current!.id !== member.id ? 
 			<img className={style.memberAction} src="http://localhost:3000/images/removeAdmin.png" 
-			alt="remove admin" title="remove admin"
-			width="24"
+			alt="Remove admin" title="Remove admin"
+			width="20"
 			onClick={() => removeAdmin(member)}/> : <></>
 		);
-	}
-
-	const trimUsername = (username: string) =>
-	{
-		return (username.length < 15 ? username : username.slice(0, 13) + '..');
 	}
 
 	const challenge = async (member: User, powerUpMode: boolean) =>
@@ -508,7 +504,7 @@ const ChatRoomBase = () =>
 							{
        							return (
 									<div id={alertStyle.boxContainer}>
-										<h1>Challenge {trimUsername(member.username)}</h1>
+										<h1>Challenge {trimUsername(member.username, 15)}</h1>
 										<p>Select a pong mode</p>
 										<div id={alertStyle.alertBoxBtn}>
 											<button onClick={() =>
@@ -542,8 +538,8 @@ const ChatRoomBase = () =>
 	{
 		return (currentUser!.id !== member.id ? 
 			<img className={style.memberAction} src="http://localhost:3000/images/challenge.png" 
-			alt={"challenge" + member.username} title={"challenge " + member.username}
-			width="20"
+			alt={"Challenge" + member.username} title={"Challenge " + member.username}
+			width="20" height="22"
 			onClick={() => selectMode(member)}/> : <></>
 		);
 	}
@@ -662,8 +658,8 @@ const ChatRoomBase = () =>
 	{
 		return (isAdmin(currentUser!) && currentUser!.id !== member.id && member.id !== owner.current!.id ? 
 			<img className={style.memberAction} src="http://localhost:3000/images/kick.png" 
-			alt={"kick" + member.username} title={"kick " + member.username}
-			width="20"
+			alt={"Kick" + member.username} title={"Kick " + member.username}
+			width="20" height="21"
 			onClick={() => kick(member)}/> : <></>
 		);
 	}
@@ -778,7 +774,7 @@ const ChatRoomBase = () =>
     		customUI: ({onClose}) => {
        		return (
 				<div id={alertStyle.boxContainer}>
-					<h1>{type.charAt(0).toUpperCase() + type.toLowerCase().slice(1)} {trimUsername(member.username)}</h1>
+					<h1>{type.charAt(0).toUpperCase() + type.toLowerCase().slice(1)} {trimUsername(member.username, 15)}</h1>
 					<p>Select duration</p>
 					<div id={alertStyle.alertBoxBtn}>
 						<button onClick={() => {applyPenalty(member, 1, type); onClose()}}>1 min</button>
@@ -798,8 +794,8 @@ const ChatRoomBase = () =>
 	{
 		return (isAdmin(currentUser!) && currentUser!.id !== member.id && member.id !== owner.current!.id ? 
 			<img className={style.memberAction} src="http://localhost:3000/images/ban.png" 
-			alt={"ban " + member.username} title={"ban " + member.username}
-			width="20"
+			alt={"Ban " + member.username} title={"Ban " + member.username}
+			width="22" height="22"
 			onClick={() => selectPenaltyTime(member, PenaltyType["BAN" as keyof typeof PenaltyType])}/> : <></>
 		);
 	}
@@ -809,8 +805,8 @@ const ChatRoomBase = () =>
 		return (isAdmin(currentUser!) && currentUser!.id !== member.id && member.id !== owner.current!.id && 
 		!isMemberMuted(member)? 
 			<img className={style.memberAction} src="http://localhost:3000/images/mute.png" 
-			alt={"mute " + member.username} title={"mute " + member.username}
-			width="20"
+			alt={"Mute " + member.username} title={"Mute " + member.username}
+			width="22" height="22"
 			onClick={() => selectPenaltyTime(member, PenaltyType["MUTE" as keyof typeof PenaltyType])}/> : <></>
 		);
 	}
@@ -827,15 +823,19 @@ const ChatRoomBase = () =>
 								<li className={currentUser && currentUser.id
 								!== member.id? style.member : 
 								style.currentMember} key={member.id}>
-									{trimUsername(member.username)}
+									<div id={style.nameAndRole}>
+									{trimUsername(member.username, 17)}
 									{printRole(member)}
-									{makeOwnerLogo(member)}
-									{makeAdminLogo(member)}
-									{removeAdminLogo(member)}
-									{challengeLogo(member)}
-									{kickLogo(member)}
-									{banLogo(member)}
-									{muteLogo(member)}
+									</div>
+									<div id={style.memberActions}>
+										{makeOwnerLogo(member)}
+										{makeAdminLogo(member)}
+										{removeAdminLogo(member)}
+										{challengeLogo(member)}
+										{muteLogo(member)}
+										{banLogo(member)}
+										{kickLogo(member)}
+									</div>
 								</li>
 							);
 						})}
@@ -908,7 +908,7 @@ const ChatRoomBase = () =>
 		{
 			return (
 					<div id={style.roomStatusContainer}>
-						<p id={style.roomStatusMsg}>You are not a member of {roomName} room</p>
+						<p id={style.roomStatusMsg}>You are not a member of '{roomName}'</p>
 						<Link id={style.roomStatusBtn} to={`/chat/`}>rooms</Link>
 					</div>);
 		}
@@ -916,7 +916,7 @@ const ChatRoomBase = () =>
 		{
 			return (
 					<div id={style.roomStatusContainer}>
-						<p id={style.roomStatusMsg}>Room {roomName} does not exist</p>
+						<p id={style.roomStatusMsg}>Room '{roomName}' does not exist</p>
 						<Link id={style.roomStatusBtn} to={`/chat/`}>rooms</Link>
 					</div>);
 		}
@@ -924,7 +924,7 @@ const ChatRoomBase = () =>
 		{
 			return (
 					<div id={style.roomStatusContainer}>
-						<p id={style.roomStatusMsg}>You have been temporarily banned from {roomName} room, try later</p>
+						<p id={style.roomStatusMsg}>You have been temporarily banned from '{roomName}', try later</p>
 						<Link id={style.roomStatusBtn} to={`/chat/`}>rooms</Link>
 					</div>
 					);
