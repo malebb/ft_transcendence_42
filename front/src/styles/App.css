@@ -11,23 +11,17 @@
   --bg-secondary: #141418;
 }
 
-p{
-  
-  color: white;
+:root {
+	--main: rgb(169, 169, 241);
+	--secondary: #20232B;
 }
-div{
-  
-  color: white;
+
+.static{
+  position: fixed;
+  width: 100%;
 }
-body {
-  /* :root {
-		--main: rgb(169, 169, 241);
-		--secondary: #20232B;
-	}
-	
-	.static{
-	  position: fixed;
-	  width: 100%; */
+
+body{
   margin: 0;
   padding: 0;
   background-color: white;

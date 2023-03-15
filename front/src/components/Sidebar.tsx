@@ -48,7 +48,7 @@ const Sidebar = () => {
             <p className="link-text">Friends</p>
             {/* </div> */}
           </Link>
-          <Link className="Sidebar-Link" to="/friends">
+          <Link className="Sidebar-Link" to="/chat">
             {/* <div className='div-sidebar'> */}
             <FontAwesomeIcon
               className="fa-2xl svg-definecolor"

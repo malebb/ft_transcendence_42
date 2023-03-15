@@ -1,0 +1,195 @@
+.title > svg {
+	height: 200px;
+	z-index: 1;
+}
+.title {
+	/* position: absolute;
+	-> si on le met, supperpose le chat et le titre */
+	top: 0;
+	left: 0;
+	z-index: 2;
+}
+.title > h1 {
+	position: absolute;
+	width: fit-content;
+	max-width: 600px;
+	  text-align: right;
+	  top: 26px;
+	  font-size: 54px;
+	  text-transform: capitalize;
+	  left: 48px;
+	  color: white;
+}
+.logo {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 2;
+}
+.chat {
+	display: flex;
+	height: calc(100vh - 50px);
+	position: absolute;
+	width: 98%;
+}
+
+#roomStatus
+{
+	color: white;
+	margin: auto;
+	margin-top: 150px;
+	text-align: center;
+}
+
+.roomBase
+{
+}
+
+
+#memberList
+{
+	position: absolute;
+	left: 30px;
+	z-index: 2;
+}
+
+#chatDataSection
+{
+	height: 70px;
+	width: 50%;
+	display: flex;
+}
+
+.membersTitle
+{
+	width: 350px;
+	color: white;
+	margin: 0px;
+	padding: 10px;
+	background-color: #413368;
+	cursor: pointer;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+#members
+{
+	display: none;
+	Overflow-y:auto;
+	height: 150px;
+}
+
+.member, .currentMember
+{
+	height: 30px;
+	background-color: white;
+	border-bottom: solid #E5E7E9 1px;
+	padding-left: 10px;
+	padding-top: 10px;
+}
+
+.role
+{
+	font-style: italic;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.currentMember
+{
+	background-color: #F0E5FF;
+}
+
+.member:hover
+{
+	background-color: #E5E7E9;
+}
+
+li
+{
+	list-style: none;
+}
+
+ul
+{
+	padding: 0px;
+}
+
+#chatSettings
+{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-left: 20px;
+	width: 500px;
+	position: relative;
+	left: 400px;
+}
+
+#chatPassword
+{
+	width: 400px;
+	display: flex;
+}
+
+#leaveRoom
+{
+}
+
+#leaveRoomInfo
+{
+	position: absolute;
+	bottom: 75px;
+	width: 150px;
+	color: red;
+}
+
+.memberAction
+{
+	cursor: pointer;
+	margin-left: 5px;
+}
+
+
+#passwordForm
+{
+	white-space: nowrap;
+	margin-right: 5px;
+}
+
+.passwordInput
+{
+	position: relative;
+	width: 20px;
+	border: 1px black solid;
+	outline: none;
+	margin-right: 10px;
+	margin-left: 10px;
+	border-radius: 3px;
+}
+
+.passwordSubmitBtn, .leaveBtn
+{
+	background-color: #413368;
+	color: white;
+	border: none;
+	height: 25px;
+	cursor: pointer;
+	border-radius: 3px;
+}
+
+.passwordSubmitBtn:hover, .leaveBtn:hover
+{
+	background-color: #613981;
+}
+
+#passwordInfo
+{
+	color: white;
+}
+
+.removePassword
+{
+	left: 465px;
+}

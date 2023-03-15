@@ -18,7 +18,6 @@ import { Chat } from './chat.entity';
 // import { User } from '@prisma/client';
 
 // interfaces :
-import { ChatRoom } from './models/ChatRoom';
 // import { UserController } from 'src/user/user.controller';
 // import { JwtService } from '@nestjs/jwt';
 
@@ -27,6 +26,7 @@ import { ChatRoom } from './models/ChatRoom';
 @Injectable()
 export class ChatService {
   constructor(
+  ){}
 	// private userController: UserController,
 	// private jwtService: JwtService,
 	// private user: User,
@@ -35,17 +35,20 @@ export class ChatService {
 
   // async createMessage(chat: Chat) {
   // return await this.chatRepository.save(chat);
-  ){}
+  // }
 
-  joinRoom(server: Server, client: Socket, room: ChatRoom) {
+//	joinRoom(server: Server, client: Socket, room: ChatRoom)
+//	{
 	// console.log(client);
 	// console.log(this.userController.getMe(this.user));
+	/*
 	client.join(room.roomId);
     client.on('SEND_ROOM_MESSAGE', (message) => {
-	//   https://gist.github.com/crtr0/2896891
 	  client.to(room.roomId).emit('ROOM_MESSAGE', message);
-    });
-  }
+	  });
+	  */
+	//   https://gist.github.com/crtr0/2896891
+ //   }
 
   // async getMessages(): Promise<Chat[]> {
   // return await this.chatRepository.find();

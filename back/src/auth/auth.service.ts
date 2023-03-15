@@ -31,10 +31,54 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
+<<<<<<< HEAD
   async hashData(data: string): Promise<string> {
     const hash = await argon.hash(data);
     return hash;
   }
+=======
+    async hashData(data: string): Promise<string>
+    {
+        const hash = await argon.hash(data);
+        return hash;
+    }
+    
+    async signup(dto: AuthDto) : Promise<Object>
+    {
+        const hash = await argon.hash(dto.password);
+        try{
+            const user = await this.prismaService.user.create({
+                data:
+				{
+                   	email: dto.email,
+                   	hash: hash,
+                   	profilePicture: DEFAULT_IMG,
+                   	username: dto.email,
+				   	stats:
+					{
+				    	create: {}
+					}
+                 }
+            })
+            const tokens = await this.signToken(user.id, user.email);
+            this.updateRtHash(user.id, tokens.refresh_token)
+            console.log(tokens)
+            return {tokens: tokens, isTfa: user.isTFA, userId: user.id};
+        }
+        catch(error)
+        {
+            if(error instanceof PrismaClientKnownRequestError)
+            {
+                if(error.code == 'P2002')
+                {
+                    throw new ForbiddenException('Credentials taken',);
+                }
+            }
+            throw error;
+        }
+        //return (this.prismaService.)
+    }
+>>>>>>> master
 
   async signup(dto: SignupDto): Promise<SignInterface> {
     const hash = await argon.hash(dto.password);

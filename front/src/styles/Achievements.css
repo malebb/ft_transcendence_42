@@ -4,18 +4,21 @@
   flex-wrap: wrap;
 }
 
-.achievement {
-  background-color: #547ebe;
-  width: 400px;
-  text-align: center;
-  margin: 20px;
-  border-radius: 5px;
+.achievement
+{
+	color: white;
+	width: 325px;
+	text-align: center;
+	margin: 20px;
+	border-radius: 5px;
+   	background-color: var(--tertiary);
+	padding-bottom: 10px;
 }
 
-#achievementsTitle {
-  background-color: #547ebe;
-  text-align: center;
-  width: 400px;
-  padding: 8px;
-  margin: auto;
+#achievementsTitle
+{
+	text-align: center;
+	width: 400px;
+	margin: auto;
+	color: white;
 }

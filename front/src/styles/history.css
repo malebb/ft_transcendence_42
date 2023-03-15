@@ -1,0 +1,74 @@
+#history
+{
+	margin-top: 100px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.historyElem
+{
+	color: white;
+	margin: 20px;
+	background-color: var(--tertiary);
+	height: 70px;
+	width: 50%;
+	text-align: center;
+	border-radius: 5px;
+}
+
+.gameDataContainer
+{
+	display: flex;
+	justify-content: space-around;
+	flex-direction: row;
+	align-items: center;
+	width: 50%;
+	margin: auto;
+	padding-top: 10px;
+}
+
+#achievementDone
+{
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.title
+{
+	margin-bottom: 10px;
+}
+
+.desc
+{
+	margin: 2px;
+	margin-bottom: 10px;
+}
+
+.score
+{
+	width: 100px;
+	white-space: nowrap;
+	margin-right: 10px;
+	margin-left: 10px;
+}
+
+.leftPlayer, .rightPlayer
+{
+	width: 160px;
+	text-align: center;
+}
+
+#noActivity
+{
+	color: white;
+	background-color: ;
+	text-align: center;
+	width: 400px;
+	margin: auto;
+	margin-top: 100px;
+}

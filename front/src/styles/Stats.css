@@ -3,6 +3,7 @@
   margin: auto;
 }
 
+<<<<<<< HEAD
 #statsTitle {
   text-align: center;
   padding: 5px;
@@ -16,17 +17,51 @@ th {
   border-style: solid;
   border-collapse: collapse;
   background-color: #547ebe;
+=======
+#statsTitle
+{
+	text-align: center;
+	padding: 5px;
+	background-color: #413368;
+	color: white;
+}
+
+table, td, th{
+	border-width: 1px;
+	border-color: black;
+	border-style: solid;
+	border-collapse: collapse;
+	color: black;
+}
+
+table{
+	
+	background-color: #E5E7E9;
+}
+
+tr:nth-child(even)
+{
+	background-color: white;
+>>>>>>> master
 }
 
 table {
   width: 100%;
 }
 
+<<<<<<< HEAD
 th,
 td {
   text-align: left;
   padding-left: 10px;
   width: 50%;
+=======
+th, td{
+	text-align: left;
+	padding-left: 10px;
+	width: 50%;
+	font-weight: normal;
+>>>>>>> master
 }
 
 td {
