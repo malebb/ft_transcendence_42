@@ -3,7 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import { AxiosInstance, AxiosResponse } from "axios";
 import { axiosToken } from "../../../api/axios";
 import StatsData from "../../../interfaces/StatsData";
-import "../styles/Stats.css";
+import "../../../styles/Stats.css";
 
 const Stats = () => {
   const {userId} = useParams();
