@@ -301,9 +301,12 @@ export default function Canvas()
 			}
 		}
 
-		function findRoom() : Promise<string>
+		function findRoom() : Promise<string | null>
 		{
 			return (new Promise(resolve => {
+				socket.current!.on(socket.current!.id + ':alreadyInResearch', () => {
+					resolve(null);
+				});
 				socket.current!.on(socket.current!.id, (data) => {
 					socket.current!.emit('joinRoom', JSON.parse(data).room.id)
 					resolve(data);
@@ -336,6 +339,32 @@ export default function Canvas()
 			}
 		}
 
+		function alreadyInResearch()
+		{
+			let background: HTMLImageElement = draw.current!.initOutGameBackground();
+
+			background.onload = function()
+			{
+				draw.current!.outGameBackground(background);
+				draw.current!.alreadyInResearch();
+
+				if (challengeId === undefined)
+				{
+					let menuZone = draw.current!.text("menu", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+					let zones = [menuZone];
+
+					addLink(menuZone, menu, zones, 0);
+				}
+				else
+				{
+					let menuZone = draw.current!.text("menu", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+					let zones = [menuZone];
+					addLink(menuZone, redirectAfterChallenge, zones, 0);
+				}
+			}
+
+		}
+
 		async function initChallenge()
 		{
 			try
@@ -356,6 +385,7 @@ export default function Canvas()
 	
 					let zones = [cancelZone];
 					let playerData: PlayerData = {userId: user.data.id, id: "", username: user.data.username, skin: user.data.skin, powerUpMode: challenge.data.powerUpMode};
+					let alreadyInQueue = false;
 
 					socket.current = io(`ws://localhost:3333/pong`,
 					{
@@ -371,11 +401,19 @@ export default function Canvas()
 					cancelLink = addLink(cancelZone, cancelChallenge, zones, 0);
 					socket.current!.on("connect", async () => {
 						await findRoom().then(data => {
-							room.current = JSON.parse(data).room;
-							position.current = JSON.parse(data).position;
+							if (data)
+							{
+								room.current = JSON.parse(data).room;
+								position.current = JSON.parse(data).position;
+							}
+							else
+								alreadyInQueue = true;
 						});
 						destroyLink(cancelLink);
-						await launchGame();
+						if (!alreadyInQueue)
+							await launchGame();
+						else
+							alreadyInResearch()
 					});
 				}
 			}
@@ -403,6 +441,7 @@ export default function Canvas()
 
 						let zones = [cancelZone];
 					let playerData: PlayerData = {userId: user.data.id, id: "", username: user.data.username, skin: user.data.skin, powerUpMode: powerUpMode.current};
+					let alreadyInQueue = false;
 					socket.current = io(`ws://localhost:3333/pong`,
 					{
 						transports: ["websocket"],
@@ -416,11 +455,19 @@ export default function Canvas()
 					cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);
 					socket.current!.on("connect", async () => {
 						await findRoom().then(data => {
-							room.current = JSON.parse(data).room;
-							position.current = JSON.parse(data).position;
+							if (data)
+							{
+								room.current = JSON.parse(data).room;
+								position.current = JSON.parse(data).position;
+							}
+							else
+								alreadyInQueue = true;
 						});
 						destroyLink(cancelLink);
-						await launchGame();
+						if (!alreadyInQueue)
+							await launchGame();
+						else
+							alreadyInResearch();
 					});
 				}
 				catch (error: any)

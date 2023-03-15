@@ -35,9 +35,14 @@ export class PongService {
 	sizeCanvas: 	Size			= { width: 700, height: 450 };
 	scoreToWin:		number			= 11;
 
-	addToQueue(player: PlayerData, queue: PlayerData[])
+	addToQueue(player: PlayerData, queue: PlayerData[]) : boolean
 	{
+		for (let i = 0; i < queue.length; ++i) {
+			if (queue[i].userId == player.userId)
+				return (false);
+		}
 		queue.push(player);
+		return (true);
 	}
 
 	removeFromQueue(playerId: string)
@@ -193,18 +198,22 @@ export class PongService {
 		let queue: PlayerData[] = playerData.powerUpMode ? this.powerUpQueue : this.queue;
 
 		playerData.id = player.id;
-		this.addToQueue(playerData, queue);
-		queueResearch = this.checkQueue(playerData, queue);
-		if (queueResearch.roomId.length) {
-			room = this.initRoom(queueResearch.roomId, queueResearch.opponent, playerData);
-			this.rooms[room.id] = room;
-			server.emit(queueResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
-			server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
-			this.runRoom(room.id, server);
+		if (!this.addToQueue(playerData, queue))
+			server.emit(player.id + ':alreadyInResearch');
+		else
+		{
+			queueResearch = this.checkQueue(playerData, queue);
+			if (queueResearch.roomId.length) {
+				room = this.initRoom(queueResearch.roomId, queueResearch.opponent, playerData);
+				this.rooms[room.id] = room;
+				server.emit(queueResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
+				server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
+				this.runRoom(room.id, server);
+			}
+			player.on("disconnecting", () => {
+				this.stopRoom(player);
+			});
 		}
-		player.on("disconnecting", () => {
-			this.stopRoom(player);
-		});
 	}
 
 	stopRoom(player: Socket)
