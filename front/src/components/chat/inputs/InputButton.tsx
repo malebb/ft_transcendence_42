@@ -9,7 +9,7 @@ const InputButton = (props: InputButtonProps) => {
 
   return (
     <form onSubmit={handleSubmit} className={styles.sendInput}>
-      <input name="messageInput" {...props?.inputProps} autoComplete="off" autoFocus/>
+      <input name="messageInput" {...props?.inputProps} autoComplete="off"/>
       <button {...props?.buttonProps} type="submit">{props.buttonText}</button>
     </form>
   );
