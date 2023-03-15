@@ -395,10 +395,10 @@ const UserProfile = () => {
         <br />
         <br />
         <br />
-        {/* <Stats/> */}
+        <Stats/>
         <br />
         <br />
-        {/* {printAchievements()} */}
+        {printAchievements()}
       </main>
     </div>
   );
