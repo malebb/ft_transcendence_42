@@ -41,7 +41,7 @@
 	margin-right: 10px;
 }
 
-#roomStatus
+#roomStatusMsg
 {
 	color: white;
 	margin: auto;
@@ -67,7 +67,7 @@
 
 .membersTitle
 {
-	width: 350px;
+	width: 400px;
 	color: white;
 	margin: 0px;
 	padding: 10px;
@@ -92,6 +92,7 @@
 	border-bottom: solid #E5E7E9 1px;
 	padding-left: 10px;
 	padding-top: 10px;
+	display: flex;
 }
 
 .role
@@ -129,7 +130,7 @@ ul
 	padding-left: 20px;
 	width: 500px;
 	position: relative;
-	left: 400px;
+	left: 450px;
 }
 
 #chatPassword
@@ -148,6 +149,21 @@ ul
 	bottom: 75px;
 	width: 150px;
 	color: red;
+}
+
+#nameAndRole
+{
+	width: 200px;
+	margin-right: 20px;
+	display: flex;
+}
+
+#memberActions
+{
+	width: 170px;
+	display: grid | inline-grid;
+	margin-left: auto;
+	justify-self: end;
 }
 
 .memberAction
@@ -184,7 +200,23 @@ ul
 	border-radius: 3px;
 }
 
-.passwordSubmitBtn:hover, .leaveBtn:hover
+#roomsBtn, #roomStatusBtn
+{
+	width: 60px;
+	background-color: #413368;
+	color: white;
+	border: none;
+	padding: 5px;
+	padding-right: 20px;
+	padding-left: 20px;
+	cursor: pointer;
+	border-radius: 3px;
+	text-decoration: none;
+	text-align: center;
+	margin: 30px;
+}
+.passwordSubmitBtn:hover, .leaveBtn:hover,
+#roomStatusBtn:hover
 {
 	background-color: #613981;
 }
@@ -198,3 +230,11 @@ ul
 {
 	left: 465px;
 }
+
+#roomStatusContainer
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+

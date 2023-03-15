@@ -2,6 +2,9 @@
 CREATE TYPE "Accessibility" AS ENUM ('PUBLIC', 'PRIVATE', 'PROTECTED');
 
 -- CreateEnum
+CREATE TYPE "PenaltyType" AS ENUM ('BAN', 'MUTE');
+
+-- CreateEnum
 CREATE TYPE "Status" AS ENUM ('pending', 'accepted', 'declined');
 
 -- CreateTable
@@ -55,6 +58,19 @@ CREATE TABLE "Message" (
     "sendAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Penalty" (
+    "id" SERIAL NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "chatId" INTEGER NOT NULL,
+    "authorId" INTEGER NOT NULL,
+    "targetId" INTEGER NOT NULL,
+    "type" "PenaltyType" NOT NULL,
+    "durationInMin" INTEGER NOT NULL,
+
+    CONSTRAINT "Penalty_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -181,6 +197,15 @@ ALTER TABLE "Message" ADD CONSTRAINT "Message_userId_fkey" FOREIGN KEY ("userId"
 
 -- AddForeignKey
 ALTER TABLE "Message" ADD CONSTRAINT "Message_chatRoomId_fkey" FOREIGN KEY ("chatRoomId") REFERENCES "ChatRoom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Penalty" ADD CONSTRAINT "Penalty_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "ChatRoom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Penalty" ADD CONSTRAINT "Penalty_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Penalty" ADD CONSTRAINT "Penalty_targetId_fkey" FOREIGN KEY ("targetId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Stats" ADD CONSTRAINT "Stats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

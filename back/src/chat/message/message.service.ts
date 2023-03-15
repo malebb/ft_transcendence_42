@@ -54,15 +54,12 @@ export class MessageService {
           name: roomName,
         },
       },
+      orderBy: {
+        sendAt: 'asc',
+      },
       include: {
         user: true,
         room: true,
-        
-        // message: {
-				// 	orderBy: {
-	
-				// 	}
-				// },
       },
     });
     // console.log(message);

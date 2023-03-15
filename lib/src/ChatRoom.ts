@@ -6,6 +6,11 @@ export enum Accessibility {
 	PROTECTED = "PROTECTED",
 }
 
+export enum PenaltyType {
+	BAN = "BAN",
+	MUTE = "MUTE",
+}
+
 export interface ChatRoom
 {
 	owner: User;

@@ -231,3 +231,9 @@ select:focus
 {
 	background-color: #613981;
 }
+
+#banned
+{
+	margin: 0px;
+	color: red;
+}

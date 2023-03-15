@@ -9,6 +9,7 @@ import Draw from "../classes/Draw";
 import "../styles/Games.css";
 import Sidebar from './Sidebar';
 import Headers from './Headers';
+import { trimUsername } from '../utils/trim';
 
 const Games = () =>
 {
@@ -36,15 +37,11 @@ const Games = () =>
 			return (
 				<Link className="gameLink" to={`/games/${game.gameId}`} key={game.id} >
 					<div className="game">
-						<p>{trimUsername(game.leftPlayer.username)} &nbsp;&nbsp; vs &nbsp;&nbsp; {trimUsername(game.rightPlayer.username)}</p>
+						<p>{trimUsername(game.leftPlayer.username, 15)} &nbsp;&nbsp; vs &nbsp;&nbsp; {trimUsername(game.rightPlayer.username, 15)}</p>
 					</div>
 				</Link>
 			);
 		}));
-	}
-
-	const trimUsername = (username: string) => {
-		return (username.length < 15 ? username : username.slice(0, 13) + '..');
 	}
 
 	useEffect(() => {
@@ -54,7 +51,7 @@ const Games = () =>
 			leftPlayer.current!.draw_paddle();
 			rightPlayer.current!.draw_paddle();
 			draw.current!.score(leftPlayer.current!.score, rightPlayer.current!.score);
-			draw.current!.usernames(trimUsername(leftPlayer.current!.username), trimUsername(rightPlayer.current!.username));
+			draw.current!.usernames(trimUsername(leftPlayer.current!.username, 15), trimUsername(rightPlayer.current!.username, 15));
 			draw.current!.speedPowerUp(speedPowerUp.current!, leftPlayer.current!.speedPowerUp, rightPlayer.current!.speedPowerUp);
 			ball.current?.draw();
 			animationFrameId.current = window.requestAnimationFrame(render)
