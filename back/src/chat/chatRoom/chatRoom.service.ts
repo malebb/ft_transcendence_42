@@ -83,7 +83,8 @@ export class ChatRoomService
 				},
 			},
 			include: {
-				owner: true
+				owner: true,
+				members: true
 			}
 		})
 		return (chatRoom);
@@ -100,7 +101,8 @@ export class ChatRoomService
 				},
 			},
 			include: {
-				owner: true
+				owner: true,
+				members: true
 			}
 		})
 		return (chatRoom);

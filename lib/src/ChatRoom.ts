@@ -14,6 +14,7 @@ export enum PenaltyType {
 export interface ChatRoom
 {
 	owner: User;
+	members: User[];
 	name: string;
 	password: string;
 	accessibility: Accessibility;

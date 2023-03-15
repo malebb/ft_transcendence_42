@@ -172,7 +172,27 @@ select:focus
 
 }
 
-.roomTitle
+#joinedChatRoom
+{
+	height: 100px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	padding-top: 10px;
+	padding-bottom: 5px;
+}
+
+#joinedTitle, .joinedOwner, .countMembers
+{
+	margin: 5px;
+}
+
+.joinedOwner
+{
+	margin-top: 7px;
+}
+
+.roomTitleNotJoined
 {
 	position: relative;
 	top: 10px;
@@ -188,6 +208,12 @@ select:focus
 .owner
 {
 	margin: 0px;
+	width: 180px;
+}
+
+.lock
+{
+	margin-right: 8px;
 }
 
 #joinRoomTitle, #createRoomTitle

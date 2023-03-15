@@ -124,7 +124,8 @@ function Rooms()
 					owner: {...user.data},
 					name: form.get("roomName")!.toString().trim(),
 					accessibility: Accessibility[roomAccessibility as keyof typeof Accessibility],
-					password: roomAccessibility === 'PROTECTED' ? password : ''
+					password: roomAccessibility === 'PROTECTED' ? password : '',
+					members: []
 				};
 				axiosInstance.current = await axiosToken();
 				await axiosInstance.current!.post('/chatRoom/',
@@ -235,12 +236,12 @@ function Rooms()
 			switch (accessibility)
 			{
 				case 'PUBLIC':
-					return (<img src="http://localhost:3000/images/public.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+					return (<img className="lock" src="http://localhost:3000/images/public.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 				case 'PRIVATE':
-					return (password.length ? <img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>
-					: <img src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+					return (password.length ? <img className="lock" src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>
+					: <img className="lock" src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 				case 'PROTECTED':
-					return (<img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+					return (<img className="lock" src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 			}
 		}
 
@@ -437,7 +438,7 @@ function Rooms()
 					chatRoomsList.map((chatRoom) => {
 						return (
 							<li className="chatRoom" key={chatRoom.name} onClick={() => updateSelectChatRoom(chatRoom.name)}>
-								<h3 className="roomTitle">{chatRoom.name}</h3>
+								<h3 className="roomTitleNotJoined">{chatRoom.name}</h3>
 						<div className="roomInfo">
 								{printRoomInfo(chatRoom)}
 						</div>
@@ -459,9 +460,10 @@ function Rooms()
 				{
 					chatRoomsList.map((chatRoom) => {
 						return (
-							<li className="chatRoom" key={chatRoom.name} onClick={() => enterRoom(chatRoom.name)}>
-								<h3 className="roomTitle">{chatRoom.name}</h3>
-								<p>Owner: {trimUsername(chatRoom.owner.username, 15)}</p>
+							<li id="joinedChatRoom" className="chatRoom" key={chatRoom.name} onClick={() => enterRoom(chatRoom.name)}>
+								<h3 id="joinedTitle" className="roomTitle">{chatRoom.name}</h3>
+									<p className="joinedOwner">Owner: {trimUsername(chatRoom.owner.username, 15)} </p>
+									<p className="countMembers">{chatRoom.members.length} member{chatRoom.members.length > 1 ? 's' : '' }</p>
 							</li>
 						);
 					})
