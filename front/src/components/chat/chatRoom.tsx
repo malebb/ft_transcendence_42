@@ -480,13 +480,50 @@ const ChatRoomBase = () =>
 
 	const challenge = async (member: User, powerUpMode: boolean) =>
 	{
-		axiosInstance.current = await axiosToken();
-		const challenge = await axiosInstance.current.post('/challenge/', {powerUpMode: powerUpMode, senderId: currentUser!.id, receiverId: member.id}, {
-			headers: {
-				"Content-Type": "application/json"
+		try
+		{
+			let alreadyInGame = false;
+
+			axiosInstance.current = await axiosToken();
+			const challenges = await axiosInstance.current.get('/challenge/');
+			for (let i = 0; i < challenges.data.length; ++i)
+			{
+				if (challenges.data[i].sender.id === currentUser!.id)
+				{
+					alreadyInGame = true;
+					break;
+				}
 			}
-		});
-		window.location.href = 'http://localhost:3000/challenge/' + challenge.data.id;
+			axiosInstance.current = await axiosToken();
+			const games = await axiosInstance.current.get('/game/');
+			for (let i = 0; i < games.data.length; ++i)
+			{
+				if (games.data[i].sender.id === currentUser!.id)
+				{
+					alreadyInGame = true;
+					break;
+				}
+			}
+
+			if (!alreadyInGame)
+			{
+				axiosInstance.current = await axiosToken();
+				const challenge = await axiosInstance.current.post('/challenge/', {powerUpMode: powerUpMode, senderId: currentUser!.id, receiverId: member.id}, {
+					headers: {
+						"Content-Type": "application/json"
+					}
+				});
+				window.location.href = 'http://localhost:3000/challenge/' + challenge.data.id;
+			}
+			else
+			{
+				printInfosBox('You are already playing in another game');
+			}
+		}
+		catch (error: any)
+		{
+			console.log('error (challenge) :', error);
+		}
 	}
 
 	const selectMode = (member: User) =>

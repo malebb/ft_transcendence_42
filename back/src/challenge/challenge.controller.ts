@@ -30,6 +30,12 @@ class ChallengeController
 	{
 		await (this.challengeService.deleteChallenge(challengeId))
 	}
+
+	@Get('')
+	async getChallenges()
+	{
+		return (await this.challengeService.getChallenges());
+	}
 }
 
 export default ChallengeController;

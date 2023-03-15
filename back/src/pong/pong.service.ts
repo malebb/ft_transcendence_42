@@ -35,12 +35,27 @@ export class PongService {
 	sizeCanvas: 	Size			= { width: 700, height: 450 };
 	scoreToWin:		number			= 11;
 
+	checkIfAlreadyInQueue(player: PlayerData) : boolean
+	{
+		for (let i = 0; i < this.queue.length; ++i) {
+			if (this.queue[i].userId == player.userId)
+				return (true);
+		}
+		for (let i = 0; i < this.powerUpQueue.length; ++i) {
+			if (this.powerUpQueue[i].userId == player.userId)
+				return (true);
+		}
+		for (let i = 0; i < this.challengers.length; ++i) {
+			if (this.challengers[i].challenger.userId == player.userId)
+				return (true);
+		}
+		return (false);
+	}
+
 	addToQueue(player: PlayerData, queue: PlayerData[]) : boolean
 	{
-		for (let i = 0; i < queue.length; ++i) {
-			if (queue[i].userId == player.userId)
-				return (false);
-		}
+		if (this.checkIfAlreadyInQueue(player))
+			return (false);
 		queue.push(player);
 		return (true);
 	}
@@ -103,21 +118,37 @@ export class PongService {
 		let challengerResearch = {roomId: null, opponent: null};
 
 		playerData.id = player.id;
-		challengerResearch = this.checkChallengers(challengeId, player)
-		if (challengerResearch.roomId.length)
+		if (this.checkIfAlreadyInQueue(playerData))
 		{
-			let room: Room;
-			room = this.initRoom(challengerResearch.roomId, challengerResearch.opponent, playerData);
-			this.rooms[room.id] = room;
-			server.emit(challengerResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
-			server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
-			this.runRoom(room.id, server);
+			server.emit(player.id + ':alreadyInResearch');
+			try
+			{
+				this.challengeService.deleteChallenge(challengeId);
+				//TODO change invitation message status from open canceled 
+			}
+			catch (error: any)
+			{
+				console.log('error (delete challenge) :', error);
+			}
 		}
 		else
-			this.challengers.push(challenger);
-		player.on("disconnecting", () => {
-			this.stopRoom(player);
-		});
+		{
+			challengerResearch = this.checkChallengers(challengeId, player)
+			if (challengerResearch.roomId.length)
+			{
+				let room: Room;
+				room = this.initRoom(challengerResearch.roomId, challengerResearch.opponent, playerData);
+				this.rooms[room.id] = room;
+				server.emit(challengerResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
+				server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
+				this.runRoom(room.id, server);
+			}
+			else
+				this.challengers.push(challenger);
+			player.on("disconnecting", () => {
+				this.stopRoom(player);
+			});
+		}
 	}
 
 	checkQueue(player: PlayerData, queue: PlayerData[])

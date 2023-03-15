@@ -48,4 +48,15 @@ export class ChallengeService {
 		});
 		return (challenge);
 	}
+
+	async getChallenges()
+	{
+		const challenges = await this.prisma.challenge.findMany({
+			include: {
+				sender: true,
+				receiver: true
+			}
+		});
+		return (challenges);
+	}
 }

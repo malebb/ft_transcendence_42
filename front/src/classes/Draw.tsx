@@ -256,4 +256,9 @@ export default class Draw
 	{
 		this.text("You are already looking for a player", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
+
+	alreadyInGame()
+	{
+		this.text("You are already in a game", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
+	}
 }

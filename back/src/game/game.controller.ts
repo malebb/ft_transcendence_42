@@ -14,7 +14,7 @@ class GameController
 	}
 
 	@Get()
-	async getRoot()
+	async getGames()
 	{
 		return (await this.gameService.getGames());
 	}
