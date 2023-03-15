@@ -1,7 +1,6 @@
-export default interface LinkZone
-{
-	posX: number;
-	posY: number;
-	width: number;
-	height: number;
+export default interface LinkZone {
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
 }

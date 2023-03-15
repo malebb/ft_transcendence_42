@@ -1,13 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Hanalei+Fill&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Hanalei+Fill&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap");
 :root {
   font-size: 16px;
-  font-family: 'Open Sans';
+  font-family: "Open Sans";
   --text-primary: #b6b6b6;
   --text-secondary: #ececec;
   --bg-primary: #23232e;
+  --bg-primary-lighter: #9e9eb5;
+  --bg-primary-darker: #1e1e28;
   --bg-secondary: #141418;
-
 }
 
 :root {
@@ -24,12 +25,16 @@ body{
   margin: 0;
   padding: 0;
   background-color: white;
-  color: black;
-  background: rgb(39,42,47);
-  background: linear-gradient(90deg, rgba(39,42,47,1) 0%, rgba(29,30,36,1) 100%);
+  color: white;
+  background: rgb(39, 42, 47);
+  background: linear-gradient(
+    90deg,
+    rgba(39, 42, 47, 1) 0%,
+    rgba(29, 30, 36, 1) 100%
+  );
 }
 
-.main-video{
+.main-video {
   margin-left: 5rem;
   padding: 1rem;
 }
@@ -48,11 +53,68 @@ body{
 .App-link {
   color: #61dafb;
 }
-#old-game-video{
+#old-game-video {
   position: fixed;
   right: 0px;
   bottom: 0px;
   min-width: 100%;
   min-height: 100%;
   z-index: -1;
+}
+
+.show{
+  visibility: visible;
+}
+.display-none{
+  display: none;
+}
+
+.display-inline-block{
+  display: inline-block; 
+}
+
+.btn{
+  border: none;
+  border-radius: 7px;
+  padding: 6px 9px;
+}
+.btn-transparent{
+  border: solid;
+  border-width: 1px;
+  border-radius: 5px;
+  padding: 6px 7px;
+  background-color: transparent;
+  transition: background-color 0.1s ease-in;
+  transition: color 0.1s ease-in;
+}
+
+.btn:hover {
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+  opacity: 0.6;
+}
+.btn:active {
+  opacity: 0.3;
+}
+
+.reverse-btn{
+  opacity: 0.6;
+}
+.reverse-btn:hover {
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+  opacity: 1;
+}
+.reverse-btn:active {
+  opacity: 0.3;
+}
+
+.display-flex{
+  display: flex;
+}
+.display-flex-column{
+  display: flex;
+  flex-direction: column;
+}
+
+.fit-content{
+  width: fit-content;
 }

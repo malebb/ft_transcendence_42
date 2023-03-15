@@ -1,61 +1,64 @@
-.Sidebar{
-    z-index: 99;
-    border-right: 1px;
-    border-right-style: solid;
-    border-right-color: #b6b6b6;
-    position: fixed;
-    background-color: var(--bg-primary);
-    top: 6rem;
-    width: 5rem;
-    bottom: 0px;
-    display: flex;
-    flex-direction: column;
-    transition: width 200ms ease;
+.Sidebar {
+  left: 0;
+  z-index: 99;
+  border-right: 1px;
+  border-right-style: solid;
+  border-right-color: #b6b6b6;
+  position: fixed;
+  background-color: var(--bg-primary);
+  top: 6rem;
+  width: 5rem;
+  bottom: 0px;
+  display: flex;
+  flex-direction: column;
+  transition: width 200ms ease;
 }
 
-.Sidebar-Link:last-child{
-    margin-top: auto;
+.Sidebar-Link:last-child {
+  margin-top: auto;
 }
 
-.Sidebar-Link{
-    display: flex;
-    height: 5rem;
-    color: var(--text-primary);
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    
+.Sidebar-Link {
+  display: flex;
+  height: 5rem;
+  color: var(--text-primary);
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
-.Sidebar-Link:hover{
-    background-color: #3d1b50de;
-    border-radius: 10px;
+.Sidebar-Link:hover {
+  background-color: #3d1b50de;
+  border-radius: 10px;
 }
 
-.div-sidebar{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
+.div-sidebar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
 }
 
-.link-text{
-    text-decoration: none;
-    display: none;
-    margin-left: 1rem;
+.link-text {
+  background-color: antiquewhite;
+  text-decoration: none;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  margin-left: 1rem;
 }
 
-FontAwesomeIcon{
-    min-width: 2rem;
-    margin: 0 1.5rem;
+FontAwesomeIcon {
+  min-width: 2rem;
+  margin: 0 1.5rem;
 }
 
-.Sidebar:hover{
-    width: 16rem;
+.Sidebar:hover {
+  width: 16rem;
 }
 
-.Sidebar:hover .link-text{
-    text-decoration: none;
-    display: block;
+.Sidebar:hover .link-text {
+  text-decoration: none;
+  display: block;
 }
