@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { SocketContext } from "../context/socket.context";
+// import { SocketContext } from "../context/socket.context";
 // import io from "socket.io-client";
 import InputButton from "../inputs/InputButton";
 import { AxiosInstance } from "axios";
@@ -12,6 +12,7 @@ import { Message } from "ft_transcendence";
 import "./message.style.css";
 import style from "../ChatRoom.module.css";
 import PrivateMessages from "./PrivateMessages";
+import { Socket, io } from "socket.io-client";
 // import { Socket } from "socket.io";
 
 function MessagesContainer() {
@@ -22,7 +23,8 @@ function MessagesContainer() {
   const currentRoom = useRef<ChatRoom | null>(null);
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const roomId = useParams();
-  const socket = SocketContext();
+  // const socket = SocketContext();
+  const socket = useRef<Socket | null>(null);
   let newMessage: Message;
 
   // reference a l'element DOM contenant les messages (js)
@@ -52,15 +54,15 @@ function MessagesContainer() {
         .current!.get("/chatRoom/" + roomId.roomName)
         .then((response) => {
           currentRoom.current = response.data;
-          socket?.emit("JOIN_ROOM", currentRoom.current);
+          socket.current?.emit("JOIN_ROOM", currentRoom.current);
         });
-        axiosInstance.current = await axiosToken();
-        await axiosInstance
-          .current!.get("/message/" + currentRoom.current?.name)
-          .then((response) => {
-            setStateMessages(response.data);
-            console.log(response.data);
-          });
+      axiosInstance.current = await axiosToken();
+      await axiosInstance
+        .current!.get("/message/" + currentRoom.current?.name)
+        .then((response) => {
+          setStateMessages(response.data);
+          console.log(response.data);
+        });
     };
     fetchData().catch(console.error);
   }, []);
@@ -70,13 +72,18 @@ function MessagesContainer() {
   }, [stateMessages]);
 
   useEffect(() => {
-    socket.on("ROOM_MESSAGE", (message) => {
-      // pourquoi (stateMessages) avant ?
-      // les ... peuvent entraîner des problèmes de concurrence
-      // car l'état précédent est conservé dans la closure
-      // de la fonction de mise à jour (useEffect)
-      // Prend donc l'etat precedent, au lieu du tableau et retourne le nouveau
-      setStateMessages((stateMessages) => [...stateMessages, message]);
+    socket.current = io("ws://localhost:3333/chat", {
+      transports: ["websocket"],
+      forceNew: true,
+      upgrade: false,
+    });
+    socket.current.on("connect", async () => {
+      socket.current!.on("ROOM_MESSAGE", (message) => {
+        setStateMessages((stateMessages) => [...stateMessages, message]);
+      });
+      return () => {
+        socket.current?.disconnect();
+      };
     });
   }, []);
 
@@ -103,7 +110,7 @@ function MessagesContainer() {
       sendAt: dateTS,
     };
 
-    socket.emit("SEND_ROOM_MESSAGE", newMessage);
+    socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
     setStateMessages([...stateMessages, newMessage]);
   }
 
@@ -195,7 +202,6 @@ function MessagesContainer() {
             <GenMessages />
           </div>
           <GenInputButton />
-          <PrivateMessages />
         </div>
       </div>
     </>
@@ -203,3 +209,17 @@ function MessagesContainer() {
 }
 
 export default MessagesContainer;
+
+
+/*
+
+  setStateMessages((stateMessages) => [...stateMessages, message]);
+  ->
+  pourquoi (stateMessages) avant ?
+  les ... peuvent entraîner des problèmes de concurrence
+  car l'état précédent est conservé dans la closure
+  de la fonction de mise à jour (useEffect)
+  Prend donc l'etat precedent, au lieu du tableau et retourne le nouveau
+
+
+*/

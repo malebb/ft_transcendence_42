@@ -1,4 +1,4 @@
-import { SocketContext } from "../context/socket.context";
+// import { SocketContext } from "../context/socket.context";
 
 import style from "./private.message.module.css";
 
@@ -13,12 +13,12 @@ function PrivateMessages() {
 
   return (
     <div>
-      <button className="open-button" onClick={openMessage}>
+      <button className={style.openbutton} onClick={openMessage}>
         Send message
       </button>
-      <div className="chat-popup" id="myForm">
-        <form className="form-container">
-          {/* <label for="msg"><b>Message</b></label>
+      <div className={style.chatpopup} id="myForm">
+        <form className={style.formcontainer}>
+          {/* <label for="msg"><b>Message</b></label> */}
           <textarea
             placeholder="Type message..."
             className="msg"
@@ -26,38 +26,32 @@ function PrivateMessages() {
           ></textarea>
           <button type="submit" className="btn">
             Send
-          </button> */}
-              <div>
-<div className={style.chatbox}>
-    <div className="chatbox__support">
-        <div className="chatbox__header">
-            Chat support!
-        </div>
-        <div className="messages">
-            <div>
-                <div className="messages__item--visitor">
-                    Hi!
+          </button>
+          {/* <div>
+            <div className={style.chatbox}>
+              <div className={style.chatbox__support}>
+                <div className={style.chatbox__header}>Chat support!</div>
+                <div className={style.messages}>
+                  <div>
+                    <div className={style.messages__item__visitor}>Hi!</div>
+                    <div className={style.messages__item__operator}>What is it?</div>.
+                    <div className={style.messages__item__typing}>
+                      <span className={style.messages__dot}></span>
+                      <span className={style.messages__dot}></span>
+                      <span className={style.messages__dot}></span>
+                    </div>
+                  </div>
                 </div>
-                <div className="messages__item--operator">
-                    What is it?
+                <div className={style.chatbox__footer}>
+                  <input type={style.text} placeholder="Write a message" />
                 </div>
-                .<div className="messages__item--typing">
-                    <span className="messages__dot"></span>
-                    <span className="messages__dot"></span>
-                    <span className="messages__dot"></span>
-                </div>
+              </div>
+              <div className={style.chatbox__button}>
+                <button>I'm a button!</button>
+              </div>
             </div>
-        </div>
-        <div className="chatbox__footer">
-            <input type="text" placeholder="Write a message"/>
-        </div>
-    </div>
-    <div className="chatbox__button">
-        <button>I'm a button!</button>
-    </div>
-</div>
-    </div>
-          <button type="button" className="btn cancel" onClick={closeMessage}>
+          </div> */}
+          <button type="button" className={style.btn} onClick={closeMessage}>
             Close
           </button>
         </form>
