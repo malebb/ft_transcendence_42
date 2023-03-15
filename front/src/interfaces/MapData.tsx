@@ -1,7 +1,6 @@
-import LinkZone from '../interfaces/LinkZone';
+import LinkZone from "../interfaces/LinkZone";
 
-export default interface MapData
-{
-	mapImg: HTMLImageElement;
-	mapZone: LinkZone;
+export default interface MapData {
+  mapImg: HTMLImageElement;
+  mapZone: LinkZone;
 }

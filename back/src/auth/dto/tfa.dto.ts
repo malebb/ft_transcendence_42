@@ -1,8 +1,11 @@
-import { IsString, IsNotEmpty } from "class-validator";
+import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
 
-export class TFADto{
-    
-    @IsString()
-    @IsNotEmpty()
-    code: string;
+export class TFADto {
+  @IsString()
+  @IsNotEmpty()
+  code: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  userId: number;
 }

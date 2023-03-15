@@ -23,18 +23,16 @@
    background-color: var(--tertiary);
 }
 
-.game:hover
-{
-	transform: scale(1.020);
+.game:hover {
+  transform: scale(1.02);
 }
 
-.gameLink
-{
-   height: 50px;
-   width: 450px;
-   text-decoration: none;
-   color: inherit;
-   margin: 30px;
+.gameLink {
+  height: 50px;
+  width: 450px;
+  text-decoration: none;
+  color: inherit;
+  margin: 30px;
 }
 
 #spectate
@@ -43,8 +41,7 @@
 	margin-top: 150px;
 }
 
-#canvas
-{
+#canvas {
 }
 
 #spectatorTitle

@@ -1,55 +1,136 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosHeaders, AxiosResponse } from "axios";
+import { Dispatch, SetStateAction } from "react";
 
-const baseURL = 'http://localhost:3333'
+const baseURL = "http://localhost:3333";
 
-export const axiosMain =  axios.create({
+export enum HTTP_METHOD{
+  GET,
+  POST,
+  PATCH,
+}
+
+export const axiosMain = axios.create({
+  baseURL,
+});
+
+export function getToken() {
+  return JSON.parse(sessionStorage.getItem("tokens")!);
+}
+
+export function getAuthorizationHeader() {
+  if (!getToken()) return null;
+  return `Bearer ${getToken().access_token}`;
+}
+export function getRefreshHeader() {
+  if (!getToken()) return null;
+  console.log(getToken().refresh_token);
+  return `Bearer ${getToken().refresh_token}`;
+}
+
+export async function axiosToken() {
+  const date = new Date();
+  const token = JSON.parse(sessionStorage.getItem("tokens")!);
+  const time = token["expireIn"];
+  const crea_time = new Date(token["crea_time"]);
+  if (date.getTime() >= crea_time.getTime() + (time - 10) * 1000) {
+    const new_jwt: AxiosResponse = await axiosMain.post(
+      "/auth/refresh",
+      {},
+      {
+        headers: {
+          Authorization: getRefreshHeader(),
+        },
+      }
+    );
+    sessionStorage.setItem("tokens", JSON.stringify(new_jwt.data));
+  }
+
+  return axios.create({
     baseURL,
-})
+    headers: { Authorization: getAuthorizationHeader() },
+  });
 
-export function getToken()
-{
-    return JSON.parse(sessionStorage.getItem('tokens')!);
 }
+//TODO check AxiosInstance
+  export async function axiosAuthReq<Type>(method: number, path: string, headers: AxiosHeaders, body: Object, setErrorMsg: Dispatch<SetStateAction<string>>, setData : Dispatch<SetStateAction<Type>>) : Promise<Type | undefined>{
+    try{
+      const AxiosInstance = await axiosToken();  
+      if (method === HTTP_METHOD.POST)
+      {
+        const response : AxiosResponse = await AxiosInstance.post(path, body,{headers: headers});
+        setData(response.data);
+        return response.data;
+      }
+      else if (method === HTTP_METHOD.GET)
+      {
+        const response : AxiosResponse = await AxiosInstance.get(path,{headers: headers});
+        setData(response.data);
+        return response.data;
+      }
+      else if (method === HTTP_METHOD.PATCH)
+      {
+        const response : AxiosResponse = await AxiosInstance.post(path, body,{headers: headers});
+        setData(response.data);
+        return response.data;
+      }
+    }catch(err : any)
+    {
+      if (err.response)
+      {
+        setErrorMsg(err.response.data); 
+      }
+      else if(err.request)
+      {
+        setErrorMsg(err.request);
+      }
+      else
+      {
+        setErrorMsg(err.message);
+      }
+    }
+    // return {} as Type;
+  }
+    
+    // axiosAuthReq<UserType | undefined>(HTTP_METHOD.GET,
+    //     "http://localhost:3333/users/me",
+    //     {} as AxiosHeaders, {},setErrMsg, setResp);
 
-export function getAuthorizationHeader()
-{
-	if (!getToken())
-		return (null);
-	return (`Bearer ${getToken().access_token}`);
-}
-export function getRefreshHeader()
-{
-	if (!getToken())
-		return (null);
-		console.log(getToken().refresh_token);
-	return (`Bearer ${getToken().refresh_token}`);
-}
+    // console.log("errMSG == " + JSON.stringify(errMsg));
+    // console.log("Resp ==" + JSON.stringify(resp));
 
-export async function axiosToken() 
-{
-	const date = new Date();
-	const token = JSON.parse(sessionStorage.getItem('tokens')!);
-	const time = token['expireIn'];
-	const crea_time = new Date(token['crea_time']);
-	if (date.getTime() >= crea_time.getTime() + (time - 10) * 1000)
-	{
-		console.log(getRefreshHeader());
-		console.log("expire");
-		const new_jwt: AxiosResponse = await axiosMain.post('/auth/refresh',{},
-		{
-			headers: {
-				'Authorization' : getRefreshHeader(),
-			},
-		});
-		console.log(new_jwt.data);
-		sessionStorage.setItem("tokens", JSON.stringify(new_jwt.data));
-		//
-	}
-	//const diff  = time.getTime() - date.getTime();
-	//console.log(diff);
-
-	return (axios.create({
-		baseURL,
-		headers: { Authorization: getAuthorizationHeader() },
-		}));
-}
+  export async function axiosReq<Type>(method: number, path: string, headers: AxiosHeaders, body: Object, setErrorMsg: Dispatch<SetStateAction<string>>, setData : Dispatch<SetStateAction<Type>>) : Promise<Type | undefined>{
+    try{
+      if (method === HTTP_METHOD.POST)
+      {
+        const response : AxiosResponse = await axios.post(path, body,{headers: headers});
+        setData(response.data);
+        return response.data;
+      }
+      else if (method === HTTP_METHOD.GET)
+      {
+        const response : AxiosResponse = await axios.get(path,{headers: headers});
+        setData(response.data);
+        return response.data;
+      }
+      else if (method === HTTP_METHOD.PATCH)
+      {
+        const response : AxiosResponse = await axios.post(path, body,{headers: headers});
+        setData(response.data);
+        return response.data;
+      }
+    }catch(err : any)
+    {
+      if (err.response)
+      {
+        setErrorMsg(err.response.data); 
+      }
+      else if(err.request)
+      {
+        setErrorMsg(err.request);
+      }
+      else
+      {
+        setErrorMsg(err.message);
+      }
+    }
+  }
