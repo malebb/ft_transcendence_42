@@ -35,7 +35,14 @@ type NeutralUser = {
   profilePicture: string;
 };
 
+enum StatusEnum {
+  FRIEND= 1,
+  RECV,
+  SEND,
+}
+
 const Friends = () => {
+  const [renderType, setRenderType] = useState<number>(StatusEnum.FRIEND);
   const [friendArray, setFriendArray] = useState<FriendType[]>();
   const [recvArray, setRecvArray] = useState<NeutralUser[]>();
   const [sendArray, setSendArray] = useState<NeutralUser[]>();
@@ -83,6 +90,16 @@ const Friends = () => {
     setFriendArray(response.data);
     console.log(JSON.stringify(friendArray));
   };
+
+  useEffect(() => {
+  if (renderType === StatusEnum.FRIEND)
+    getFriendArray();
+  if (renderType === StatusEnum.SEND)
+    getSendArray();
+  if (renderType === StatusEnum.RECV)
+    getRecvArray();
+  }, [renderType]);
+
   const acceptRequestWrap = (friendId: number) => {
     acceptRequest(friendId);
     if (recvArray)
@@ -119,6 +136,19 @@ const Friends = () => {
     else return GET_PROFILE_PICTURE + neutral.profilePicture.split("/")[2];
   };
 
+  const handleSwitch = (e : any) =>
+  {
+    const otherSwitch = document.getElementsByClassName("switch-label_selected");
+    if (!otherSwitch)
+      return;
+    if (otherSwitch.length > 0)
+      for(var i = 0; i < otherSwitch.length ; i++)
+          otherSwitch.item(i)!.className = "switch-label_item";
+    e.target.classList.replace("switch-label_item","switch-label_selected");
+    console.log(parseInt(e.target.id.split('_')[1]));
+    setRenderType(parseInt(e.target.id.split('_')[1]));
+  }
+
   useEffect(() => {}, [friendArray, recvArray, sendArray]);
 
   useEffect(() => {
@@ -131,18 +161,12 @@ const Friends = () => {
       <Headers />
       <Sidebar />
       <main> 
-        <div className="accordion">
-          <input
-            type="radio"
-            name="select"
-            className="accordion-select"
-            checked
-          />
-          <div className="accordion-title">
-            <span>Friend</span>
-          </div>
-          <div className="accordion-content">
-            <ul>
+            <div className="switch-label_container">
+              <div id="switch-label_1" className={"switch-label_selected"} tabIndex={0} onClick={handleSwitch}>Friends</div>
+              <div id="switch-label_2" className={"switch-label_item"} tabIndex={0} onClick={handleSwitch}>Pending</div>
+              <div id="switch-label_3" className={"switch-label_item"} tabIndex={0} onClick={handleSwitch}>Send</div>
+            </div>
+            <ul className={renderType === StatusEnum.FRIEND ? "show": "hiden"}>
               {friendArray?.map((friend: FriendType) => {
                 return (
                   <div key={friend.id}>
@@ -160,6 +184,7 @@ const Friends = () => {
                     <Link className="link-user" to={"/user/" + friend.id}>
                       {
                         <img
+                        alt="profile_picture"
                           id="profilePicture"
                           className="profilePicture"
                           src={handleSrcFriend(friend)}
@@ -195,19 +220,14 @@ const Friends = () => {
                 );
               })}
             </ul>
-          </div>
-          <input type="radio" name="select" className="accordion-select" />
-          <div className="accordion-title">
-            <span>Sended Request</span>
-          </div>
-          <div className="accordion-content">
-            <ul>
+            <ul className={renderType === StatusEnum.SEND ? "show": "hiden"}>
               {sendArray?.map((friend: NeutralUser) => {
                 return (
                   <div key={friend.id}>
                     <Link className="link-user" to={"/user/" + friend.id}>
                         {
                           <img
+                          alt="profile_picture"
                           id="profilePicture"
                           className="profilePicture"
                           src={handleSrcNeutral(friend)}
@@ -243,18 +263,13 @@ const Friends = () => {
                 );
               })}
             </ul>
-          </div>
-          <input type="radio" name="select" className="accordion-select" />
-          <div className="accordion-title">
-            <span>Received Request</span>
-          </div>
-          <div className="accordion-content">
-            <ul>
+            <ul className={renderType === StatusEnum.RECV ? "show": "hiden"}>
               {recvArray?.map((friend: NeutralUser) => {
                 return (
                   <div key={friend.id}>
                     <Link className="link-user" to={"/user/" + friend.id}>
                         {<img
+                        alt="profile_picture"
                           id="profilePicture"
                           className="profilePicture"
                           src={handleSrcNeutral(friend)}
@@ -272,8 +287,6 @@ const Friends = () => {
                 //return <li key={friend.id}>{friend.username}</li>;
               })}
             </ul>
-          </div>
-        </div>
       </main>
     </>
   );

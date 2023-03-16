@@ -75,7 +75,7 @@ const Sidebar = () => {
             <p className="link-text">Watch Games</p>
             {/* </div> */}
           </Link>
-          <Link className="Sidebar-Link" to="/games">
+          <Link className="Sidebar-Link" to="/logout">
             {/* <div className='div-sidebar'> */}
             <FontAwesomeIcon
               className="fa-2xl svg-definecolor"

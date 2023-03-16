@@ -39,7 +39,7 @@ export const storage = {
   fileFilter: imageFileFilter,
 };
 //TODO everybody can accept and decline other user pendingrequest BIG PROBLEM
-@UseGuards(JwtGuard)
+// @UseGuards(JwtGuard)
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}

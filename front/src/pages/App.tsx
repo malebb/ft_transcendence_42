@@ -19,6 +19,8 @@ import ChatRoomBase from "./chat/chatRoom";
 import PrivateRoutes from "./privateRoute/PrivateRoutes";
 import { SnackbarProvider } from "notistack";
 import NotAuthRoutes from "./privateRoute/NotAuthRoutes";
+import NotFound from "./error/NotFound";
+import Logout from "./logout/Logout";
 
 /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
@@ -47,7 +49,9 @@ function App() {
             <Route path="/2fadelete" element={<DeleteTfa />} />
             {/* <Route path="/2faverif" element={<VerifTfa setTfaSuccess={}/>} /> */}
             <Route path="user/:userId" element={<UserProfile />} />
+            <Route path='/logout' element={<Logout/>} />
           </Route>
+          <Route element={<NotFound />}/>
         </Routes>
       </BrowserRouter></SnackbarProvider>
     </AuthProvider>
