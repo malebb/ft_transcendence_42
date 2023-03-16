@@ -35,6 +35,24 @@ function SearchBar() {
     }
   };
 
+  const handleArrow = (e: any) => {
+    const splitter = 'n';
+    if (e.keyCode === 40)
+    {
+    const fieldName = e.target.id.split(splitter);
+    const nextSibiling = document.getElementById(`${fieldName[0]}${splitter}${parseInt(fieldName[1]) + 1}`);
+    if(nextSibiling !== null){
+        nextSibiling.focus();
+    }}
+    if (e.keyCode === 38)
+    {
+    const fieldName = e.target.id.split(splitter);
+    const nextSibiling = document.getElementById(`${fieldName[0]}${splitter}${parseInt(fieldName[1]) - 1}`);
+    if(nextSibiling !== null){
+        nextSibiling.focus();
+    }}
+    }
+    
   const handleInputChange = async (event: any) => {
     const value = event.target.value;
     setQuery(value);
@@ -56,11 +74,14 @@ function SearchBar() {
           value={query}
           onChange={handleInputChange}
           placeholder="Search for a friend..."
+          onKeyDown={handleArrow}
+          id={'searchbar_n-1'}
+          
         />
         <ul className={(results.length === 0) ? "hiden" : "Nav-Result"}>
-          {results.map((item) => (
-            <Link className="list-profile" to={"/user/" + item.id} key={item.id}>
-              <li className="link-profile" >{item.username}
+          {results.map((item, index) => (
+            <Link className="list-profile" tabIndex={0} id={'searchbar_n' + index.toString()} onKeyDown={handleArrow} to={"/user/" + item.id} key={item.id}>
+              <li className="link-profile"  key={item.id}>{index}{item.username}
             </li></Link>
           ))}
         </ul>

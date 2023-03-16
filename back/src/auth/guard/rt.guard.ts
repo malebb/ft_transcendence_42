@@ -5,11 +5,8 @@ import { ExtractJwt } from 'passport-jwt';
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class RtGuard extends AuthGuard('jwt-refresh')
-{
-    constructor(private config: ConfigService)
-    {
-        super();
-    }
-
+export class RtGuard extends AuthGuard('jwt-refresh') {
+  constructor(private config: ConfigService) {
+    super();
+  }
 }
