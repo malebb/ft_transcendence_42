@@ -143,14 +143,6 @@ ul
 {
 }
 
-#leaveRoomInfo
-{
-	position: absolute;
-	bottom: 75px;
-	width: 150px;
-	color: red;
-}
-
 #nameAndRole
 {
 	width: 200px;

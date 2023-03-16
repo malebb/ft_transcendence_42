@@ -22,7 +22,6 @@ const ChatRoomBase = () =>
 	const [password, setPassword] = useState<string>('');
 	const [passwordInfo, setPasswordInfo] = useState("4 digits password : ");
 	const [btnValue, setBtnValue] = useState("set");
-	const [leaveRoomInfo, setLeaveRoomInfo] = useState("");
 	const regexPassword = useRef(/^[0-9]*$/);
 	const [isCurrentUserOwner, setIsCurrentUserOwner] = useState<boolean>(false);
 
@@ -668,23 +667,18 @@ const ChatRoomBase = () =>
 		try
 		{
 			axiosInstance.current = await axiosToken();
-			const user = await axiosInstance.current.get('/users/me');
-			axiosInstance.current = await axiosToken();
-			const room = await axiosInstance.current.get('/chatRoom/' + roomName);
-			if (user.data.id !== room.data.owner.id)
-			{
-				axiosInstance.current = await axiosToken();
-				axiosInstance.current.patch('/chatRoom/leaveRoom/' + roomName);
-				window.location.href = 'http://localhost:3000/chat/';
-			}
-			else
-			{
-				setLeaveRoomInfo('make someone owner to leave');
-			}
+			await axiosInstance.current.patch('/chatRoom/leaveRoom/' + roomName);
+			window.location.href = 'http://localhost:3000/chat/';
 		}
 		catch (error: any)
 		{
-			console.log('error (leave room) :', error);
+			if (error.response.status === 403)
+			{
+				printInfosBox('Make someone owner to leave');
+				await updateMembersData();
+			}
+			else
+				console.log('error (leave room) :', error);
 		}
 	}
 
@@ -693,7 +687,6 @@ const ChatRoomBase = () =>
 		return (
 			<div id={style.leaveRoom}>
 				<form onSubmit={handleLeaveRoom}>
-					<label id={style.leaveRoomInfo}>{leaveRoomInfo}</label>
 					<input type="submit" value="leave room"
 					className={style.leaveBtn}/>
 				</form>

@@ -380,9 +380,9 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (this.isAdmin(room.admins, authorId),
-			this.isMember(room.members, penalty.targetId),
-		   !this.isOwner(room.owner, penalty.targetId),
+		if (this.isAdmin(room.admins, authorId) &&
+			this.isMember(room.members, penalty.targetId) &&
+		   !this.isOwner(room.owner, penalty.targetId) &&
 		   PenaltyTimes.includes(penalty.durationInMin))
 		{
 				if (penalty.type === 'BAN' && !this.isSanctioned(room.penalties, penalty.targetId, penalty.type))
@@ -405,7 +405,7 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (this.isMember(room.members, userId),
+		if (this.isMember(room.members, userId) && 
 		   !this.isOwner(room.owner, userId))
 		{
 			this.removeMember(chatRoomName, userId);
