@@ -19,3 +19,15 @@ export interface ChatRoom
 	password: string;
 	accessibility: Accessibility;
 }
+
+export interface Penalty
+{
+	id: number;
+	date: string;
+	author: User;
+	target: User;
+	type: PenaltyType;
+	durationInMin: number;
+}
+
+export const PenaltyTimes = [1, 15, 60, 360, 1440, 10080];

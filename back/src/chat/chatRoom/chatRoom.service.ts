@@ -1,13 +1,54 @@
 import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ChatRoom } from 'ft_transcendence';
-import { Accessibility } from 'ft_transcendence';
+import { ChatRoom, PenaltyTimes, Accessibility, User } from 'ft_transcendence';
 import * as argon2 from 'argon2';
+import { PenaltyDto } from '../penalty/Penalty';
+import PenaltyService from '../penalty/penalty.service';
+import { Penalty, PenaltyType } from '@prisma/client';
 
 @Injectable()
 export class ChatRoomService
 {
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService,
+			   	private readonly penaltyService: PenaltyService) {}
+
+	// checks
+	
+	isOwner(owner: User, userId: number): boolean
+	{
+		return (owner.id == userId);
+	}
+
+	isMember(members: User[], userId: number): boolean
+	{
+		for (let i = 0; i < members.length; ++i)
+		{
+			if (members[i].id === userId)
+				return (true);
+		}
+		return (false)
+	}
+
+	isAdmin(admins: User[], userId: number): boolean
+	{
+		for (let i = 0; i < admins.length; ++i)
+		{
+			if (admins[i].id === userId)
+				return (true);
+		}
+		return (false)
+	}
+
+	isSanctioned(penalties: Penalty[], userId: number, type : PenaltyType): boolean
+	{
+		for (let i = 0; i < penalties.length; ++i)
+		{
+			if (penalties[i].targetId === userId
+				&& penalties[i].type === type)
+				return (true);
+		}
+		return (false);
+	}
 
 	async createChatRoom(chatRoom: ChatRoom)
 	{
@@ -148,7 +189,7 @@ export class ChatRoomService
 				}
 			}
 		})
-		return (chatRoom);
+		return (chatRoom.members);
 	}
 
 	async getMemberFromRoom(userId: number, name: string)
@@ -204,7 +245,7 @@ export class ChatRoomService
 		});
 	}
 
-	async removeUserFromRoom(userId: number, chatRoomName: string)
+	async removeMember(chatRoomName: string, userId: number)
 	{
 		await this.prisma.chatRoom.update({
 			where: {
@@ -219,53 +260,78 @@ export class ChatRoomService
 		});
 	}
 
-	async updateOwner(chatRoomName: string, userId: number)
+	async makeOwner(chatRoomName: string, userId: number, authorId: number)
 	{
-		await this.prisma.chatRoom.update({
-			where: {
-				name: chatRoomName
-			},
-			data: {
-				owner: {
-					connect: {
-						id: userId,
-					}
+		const room = await this.getChatRoom(chatRoomName);
+
+		if (this.isOwner(room.owner, authorId) &&
+		   	this.isMember(room.members, userId))
+		{
+			await this.prisma.chatRoom.update({
+				where: {
+					name: chatRoomName
 				},
-				admins: {
-					connect: {
-						id: userId,
+				data: {
+					owner: {
+						connect: {
+							id: userId,
+						}
+					},
+					admins: {
+						connect: {
+							id: userId,
+						}
 					}
-				},
-			}
-		});
+				}
+			});
+			this.penaltyService.deletePenalties(room.id, userId);
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
-	async addAdmin(chatRoomName: string, userId: number)
+	async makeAdmin(chatRoomName: string, userId: number, authorId: number)
 	{
-		await this.prisma.chatRoom.update({
-			where: {
-				name: chatRoomName
-			},
-			data: {
-				admins: {
-					connect: {
-						id: userId,
-					}
+		const room = await this.getChatRoom(chatRoomName);
+
+		if (this.isOwner(room.owner, authorId) &&
+		   	!this.isAdmin(room.admins, userId))
+		{
+			await this.prisma.chatRoom.update({
+				where: {
+					name: chatRoomName
 				},
-			}
-		});
+				data: {
+					admins: {
+						connect: {
+							id: userId,
+						}
+					},
+				}
+			});
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
-	async removeAdmin(userId: number, chatRoomName: string)
+	async removeAdmin(userId: number, chatRoomName: string, authorId: number)
 	{
-		await this.prisma.chatRoom.update({
-			where: {
-				name: chatRoomName
-			},
-			data: {
-				admins: { disconnect: [{id: userId}]}
-			}
-		});
+		const room = await this.getChatRoom(chatRoomName);
+
+		if (this.isOwner(room.owner, authorId) &&
+		   	this.isAdmin(room.admins, userId))
+		{
+			await this.prisma.chatRoom.update({
+				where: {
+					name: chatRoomName
+				},
+				data: {
+					admins: { disconnect: [{id: userId}]}
+				}
+			});
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
 	async getUserPenalties(chatRoomName: string, userId: number)
@@ -274,7 +340,7 @@ export class ChatRoomService
 			where: {
 				name: chatRoomName
 			},
-			include: {
+			select: {
 				penalties: {
 					where : {
 						targetId: userId
@@ -285,9 +351,9 @@ export class ChatRoomService
 		return (penalties);
 	}
 
-	async getMutes(chatRoomName: string)
+	async getUsersMuted(chatRoomName: string)
 	{
-		const mutes = this.prisma.chatRoom.findUnique({
+		const room = await this.prisma.chatRoom.findUnique({
 			where: {
 				name: chatRoomName
 			},
@@ -302,6 +368,63 @@ export class ChatRoomService
 				}
 			}
 		})
-		return (mutes);
+		const usersMuted: User[] = [];
+		for (let i = 0; i < room.penalties.length; ++i)
+		{
+			usersMuted.push(room.penalties[i].target);
+		}
+		return (usersMuted);
+	}
+
+	async penalty(chatRoomName: string, penalty: PenaltyDto, authorId: number)
+	{
+		const room = await this.getChatRoom(chatRoomName);
+
+		if (this.isAdmin(room.admins, authorId),
+			this.isMember(room.members, penalty.targetId),
+		   !this.isOwner(room.owner, penalty.targetId),
+		   PenaltyTimes.includes(penalty.durationInMin))
+		{
+				if (penalty.type === 'BAN' && !this.isSanctioned(room.penalties, penalty.targetId, penalty.type))
+				{
+					this.removeMember(chatRoomName, penalty.targetId);
+					this.penaltyService.createPenalty(penalty, authorId);
+				}
+				else if (penalty.type === 'MUTE' && !this.isSanctioned(room.penalties, penalty.targetId, penalty.type))
+				{
+					this.penaltyService.createPenalty(penalty, authorId);
+				}
+				else
+					throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+	}
+
+	async leaveRoom(chatRoomName: string, userId: number)
+	{
+		const room = await this.getChatRoom(chatRoomName);
+
+		if (this.isMember(room.members, userId),
+		   !this.isOwner(room.owner, userId))
+		{
+			this.removeMember(chatRoomName, userId);
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+	}
+
+	async kick(chatRoomName: string, userId: number, authorId: number)
+	{
+		const room = await this.getChatRoom(chatRoomName);
+
+		if (this.isAdmin(room.admins, authorId) &&
+		   this.isMember(room.members, userId) &&
+		   !this.isOwner(room.owner, userId))
+		{
+			await this.removeMember(chatRoomName, userId);
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 }

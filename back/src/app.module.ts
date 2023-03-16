@@ -16,7 +16,7 @@ import  GameController from './game/game.controller';
 import { ChallengeModule } from './challenge/challenge.module';
 import { ChatRoomModule } from './chat/chatRoom/chatRoom.module';
 import { MessageModule } from './chat/message/message.module';
-import { PenaltyModule } from './chat/penalty/penalty.module';
+import PenaltyModule from './chat/penalty/penalty.module';
 
 @Module({
   imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule, UserModule, BookmarkModule, PrismaModule, PongModule, GameModule, HistoryModule, NestjsFormDataModule, ChatRoomModule, MessageModule, ChallengeModule, PenaltyModule],

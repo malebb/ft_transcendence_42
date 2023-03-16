@@ -12,12 +12,6 @@ export default class PenaltyController
 
 	}
 
-	@Post('')
-	async createPenalty(@Body() penalty: PenaltyDto)
-	{
-		await this.penaltyService.createPenalty(penalty);
-	}
-
 	@Delete(':id')
 	async deletePenalty(@Param('id', ParseIntPipe) penaltyId: number)
 	{

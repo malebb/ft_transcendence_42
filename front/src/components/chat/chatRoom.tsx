@@ -8,7 +8,6 @@ import style from "./ChatRoom.module.css"
 import Headers from '../Headers';
 import Sidebar from '../Sidebar';
 import { RoomStatus } from './utils/RoomStatus';
-import { Penalty } from './utils/Penalty';
 import { User, PenaltyType } from 'ft_transcendence';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
@@ -20,40 +19,24 @@ const ChatRoomBase = () =>
 	const { roomName } = useParams();
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 	const [roomStatus, setRoomStatus] = useState<RoomStatus | null>(null);
-	const [isOwner, setIsOwner] = useState<boolean>(false);
-	const [membersMuted, setMembersMuted] = useState<User[]>([]);
-	const owner = useRef<User | null>(null);
 	const [password, setPassword] = useState<string>('');
 	const [passwordInfo, setPasswordInfo] = useState("4 digits password : ");
 	const [btnValue, setBtnValue] = useState("set");
-	const [membersList, setMembersList] = useState<User[]>([]);
-	const [admins, setAdmins] = useState<User[]>([]);
 	const [leaveRoomInfo, setLeaveRoomInfo] = useState("");
-	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	const regexPassword = useRef(/^[0-9]*$/);
+	const [isCurrentUserOwner, setIsCurrentUserOwner] = useState<boolean>(false);
+
+	// members list data :
+	const [membersMuted, setMembersMuted] = useState<User[]>([]);
+	const [members, setMembers] = useState<User[]>([]);
+	const [owner, setOwner] = useState<User | null>(null);
+	const [admins, setAdmins] = useState<User[]>([]);
+	const [currentUser, setCurrentUser] = useState<User | null>(null);
+
 
 	useEffect(() => {
-		const checkRoom = async () =>
-		{
-			try
-			{
-				axiosInstance.current = await axiosToken();
-				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
-				axiosInstance.current = await axiosToken();
-				const user: AxiosResponse = await axiosInstance.current.get('/users/me');
-				setCurrentUser(user.data);
-				if (!room.data)
-					setRoomStatus(RoomStatus["NOT_EXIST" as keyof typeof RoomStatus]);
-				else
-					isUserStillMember(user.data.id);
-			}
-			catch (error: any)
-			{
-				console.log("error (check room) :", error);
-			}
-		}
-		checkRoom();
-	}, [roomName]);
+		updateRoomStatus();
+	}, []);
 
 	useEffect(() => 
 	{
@@ -84,10 +67,10 @@ const ChatRoomBase = () =>
 				if (user.data.username === room.data.owner.username)
 				{	
 					initPasswordInfo(room);
-					setIsOwner(true);
+					setIsCurrentUserOwner(true);
 				}
 				else
-					setIsOwner(false);
+					setIsCurrentUserOwner(false);
 				setCurrentUser(user.data);
 			}
 			catch (error: any)
@@ -219,7 +202,7 @@ const ChatRoomBase = () =>
 	const passwordSection = () =>
 	{
 			return (
-				isOwner ? (
+				isCurrentUserOwner ? (
 				<div id={style.chatPassword}>
 					<form onSubmit={handleChangePassword} id={style.passwordForm}>
 					<label id={style.passwordInfo}>{passwordInfo}</label>
@@ -252,136 +235,9 @@ const ChatRoomBase = () =>
 		return (false);
 	}
 
-	const handleMembersDisplay = async () =>
+	const isAdmin = (member: User): boolean =>
 	{
-		try
-		{
-			isUserStillMember(currentUser!.id).then(async (ret: boolean) =>
-			{
-				if (ret)
-				{
-					let members: HTMLElement = document.getElementById(style.members)!;
-					let membersDisplay = window.getComputedStyle(members).getPropertyValue('display');
-	
-					if (membersDisplay === "none")
-						members.style.display = "block";
-					else
-						members.style.display = "none";
-					axiosInstance.current = await axiosToken();
-					const room = await axiosInstance.current.get('/chatRoom/' + roomName);
-					owner.current = room.data.owner;
-					setAdmins(room.data.admins);
-					setMembersList(room.data.members);
-					axiosInstance.current = await axiosToken();
-					const user = await axiosInstance.current.get('/users/me');
-					setCurrentUser(user.data);
-					if (user.data.id === owner.current!.id)
-					{
-						setIsOwner(true);
-					}
-					axiosInstance.current = await axiosToken();
-					const getMutes: AxiosResponse = await axiosInstance.current.get('/chatRoom/mutes/' + roomName);
-					const selectMuted: User [] = [];
-					for (let i = 0; i < getMutes.data.penalties.length; ++i)
-					{
-						selectMuted.push(getMutes.data.penalties[i].target);
-					}
-					setMembersMuted(selectMuted);
-				}
-
-			});
-		}
-		catch (error: any)
-		{
-			console.log("error (display members) :", error);
-		}
-	}
-
-	const makeOwner = async (member: User) =>
-	{
-		try
-		{
-			isCurrentUserOwner().then(async (ret: boolean) =>
-			{
-				if (ret)
-				{
-					await isUserStillMember(member.id).then(async (ret: boolean) =>
-					{
-						if (ret)
-						{
-							axiosInstance.current = await axiosToken();
-							axiosInstance.current.patch('/chatRoom/changeOwner/' + roomName, {userId: member.id});
-							owner.current = member;
-							setIsOwner(false);
-							printInfosBox(member.username + ' is the new owner');
-						}
-						else
-						{
-							printInfosBox(member.username + ' is not member anymore');
-							removeMemberFromList(member);
-						}
-					});
-				}
-				else
-					printInfosBox('You are not owner anymore');
-			});
-		}
-		catch (error: any)
-		{
-			console.log("error (make owner) :", error);
-		}
-	}
-
-	const makeOwnerLogo = (member: User) =>
-	{
-		return (isOwner ? 
-		(
-			owner.current!.id !== member.id ?
-			<img className={style.memberAction} src="http://localhost:3000/images/makeOwner.png" 
-			alt="Make Owner" title="Make owner"
-			width="20" height="20"
-			onClick={() => makeOwner(member)}/> : <></>
-		)
-		: <></>);
-	}
-
-	const makeAdmin = async (member: User) =>
-	{
-		try
-		{
-			isCurrentUserOwner().then(async (ret: boolean) =>
-			{
-				if (ret)
-				{
-					isUserStillMember(member.id).then(async (ret: boolean) =>
-					{
-						if (ret)
-						{
-							axiosInstance.current = await axiosToken();
-							await axiosInstance.current.patch('/chatRoom/addAdmin/' + roomName, "userId=" + member.id);
-							printInfosBox(member.username + ' is now admin');
-							const newAdmins: User[] = [...admins];
-							newAdmins.push(member);
-							setAdmins(newAdmins);
-						}
-						else
-						{
-							printInfosBox(member.username + ' is not member anymore');
-							removeMemberFromList(member);
-						}
-					});
-				}
-			});
-		}
-		catch (error: any)
-		{
-			console.log("error (make admin) :", error);
-		}
-	}
-
-	const isAdmin = (member: User) : boolean =>
-	{
-		for(var i: number = 0; i < admins.length; ++i)
+		for(let i: number = 0; i < admins.length; ++i)
 		{
 			if (admins[i].id === member.id)
 			{
@@ -391,9 +247,139 @@ const ChatRoomBase = () =>
 		return (false);
 	}
 
+	const isOwner = (member: User): boolean =>
+	{
+		return (member.id === owner!.id);
+	}
+
+	const isYourself = (member: User): boolean =>
+	{
+		return (member!.id === currentUser!.id)
+	}
+
+	const updateRoomStatus = async () =>
+	{
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			const room = await axiosInstance.current.get('/chatRoom/' + roomName);
+			if (room.data)
+			{
+				axiosInstance.current = await axiosToken();
+				const penaltiesResp: AxiosResponse = await axiosInstance.current.get('/chatRoom/userPenalties/' + roomName);
+				let banned: boolean = false;
+				for (let i = 0; i < penaltiesResp.data.penalties.length; ++i)
+				{
+					if (penaltiesResp.data.penalties[i].type === 'BAN')
+					{
+						setRoomStatus(RoomStatus["BANNED" as keyof typeof RoomStatus]);
+						banned = true;
+						break ;
+					}
+				}
+				if (!banned)
+				{
+					axiosInstance.current = await axiosToken();
+					const member = await axiosInstance.current.get('/chatRoom/member/' + roomName);
+					if (!member.data.length)
+					{
+						setRoomStatus(RoomStatus["NOT_JOINED" as keyof typeof RoomStatus])
+						}
+					else
+					{
+						setRoomStatus(RoomStatus["JOINED" as keyof typeof RoomStatus])
+						}
+				}
+			}
+			else
+				setRoomStatus(RoomStatus["NOT_EXIST" as keyof typeof RoomStatus])
+
+		}
+		catch (error: any)
+		{
+			console.log('error (update room status): ', error);
+		}
+	}
+
+	const updateMembersData = async () =>
+	{
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			const room = await axiosInstance.current.get('/chatRoom/' + roomName);
+			axiosInstance.current = await axiosToken();
+			const user = await axiosInstance.current.get('/users/me');
+			axiosInstance.current = await axiosToken();
+			const userMuted: AxiosResponse = await axiosInstance.current.get('/chatRoom/mutedUsers/' + roomName);
+
+			setOwner(room.data.owner);
+			setAdmins(room.data.admins);
+			setMembers(room.data.members);
+			setCurrentUser(user.data);
+			setMembersMuted(userMuted.data);
+			updateRoomStatus();
+		}
+		catch (error: any)
+		{
+			console.log('error (update members list data) :', error);
+		}
+	}
+
+	const makeOwner = async (member: User) =>
+	{
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current.patch('/chatRoom/makeOwner/' + roomName, {userId: member.id});
+			printInfosBox(member.username + ' is the new owner');
+			await updateMembersData();
+		}
+		catch (error: any)
+		{
+			if (error.response.status === 403)
+			{
+				printInfosBox('You can not make ' + member.username + " owner");
+				await updateMembersData();
+			}
+			else
+				console.log("error (make owner) :", error);
+		}
+	}
+
+	const makeOwnerLogo = (member: User) =>
+	{
+		return (isOwner(currentUser!) ? (
+			owner!.id !== member.id ?
+			<img className={style.memberAction} src="http://localhost:3000/images/makeOwner.png" 
+			alt="Make Owner" title="Make owner"
+			width="20" height="20"
+			onClick={() => makeOwner(member)}/> : <></>) : (<></>));
+	}
+
+	const makeAdmin = async (member: User) =>
+	{
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current.patch('/chatRoom/makeAdmin/' + roomName, "userId=" + member.id);
+			printInfosBox(member.username + ' is now admin');
+			await updateMembersData();
+		}
+		catch (error: any)
+		{
+			if (error.response.status === 403)
+			{
+				printInfosBox('You can not make ' + member.username + " admin");
+				await updateMembersData();
+			}
+			else
+				console.log("error (make admin) :", error);
+		}
+	}
+
 	const makeAdminLogo = (member: User) =>
 	{
-		return (!isAdmin(member) && isOwner ?
+		return (!isAdmin(member) && isOwner(currentUser!) ?
 			<img className={style.memberAction} src="http://localhost:3000/images/admin.png" 
 			alt="Make admin" title="Make admin"
 			width="20" height="21"
@@ -403,7 +389,7 @@ const ChatRoomBase = () =>
 
 	const printRole = (member: User) =>
 	{
-		if (owner.current!.id === member.id)
+		if (owner!.id === member.id)
 			return (<span className={style.role}>(owner)</span>);
 		else if (isAdmin(member))
 			return (<span className={style.role}>(admin)</span>);
@@ -411,66 +397,30 @@ const ChatRoomBase = () =>
 			return (<span className={style.role}>(member)</span>);
 	}
 
-	const isCurrentUserOwner = async (): Promise<boolean> =>
-	{
-		try
-		{
-			axiosInstance.current = await axiosToken();
-			const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
-			if (currentUser!.id === room.data.owner.id)
-				return (new Promise(resolve => {resolve(true)}));
-			return (new Promise(resolve => {resolve(false)}));
-		}
-		catch (error: any)
-		{
-			console.log('error (checking if current user is owner) :', error);
-			return (new Promise(resolve => {resolve(false)}));
-		}
-	}
-
 	const removeAdmin = async (member: User) =>
 	{
 		try
 		{
-			isCurrentUserOwner().then(async (ret: boolean) =>
-			{
-				if (ret)
-				{
-					isUserStillMember(member.id).then(async (ret: boolean) =>
-					{
-						if (ret)
-						{
-							axiosInstance.current = await axiosToken();
-							await axiosInstance.current.patch('/chatRoom/removeAdmin/' + roomName, "userId=" + member.id);
-							printInfosBox(member.username + ' is not admin anymore');
-							for (let i = 0; i < admins.length; ++i)
-							{
-								if (member.id === admins[i].id)
-								{
-									let newAdmins: User[] = [...admins];
-									newAdmins.splice(i, 1);
-									setAdmins(newAdmins);
-								}
-							}
-						}
-						else
-						{
-							printInfosBox(member.username + ' is not member anymore');
-							removeMemberFromList(member);
-						}
-					});
-				}
-			});
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current.patch('/chatRoom/removeAdmin/' + roomName, "userId=" + member.id);
+			printInfosBox(member.username + ' is no longer admin');
+			await updateMembersData();
 		}
 		catch (error: any)
 		{
-			console.log("error (remove admin): ", error);
+			if (error.response.status === 403)
+			{
+				printInfosBox('You can not remove admin role from ' + member.username);
+				await updateMembersData();
+			}
+			else
+				console.log("error (remove admin) :", error);
 		}
 	}
 
 	const removeAdminLogo = (member: User) =>
 	{
-		return (isOwner && isAdmin(member) && owner.current!.id !== member.id ? 
+		return (isOwner(currentUser!) && isAdmin(member) && owner!.id !== member.id ? 
 			<img className={style.memberAction} src="http://localhost:3000/images/removeAdmin.png" 
 			alt="Remove admin" title="Remove admin"
 			width="20"
@@ -482,98 +432,53 @@ const ChatRoomBase = () =>
 	{
 		try
 		{
-			let alreadyInGame = false;
-
 			axiosInstance.current = await axiosToken();
-			const challenges = await axiosInstance.current.get('/challenge/');
-			for (let i = 0; i < challenges.data.length; ++i)
-			{
-				if (challenges.data[i].sender.id === currentUser!.id)
-				{
-					alreadyInGame = true;
-					break;
+			const challengeResponse = await axiosInstance.current.post('/challenge/', {powerUpMode: powerUpMode, receiverId: member.id}, {
+				headers: {
+					"Content-Type": "application/json"
 				}
-			}
-			axiosInstance.current = await axiosToken();
-			const games = await axiosInstance.current.get('/game/');
-			for (let i = 0; i < games.data.length; ++i)
-			{
-				if (games.data[i].sender.id === currentUser!.id)
-				{
-					alreadyInGame = true;
-					break;
-				}
-			}
-
-			if (!alreadyInGame)
-			{
-				axiosInstance.current = await axiosToken();
-				const challenge = await axiosInstance.current.post('/challenge/', {powerUpMode: powerUpMode, senderId: currentUser!.id, receiverId: member.id}, {
-					headers: {
-						"Content-Type": "application/json"
-					}
-				});
-				window.location.href = 'http://localhost:3000/challenge/' + challenge.data.id;
-			}
-			else
-			{
-				printInfosBox('You are already playing in another game');
-			}
+			});
+			window.location.href = 'http://localhost:3000/challenge/' + challengeResponse.data;
 		}
 		catch (error: any)
 		{
-			console.log('error (challenge) :', error);
+			if (error.response.status === 403)
+			{
+				printInfosBox('You are already playing in another game');
+				await updateMembersData();
+			}
 		}
 	}
 
 	const selectMode = (member: User) =>
 	{
-		isUserStillMember(currentUser!.id).then(async (ret: boolean) =>
-		{
-			if (ret)
+  	 	confirmAlert({
+   			customUI: ({onClose}) =>
 			{
-				isUserStillMember(member.id).then(async (ret: boolean) =>
-				{
-					if (ret)
-					{
-  					 	confirmAlert({
-     						customUI: ({onClose}) =>
+   				return (
+					<div id={alertStyle.boxContainer}>
+						<h1>Challenge {trimUsername(member.username, 15)}</h1>
+						<p>Select a pong mode</p>
+						<div id={alertStyle.alertBoxBtn}>
+							<button onClick={() =>
 							{
-       							return (
-									<div id={alertStyle.boxContainer}>
-										<h1>Challenge {trimUsername(member.username, 15)}</h1>
-										<p>Select a pong mode</p>
-										<div id={alertStyle.alertBoxBtn}>
-											<button onClick={() =>
-												{
-								 					challenge(member, false);
-													onClose();
-												}
-												}>normal</button>
-											<button onClick={() =>
-						  						{
-													challenge(member, true)
-													onClose();
-												}}>power-up</button>
-										</div>
-          							</div>
-        						);
-      						}
-    					});
-					}
-					else
-					{
-						printInfosBox(member.username + ' is not member anymore');
-						removeMemberFromList(member);
-					}
-				});
-			}
-		});
+			 					challenge(member, false);
+								onClose();
+							}}>normal</button>
+							<button onClick={() =>
+							{
+								challenge(member, true)
+								onClose();
+							}}>power-up</button>
+						</div>
+          			</div>);
+      		}
+    	});
 	}
 
 	const challengeLogo = (member: User) =>
 	{
-		return (currentUser!.id !== member.id ? 
+		return (!isYourself(member) ?
 			<img className={style.memberAction} src="http://localhost:3000/images/challenge.png" 
 			alt={"Challenge" + member.username} title={"Challenge " + member.username}
 			width="20" height="22"
@@ -581,226 +486,82 @@ const ChatRoomBase = () =>
 		);
 	}
 
-	const isUserStillMember = async (userId: number): Promise<boolean> =>
+	const kick = async (member: User) =>
 	{
 		try
 		{
 			axiosInstance.current = await axiosToken();
-			const member: AxiosResponse = await axiosInstance.current.get('/chatRoom/member/' + roomName + '/' + userId);
-			axiosInstance.current = await axiosToken();
-			const user: AxiosResponse = await axiosInstance.current.get('/users/me');
-
-			if (!member.data.members.length)
+			await axiosInstance.current.patch('/chatRoom/kick/' + roomName, {userId: member.id});
+			printInfosBox(member.username + ' has been kicked');
+			await updateMembersData();
+		}
+		catch (error: any)
+		{
+			if (error.response.status === 403)
 			{
-				if (userId === user.data.id)
-				{
-					axiosInstance.current = await axiosToken();
-					const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
-					axiosInstance.current = await axiosToken();
-						const penalties: Penalty[] = room.data.penalties;
-					let banned = false;
-					penalties.forEach((penalty: Penalty) =>
-					{
-						if (penalty.target.id === 
-						user.data.id && penalty.type === 'BAN')
-						{
-							setRoomStatus(RoomStatus["BANNED" as keyof typeof RoomStatus]);
-							banned = true;
-						}
-					});
-					if (!banned)
-						setRoomStatus(RoomStatus["NOT_JOINED" as keyof typeof RoomStatus])
-				}
-				return (new Promise(resolve => {resolve(false)}));
+				printInfosBox('You can not kick ' + member.username);
+				await updateMembersData();
 			}
 			else
-			{
-				if (userId === user.data.id)
-					setRoomStatus(RoomStatus["JOINED" as keyof typeof RoomStatus])
-				return (new Promise(resolve => {resolve(true)}));
-			}
-		}
-		catch (error: any)
-		{
-			console.log('error (is user still in room) :', error);
-			return (new Promise(resolve => {resolve(false)}));
-		}
-	}
-
-	const checkIfAdmin = async (member: User): Promise<boolean> =>
-	{
-		try
-		{
-			axiosInstance.current = await axiosToken();
-			const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
-			for(var i: number = 0; i < admins.length; ++i)
-			{
-				if (room.data.admins[i].id === member.id)
-				{
-					return (new Promise(resolve => {resolve(true)}));
-				}
-			}
-			return (new Promise(resolve => {resolve(false)}));
-		}
-		catch (error: any)
-		{
-			console.log('error (checking if user is admin) :', error);
-			return (new Promise(resolve => {resolve(false)}));
-		}
-	}
-
-	const kick = (member: User) =>
-	{
-		try
-		{
-			isUserStillMember(currentUser!.id).then(async (ret: boolean) =>
-			{
-				if (ret)
-				{
-					isUserStillMember(member.id).then(async (ret: boolean) =>
-					{
-						if (ret)
-						{
-							axiosInstance.current = await axiosToken();
-							const user: AxiosResponse = await axiosInstance.current.get('/users/me');
-							checkIfAdmin(user.data).then(async (isOwner) =>
-							{
-								if (isOwner)
-								{
-									axiosInstance.current = await axiosToken();
-									await axiosInstance.current.patch('/chatRoom/removeUser/' + roomName, {userId: member.id});
-									printInfosBox(member.username + ' has been kicked');
-									removeMemberFromList(member);
-								}
-							})
-						}
-						else
-						{
-							printInfosBox(member.username + ' is not member anymore');
-							removeMemberFromList(member);
-						}
-
-					});
-
-				}
-			});
-		}
-		catch (error: any)
-		{
-			console.log('error (while kicking) :', error);
+				console.log('error (while kicking) :', error);
 		}
 	}
 
 	const kickLogo = (member: User) =>
 	{
-		return (isAdmin(currentUser!) && currentUser!.id !== member.id && member.id !== owner.current!.id ? 
+		return (isAdmin(currentUser!) && !isYourself(member) && !isOwner(member) ? (
 			<img className={style.memberAction} src="http://localhost:3000/images/kick.png" 
 			alt={"Kick" + member.username} title={"Kick " + member.username}
 			width="20" height="21"
-			onClick={() => kick(member)}/> : <></>
-		);
+			onClick={() => kick(member)}/>) : (<></>));
 	}
 
-	const removeMemberFromList = (memberToRemove: User) =>
-	{
-		for (let i = 0; i < membersList.length; ++i)
-		{
-			if (membersList[i].id === memberToRemove.id)
-			{
-				let newMembersList: User[] = [...membersList];
-				newMembersList.splice(i, 1);
-				setMembersList(newMembersList);
-				break;
-			}
-		}
-	}
-
-	const doesUserHasPenalty = async (member: User, type: PenaltyType): Promise<boolean> =>
-	{
-		axiosInstance.current = await axiosToken();
-		const penalties: AxiosResponse = await axiosInstance.current.get('/chatRoom/penalty/' + roomName + '/' + member.id);
-
-		for (let i = 0; i < penalties.data.penalties.length; ++i)
-		{
-			if (penalties.data.penalties[i].type === type)
-				return (new Promise(resolve => {resolve(true)}));
-		}
-		return (new Promise(resolve => {resolve(false)}));
-	}
-
-	const applyPenalty = (member: User, duration: number, type: PenaltyType) =>
+	const applyPenalty = async (member: User, duration: number, type: PenaltyType) =>
 	{
 		try
 		{
-			isUserStillMember(currentUser!.id).then(async (ret: boolean) =>
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current.post('/chatRoom/penalty/' + roomName,
 			{
-				if (ret)
+				type: type,
+				targetId: member.id,
+				roomName: roomName,
+				durationInMin: duration
+			},
+			{
+				headers:
 				{
-					axiosInstance.current = await axiosToken();
-					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
-					checkIfAdmin(user.data).then(async (ret: boolean) =>
-					{
-						if (ret)
-						{	
-							doesUserHasPenalty(member, type).then(async (ret: boolean) =>
-							{
-								if (!ret)
-								{
-									isUserStillMember(member.id).then(async (ret: boolean) =>
-									{
-										if (ret)
-										{
-											axiosInstance.current = await axiosToken();
-											await axiosInstance.current.post('/penalty/',
-											{type: type, authorId: currentUser!.id, targetId: member.id,
-											roomName: roomName, durationInMin: duration},
-											{headers: {"Content-Type": "application/json"}});
-											if (type === 'BAN')
-											{
-												axiosInstance.current = await axiosToken();
-												await axiosInstance.current.patch('/chatRoom/removeUser/' + roomName, {userId: member.id});
-												printInfosBox(member.username + ' has been banned');
-												removeMemberFromList(member);
-											}
-											else if (type === 'MUTE')
-											{
-												printInfosBox(member.username + ' has been muted');
-												const newMembersMuted = [...membersMuted];
-												newMembersMuted.push(member);
-												setMembersMuted(newMembersMuted);
-											}
-										}
-										else
-										{
-											printInfosBox(member.username + ' is not member anymore');
-											removeMemberFromList(member);
-										}
-									});
-								}
-								else
-								{
-									if (type === 'BAN')
-									{
-										printInfosBox(member.username + ' has already been banned');
-										removeMemberFromList(member);
-									}
-									else if (type === 'MUTE')
-									{
-										printInfosBox(member.username + ' has already been muted');
-										const newMembersMuted = [...membersMuted];
-										newMembersMuted.push(member);
-										setMembersMuted(newMembersMuted);
-									}
-								}
-							})
-						}
-					})
+					"Content-Type": "application/json"
 				}
-			})
+			});
+			switch (type)
+			{
+				case 'BAN':
+					printInfosBox(member.username + ' has been banned');
+					break;
+				case 'MUTE':
+					printInfosBox(member.username + ' has been muted');
+					break;
+			}
+			await updateMembersData();
 		}
 		catch (error: any)
 		{
-			console.log('error (apply penalty) :', error);
+			if (error.response.status === 403)
+			{
+				switch (type)
+				{
+					case 'BAN':
+						printInfosBox('You can not ban ' + member.username);
+						break;
+					case 'MUTE':
+						printInfosBox('You can not mute ' + member.username);
+						break;
+				}
+				await updateMembersData();
+			}
+			else
+				console.log("error (apply penalty) :", error);
 		}
 	}
 
@@ -829,7 +590,7 @@ const ChatRoomBase = () =>
 
 	const banLogo = (member: User) =>
 	{
-		return (isAdmin(currentUser!) && currentUser!.id !== member.id && member.id !== owner.current!.id ? 
+		return (isAdmin(currentUser!) && currentUser!.id !== member.id && member.id !== owner!.id ? 
 			<img className={style.memberAction} src="http://localhost:3000/images/ban.png" 
 			alt={"Ban " + member.username} title={"Ban " + member.username}
 			width="22" height="22"
@@ -839,13 +600,32 @@ const ChatRoomBase = () =>
 
 	const muteLogo = (member: User) =>
 	{
-		return (isAdmin(currentUser!) && currentUser!.id !== member.id && member.id !== owner.current!.id && 
+		return (isAdmin(currentUser!) && currentUser!.id !== member.id && member.id !== owner!.id && 
 		!isMemberMuted(member)? 
 			<img className={style.memberAction} src="http://localhost:3000/images/mute.png" 
 			alt={"Mute " + member.username} title={"Mute " + member.username}
 			width="22" height="22"
 			onClick={() => selectPenaltyTime(member, PenaltyType["MUTE" as keyof typeof PenaltyType])}/> : <></>
 		);
+	}
+
+	const handleMembersDisplay = async () =>
+	{
+		try
+		{
+			await updateMembersData();
+			let members: HTMLElement = document.getElementById(style.members)!;
+			let membersDisplay = window.getComputedStyle(members).getPropertyValue('display');
+
+			if (membersDisplay === "none")
+				members.style.display = "block";
+			else
+				members.style.display = "none";
+		}
+		catch (error: any)
+		{
+			console.log("error (display members) :", error);
+		}
 	}
 
 	const memberList = () =>
@@ -855,7 +635,7 @@ const ChatRoomBase = () =>
 				<li>
 					<h4 className={style.membersTitle} onClick={handleMembersDisplay}>Members</h4>
 					<ul id={style.members} >
-						{membersList.map((member: User) => {
+						{members.map((member: User) => {
 							return (
 								<li className={currentUser && currentUser.id
 								!== member.id? style.member : 

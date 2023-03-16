@@ -6,7 +6,8 @@ import { PenaltyDto } from './Penalty';
 export default class PenaltyService
 {
 	constructor(private readonly prisma: PrismaService) {}
-	async createPenalty(penalty: PenaltyDto)
+
+	async createPenalty(penalty: PenaltyDto, authorId: number)
 	{
 		await this.prisma.penalty.create({
 			data: {
@@ -18,7 +19,7 @@ export default class PenaltyService
 				},
 				author: {
 					connect: {
-						id: penalty.authorId
+						id: authorId
 					}
 				},
 				target: {
@@ -37,6 +38,16 @@ export default class PenaltyService
 		await this.prisma.penalty.delete({
 			where: {
 				id: penaltyId
+			}
+		});
+	}
+
+	async deletePenalties(chatId: number, userId: number)
+	{
+		await this.prisma.penalty.deleteMany({
+			where: {
+				targetId: userId,
+				chatId: chatId
 			}
 		});
 	}

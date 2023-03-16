@@ -360,6 +360,7 @@ export class UserService {
         }
         return 'receiver';
     }
+
     async getAllUser(): Promise<NeutralUser[]>
     {
         const users = await this.prisma.user.findMany();

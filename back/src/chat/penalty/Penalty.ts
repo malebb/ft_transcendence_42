@@ -7,11 +7,6 @@ export class PenaltyDto
 	@IsInt()
 	@IsOptional()
 	@Type(() => Number)
-	authorId?: number;
-
-	@IsInt()
-	@IsOptional()
-	@Type(() => Number)
 	targetId?: number;
 
 	@IsInt()

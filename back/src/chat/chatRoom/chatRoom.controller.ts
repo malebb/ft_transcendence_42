@@ -10,6 +10,8 @@ import { Accessibility } from 'ft_transcendence';
 
 import { ChatRoom } from 'ft_transcendence';
 
+import { PenaltyDto } from '../penalty/Penalty';
+
 class ChatRoomDto {
 	@IsInt()
 	@IsOptional()
@@ -22,6 +24,9 @@ class ChatRoomDto {
 
 	@IsOptional()
 	accessibility?: Accessibility;
+
+	@IsOptional()
+	penalty?: PenaltyDto;
 }
 
 @Controller('chatRoom')
@@ -65,13 +70,13 @@ class ChatRoomController
 	{
 		return (await this.chatRoomService.getMember(userId, name));
 	}
-
+/*
 	@Get('member/:name/:id')
 	async getMemberById(@Param('name') roomName: string, @Param('id', ParseIntPipe) userId: number)
 	{
 		return (await this.chatRoomService.getMember(userId, roomName));
 	}
-
+*/
 
 	@Post(':name')
 	async joinChatRoom(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
@@ -85,22 +90,34 @@ class ChatRoomController
 		await this.chatRoomService.checkPassword(chatRoomName, chatRoomDto.password);
 	}
 
-	@Patch('changeOwner/:name')
-	async updateOwner(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
+	@Patch('makeOwner/:name')
+	async makeOwner(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto, @GetUser('id') authorId: number)
 	{
-		await this.chatRoomService.updateOwner(chatRoomName, chatRoomDto.userId);
+		await this.chatRoomService.makeOwner(chatRoomName, chatRoomDto.userId, authorId);
 	}
 
-	@Patch('addAdmin/:name')
-	async addAdmin(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
+	@Patch('makeAdmin/:name')
+	async addAdmin(@Param('name') chatRoomName: string,
+				   @Body() chatRoomDto: ChatRoomDto,
+				   @GetUser('id') authorId: number)
 	{
-		await this.chatRoomService.addAdmin(chatRoomName, chatRoomDto.userId);
+		await this.chatRoomService.makeAdmin(chatRoomName, chatRoomDto.userId, authorId);
 	}
 
 	@Patch('removeAdmin/:name')
-	async removeAdmin(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
+	async removeAdmin(@Param('name') chatRoomName: string,
+					  @Body() chatRoomDto: ChatRoomDto,
+					  @GetUser('id') authorId: number)
 	{
-		await this.chatRoomService.removeAdmin(chatRoomDto.userId, chatRoomName);
+		await this.chatRoomService.removeAdmin(chatRoomDto.userId, chatRoomName, authorId);
+	}
+
+	@Patch('kick/:name')
+	async kick(@Param('name') chatRoomName: string,
+					  @Body() chatRoomDto: ChatRoomDto,
+					  @GetUser('id') authorId: number)
+	{
+		await this.chatRoomService.kick(chatRoomName, chatRoomDto.userId, authorId);
 	}
 
 	@Patch('password/:name')
@@ -124,25 +141,27 @@ class ChatRoomController
 	@Patch('leaveRoom/:name')
 	async leaveRoom(@Param('name') chatRoomName: string, @GetUser('id') userId: number)
 	{
-		await this.chatRoomService.removeUserFromRoom(userId, chatRoomName);
+		await this.chatRoomService.leaveRoom(chatRoomName, userId);
 	}
 
-	@Patch('removeUser/:name')
-	async removeUserWithId(@Param('name') chatRoomName: string,  @Body() chatRoomDto: ChatRoomDto)
-	{
-		await this.chatRoomService.removeUserFromRoom(chatRoomDto.userId, chatRoomName);
-	}
-
-	@Get('penalty/:name/:userId')
-	async getUserPenalties(@Param('name') chatRoomName: string, @Param('userId', ParseIntPipe) userId: number)
+	@Get('userPenalties/:name')
+	async getUserPenalties(@Param('name') chatRoomName: string, @GetUser('id') userId: number)
 	{
 		return (await this.chatRoomService.getUserPenalties(chatRoomName, userId));
 	}
 
-	@Get('mutes/:name')
+	@Get('mutedUsers/:name')
 	async getMuted(@Param('name') chatRoomName: string)
 	{
-		return (await this.chatRoomService.getMutes(chatRoomName));
+		return (await this.chatRoomService.getUsersMuted(chatRoomName));
+	}
+
+	@Post('penalty/:name')
+	async penalty(@Param('name') chatRoomName: string,
+				  @Body() penalty: PenaltyDto,
+				  @GetUser('id') authorId: number)
+	{
+		await this.chatRoomService.penalty(chatRoomName, penalty, authorId);
 	}
 }
 

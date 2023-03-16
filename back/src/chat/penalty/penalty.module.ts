@@ -5,5 +5,6 @@ import PenaltyService from './penalty.service';
 @Module({
 	controllers: [PenaltyController],
 	providers: [PenaltyService],
+	exports: [PenaltyService],
 })
-export class PenaltyModule{};
+export default class PenaltyModule{};
