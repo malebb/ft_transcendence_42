@@ -34,9 +34,7 @@ export class MessageGateway
   private readonly logger = new Logger(MessageGateway.name);
 
   // va bind l'application MessageService
-  constructor(
-    private messageService: MessageService, // private authService: AuthService, // private userService: UserService
-  ) {}
+  constructor(private messageService: MessageService) {}
 
   // creation d'une instance server
   @WebSocketServer()
@@ -44,14 +42,9 @@ export class MessageGateway
 
   handleConnection(client: Socket) {
     const sockets = this.server.sockets;
-
     console.log(`Message Socket client with id: ${client.id} connected.`);
-    // this.logger.log(`Message Socket client with id: ${client.id} connected.`);
-    // this.logger.debug(`Number of connected sockets: ${sockets.size}`);
   }
 
-
-  // async??
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
     client.join(String(room?.name));
@@ -63,8 +56,26 @@ export class MessageGateway
     client.to(message.room?.name).emit('ROOM_MESSAGE', message);
   }
 
-
-
+  @SubscribeMessage('PRIVATE')
+  receivePrivateMessage(client: Socket, data) {
+    const sockets = this.server.sockets;
+    // console.log("PRIVATE");
+    console.log(data.friend);
+    console.log(data.friend.current.username);
+    // client.on('PRIVATE', function(data) {
+      // console.log(data);
+      client.to[data.friend.current!.id].emit('PRIVATE', {
+        from: client.id,
+        to: data.friend.to,
+        msg: data.msg,
+      });
+      // client.emit('PRIVATE', {
+      //   from: client.id,
+      //   to: data.to,
+      //   msg: data,
+      // });
+    // });
+  }
 
   afterInit(server: Server) {
     // console.log(server);
@@ -78,13 +89,7 @@ export class MessageGateway
 
   handleDisconnect(client: Socket) {
     const sockets = this.server.sockets;
-
     console.log(`Disconnected id: ${client.id}.`);
-    // this.logger.log(`Disconnected socket id: ${client.id} connected.`);
-    // this.logger.debug(`Number of connected sockets: ${sockets.listeners}`);
-
-    // TODO = enlever le client de la socket
-    
   }
 }
 

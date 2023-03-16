@@ -41,7 +41,7 @@
 	/* margin-left: 4rem;; */
 /* 100vh = ?? 50px = ?? - 200px = titre - 40 = input chat */
 	/* height: calc(100vh - 50px - 180px - 40px - 5rem); */
-	height: 100vh;
+	height: 75%;
 	background-color: var(--cinco);
 	border-radius: 16px;
 	margin-bottom: 1em;
