@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "Accessibility" AS ENUM ('PUBLIC', 'PRIVATE', 'PROTECTED');
+CREATE TYPE "Accessibility" AS ENUM ('PUBLIC', 'PRIVATE', 'PROTECTED', 'PRIVATE_PROTECTED');
 
 -- CreateEnum
 CREATE TYPE "PenaltyType" AS ENUM ('BAN', 'MUTE');

@@ -48,7 +48,7 @@ function MessagesContainer() {
       });
       axiosInstance.current = await axiosToken();
       await axiosInstance
-        .current!.get("/chatRoom/" + roomId.roomName)
+        .current!.get("/chatRoom/publicInfos/" + roomId.roomName)
         .then((response) => {
           currentRoom.current = response.data;
           socket?.emit("JOIN_ROOM", currentRoom.current);

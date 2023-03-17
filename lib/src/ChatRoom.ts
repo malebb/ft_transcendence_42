@@ -4,6 +4,7 @@ export enum Accessibility {
 	PUBLIC = "PUBLIC",
 	PRIVATE = "PRIVATE",
 	PROTECTED = "PROTECTED",
+	PRIVATE_PROTECTED = "PRIVATE_PROTECTED"
 }
 
 export enum PenaltyType {

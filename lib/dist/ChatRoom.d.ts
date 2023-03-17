@@ -2,7 +2,8 @@ import { User } from './User';
 export declare enum Accessibility {
     PUBLIC = "PUBLIC",
     PRIVATE = "PRIVATE",
-    PROTECTED = "PROTECTED"
+    PROTECTED = "PROTECTED",
+    PRIVATE_PROTECTED = "PRIVATE_PROTECTED"
 }
 export declare enum PenaltyType {
     BAN = "BAN",

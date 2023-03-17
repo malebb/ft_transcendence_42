@@ -122,18 +122,10 @@ const ChatRoomBase = () =>
 		{
 			axiosInstance.current = await axiosToken();
 			await axiosInstance.current.post('/chatRoom/checkPassword/' + roomName, "password=" + password);
+			setPasswordInfo('The password is not new :');
+			document.getElementById(style.passwordInfo)!.style.color = 'red';
 		}
-		catch (error: any)
-		{
-			if (error.response.status === 403)
-			{
-				setPasswordInfo('The password is not new :');
-				document.getElementById(style.passwordInfo)!.style.color = 'red';
-			}
-			else
-				console.log('error (checkin password)', error);
-			return;
-		}
+		catch (error: any) {}
 		try
 		{
 			axiosInstance.current = await axiosToken();
@@ -253,29 +245,21 @@ const ChatRoomBase = () =>
 			if (room.data)
 			{
 				axiosInstance.current = await axiosToken();
-				const penaltiesResp: AxiosResponse = await axiosInstance.current.get('/chatRoom/userPenalties/' + roomName);
-				let banned: boolean = false;
-				for (let i = 0; i < penaltiesResp.data.penalties.length; ++i)
-				{
-					if (penaltiesResp.data.penalties[i].type === 'BAN')
-					{
-						setRoomStatus(RoomStatus["BANNED" as keyof typeof RoomStatus]);
-						banned = true;
-						break ;
-					}
-				}
-				if (!banned)
+				const ban: AxiosResponse = await axiosInstance.current.get('/chatRoom/myBan/' + roomName);
+				if (ban.data.penalties.length)
+					setRoomStatus(RoomStatus["BANNED" as keyof typeof RoomStatus]);
+				else
 				{
 					axiosInstance.current = await axiosToken();
 					const member = await axiosInstance.current.get('/chatRoom/member/' + roomName);
 					if (!member.data.length)
 					{
 						setRoomStatus(RoomStatus["NOT_JOINED" as keyof typeof RoomStatus])
-						}
+					}
 					else
 					{
 						setRoomStatus(RoomStatus["JOINED" as keyof typeof RoomStatus])
-						}
+					}
 				}
 			}
 			else
@@ -308,6 +292,8 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
+			if (error.response.status === 403)
+				updateRoomStatus();
 			console.log('error (update members list data) :', error);
 		}
 	}
@@ -665,7 +651,7 @@ const ChatRoomBase = () =>
 		{
 			if (error.response.status === 403)
 			{
-				printInfosBox('Make someone owner to leave');
+				printInfosBox('You can not leave the room');
 				await updateMembersData();
 			}
 			else

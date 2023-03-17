@@ -5,6 +5,7 @@ import * as argon2 from 'argon2';
 import { PenaltyDto } from '../penalty/Penalty';
 import PenaltyService from '../penalty/penalty.service';
 import { Penalty, PenaltyType } from '@prisma/client';
+import { ChatRoomDto } from './ChatRoomDto';
 
 @Injectable()
 export class ChatRoomService
@@ -50,38 +51,74 @@ export class ChatRoomService
 		return (false);
 	}
 
-	async createChatRoom(chatRoom: ChatRoom)
+	isNameValid(name: string)
 	{
-		await this.prisma.chatRoom.create({
-			data: {
-				owner: {
-					connect: {
-						id: chatRoom.owner.id,
-					}
-				},
-				admins: {
-					connect: {
-						id: chatRoom.owner.id,
-					}
-				},
-				members: {
-					connect: {
-						id: chatRoom.owner.id,
-					}
-				},
-				name: chatRoom.name,
-				password: chatRoom.password.length ? await argon2.hash(chatRoom.password): '',
-				accessibility: chatRoom.accessibility
-			}
-		})
+		if (name.length < 4 || name.length > 25)
+			return (false);
+		if (!/^[A-Za-z0-9 ]*$/.test(name))
+			return (false);
+		return (true);
+	}
+
+	isAccessibilityValid(accessibility: Accessibility, password: string)
+	{
+		if (accessibility !== undefined)
+		{
+			if (accessibility === 'PROTECTED' ||
+				accessibility === 'PRIVATE_PROTECTED' &&
+				(/^[0-9]*$/).test(password) &&
+			   password.length === 4)
+				return (true);
+			else if ((accessibility === 'PRIVATE' ||
+					  accessibility === 'PUBLIC') &&
+					  !password.length)
+				return (true);
+		}
+		return (false);
+	}
+
+	async createChatRoom(chatRoom: ChatRoomDto, creatorId: number)
+	{
+		if (chatRoom.accessibility != undefined
+			&& this.isNameValid(chatRoom.name)
+		&& this.isAccessibilityValid(chatRoom.accessibility,
+									  chatRoom.password))
+		{
+			if (await this.getChatRoom(chatRoom.name))
+					throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+			await this.prisma.chatRoom.create({
+				data: {
+					owner: {
+						connect: {
+							id: creatorId,
+						}
+					},
+					admins: {
+						connect: {
+							id: creatorId,
+						}
+					},
+					members: {
+						connect: {
+							id: creatorId,
+						}
+					},
+					name: chatRoom.name,
+					password: chatRoom.password.length ? await argon2.hash(chatRoom.password): '',
+					accessibility: chatRoom.accessibility
+				}
+			})
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
 	async checkPassword(chatRoomName: string, password: string)
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if ((/^[0-9]*$/).test(password) && password.length === 4
-			&& room.password.length && await argon2.verify(room.password, password))
+		if (!((/^[0-9]*$/).test(password) && password.length === 4
+			&& room.password.length && await argon2.verify(room.password, password)))
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
@@ -110,9 +147,35 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
+	async getPublicInfosFromChat(name: string)
+	{
+		const chatRoom = await this.prisma.chatRoom.findUnique({
+			where: {
+				name: name,
+			},
+			select: {
+				accessibility: true,
+				penalties: {
+					select: {
+						author: true,
+						target: true,
+					}
+				},
+				name: true,
+				owner: {
+					select: {username: true}
+				},
+				members: {
+					select: {id: true}
+				}
+			}
+		})
+		return (chatRoom);
+	}
+
 	async getNotJoinedRooms(userId: number)
 	{
-		const chatRoom = await this.prisma.chatRoom.findMany({
+		const chatRooms = await this.prisma.chatRoom.findMany({
 			where: {
 				members: {
 					none : {
@@ -120,17 +183,23 @@ export class ChatRoomService
 					}
 				},
 			},
-			include: {
-				owner: true,
-				members: true
+			select: {
+				accessibility: true,
+				name: true,
+				owner: {
+					select: {username: true}
+				},
+				members: {
+					select: {id: true}
+				}
 			}
 		})
-		return (chatRoom);
+		return (chatRooms);
 	}
 
 	async getJoinedRooms(userId: number)
 	{
-		const chatRoom = await this.prisma.chatRoom.findMany({
+		const chatRooms = await this.prisma.chatRoom.findMany({
 			where: {
 				members: {
 					some: {
@@ -138,38 +207,43 @@ export class ChatRoomService
 					},
 				},
 			},
-			include: {
-				owner: true,
-				members: true
-			}
-		})
-		return (chatRoom);
-	}
-
-	async getAllRooms()
-	{
-		const chatRoom = await this.prisma.chatRoom.findMany({
-			include: {
-				owner: true
-			}
-		})
-		return (chatRoom);
-	}
-
-	async joinChatRoom(chatRoomName: string, userId: number)
-	{
-		await this.prisma.user.update({
-			where: {
-				id: userId
-			},
-			data : {
-				memberChats : {
-					connect : {
-						name: chatRoomName
-					}
+			select: {
+				name: true,
+				owner: {
+					select: {username: true}
+				},
+				members: {
+					select: {id: true}
 				}
 			}
-		});
+		})
+		return (chatRooms);
+	}
+
+	async joinChatRoom(chatRoomName: string, chatRoom: ChatRoomDto, userId: number)
+	{
+		const room = await this.getChatRoom(chatRoomName);
+
+		if (!this.isMember(room.members, userId) && 
+			(room.accessibility === 'PUBLIC'
+			 || (chatRoom.password && chatRoom.password.length &&
+			await argon2.verify(room.password, chatRoom.password))))
+		{
+			await this.prisma.user.update({
+				where: {
+					id: userId
+				},
+				data : {
+					memberChats : {
+						connect : {
+							name: chatRoomName
+						}
+					}
+				}
+			});
+		 }
+		 else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
 	async getMember(userId: number, name: string)
@@ -222,9 +296,9 @@ export class ChatRoomService
 				}
 			});
 			if (room.accessibility === 'PUBLIC')
-			{
 				this.changeAccessibility(room.name, Accessibility.PROTECTED);
-			}
+			else if (room.accessibility === 'PRIVATE')
+				this.changeAccessibility(room.name, Accessibility.PRIVATE_PROTECTED);
 		}
 		else
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
@@ -247,6 +321,8 @@ export class ChatRoomService
 			});
 			if (room.accessibility === 'PROTECTED')
 				this.changeAccessibility(room.name, Accessibility.PUBLIC);
+			else if (room.accessibility === 'PRIVATE_PROTECTED')
+				this.changeAccessibility(room.name, Accessibility.PRIVATE);
 		}
 		else
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
@@ -370,29 +446,36 @@ export class ChatRoomService
 		return (penalties);
 	}
 
-	async getUsersMuted(chatRoomName: string)
+	async getUsersMuted(chatRoomName: string, userId: number)
 	{
-		const room = await this.prisma.chatRoom.findUnique({
-			where: {
-				name: chatRoomName
-			},
-			include: {
-				penalties: {
-					where: {
-						type: 'MUTE'
-					},
-					include: {
-						target: true
+		const room = await this.getChatRoom(chatRoomName);
+
+		if (this.isMember(room.members, userId))
+		{
+			const room = await this.prisma.chatRoom.findUnique({
+				where: {
+					name: chatRoomName
+				},
+				include: {
+					penalties: {
+						where: {
+							type: 'MUTE'
+						},
+						include: {
+							target: true
+						}
 					}
 				}
+			})
+			const usersMuted: User[] = [];
+			for (let i = 0; i < room.penalties.length; ++i)
+			{
+				usersMuted.push(room.penalties[i].target);
 			}
-		})
-		const usersMuted: User[] = [];
-		for (let i = 0; i < room.penalties.length; ++i)
-		{
-			usersMuted.push(room.penalties[i].target);
+			return (usersMuted);
 		}
-		return (usersMuted);
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
 	async penalty(chatRoomName: string, penalty: PenaltyDto, authorId: number)
@@ -445,5 +528,29 @@ export class ChatRoomService
 		}
 		else
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+	}
+
+	async myBan(chatRoomName: string, userId: number)
+	{
+		const ban = this.prisma.chatRoom.findUnique(
+		{
+			where: {
+				name: chatRoomName
+			},
+			select: {
+				penalties: {
+					where : {
+						targetId: userId,
+						type: 'BAN'
+					},
+					select: {
+						id: true,
+						date: true,
+						durationInMin: true
+					}
+				}
+			}
+		});
+		return (ban);
 	}
 }
