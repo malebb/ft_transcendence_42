@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import "../../styles/App.css";
 import Headers from "../../components/Headers";
 import Canvas from "./components/Canvas";
@@ -6,9 +6,12 @@ import axios from "axios";
 import { getRefreshHeader } from "src/api/axios";
 import Sidebar from "../../components/Sidebar";
 import backgroundVideo from "../../content/background.mp4";
+import AuthContext from "src/context/TokenContext";
 
 function Main() {
-  const userSessionId = JSON.parse(sessionStorage.getItem("id")!);
+  
+  const {token, setToken, username, setUsername} = useContext(AuthContext);
+  const userSessionId = JSON.parse(localStorage.getItem("id")!);
   const onClick = async () => {
     console.log(getRefreshHeader());
     const new_jwt = await axios.post(
@@ -34,7 +37,10 @@ function Main() {
             <source src={backgroundVideo} type="video/mp4" />
           </video>
         ) : (
+          <>
           <Canvas />
+          <p tabIndex={99}>{username}</p>
+          </>
         )}
       </main>
     </div>

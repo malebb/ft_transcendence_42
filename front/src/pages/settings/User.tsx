@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { axiosMain, axiosAuthReq, HTTP_METHOD } from "../../api/axios";
 import axios, { AxiosHeaders, AxiosResponse } from "axios";
 import userEvent from "@testing-library/user-event";
@@ -20,6 +20,7 @@ import Popup from "src/components/Popup";
 import Sidebar from "src/components/Sidebar";
 import Headers from "src/components/Headers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import AuthContext from "src/context/TokenContext";
 //var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
@@ -95,6 +96,7 @@ console.log(qrcode_img);*/
         <img src="http://localhost:3333/users/profile-image/" alt='profile-picture'/>
         </form> */
 const User = () => {
+  const {token, setToken, username, setUsername} = useContext(AuthContext);
   const [refresh, setRefresh] = useState("");
   const [user, setUser] = useState<UserType>();
   const [validUser, setValidUser] = useState<boolean>(false);
@@ -148,7 +150,7 @@ const User = () => {
   }, [code]);
 
   const getJWT = () => {
-    const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
+    const jwt = JSON.parse(localStorage.getItem("tokens") || "{}");
     return jwt["access_token"];
   };
 
@@ -341,6 +343,7 @@ const User = () => {
           </div>
           <button className="del-acc-User fit-content">Delete Account</button>
           </section>
+          {username}
         </main>
       ) : (
         <main></main>

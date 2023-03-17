@@ -16,9 +16,10 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import Headers from "src/components/Headers";
 import "../../styles/VerifTfa.css";
+import { ResponseInterface } from "src/interfaces/Sign";
 
 const EMAIL_REGEX = /^[a-z0-9-_@.]{3,23}$/;
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,24}$/;
+const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%&*^()-_=]).{8,24}$/;
 const SIGNIN_PATH = "/auth/signin";
 
 interface TokensInterface{
@@ -27,10 +28,10 @@ interface TokensInterface{
     expireIn: number,
     refresh_token: string,
   }
-interface ResponseInterface{
-  tokens: TokensInterface | undefined,
-  id: number | undefined,
-}
+// interface ResponseInterface{
+//   tokens: TokensInterface | undefined,
+//   id: number | undefined,
+// }
 
 interface SignInterface {
   tokens: TokensInterface;
@@ -49,6 +50,7 @@ const Signin = () => {
   const [resp, setResp] = useState<ResponseInterface>({
     tokens: undefined,
     id: undefined,
+    username: undefined,
   });
   const [email, setEmail] = useState("");
   const [validEmail, setValidEmail] = useState(false);
@@ -103,6 +105,11 @@ const Signin = () => {
   // );
   // }*/
 
+  const handle42Button = (e : any) => {
+    window.location.href =
+        "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code";
+    }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const v1 = EMAIL_REGEX.test(email);
@@ -129,8 +136,11 @@ const Signin = () => {
       console.log("tfa ==" + response.data.isTfa);
       if (response.data.isTfa === false)
       {
-      sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
-      sessionStorage.setItem("id", JSON.stringify(response.data.userId));
+      localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
+      localStorage.setItem("id", JSON.stringify(response.data.userId));
+      setUsername(response.data.username!);
+      setUserId(response.data.id);
+      setToken(response.data.tokens!)
       }
       else {
         setResp((prev) => ({...prev, id: response.data.userId}))
@@ -154,8 +164,11 @@ const Signin = () => {
   useEffect(() => {
     if (TfaSuccess)
     {
-      sessionStorage.setItem("tokens", JSON.stringify(resp.tokens));
-      sessionStorage.setItem("id", JSON.stringify(resp.id));
+      localStorage.setItem("tokens", JSON.stringify(resp.tokens));
+      localStorage.setItem("id", JSON.stringify(resp.id));
+      setUsername(resp.username!);
+      setUserId(resp.id);
+      setToken(resp.tokens!)
     }
 
   }, [TfaSuccess])
@@ -265,10 +278,7 @@ button img{position: relative;
             <button
               className="btn btn-transparent"
               type="button"
-              onClick={() =>
-                (window.location.href =
-                  "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code")
-              }
+              onClick={handle42Button}
             >
               <img
                 alt="42_logo"
@@ -291,3 +301,11 @@ button img{position: relative;
 };
 
 export default Signin;
+function setUsername(arg0: any) {
+  throw new Error("Function not implemented.");
+}
+
+function setUserId(id: any) {
+  throw new Error("Function not implemented.");
+}
+

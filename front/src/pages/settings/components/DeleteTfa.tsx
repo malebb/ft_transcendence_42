@@ -60,7 +60,7 @@ const DeleteTfa = () => {
   };
 
   const getJWT = () => {
-    const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
+    const jwt = JSON.parse(localStorage.getItem("tokens") || "{}");
     return jwt["access_token"];
   };
   return (

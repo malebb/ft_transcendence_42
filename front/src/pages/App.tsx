@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 import "../styles/App.css";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "../context/TokenContext";
+import AuthContext, { AuthProvider } from "../context/TokenContext";
 import Main from "./home/Main";
 import Signin from "./signin/signin";
 import Signup from "./signup/signup";
@@ -25,6 +25,9 @@ import Logout from "./logout/Logout";
 /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
 function App() {
+
+  const context = useContext(AuthContext);
+  console.log(context);
   return (
     <AuthProvider>
       <SnackbarProvider maxSnack={4}>

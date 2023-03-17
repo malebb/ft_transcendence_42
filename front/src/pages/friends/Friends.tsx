@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AxiosResponse } from "axios";
 import axios from "axios";
 import { getToken, axiosMain, axiosToken } from "../../api/axios";
@@ -9,6 +9,7 @@ import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
 import "../../styles/Friends.css";
 import { GET_PROFILE_PICTURE, validURL } from "src/api/utils";
+import AuthContext from "src/context/TokenContext";
 
 const FRIEND_LIST_PATH = "/users/friend-list";
 const RECV_LIST_PATH = "/users/recv-request";
@@ -42,6 +43,7 @@ enum StatusEnum {
 }
 
 const Friends = () => {
+  const {token, setToken} = useContext(AuthContext);
   const [renderType, setRenderType] = useState<number>(StatusEnum.FRIEND);
   const [friendArray, setFriendArray] = useState<FriendType[]>();
   const [recvArray, setRecvArray] = useState<NeutralUser[]>();
@@ -71,21 +73,21 @@ const Friends = () => {
 
   const getRecvArray = async () => {
     const response: AxiosResponse = await (
-      await axiosToken()
+      await axiosToken(token!, setToken)
     ).get(RECV_LIST_PATH);
     setRecvArray(response.data);
     console.log(JSON.stringify(friendArray));
   };
   const getSendArray = async () => {
     const response: AxiosResponse = await (
-      await axiosToken()
+      await axiosToken(token!, setToken)
     ).get(SEND_LIST_PATH);
     setSendArray(response.data);
     console.log(JSON.stringify(friendArray));
   };
   const getFriendArray = async () => {
     const response: AxiosResponse = await (
-      await axiosToken()
+      await axiosToken(token!, setToken)
     ).get(FRIEND_LIST_PATH);
     setFriendArray(response.data);
     console.log(JSON.stringify(friendArray));

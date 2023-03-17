@@ -16,11 +16,11 @@ import {} from "@fortawesome/free-solid-svg-icons";
 import "../styles/Sidebar.css";
 
 const Sidebar = () => {
-  const userSessionId = JSON.parse(sessionStorage.getItem("id")!);
+  const userSessionId = JSON.parse(localStorage.getItem("id")!);
 
   return (
     <>
-      {!(sessionStorage.getItem("tokens")) ? (
+      {!(localStorage.getItem("tokens")) ? (
         <></>
       ) : (
         <nav className="Sidebar">

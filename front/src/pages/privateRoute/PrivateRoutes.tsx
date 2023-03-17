@@ -9,16 +9,6 @@ import { useSnackbar } from "notistack";
 
 const AUTH_VERIF_PATH = "/auth/verify";
 
-async function verify() {
-  try {
-    const response: AxiosResponse = await (await axiosToken()).get(
-      "http://localhost:3333/auth/verify");
-    return response.data;
-  } catch (err: any) {
-    console.log("error");
-  }
-}
-
 const PrivateRoutes = () => {
   const [isAuth, setIsAuth] = useState(false);
   const [isChecking, setIsChecking] = useState(true);

@@ -8,7 +8,7 @@ const Headers = () => {
   return (
     <div className="static_header">
       <HeadersTitle />
-      {sessionStorage.getItem("tokens") ? <Nav /> : <Log />}
+      {localStorage.getItem("tokens") ? <Nav /> : <Log />}
     </div>
   );
 };

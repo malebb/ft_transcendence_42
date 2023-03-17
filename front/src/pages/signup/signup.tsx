@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useRef, useState, useEffect } from "react";
 import {
   faCheck,
@@ -12,10 +12,11 @@ import { AxiosError, AxiosResponse } from "axios";
 import { useSnackbar } from "notistack";
 import '../../styles/signup.css'
 import Headers from "src/components/Headers";
+import AuthContext from "src/context/TokenContext";
 
 const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,24}$/;
+const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%&*^()-_=]).{8,24}$/;
 const SIGNUP_PATH = "/auth/signup";
 
 const Signup = () => {
@@ -23,6 +24,7 @@ const Signup = () => {
   const emailRef = useRef<HTMLInputElement>(null);
   const errRef = useRef<HTMLParagraphElement>(null);
 
+  const {token, setToken, username, setUsername, userId, setUserId} = useContext(AuthContext);
   const [user, setUser] = useState("");
   const [validName, setValidName] = useState(false);
   const [userFocus, setUserFocus] = useState(false);
@@ -96,8 +98,11 @@ const Signup = () => {
       console.log(response.data);
       setSuccess(true);
       // setToken(response.data.token);
-      sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
-      sessionStorage.setItem("id", JSON.stringify(response.data.userId));
+      localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
+      localStorage.setItem("id", JSON.stringify(response.data.userId));
+      setUsername(response.data.username!);
+      setUserId(response.data.id);
+      setToken(response.data.tokens!)
       console.log(response.data.access_token);
       //console.log(token);
     } catch (err: any) {

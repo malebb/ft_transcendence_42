@@ -70,7 +70,7 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
   };
 
   const getJWT = () => {
-    const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
+    const jwt = JSON.parse(localStorage.getItem("tokens") || "{}");
     console.log("totokens=" + JSON.stringify(jwt));
     return jwt["access_token"];
   };

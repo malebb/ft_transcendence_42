@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useState, useEffect } from "react";
 import { axiosMain, axiosToken } from "../../../api/axios";
 import axios, { AxiosResponse } from "axios";
+import AuthContext from "src/context/TokenContext";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const Tfa = () => {
+  const {token, setToken} = useContext(AuthContext);
   const [code, setCode] = useState("");
   const [validCode, setValidCode] = useState<boolean>(false);
 
@@ -21,14 +23,14 @@ const Tfa = () => {
   };
 
   const getJWT = () => {
-    const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
+    const jwt = JSON.parse(localStorage.getItem("tokens") || "{}");
     return jwt["access_token"];
   };
 
   const handleCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const verif = (
-      await axiosMain.post(
+      await (await axiosToken(token!, setToken)).post(
         "/auth/verify2FA",
         { code: code },
         {

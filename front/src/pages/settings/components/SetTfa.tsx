@@ -1,12 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { useState } from "react";
 import { axiosMain, axiosToken } from "src/api/axios";
 import axios, { AxiosResponse } from "axios";
 import { useNavigate } from "react-router-dom";
+import AuthContext from "src/context/TokenContext";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const SetTfa = () => {
+  const {token, setToken} = useContext(AuthContext);
   const [TfaQrcode, setTfaQrcode] = useState("");
   const [boolQrcode, setboolQrcode] = useState<boolean>(false);
 
@@ -28,10 +30,7 @@ const SetTfa = () => {
     const createQrCode = async () => {
       setTfaQrcode(
         (
-          await axiosMain.get("/auth/create2FA", {
-            headers: { Authorization: "Bearer " + getJWT() },
-            //withCredentials: true
-          })
+          await (await axiosToken(token!, setToken)).get("/auth/create2FA")
         ).data
         //qrcode.toDataURL(secret.otpauth_url,{type: "image/jpeg"}/*, function(err: any, data: any){
         /*console.log(err);
@@ -49,13 +48,9 @@ const SetTfa = () => {
   const handleCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const verif = (
-      await axiosMain.post(
+      await (await axiosToken(token!, setToken)).post(
         "/auth/verify2FA",
         { code: code },
-        {
-          headers: { Authorization: "Bearer " + getJWT() },
-          //withCredentials: true
-        }
       )
     ).data;
     /*speakeasy.totp.verify({
@@ -65,7 +60,7 @@ const SetTfa = () => {
     }) */
     if (verif === true) {
       const check = (
-        await axiosMain.get("/auth/set2FA", {
+        await (await axiosToken(token!, setToken)).get("/auth/set2FA", {
           headers: { Authorization: "Bearer " + getJWT() },
           //withCredentials: true
         })
@@ -77,7 +72,7 @@ const SetTfa = () => {
   };
 
   const getJWT = () => {
-    const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
+    const jwt = JSON.parse(localStorage.getItem("tokens") || "{}");
     return jwt["access_token"];
   };
 
