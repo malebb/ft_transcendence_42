@@ -72,7 +72,7 @@ function MessagesContainer() {
       upgrade: false,
     });
     socket.current.on("connect", async () => {
-      socket.current!.on("ROOM_MESSAGE", (message) => {
+      socket.current!.on("ROOM_MESSAGE", (message: Message) => {
         setStateMessages((stateMessages) => [...stateMessages, message]);
       });
       return () => {

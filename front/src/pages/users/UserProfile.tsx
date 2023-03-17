@@ -2,7 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { AxiosResponse, AxiosInstance, AxiosHeaders } from "axios";
 import axios from "axios";
-import { getToken, axiosMain, axiosToken, axiosAuthReq, HTTP_METHOD } from "../../api/axios";
+import {
+  getToken,
+  axiosMain,
+  axiosToken,
+  axiosAuthReq,
+  HTTP_METHOD,
+} from "../../api/axios";
 import "../../styles/UserProfile.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
@@ -11,6 +17,7 @@ import Achievements from "./components/Achievements";
 import { FriendType } from "../friends/Friends";
 import Popup from "../../components/Popup";
 import PrivateMessages from "../chat/containers/PrivateMessages";
+import Status from "../settings/components/Status";
 
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
 const GET_USER_PROFILE = "users/profile/";
@@ -161,14 +168,31 @@ const UserProfile = () => {
 
   useEffect(() => {
     const treatData = async () => {
-      const profile = await axiosAuthReq(HTTP_METHOD.GET, GET_USER_PROFILE + userId, {} as AxiosHeaders, {}, setErrMsg, setUser);
-      if (profile === undefined) return ;
-      if (profile !== undefined){
-        if (validURL(profile.profilePicture)) setPicture(profile.profilePicture);
+      const profile = await axiosAuthReq(
+        HTTP_METHOD.GET,
+        GET_USER_PROFILE + userId,
+        {} as AxiosHeaders,
+        {},
+        setErrMsg,
+        setUser
+      );
+      if (profile === undefined) return;
+      if (profile !== undefined) {
+        if (validURL(profile.profilePicture))
+          setPicture(profile.profilePicture);
         else
-          setPicture(GET_PROFILE_PICTURE + profile.profilePicture.split("/")[2]);
+          setPicture(
+            GET_PROFILE_PICTURE + profile.profilePicture.split("/")[2]
+          );
         console.log(picture);
-        await axiosAuthReq(HTTP_METHOD.GET, GET_STATUS_PATH + userId, {} as AxiosHeaders, {}, setErrMsg, setFriendStatus);
+        await axiosAuthReq(
+          HTTP_METHOD.GET,
+          GET_STATUS_PATH + userId,
+          {} as AxiosHeaders,
+          {},
+          setErrMsg,
+          setFriendStatus
+        );
       }
     };
     treatData();
@@ -316,8 +340,9 @@ const UserProfile = () => {
           {/* </div> */}
           <div id="divprofileName" className="divprofileName">
             <p className="profileName">{user?.username?.slice(0, 15)}</p>
+            <Status />
           </div>
-          <PrivateMessages/>
+          {/* <PrivateMessages/> */}
           <Popup
             apparent={showConfirmation}
             title={popupTitle}
@@ -397,7 +422,7 @@ const UserProfile = () => {
         <br />
         <br />
         <br />
-        <Stats/>
+        <Stats />
         <br />
         <br />
         {printAchievements()}

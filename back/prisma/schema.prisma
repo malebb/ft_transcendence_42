@@ -16,6 +16,7 @@ model User {
   updatedAt DateTime @updatedAt
   id42      String?  @unique
   username  String  @unique
+  status    String  @default("OFFLINE")
 
   email  String  @unique
   hash   String

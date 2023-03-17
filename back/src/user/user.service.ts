@@ -35,6 +35,20 @@ export class UserService {
     delete user.hash;
     return user;
   }
+  async setUserOnLineOffline(userId: number, newStatus: string) {
+    const user = await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        //https://stackoverflow.com/questions/31816061/why-am-i-getting-an-error-object-literal-may-only-specify-known-properties
+        status: newStatus,
+      },
+    });
+    console.log(user);
+    return user;
+  }
+
   async editUsername(userId: number, dto: EditUserDto) {
     // try {
     const user = await this.prisma.user.update({
@@ -215,12 +229,13 @@ export class UserService {
   }
 
   mapArrayUserToNeutralUser(user: User[]): NeutralUser[] {
-    let ret = user.map(({ id, createdAt, id42, username, profilePicture }) => ({
+    let ret = user.map(({ id, createdAt, id42, username, profilePicture, status }) => ({
       id,
       createdAt,
       id42,
       username,
       profilePicture,
+      status,
     }));
     return ret;
   }
@@ -255,7 +270,8 @@ export class UserService {
     const id42 = user.id42;
     const username = user.username;
     const profilePicture = user.profilePicture;
-    return { id, createdAt, id42, username, profilePicture };
+    const status = user.status;
+    return { id, createdAt, id42, username, profilePicture, status };
   }
   async getFriends(userId: number): Promise<Friend[]> {
     let friendArray: Friend[] = [];
