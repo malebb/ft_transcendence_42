@@ -78,13 +78,10 @@ export class ChatRoomService
 
 	async checkPassword(chatRoomName: string, password: string)
 	{
-		const room = await this.prisma.chatRoom.findUnique({
-			where: {
-				name: chatRoomName
-			}
-		});
+		const room = await this.getChatRoom(chatRoomName);
 
-		if (!(await argon2.verify(room.password, password)))
+		if ((/^[0-9]*$/).test(password) && password.length === 4
+			&& room.password.length && await argon2.verify(room.password, password))
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
@@ -209,28 +206,50 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
-	async updateRoomPassword(chatRoomName: string, password: string)
+	async updateRoomPassword(chatRoomName: string, password: string, userId: number)
 	{
-		await this.prisma.chatRoom.update({
-			where: {
-				name: chatRoomName
-			},
-			data: {
-				password: await argon2.hash(password),
+		const room = await this.getChatRoom(chatRoomName);
+
+		if (this.isOwner(room.owner, userId) &&
+		   (/^[0-9]*$/).test(password) && password.length === 4)
+		{
+			await this.prisma.chatRoom.update({
+				where: {
+					name: chatRoomName
+				},
+				data: {
+					password: await argon2.hash(password),
+				}
+			});
+			if (room.accessibility === 'PUBLIC')
+			{
+				this.changeAccessibility(room.name, Accessibility.PROTECTED);
 			}
-		});
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
-	async removePassword(chatRoomName: string)
+	async removePassword(chatRoomName: string, userId: number)
 	{
-		await this.prisma.chatRoom.update({
-			where: {
-				name: chatRoomName
-			},
-			data: {
-				password: '',
-			}
-		});
+		const room = await this.getChatRoom(chatRoomName);
+
+		if (this.isOwner(room.owner, userId) &&
+			room.password.length)
+		{
+			await this.prisma.chatRoom.update({
+				where: {
+					name: chatRoomName
+				},
+				data: {
+					password: '',
+				}
+			});
+			if (room.accessibility === 'PROTECTED')
+				this.changeAccessibility(room.name, Accessibility.PUBLIC);
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
 	async changeAccessibility(chatRoomName: string, accessibility: Accessibility)

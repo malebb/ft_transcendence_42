@@ -104,54 +104,52 @@ const ChatRoomBase = () =>
 						</div>
 					</div>
 				   );
-		}
+		},
+		keyCodeForClose: [8, 32, 13]
 		});
 	}
 
 	const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) =>
 	{
 		e.preventDefault();
+		if (password.length !== 4)
+		{
+			setPasswordInfo('4 digits required :');
+			document.getElementById(style.passwordInfo)!.style.color = 'red';
+			return;
+		}
 		try
 		{
 			axiosInstance.current = await axiosToken();
-			const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
-			if (password.length !== 4)
+			await axiosInstance.current.post('/chatRoom/checkPassword/' + roomName, "password=" + password);
+		}
+		catch (error: any)
+		{
+			if (error.response.status === 403)
 			{
-				setPasswordInfo('4 digits required :');
+				setPasswordInfo('The password is not new :');
 				document.getElementById(style.passwordInfo)!.style.color = 'red';
-				return;
 			}
-			try
-			{
-				if (room.data.accessibility === 'PROTECTED'
-				|| (room.data.accessibility === 'PRIVATE' && room.data.password.length))
-				{
-					axiosInstance.current = await axiosToken();
-					await axiosInstance.current.post('/chatRoom/checkPassword/' + roomName,
-						{password: password}, { headers: {"Content-Type": "application/json"}});
-					setPasswordInfo('The password is not new :');
-					document.getElementById(style.passwordInfo)!.style.color = 'red';
-					return ;
-				}
-			}
-			catch (error: any) {}
+			else
+				console.log('error (checkin password)', error);
+			return;
+		}
+		try
+		{
 			axiosInstance.current = await axiosToken();
 			await axiosInstance.current.patch('/chatRoom/password/' + roomName, "password=" + password);
-			if (room.data.accessibility === 'PUBLIC')
-			{
-				axiosInstance.current = await axiosToken();
-				await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomName, "accessibility=PROTECTED");
-			}
+			printInfosBox('Password updated successfully');
 			setPasswordInfo('Change the room password: ');
 			setBtnValue("Change password");
 			setPassword('');
 			document.getElementById(style.passwordInfo)!.style.color = 'white';
-			printInfosBox('Password updated successfully');
-			return ;
 		}
 		catch (error: any)
 		{
-			console.log("error (change password) :", error);
+			if (error.response.status === 403)
+				printInfosBox('You can not change the password');
+				
+			console.log('error (changing password)', error);
 		}
 	}
 
@@ -161,29 +159,19 @@ const ChatRoomBase = () =>
 		try
 		{
 			axiosInstance.current = await axiosToken();
-			const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
-			if (room.data.password === '')
-			{
-				setPasswordInfo('No password to remove');
-				document.getElementById(style.passwordInfo)!.style.color = 'red';
-				return ;
-			}
-			axiosInstance.current = await axiosToken();
 			await axiosInstance.current.patch('/chatRoom/removePassword/' + roomName);
-			if (room.data.accessibility === 'PROTECTED')
-			{
-				axiosInstance.current = await axiosToken();
-				await axiosInstance.current.patch('/chatRoom/changeAccessibility/' + roomName, "accessibility=PUBLIC");
-			}
 			document.getElementById(style.passwordInfo)!.style.color = 'white';
+			printInfosBox('Password has been removed successfully');
 			setPasswordInfo('Add a password: ');
 			setBtnValue("set");
 			setPassword('');
-			printInfosBox('Password has been removed successfully');
 		}
 		catch (error: any)
 		{
-			console.log("error (remove password) :", error);
+			if (error.response.status === 403)
+				printInfosBox('You can not remove the password');
+			else
+				console.log("error (remove password) :", error);
 		}
 	}
 
@@ -203,7 +191,7 @@ const ChatRoomBase = () =>
 			return (
 				isCurrentUserOwner ? (
 				<div id={style.chatPassword}>
-					<form onSubmit={handleChangePassword} id={style.passwordForm}>
+					<form onSubmit={handleChangePassword} className={style.passwordForm} id="passwordForm">
 					<label id={style.passwordInfo}>{passwordInfo}</label>
 						<input type="password"
 								onChange={updatePassword}
@@ -471,7 +459,9 @@ const ChatRoomBase = () =>
 							}}>power-up</button>
 						</div>
           			</div>);
-      		}
+      		},
+			keyCodeForClose: [8, 32, 13],
+
     	});
 	}
 
@@ -583,7 +573,8 @@ const ChatRoomBase = () =>
 					</div>
           		</div>
         		);
-      		}
+      		},
+			keyCodeForClose: [8, 32, 13]
     	});
 	}
 

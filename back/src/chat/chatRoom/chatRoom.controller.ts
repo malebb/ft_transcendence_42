@@ -121,15 +121,17 @@ class ChatRoomController
 	}
 
 	@Patch('password/:name')
-	async updateRoomPassword(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
+	async updateRoomPassword(@Param('name') chatRoomName: string,
+							 @Body() chatRoomDto: ChatRoomDto,
+							 @GetUser('id') userId: number)
 	{
-		await this.chatRoomService.updateRoomPassword(chatRoomName, chatRoomDto.password)
+		await this.chatRoomService.updateRoomPassword(chatRoomName, chatRoomDto.password, userId)
 	}
 
 	@Patch('removePassword/:name')
-	async removePassword(@Param('name') chatRoomName: string)
+	async removePassword(@Param('name') chatRoomName: string, @GetUser('id') userId: number)
 	{
-		await this.chatRoomService.removePassword(chatRoomName);
+		await this.chatRoomService.removePassword(chatRoomName, userId);
 	}
 
 	@Patch('changeAccessibility/:name')
