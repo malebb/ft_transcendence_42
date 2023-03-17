@@ -156,12 +156,21 @@ export default function Canvas()
 				draw.current!.outGameBackground(background);
 				draw.current!.opponentDisconnection();
 
-				let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
-				let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
-				let zones = [newGameZone, menuZone];
+				if (challengeId === undefined)
+				{
+					let menuZone = draw.current!.text("menu", size.current.width / 4, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+					let newGameZone = draw.current!.text("new game", size.current.width / 1.3, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+					let zones = [newGameZone, menuZone];
 
-				addLink(newGameZone, matchmaking, zones, 0);
-				addLink(menuZone, menu, zones, 0);
+					addLink(newGameZone, matchmaking, zones, 0);
+					addLink(menuZone, menu, zones, 0);
+				}
+				else
+				{
+					let menuZone = draw.current!.text("menu", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
+					let zones = [menuZone];
+					addLink(menuZone, redirectAfterChallenge, zones, 0);
+				}
 			}
 		}
 
@@ -452,7 +461,8 @@ export default function Canvas()
 			}
 			catch (error: any)
 			{
-				console.log('error (init challenge) :', error);
+				if (error.response.status === 404)
+					redirectAfterChallenge();
 			}
 		}
 
@@ -680,26 +690,14 @@ export default function Canvas()
 			try
 			{
 				axiosInstance.current = await axiosToken();
-				let challenge: AxiosResponse = await axiosInstance.current!.get('/challenge/' + challengeId);
-
-				if (challenge.data === '')
-				{
-					setIsChallenger(false);
-					return ;
-				}
-				axiosInstance.current = await axiosToken();
-				let user: AxiosResponse = await axiosInstance.current!.get('/users/me');
-
-				if (user.data.id !== challenge.data.sender.id &&
-					user.data.id !== challenge.data.receiver.id)
-				{
-					setIsChallenger(false);
-					return ;
-				}
+				await axiosInstance.current!.get('/challenge/' + challengeId);
 			}
 			catch (error: any)
 			{
-				console.log('error (check challenger) :', error);
+				if (error.response.status === 404)
+					redirectAfterChallenge();
+				else
+					setIsChallenger(false);
 			}
 		}
 		else

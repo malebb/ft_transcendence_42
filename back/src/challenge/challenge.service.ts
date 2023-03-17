@@ -85,8 +85,10 @@ export class ChallengeService {
 				}
 			}
 		});
-		if (challenge && (challenge.sender.id === userId ||
-						  challenge.receiver.id === userId))
+		if (!challenge)
+			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+		if (challenge.sender.id === userId ||
+		  challenge.receiver.id === userId)
 			return (challenge);
 		else
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
