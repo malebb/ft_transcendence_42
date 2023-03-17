@@ -224,7 +224,7 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (!this.isMember(room.members, userId) && 
+		if (room && !this.isMember(room.members, userId) && 
 			(room.accessibility === 'PUBLIC'
 			 || (chatRoom.password && chatRoom.password.length &&
 			await argon2.verify(room.password, chatRoom.password))))
@@ -270,7 +270,7 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (this.isOwner(room.owner, userId) &&
+		if (room && this.isOwner(room.owner, userId) &&
 		   (/^[0-9]*$/).test(password) && password.length === 4)
 		{
 			await this.prisma.chatRoom.update({
@@ -294,7 +294,7 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (this.isOwner(room.owner, userId) &&
+		if (room && this.isOwner(room.owner, userId) &&
 			room.password.length)
 		{
 			await this.prisma.chatRoom.update({
@@ -345,7 +345,7 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (this.isOwner(room.owner, authorId) &&
+		if (room && this.isOwner(room.owner, authorId) &&
 		   	this.isMember(room.members, userId))
 		{
 			await this.prisma.chatRoom.update({
@@ -375,8 +375,9 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (this.isOwner(room.owner, authorId) &&
-		   	!this.isAdmin(room.admins, userId))
+		if (room && this.isOwner(room.owner, authorId) &&
+		   	!this.isAdmin(room.admins, userId) &&
+		   this.isMember(room.members, userId))
 		{
 			await this.prisma.chatRoom.update({
 				where: {
@@ -399,7 +400,7 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (this.isOwner(room.owner, authorId) &&
+		if (room && this.isOwner(room.owner, authorId) &&
 		   	this.isAdmin(room.admins, userId))
 		{
 			await this.prisma.chatRoom.update({
@@ -419,7 +420,7 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (this.isMember(room.members, userId))
+		if (room && this.isMember(room.members, userId))
 		{
 			const room = await this.prisma.chatRoom.findUnique({
 				where: {
@@ -455,7 +456,7 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (this.isAdmin(room.admins, authorId) &&
+		if (room && this.isAdmin(room.admins, authorId) &&
 			this.isMember(room.members, penalty.targetId) &&
 		   !this.isOwner(room.owner, penalty.targetId) &&
 		   PenaltyTimes.includes(penalty.durationInMin))
@@ -480,8 +481,8 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (this.isMember(room.members, userId) && 
-		   !this.isOwner(room.owner, userId))
+		if (room && this.isMember(room.members, userId) &&
+			!this.isOwner(room.owner, userId))
 		{
 			this.removeMember(chatRoomName, userId);
 		}
@@ -493,7 +494,7 @@ export class ChatRoomService
 	{
 		const room = await this.getChatRoom(chatRoomName);
 
-		if (this.isAdmin(room.admins, authorId) &&
+		if (room && this.isAdmin(room.admins, authorId) &&
 		   this.isMember(room.members, userId) &&
 		   !this.isOwner(room.owner, userId))
 		{

@@ -246,6 +246,7 @@ const ChatRoomBase = () => {
 			const user = await axiosInstance.current.get('/users/me');
 			axiosInstance.current = await axiosToken();
 			const userMuted: AxiosResponse = await axiosInstance.current.get('/chatRoom/mutedMembers/' + roomName);
+
 			setOwner(room.data.owner);
 			setAdmins(room.data.admins);
 			setMembers(room.data.members);
