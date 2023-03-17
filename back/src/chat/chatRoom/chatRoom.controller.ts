@@ -12,7 +12,8 @@ class ChatRoomController
 	constructor(private chatRoomService: ChatRoomService) {}
 
 	@Post('')
-	async createRoom(@Body() chatRoom: ChatRoomDto, @GetUser('id') creatorId: number)
+	async createRoom(@Body() chatRoom: ChatRoomDto,
+					 @GetUser('id') creatorId: number)
 	{
 		return (await this.chatRoomService.createChatRoom(chatRoom, creatorId));
 	}
@@ -30,20 +31,15 @@ class ChatRoomController
 	}
 
 	@Get('publicInfos/:name')
-	async getPublicInfosFromChat(@Param('name') name: string)
+	async getPublicInfosFromChat(@Param('name') name: string,
+								 @GetUser('id') userId: number)
 	{
-		return (await this.chatRoomService.getPublicInfosFromChat(name));
-	}
-
-	@Get(':name')
-	async getChatRoom(@Param('name') name: string)
-	{
-		return (await this.chatRoomService.getChatRoom(name));
+		return (await this.chatRoomService.getPublicInfosFromChat(name, userId));
 	}
 
 	@Get('member/:name')
-	async getMember(@GetUser('id') userId: number,
-					@Param('name') name: string)
+	async getMember(@Param('name') name: string,
+					@GetUser('id') userId: number)
 	{
 		return (await this.chatRoomService.getMember(userId, name));
 	}
@@ -58,9 +54,10 @@ class ChatRoomController
 
 	@Post('checkPassword/:name')
 	async checkPassword(@Param('name') chatRoomName: string,
-						@Body() chatRoomDto: ChatRoomDto)
+						@Body() chatRoomDto: ChatRoomDto,
+					   @GetUser('id') userId)
 	{
-		await this.chatRoomService.checkPassword(chatRoomName, chatRoomDto.password);
+		await this.chatRoomService.checkPassword(chatRoomName, chatRoomDto.password, userId);
 	}
 
 	@Patch('makeOwner/:name')
@@ -117,14 +114,7 @@ class ChatRoomController
 		await this.chatRoomService.leaveRoom(chatRoomName, userId);
 	}
 
-	@Get('userPenalties/:name')
-	async getUserPenalties(@Param('name') chatRoomName: string,
-						   @GetUser('id') userId: number)
-	{
-		return (await this.chatRoomService.getUserPenalties(chatRoomName, userId));
-	}
-
-	@Get('mutedUsers/:name')
+	@Get('mutedMembers/:name')
 	async getMuted(@Param('name') chatRoomName: string,
 				  @GetUser('id') userId: number)
 	{

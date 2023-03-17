@@ -1,11 +1,11 @@
 import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
+import { PenaltyTimes, Accessibility, User } from 'ft_transcendence';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ChatRoom, PenaltyTimes, Accessibility, User } from 'ft_transcendence';
-import * as argon2 from 'argon2';
 import { PenaltyDto } from '../penalty/Penalty';
 import PenaltyService from '../penalty/penalty.service';
 import { Penalty, PenaltyType } from '@prisma/client';
 import { ChatRoomDto } from './ChatRoomDto';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class ChatRoomService
@@ -14,7 +14,6 @@ export class ChatRoomService
 			   	private readonly penaltyService: PenaltyService) {}
 
 	// checks
-	
 	isOwner(owner: User, userId: number): boolean
 	{
 		return (owner.id == userId);
@@ -113,8 +112,10 @@ export class ChatRoomService
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
-	async checkPassword(chatRoomName: string, password: string)
+	async checkPassword(chatRoomName: string, password: string, userId: number)
 	{
+		if (!userId)
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		const room = await this.getChatRoom(chatRoomName);
 
 		if (!((/^[0-9]*$/).test(password) && password.length === 4
@@ -147,25 +148,24 @@ export class ChatRoomService
 		return (chatRoom);
 	}
 
-	async getPublicInfosFromChat(name: string)
+	async getPublicInfosFromChat(name: string, userId: number)
 	{
+		if (!userId)
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		const chatRoom = await this.prisma.chatRoom.findUnique({
 			where: {
 				name: name,
 			},
 			select: {
 				accessibility: true,
-				penalties: {
-					select: {
-						author: true,
-						target: true,
-					}
-				},
 				name: true,
 				owner: {
-					select: {username: true}
+					select: {id: true, username: true}
 				},
 				members: {
+					select: {id: true, username: true}
+				},
+				admins: {
 					select: {id: true}
 				}
 			}
@@ -252,32 +252,18 @@ export class ChatRoomService
 			where: {
 				name: name
 			},
-			include: {
+			select: {
 				members: {
 					where: {
 						id: userId
+					},
+					select: {
+						id: true,
 					}
 				}
 			}
 		})
 		return (chatRoom.members);
-	}
-
-	async getMemberFromRoom(userId: number, name: string)
-	{
-		const chatRoom = await this.prisma.chatRoom.findUnique({
-			where: {
-				name: name
-			},
-			include: {
-				members: {
-					where: {
-						id: userId
-					}
-				}
-			}
-		})
-		return (chatRoom);
 	}
 
 	async updateRoomPassword(chatRoomName: string, password: string, userId: number)
@@ -429,23 +415,6 @@ export class ChatRoomService
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
-	async getUserPenalties(chatRoomName: string, userId: number)
-	{
-		const penalties = this.prisma.chatRoom.findUnique({
-			where: {
-				name: chatRoomName
-			},
-			select: {
-				penalties: {
-					where : {
-						targetId: userId
-					}
-				}
-			}
-		});
-		return (penalties);
-	}
-
 	async getUsersMuted(chatRoomName: string, userId: number)
 	{
 		const room = await this.getChatRoom(chatRoomName);
@@ -461,13 +430,17 @@ export class ChatRoomService
 						where: {
 							type: 'MUTE'
 						},
-						include: {
-							target: true
+						select: {
+							target: {
+								select: {
+									id: true
+								}
+							}
 						}
 					}
 				}
 			})
-			const usersMuted: User[] = [];
+			const usersMuted = [];
 			for (let i = 0; i < room.penalties.length; ++i)
 			{
 				usersMuted.push(room.penalties[i].target);
