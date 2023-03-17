@@ -101,7 +101,7 @@ export class PongService {
 				this.removeFromQueue(player.id);
 				try
 				{
-					this.challengeService.deleteChallenge(challengeId);
+					this.challengeService.deleteChallenge(challengeId, this.challengers[i].challenger.userId);
 				}
 				catch (error: any)
 				{
@@ -123,7 +123,7 @@ export class PongService {
 			server.emit(player.id + ':alreadyInResearch');
 			try
 			{
-				this.challengeService.deleteChallenge(challengeId);
+				this.challengeService.deleteChallenge(challengeId, playerData.userId);
 				//TODO change invitation message status from open canceled 
 			}
 			catch (error: any)

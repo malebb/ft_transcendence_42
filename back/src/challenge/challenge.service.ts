@@ -53,28 +53,43 @@ export class ChallengeService {
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
-	async deleteChallenge(challengeId: number)
+	async deleteChallenge(challengeId: number, userId: number)
 	{
-		await this.prisma.challenge.delete(
+		const challenge = await this.getChallenge(challengeId, userId);
+
+		if (challenge && userId === challenge.sender.id)
 		{
-			where : {
-				id: challengeId
-			}
-		});
+			await this.prisma.challenge.delete(
+			{
+				where : {
+					id: challengeId
+				}
+			});
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
-	async getChallenge(challengeId: number)
+	async getChallenge(challengeId: number, userId: number)
 	{
 		const challenge = await this.prisma.challenge.findUnique({
 			where: {
 				id: challengeId
 			},
 			include: {
-				sender: true,
-				receiver: true
+				sender: {
+					select: {id: true, username: true}
+				},
+				receiver: {
+					select: {id: true, username: true}
+				}
 			}
 		});
-		return (challenge);
+		if (challenge && (challenge.sender.id === userId ||
+						  challenge.receiver.id === userId))
+			return (challenge);
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
 	async getChallenges()
