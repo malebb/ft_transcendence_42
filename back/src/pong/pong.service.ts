@@ -204,7 +204,7 @@ export class PongService {
 				rightPlayer: new Player(this.sizeCanvas.width - this.sizeCanvas.width / 30
 					- (this.sizeCanvas.width / 60),
 					this.sizeCanvas.height -
-					(this.sizeCanvas.height / 23 + (this.sizeCanvas.height / 6)),
+					(this.sizeCanvas.height / 23 + (this.sizeCanvas.height / 7)),
 					this.sizeCanvas.width / 60,
 					this.sizeCanvas.height / 7,
 					5,
@@ -350,8 +350,8 @@ export class PongService {
 		await this.statsService.addDefeat(loser.id);
 		await this.statsService.addXp(winner.id, 500);
 
-		let winnerStats: Stats = await this.statsService.getStats(winner.id);
-		let loserStats: Stats = await this.statsService.getStats(loser.id);
+		let winnerStats: Stats = await this.statsService.getStats(winner.id, winner.id);
+		let loserStats: Stats = await this.statsService.getStats(loser.id, loser.id);
 
 		let newWinnerLevel = 0;
 

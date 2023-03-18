@@ -291,7 +291,7 @@ const UserProfile = () => {
 					setIsFriend(true);
 				friendList.data.forEach((friend: FriendType) => 
 				{
-					if (friend.username === profileUser.data.username)
+					if (friend.id === profileUser.data.id)
 						setIsFriend(true);
 				});
 			}

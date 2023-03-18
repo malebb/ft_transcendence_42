@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserService } from '../user/user.service';
+//import { Friend } from '@prisma/client';
+import { User } from 'ft_transcendence';
 
 @Injectable()
 export class StatsService {
-    constructor(private prisma: PrismaService)
+    constructor(private prisma: PrismaService,
+			   private readonly userService: UserService)
     {
 	}
 
@@ -168,17 +172,48 @@ export class StatsService {
 		})
 	}
 
-	async getStats(id: number)
+	isFriend(friends: User[], userId: number): boolean
 	{
-		const getUser = await this.prisma.user.findUnique(
+		let isFriend = false;
+		friends.forEach((friend: User) => {
+			if (friend.id == userId)
+				isFriend = true;
+		});
+		return (isFriend);
+	}
+
+	async getStats(userStatsId: number, userId: number)
+	{
+		const friends = await this.userService.getFriends(userId);
+
+		if (userStatsId === userId ||
+			this.isFriend(friends, userStatsId))
 		{
-  			where: {
-				id: id,
-  			},
-			select: {
-				stats: true
-			}
-  		});
-		return (getUser.stats);
+			let userFriend = await this.prisma.user.findUnique(
+			{
+	  			where: {
+					id: userStatsId,
+	  			},
+				select: {
+					stats: true
+				}
+  			});
+			return (userFriend.stats);
+		}
+		else
+		{
+			let user = await this.prisma.user.findUnique(
+			{
+	  			where: {
+					id: userStatsId,
+	  			},
+				select: {
+					stats: {
+						select: {defeat: true, victory: true, xp: true, level: true}
+					}
+				}
+  			});
+			return (user.stats);
+		}
 	}
 }
