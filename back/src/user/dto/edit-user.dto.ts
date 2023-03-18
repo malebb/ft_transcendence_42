@@ -12,12 +12,4 @@ export class EditUserDto {
     @IsString()
     @IsOptional()
     lastName?: string
-
-    @IsString()
-    @IsOptional()
-    map?: string
-
-    @IsString()
-    @IsOptional()
-    skin?: string
 }
