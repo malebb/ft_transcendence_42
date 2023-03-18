@@ -68,11 +68,9 @@ const History = () =>
 			try
 			{
 				axiosInstance.current = await axiosToken();
-				const user: AxiosResponse = (await axiosInstance.current.get('users/me'));
+				const gamePlayed: AxiosResponse = await axiosInstance.current.get('history/gamePlayed');
 				axiosInstance.current = await axiosToken();
-				const gamePlayed: AxiosResponse = await axiosInstance.current.get('history/gamePlayed/' + user.data.id);
-				axiosInstance.current = await axiosToken();
-				const achievementDone: AxiosResponse = await axiosInstance.current.get('history/achievementsDone/' + user.data.id);
+				const achievementDone: AxiosResponse = await axiosInstance.current.get('history/achievementsDone');
 				for (let i = 0; i < gamePlayed.data.gamePlayed.length; ++i)
 				{
 					historyElem.current.push({type: "game", value: gamePlayed.data.gamePlayed[i]});
