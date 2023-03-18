@@ -289,9 +289,9 @@ const UserProfile = () => {
         await axiosInstance.current.get("/users/profile/" + userId)
       ).data;
       myProfile = (await axiosInstance.current.get("/users/me")).data;
-      if (profileUser.username === myProfile.username) setIsFriend(true);
+      if (profileUser.id === myProfile.id) setIsFriend(true);
       friendList.forEach((friend) => {
-        if (friend.username === profileUser.username) setIsFriend(true);
+        if (friend.id === profileUser.id) setIsFriend(true);
       });
     };
     checkIfFriend();

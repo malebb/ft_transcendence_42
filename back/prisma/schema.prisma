@@ -90,6 +90,7 @@ enum Accessibility {
   PUBLIC
   PRIVATE
   PROTECTED
+  PRIVATE_PROTECTED
 }
 
 model Penalty {

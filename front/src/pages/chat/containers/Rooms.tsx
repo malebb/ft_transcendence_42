@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import InputButton from "../inputs/InputButton";
-import { accessibilities } from "../utils/RoomAccessibilities";
+import { accessibilitiesForCreation } from "../utils/RoomAccessibilities";
 import { AxiosInstance, AxiosResponse } from 'axios';
 import { axiosToken } from '../../../api/axios';
 import { ChatRoom, Accessibility } from 'ft_transcendence';
@@ -92,7 +92,8 @@ function Rooms()
 		{
 			if (chatRooms.data)
 			{
-				setNameInfo("There is already a " + name + " room");
+				setNameInfo("There is already a '" + name + "' room");
+				document.getElementById('nameInfo')!.style.color = 'red';
 				return (false);
 			}
 			return (true);
@@ -108,29 +109,20 @@ function Rooms()
 				//@ts-ignore
    			 	const form = new FormData(event.target);
  				const roomName = form.get("roomName")!.toString().trim();
-				let user: AxiosResponse;
-	
 				if (!checkPassword())
 					return ;
-				axiosInstance.current = await axiosToken();
 				if (!checkName(roomName))
 					return ;
-				if (!isNameAvailable(roomName, await axiosInstance.current!.get('/chatRoom/' + roomName)))
+				axiosInstance.current = await axiosToken();
+				if (!isNameAvailable(roomName, await axiosInstance.current!.get('/chatRoom/publicInfos/' + roomName)))
 					return ;
 				axiosInstance.current = await axiosToken();
-				user = await axiosInstance.current!.get('/users/me');
-				let newRoom: ChatRoom =
+				await axiosInstance.current!.post('/chatRoom/',
 				{
-					owner: {...user.data},
 					name: form.get("roomName")!.toString().trim(),
 					accessibility: Accessibility[roomAccessibility as keyof typeof Accessibility],
 					password: roomAccessibility === 'PROTECTED' ? password : ''
-				};
-				axiosInstance.current = await axiosToken();
-				await axiosInstance.current!.post('/chatRoom/',
-					newRoom,
-					{headers: {'Content-Type': 'application/json'},
-				});
+				}, {headers: {'Content-Type': 'application/json'}});
 
 				setName('');
 				setPassword('');
@@ -164,7 +156,7 @@ function Rooms()
 			<form id="accessibility" onSubmit={handleAccessibilityForm}>
 				<ul id="checkboxes">
 					{
-						accessibilities.map((accessibility: string, index: number) =>
+						accessibilitiesForCreation.map((accessibility: string, index: number) =>
 						{
 							return (
 									<li key={index}>
@@ -228,19 +220,20 @@ function Rooms()
 			);
 		}
 
-		const accessibilityLogo = (accessibility: Accessibility, password: string) =>
+		const accessibilityLogo = (accessibility: Accessibility) =>
 		{
 			const logoWidth = 25;
 
 			switch (accessibility)
 			{
 				case 'PUBLIC':
-					return (<img src="http://localhost:3000/images/public.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+					return (<img className="lock" src="http://localhost:3000/images/public.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 				case 'PRIVATE':
-					return (password.length ? <img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>
-					: <img src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+					return (<img className="lock" src="http://localhost:3000/images/private.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+				case 'PRIVATE_PROTECTED':
+					return (<img className="lock" src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 				case 'PROTECTED':
-					return (<img src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
+					return (<img className="lock" src="http://localhost:3000/images/protected.png" width={logoWidth} height={logoWidth} alt={accessibility}/>);
 			}
 		}
 
@@ -251,16 +244,11 @@ function Rooms()
 
 		const joinRoom = async (roomName: string) =>
 		{
-			try {
+			try
+			{
 				axiosInstance.current = await axiosToken();
-				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
-				axiosInstance.current = await axiosToken();
-				const user: AxiosResponse = await axiosInstance.current.get('/users/me');
-					await axiosInstance.current.post('/chatRoom/' + roomName,
-						{userId: user.data.id},
-						{headers: {'Content-Type': 'application/json'},
-					});
-					enterRoom(roomName);
+				await axiosInstance.current.patch('/chatRoom/joinRoom/' + roomName, "password=" + roomPassword);
+				enterRoom(roomName);
 			}
 			catch (error: any)
 			{
@@ -280,24 +268,21 @@ function Rooms()
 			try
 			{
 				axiosInstance.current = await axiosToken();
-				const room: AxiosResponse = await axiosInstance.current.get('chatRoom/' + chatRoom.name);
-
-				if (room.data.password.length)
+				const room: AxiosResponse = await axiosInstance.current.get('chatRoom/publicInfos/' + chatRoom.name);
+				if (room.data.accessibility === 'PROTECTED' ||
+				room.data.accessibility === 'PRIVATE_PROTECTED')
 				{
 					axiosInstance.current = await axiosToken();
 					await axiosInstance.current.post('/chatRoom/checkPassword/' + chatRoom.name,
-						{password: roomPassword}, { headers: {"Content-Type": "application/json"}});
+					{password: roomPassword}, { headers: {"Content-Type": "application/json"}});
 					joinRoom(chatRoom.name);
 				}
-				else
+				else if (room.data.accessibility === 'PUBLIC')
+					joinRoom(chatRoom.name);
+				else if (room.data.accessibility === 'PRIVATE')
 				{
-					if (room.data.accessibility === 'PUBLIC')
-						joinRoom(chatRoom.name);
-					else if (room.data.accessibility === 'PRIVATE')
-					{
-						setInfoPassword('password removed');
-						setRoomPassword('');
-					}
+					setInfoPassword('password removed');
+					setRoomPassword('');
 				}
 			}
 			catch (error: any)
@@ -311,6 +296,7 @@ function Rooms()
 					console.log('error (check password) :', error);
 			}
 		}
+			
 
 		const displayNotJoinedChatRooms = () =>
 		{
@@ -323,8 +309,7 @@ function Rooms()
 					if (bannedFromSelected)
 						return (<p id="banned">You are banned ({timeBannedRemain})</p>);
 					else if (accessibilityAfterSelect.current === 'PROTECTED' ||
-					(accessibilityAfterSelect.current === 'PRIVATE' &&
-					chatRoom.password !== ''))
+					accessibilityAfterSelect.current === 'PRIVATE_PROTECTED')
 					{
 							return (<div>
 									<form onSubmit={(e) => checkPassword(e, chatRoom)}>
@@ -346,7 +331,7 @@ function Rooms()
 				}
 				return (	<>
 								<p className="owner">Owner : {trimUsername(chatRoom.owner.username, 15)}</p>
-								{accessibilityLogo(chatRoom.accessibility, chatRoom.password)}
+								{accessibilityLogo(chatRoom.accessibility)}
 							</>
 						);
 			}
@@ -386,32 +371,30 @@ function Rooms()
 				try
 				{
 					axiosInstance.current = await axiosToken();
-					const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + newChatRoomSelected);
+					const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/publicInfos/' + newChatRoomSelected);
 					accessibilityAfterSelect.current = room.data.accessibility;
-					const penalties: Penalty[] = room.data.penalties;
-					axiosInstance.current = await axiosToken();
-					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
+					const ban: AxiosResponse = await axiosInstance.current.get('/chatRoom/myBan/' + newChatRoomSelected);
 					let banned = false;
-					for(const penalty of penalties)
+					if (ban.data.penalties.length)
 					{
-						if (penalty.target.id === 
-						user.data.id && penalty.type === 'BAN')
+						try
 						{
-							const penaltyTimeInMin = penalty.durationInMin;
-							const startPenaltyTime = new Date(penalty.date);
-							const endPenaltyTime = new Date(startPenaltyTime.getTime() + penaltyTimeInMin * 60000)
-							const currentTime = new Date(Date.now());
-							if (endPenaltyTime > currentTime)
+							await axiosInstance.current.delete('/penalty/' + ban.data.penalties[0].id);
+							setBannedFromSelected(false);
+							banned = false;
+						}
+						catch (error: any)
+						{
+							if (error.response.status === 403)
 							{
+								const penaltyTimeInMin = ban.data.penalties[0].durationInMin;
+								const startPenaltyTime = new Date(ban.data.penalties[0].date);
+								const endPenaltyTime = new Date(startPenaltyTime.getTime() + penaltyTimeInMin * 60000)
+								const currentTime = new Date(Date.now());
+
 								formatRemainTime(currentTime, endPenaltyTime);
 								banned = true;
 								setBannedFromSelected(true);
-							}
-							else
-							{
-								setBannedFromSelected(false);
-								axiosInstance.current = await axiosToken();
-								axiosInstance.current.delete('/penalty/' + penalty.id);
 							}
 						}
 					}
@@ -437,7 +420,7 @@ function Rooms()
 					chatRoomsList.map((chatRoom) => {
 						return (
 							<li className="chatRoom" key={chatRoom.name} onClick={() => updateSelectChatRoom(chatRoom.name)}>
-								<h3 className="roomTitle">{chatRoom.name}</h3>
+								<h3 className="roomTitleNotJoined">{chatRoom.name}</h3>
 						<div className="roomInfo">
 								{printRoomInfo(chatRoom)}
 						</div>
@@ -459,9 +442,10 @@ function Rooms()
 				{
 					chatRoomsList.map((chatRoom) => {
 						return (
-							<li className="chatRoom" key={chatRoom.name} onClick={() => enterRoom(chatRoom.name)}>
-								<h3 className="roomTitle">{chatRoom.name}</h3>
-								<p>Owner: {trimUsername(chatRoom.owner.username, 15)}</p>
+							<li id="joinedChatRoom" className="chatRoom" key={chatRoom.name} onClick={() => enterRoom(chatRoom.name)}>
+								<h3 id="joinedTitle" className="roomTitle">{chatRoom.name}</h3>
+									<p className="joinedOwner">Owner: {trimUsername(chatRoom.owner.username, 15)} </p>
+									<p className="countMembers">{chatRoom.members.length} member{chatRoom.members.length > 1 ? 's' : '' }</p>
 							</li>
 						);
 					})
@@ -489,20 +473,17 @@ function Rooms()
 				try
 				{
 					let chatRooms: AxiosResponse;
-					axiosInstance.current = await axiosToken();
-					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
 					if (chatRoomFilter === 'JOINED')
 					{
 						axiosInstance.current = await axiosToken();
-						chatRooms = await axiosInstance.current!.get('/chatRoom/joined/' + user.data.id);
+						chatRooms = await axiosInstance.current!.get('/chatRoom/joined/');
 					}
 					else
 					{
 						axiosInstance.current = await axiosToken();
-						chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined/' + user.data.id);
+						chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined/');
 					}
-					setChatRoomsList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
-					(a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)));
+					setChatRoomsList(chatRooms.data);
 				}
 				catch (error: any)
 				{

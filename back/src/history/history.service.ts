@@ -27,7 +27,8 @@ export class HistoryService {
 		})
 	}
 
-	async getGamePlayed(id: number) {
+	async getGamePlayed(id: number)
+	{
 		const gamesPlayed = await this.prisma.user.findUnique({
 			where: {
 				id: id
@@ -35,8 +36,12 @@ export class HistoryService {
 			select: {
 				gamePlayed: {
 					include: {
-						leftPlayer: true,
-						rightPlayer: true,
+						leftPlayer: {
+							select: {id: true, username: true}
+						},
+						rightPlayer: {
+							select: {id: true, username: true}
+						}
 					}
 				}
 			}
@@ -58,7 +63,8 @@ export class HistoryService {
 		})
 	}
 
-	async getAchievementsDone(id: number) {
+	async getAchievementsDone(id: number)
+	{
 		const achievementsDone = await this.prisma.user.findUnique({
 			where: {
 				id: id

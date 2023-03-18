@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { Ball, Player, Size, Room, PlayerData } from 'ft_transcendence';
 import { Socket, Server } from 'socket.io';
 import { GameService } from '../game/game.service';
@@ -10,7 +10,8 @@ import { levels } from './levels';
 import { winSteps, levelSteps, modeExplorer,
 		fashionWeek, traveler, failureKnowledge } from 'ft_transcendence';
 import { Stats } from './Stats';
-import { Customisation } from './Customisation';
+import { Customisation, Skins, Maps } from './Customisation';
+import { PrismaService } from '../prisma/prisma.service';
 
 interface Challenger
 {
@@ -26,7 +27,8 @@ export class PongService {
 			   	private readonly statsService: StatsService,
 			   	private readonly historyService: HistoryService,
 			   	private readonly userService: UserService,
-			   	private readonly challengeService: ChallengeService) {}
+			   	private readonly challengeService: ChallengeService,
+			   	private readonly prisma: PrismaService) {}
 
 	queue: 			PlayerData[] 	= [];
 	powerUpQueue:	PlayerData[] 	= [];
@@ -35,9 +37,29 @@ export class PongService {
 	sizeCanvas: 	Size			= { width: 700, height: 450 };
 	scoreToWin:		number			= 11;
 
-	addToQueue(player: PlayerData, queue: PlayerData[])
+	checkIfAlreadyInQueue(player: PlayerData) : boolean
 	{
+		for (let i = 0; i < this.queue.length; ++i) {
+			if (this.queue[i].userId == player.userId)
+				return (true);
+		}
+		for (let i = 0; i < this.powerUpQueue.length; ++i) {
+			if (this.powerUpQueue[i].userId == player.userId)
+				return (true);
+		}
+		for (let i = 0; i < this.challengers.length; ++i) {
+			if (this.challengers[i].challenger.userId == player.userId)
+				return (true);
+		}
+		return (false);
+	}
+
+	addToQueue(player: PlayerData, queue: PlayerData[]) : boolean
+	{
+		if (this.checkIfAlreadyInQueue(player))
+			return (false);
 		queue.push(player);
+		return (true);
 	}
 
 	removeFromQueue(playerId: string)
@@ -81,7 +103,7 @@ export class PongService {
 				this.removeFromQueue(player.id);
 				try
 				{
-					this.challengeService.deleteChallenge(challengeId);
+					this.challengeService.deleteChallenge(challengeId, this.challengers[i].challenger.userId);
 				}
 				catch (error: any)
 				{
@@ -98,21 +120,37 @@ export class PongService {
 		let challengerResearch = {roomId: null, opponent: null};
 
 		playerData.id = player.id;
-		challengerResearch = this.checkChallengers(challengeId, player)
-		if (challengerResearch.roomId.length)
+		if (this.checkIfAlreadyInQueue(playerData))
 		{
-			let room: Room;
-			room = this.initRoom(challengerResearch.roomId, challengerResearch.opponent, playerData);
-			this.rooms[room.id] = room;
-			server.emit(challengerResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
-			server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
-			this.runRoom(room.id, server);
+			server.emit(player.id + ':alreadyInResearch');
+			try
+			{
+				this.challengeService.deleteChallenge(challengeId, playerData.userId);
+				//TODO change invitation message status from open canceled 
+			}
+			catch (error: any)
+			{
+				console.log('error (delete challenge) :', error);
+			}
 		}
 		else
-			this.challengers.push(challenger);
-		player.on("disconnecting", () => {
-			this.stopRoom(player);
-		});
+		{
+			challengerResearch = this.checkChallengers(challengeId, player)
+			if (challengerResearch.roomId.length)
+			{
+				let room: Room;
+				room = this.initRoom(challengerResearch.roomId, challengerResearch.opponent, playerData);
+				this.rooms[room.id] = room;
+				server.emit(challengerResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
+				server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
+				this.runRoom(room.id, server);
+			}
+			else
+				this.challengers.push(challenger);
+			player.on("disconnecting", () => {
+				this.stopRoom(player);
+			});
+		}
 	}
 
 	checkQueue(player: PlayerData, queue: PlayerData[])
@@ -168,7 +206,7 @@ export class PongService {
 				rightPlayer: new Player(this.sizeCanvas.width - this.sizeCanvas.width / 30
 					- (this.sizeCanvas.width / 60),
 					this.sizeCanvas.height -
-					(this.sizeCanvas.height / 23 + (this.sizeCanvas.height / 6)),
+					(this.sizeCanvas.height / 23 + (this.sizeCanvas.height / 7)),
 					this.sizeCanvas.width / 60,
 					this.sizeCanvas.height / 7,
 					5,
@@ -193,18 +231,22 @@ export class PongService {
 		let queue: PlayerData[] = playerData.powerUpMode ? this.powerUpQueue : this.queue;
 
 		playerData.id = player.id;
-		this.addToQueue(playerData, queue);
-		queueResearch = this.checkQueue(playerData, queue);
-		if (queueResearch.roomId.length) {
-			room = this.initRoom(queueResearch.roomId, queueResearch.opponent, playerData);
-			this.rooms[room.id] = room;
-			server.emit(queueResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
-			server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
-			this.runRoom(room.id, server);
+		if (!this.addToQueue(playerData, queue))
+			server.emit(player.id + ':alreadyInResearch');
+		else
+		{
+			queueResearch = this.checkQueue(playerData, queue);
+			if (queueResearch.roomId.length) {
+				room = this.initRoom(queueResearch.roomId, queueResearch.opponent, playerData);
+				this.rooms[room.id] = room;
+				server.emit(queueResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
+				server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
+				this.runRoom(room.id, server);
+			}
+			player.on("disconnecting", () => {
+				this.stopRoom(player);
+			});
 		}
-		player.on("disconnecting", () => {
-			this.stopRoom(player);
-		});
 	}
 
 	stopRoom(player: Socket)
@@ -310,8 +352,8 @@ export class PongService {
 		await this.statsService.addDefeat(loser.id);
 		await this.statsService.addXp(winner.id, 500);
 
-		let winnerStats: Stats = await this.statsService.getStats(winner.id);
-		let loserStats: Stats = await this.statsService.getStats(loser.id);
+		let winnerStats: Stats = await this.statsService.getStats(winner.id, winner.id);
+		let loserStats: Stats = await this.statsService.getStats(loser.id, loser.id);
 
 		let newWinnerLevel = 0;
 
@@ -440,5 +482,39 @@ export class PongService {
 			this.rooms[roomId].leftPlayer.speedPowerUp = false;
 		else
 			this.rooms[roomId].rightPlayer.speedPowerUp = false;
+	}
+
+	async updateSkin(userId: number, skin: string)
+	{
+		if (Skins.includes(skin))
+		{
+			await this.prisma.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					skin: skin
+				}
+			});
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+	}
+
+	async updateMap(userId: number, map: string)
+	{
+		if (Maps.includes(map))
+		{
+			await this.prisma.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					map: map
+				}
+			});
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 }

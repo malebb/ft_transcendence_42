@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { StatsService } from './stats.service';
 import StatsController from './stats.controller';
-import { HttpModule } from '@nestjs/axios';
+import { UserModule } from '../user/user.module';
 
 @Module({
-	imports: [HttpModule],
+	imports: [UserModule],
 	controllers: [StatsController],
 	providers: [StatsService],
 	exports: [StatsService]

@@ -18,7 +18,8 @@
   }
   .sendInput button {
 	height: 100%;
-	padding: 8px 16px;
+	padding: 5px;
+	padding-bottom: 20px;
 	border: 0;
 	background-color: #413368;
 	font-weight: 700;

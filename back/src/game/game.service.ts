@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class GameService {
+export class GameService
+{
     constructor(private prisma: PrismaService)
     {
 	}
@@ -32,8 +33,12 @@ export class GameService {
 		return (await this.prisma.game.findMany(
 		{
 			include: {
-				leftPlayer: true,
-				rightPlayer: true
+				leftPlayer: {
+					select: {id: true, username: true}
+				},
+				rightPlayer: {
+					select: {id: true, username: true}
+				},
 			}
 		}
 		));
@@ -41,7 +46,7 @@ export class GameService {
 
 	async removeGame(gameId: string)
 	{
-		const game = await this.prisma.game.delete(
+		await this.prisma.game.delete(
 		{
  			where: {
  				gameId: gameId,

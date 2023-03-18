@@ -104,7 +104,7 @@
 #creationPasswordInput
 {
 	position: relative;
-	width: 20px;
+	width: 25px;
 	margin-left: 10px;
 	border: 1px black solid;
 	outline: none;
@@ -160,8 +160,8 @@ select:focus
 .chatRoom
 {
 	position: static;;
-   width: 250px;
-   height: 100px;
+   width: 280px;
+	height: 110px;
    background-color: var(--tertiary);
    border: 1px, solid;
    border-radius: 5px;
@@ -172,7 +172,27 @@ select:focus
 
 }
 
-.roomTitle
+#joinedChatRoom
+{
+	height: 130px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	padding-top: 10px;
+	padding-bottom: 5px;
+}
+
+#joinedTitle, .joinedOwner, .countMembers
+{
+	margin: 5px;
+}
+
+.joinedOwner
+{
+	margin-top: 7px;
+}
+
+.roomTitleNotJoined
 {
 	position: relative;
 	top: 10px;
@@ -180,6 +200,7 @@ select:focus
 
 .roomInfo
 {
+	margin-top: 25px;
 	height: 25px;
 	display: flex;
 	justify-content: space-around;
@@ -188,6 +209,12 @@ select:focus
 .owner
 {
 	margin: 0px;
+	width: 180px;
+}
+
+.lock
+{
+	margin-right: 8px;
 }
 
 #joinRoomTitle, #createRoomTitle
@@ -208,7 +235,7 @@ select:focus
 .joinPasswordInput
 {
 	position: relative;
-	width: 20px;
+	width: 25px;
 	border: 1px black solid;
 	outline: none;
 	margin-right: 10px;

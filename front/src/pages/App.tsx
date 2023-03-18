@@ -21,6 +21,7 @@ import { SnackbarProvider } from "notistack";
 import NotAuthRoutes from "./privateRoute/NotAuthRoutes";
 import NotFound from "./error/NotFound";
 import Logout from "./logout/Logout";
+import Challenge from './challenge/Challenge';
 
 /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
@@ -43,6 +44,7 @@ function App() {
             <Route path="/history" element={<History />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/games/:gameId?" element={<Games />} />
+            <Route path="/challenge/:challengeId?" element={<Challenge />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/chat/room/:roomName" element={<ChatRoomBase />} />
             <Route path="/2factivate" element={<SetTfa />} />

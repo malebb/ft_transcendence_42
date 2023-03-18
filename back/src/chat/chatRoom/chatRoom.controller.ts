@@ -1,148 +1,138 @@
 import { Controller, Get, Param, Post, Body, Patch,
 ParseIntPipe} from '@nestjs/common';
-import { IsInt, IsString, IsOptional } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
 import { ChatRoomService } from './chatRoom.service';
-
 import { GetUser } from '../../auth/decorator';
+import { PenaltyDto } from '../penalty/Penalty';
+import { ChatRoomDto } from './ChatRoomDto';
 
-import { Accessibility } from 'ft_transcendence';
-
-import { ChatRoom } from 'ft_transcendence';
-
-class ChatRoomDto {
-	@IsInt()
-	@IsOptional()
-	@Type(() => Number)
-	userId?: number;
-
-	@IsString()
-	@IsOptional()
-	password?: string;
-
-	@IsOptional()
-	accessibility?: Accessibility;
-}
 
 @Controller('chatRoom')
 class ChatRoomController
 {
 	constructor(private chatRoomService: ChatRoomService) {}
 
-
-	@Get('')
-	async getAllRooms()
-	{
-		return (await this.chatRoomService.getAllRooms());
-	}
-
 	@Post('')
-	async createRoom(@Body() chatRoom: ChatRoom)
+	async createRoom(@Body() chatRoom: ChatRoomDto,
+					 @GetUser('id') creatorId: number)
 	{
-		return (await this.chatRoomService.createChatRoom(chatRoom));
+		return (await this.chatRoomService.createChatRoom(chatRoom, creatorId));
 	}
 
-	@Get('notJoined/:userId')
-	async getNotJoinedRooms(@Param('userId', ParseIntPipe) userId: number)
+	@Get('notJoined')
+	async getNotJoinedRooms(@GetUser('id') userId: number)
 	{
 		return (await this.chatRoomService.getNotJoinedRooms(userId));
 	}
 
-	@Get('joined/:userId')
-	async getJoinedRooms(@Param('userId', ParseIntPipe) userId: number)
+	@Get('joined')
+	async getJoinedRooms(@GetUser('id') userId: number)
 	{
 		return (await this.chatRoomService.getJoinedRooms(userId));
 	}
 
-	@Get(':name')
-	async getChatRoom(@Param('name') name: string)
+	@Get('publicInfos/:name')
+	async getPublicInfosFromChat(@Param('name') name: string,
+								 @GetUser('id') userId: number)
 	{
-		return (await this.chatRoomService.getChatRoom(name));
+		return (await this.chatRoomService.getPublicInfosFromChat(name, userId));
 	}
 
 	@Get('member/:name')
-	async getMember(@GetUser('id') userId: number, @Param('name') name: string)
+	async getMember(@Param('name') name: string,
+					@GetUser('id') userId: number)
 	{
 		return (await this.chatRoomService.getMember(userId, name));
 	}
 
-	@Get('member/:name/:id')
-	async getMemberById(@Param('name') roomName: string, @Param('id', ParseIntPipe) userId: number)
+	@Patch('joinRoom/:name')
+	async joinChatRoom(@Param('name') chatRoomName: string,
+					   @Body() chatRoom: ChatRoomDto,
+					   @GetUser('id') userId: number)
 	{
-		return (await this.chatRoomService.getMember(userId, roomName));
-	}
-
-
-	@Post(':name')
-	async joinChatRoom(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
-	{
-		await this.chatRoomService.joinChatRoom(chatRoomName, chatRoomDto.userId)
+		await this.chatRoomService.joinChatRoom(chatRoomName, chatRoom, userId)
 	}
 
 	@Post('checkPassword/:name')
-	async checkPassword(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
+	async checkPassword(@Param('name') chatRoomName: string,
+						@Body() chatRoomDto: ChatRoomDto,
+					   @GetUser('id') userId)
 	{
-		await this.chatRoomService.checkPassword(chatRoomName, chatRoomDto.password);
+		await this.chatRoomService.checkPassword(chatRoomName, chatRoomDto.password, userId);
 	}
 
-	@Patch('changeOwner/:name')
-	async updateOwner(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
+	@Patch('makeOwner/:name')
+	async makeOwner(@Param('name') chatRoomName: string,
+					@Body() chatRoomDto: ChatRoomDto,
+					@GetUser('id') authorId: number)
 	{
-		await this.chatRoomService.updateOwner(chatRoomName, chatRoomDto.userId);
+		await this.chatRoomService.makeOwner(chatRoomName, chatRoomDto.userId, authorId);
 	}
 
-	@Patch('addAdmin/:name')
-	async addAdmin(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
+	@Patch('makeAdmin/:name')
+	async addAdmin(@Param('name') chatRoomName: string,
+				   @Body() chatRoomDto: ChatRoomDto,
+				   @GetUser('id') authorId: number)
 	{
-		await this.chatRoomService.addAdmin(chatRoomName, chatRoomDto.userId);
+		await this.chatRoomService.makeAdmin(chatRoomName, chatRoomDto.userId, authorId);
 	}
 
 	@Patch('removeAdmin/:name')
-	async removeAdmin(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
+	async removeAdmin(@Param('name') chatRoomName: string,
+					  @Body() chatRoomDto: ChatRoomDto,
+					  @GetUser('id') authorId: number)
 	{
-		await this.chatRoomService.removeAdmin(chatRoomDto.userId, chatRoomName);
+		await this.chatRoomService.removeAdmin(chatRoomDto.userId, chatRoomName, authorId);
+	}
+
+	@Patch('kick/:name')
+	async kick(@Param('name') chatRoomName: string,
+					  @Body() chatRoomDto: ChatRoomDto,
+					  @GetUser('id') authorId: number)
+	{
+		await this.chatRoomService.kick(chatRoomName, chatRoomDto.userId, authorId);
 	}
 
 	@Patch('password/:name')
-	async updateRoomPassword(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
+	async updateRoomPassword(@Param('name') chatRoomName: string,
+							 @Body() chatRoomDto: ChatRoomDto,
+							 @GetUser('id') userId: number)
 	{
-		await this.chatRoomService.updateRoomPassword(chatRoomName, chatRoomDto.password)
+		await this.chatRoomService.updateRoomPassword(chatRoomName, chatRoomDto.password, userId)
 	}
 
 	@Patch('removePassword/:name')
-	async removePassword(@Param('name') chatRoomName: string)
+	async removePassword(@Param('name') chatRoomName: string,
+						 @GetUser('id') userId: number)
 	{
-		await this.chatRoomService.removePassword(chatRoomName);
-	}
-
-	@Patch('changeAccessibility/:name')
-	async changeAccessibility(@Param('name') chatRoomName: string, @Body() chatRoomDto: ChatRoomDto)
-	{
-		await this.chatRoomService.changeAccessibility(chatRoomName, chatRoomDto.accessibility);
+		await this.chatRoomService.removePassword(chatRoomName, userId);
 	}
 
 	@Patch('leaveRoom/:name')
-	async leaveRoom(@Param('name') chatRoomName: string, @GetUser('id') userId: number)
+	async leaveRoom(@Param('name') chatRoomName: string,
+					@GetUser('id') userId: number)
 	{
-		await this.chatRoomService.removeUserFromRoom(userId, chatRoomName);
+		await this.chatRoomService.leaveRoom(chatRoomName, userId);
 	}
 
-	@Patch('removeUser/:name')
-	async removeUserWithId(@Param('name') chatRoomName: string,  @Body() chatRoomDto: ChatRoomDto)
+	@Get('mutedMembers/:name')
+	async getMuted(@Param('name') chatRoomName: string,
+				  @GetUser('id') userId: number)
 	{
-		await this.chatRoomService.removeUserFromRoom(chatRoomDto.userId, chatRoomName);
+		return (await this.chatRoomService.getUsersMuted(chatRoomName, userId));
 	}
 
-	@Get('penalty/:name/:userId')
-	async getUserPenalties(@Param('name') chatRoomName: string, @Param('userId', ParseIntPipe) userId: number)
+	@Post('penalty/:name')
+	async penalty(@Param('name') chatRoomName: string,
+				  @Body() penalty: PenaltyDto,
+				  @GetUser('id') authorId: number)
 	{
-		return (await this.chatRoomService.getUserPenalties(chatRoomName, userId));
+		await this.chatRoomService.penalty(chatRoomName, penalty, authorId);
 	}
 
-	@Get('mutes/:name')
-	async getMuted(@Param('name') chatRoomName: string)
+	@Get('myBan/:name')
+	async myBan(@Param('name') chatRoomName: string, @GetUser('id') userId: number)
 	{
-		return (await this.chatRoomService.getMutes(chatRoomName));
+		return (await this.chatRoomService.myBan(chatRoomName, userId));
 	}
 }
 
