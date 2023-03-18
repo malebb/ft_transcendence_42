@@ -249,7 +249,7 @@ export default class Draw
 
 	spectatorEnd()
 	{
-		this.text("Game is finished", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
+		this.text("No game to spectate", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
 
 	alreadyInResearch()
