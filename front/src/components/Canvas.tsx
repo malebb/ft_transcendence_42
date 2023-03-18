@@ -413,8 +413,6 @@ export default function Canvas()
 				}
 				axiosInstance.current = await axiosToken();
 				let challenge: AxiosResponse = await axiosInstance.current!.get('/challenge/' + challengeId);
-				axiosInstance.current = await axiosToken();
-
 				let cancelLink: Function[];
 				let background: HTMLImageElement = draw.current!.initOutGameBackground();
 
@@ -545,7 +543,7 @@ export default function Canvas()
 			{
 				draw.current!.skins = [];
 				axiosInstance.current = await axiosToken();
-				await axiosInstance.current!.post('/users/', {skin: name});
+				await axiosInstance.current!.patch('/pong/skin', "skin=" +  name);
 				menu();
 			}
 			catch (error: any)
@@ -579,7 +577,7 @@ export default function Canvas()
 			try
 			{
 				axiosInstance.current = await axiosToken();
-				axiosInstance.current!.post('/users/', {map: name});
+				axiosInstance.current!.patch('/pong/map', "map=" + name);
 				menu();
 			}
 			catch (error: any)

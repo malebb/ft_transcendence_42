@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { Ball, Player, Size, Room, PlayerData } from 'ft_transcendence';
 import { Socket, Server } from 'socket.io';
 import { GameService } from '../game/game.service';
@@ -10,7 +10,8 @@ import { levels } from './levels';
 import { winSteps, levelSteps, modeExplorer,
 		fashionWeek, traveler, failureKnowledge } from 'ft_transcendence';
 import { Stats } from './Stats';
-import { Customisation } from './Customisation';
+import { Customisation, Skins, Maps } from './Customisation';
+import { PrismaService } from '../prisma/prisma.service';
 
 interface Challenger
 {
@@ -26,7 +27,8 @@ export class PongService {
 			   	private readonly statsService: StatsService,
 			   	private readonly historyService: HistoryService,
 			   	private readonly userService: UserService,
-			   	private readonly challengeService: ChallengeService) {}
+			   	private readonly challengeService: ChallengeService,
+			   	private readonly prisma: PrismaService) {}
 
 	queue: 			PlayerData[] 	= [];
 	powerUpQueue:	PlayerData[] 	= [];
@@ -480,5 +482,39 @@ export class PongService {
 			this.rooms[roomId].leftPlayer.speedPowerUp = false;
 		else
 			this.rooms[roomId].rightPlayer.speedPowerUp = false;
+	}
+
+	async updateSkin(userId: number, skin: string)
+	{
+		if (Skins.includes(skin))
+		{
+			await this.prisma.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					skin: skin
+				}
+			});
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+	}
+
+	async updateMap(userId: number, map: string)
+	{
+		if (Maps.includes(map))
+		{
+			await this.prisma.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					map: map
+				}
+			});
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 }
