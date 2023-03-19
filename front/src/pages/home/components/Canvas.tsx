@@ -48,12 +48,13 @@ export default function Canvas()
 			(position.current === "right" && rightPlayer.current!.speedPowerUp))
 		}
 
-		function powerUp(e: KeyboardEvent)
+		async function powerUp(e: KeyboardEvent)
 		{
 			if (keyPressed.current)
 				return;
 			if (e.key === ' ' && powerUpEnabled())
 			{
+				await axiosToken();
 				socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
 				keyPressed.current = true;
 			}
@@ -272,12 +273,13 @@ export default function Canvas()
 				});
 			}
 
-			kd.current.UP.down(function()
+			kd.current.UP.down(async function()
 			{
+				await axiosToken();
 				socket.current!.emit("movePlayer", {roomId : room.current!.id, position: position.current, key: "UP"});
 			});
 
-			kd.current.DOWN.down(function()
+			kd.current.DOWN.down(async function()
 			{
 				socket.current!.emit("movePlayer", {roomId : room.current!.id, position: position.current, key: "DOWN"});
 			})
@@ -313,12 +315,13 @@ export default function Canvas()
 		function findRoom() : Promise<string | null>
 		{
 			return (new Promise(resolve => {
-				socket.current!.on(socket.current!.id + ':alreadyInResearch', () => {
-					resolve(null);
-				});
-				socket.current!.on(socket.current!.id, (data) => {
-					socket.current!.emit('joinRoom', JSON.parse(data).room.id)
+				socket.current!.on(socket.current!.id, async (data) => {
+					await axiosToken();
+					socket.current!.emit('joinRoom', {roomId: JSON.parse(data).room.id})
 					resolve(data);
+				});
+				socket.current!.on('error', () => {
+					resolve(null);
 				});
 			}));
 		}
@@ -334,20 +337,6 @@ export default function Canvas()
 			return (user.data.username === challenge.data.sender.username ? challenge.data.receiver.username : challenge.data.sender.username);
 		}
 
-		async function cancelChallenge()
-		{
-			try
-			{
-				axiosInstance.current = await axiosToken();
-				await axiosInstance.current!.delete('/challenge/' + challengeId);
-				window.location.href = "http://localhost:3000/";
-			}
-			catch (error: any)
-			{
-				console.log('error (cancel challenge) :', error);
-			}
-		}
-
 		function alreadyInResearch()
 		{
 			let background: HTMLImageElement = draw.current!.initOutGameBackground();
@@ -355,7 +344,7 @@ export default function Canvas()
 			background.onload = function()
 			{
 				draw.current!.outGameBackground(background);
-				draw.current!.alreadyInResearch();
+				draw.current!.error();
 
 				if (challengeId === undefined)
 				{
@@ -425,8 +414,8 @@ export default function Canvas()
 	
 					let zones = [cancelZone];
 					let playerData: PlayerData = {userId: user.data.id, id: "", username: user.data.username, skin: user.data.skin, powerUpMode: challenge.data.powerUpMode};
-					let alreadyInQueue = false;
-
+					let gamePossible = true;
+					axiosInstance.current = await axiosToken();
 					socket.current = io(`ws://localhost:3333/pong`,
 					{
 						transports: ["websocket"],
@@ -436,9 +425,12 @@ export default function Canvas()
 									challenge: true,
 									challengeId: challenge.data.id
 								},
+						auth: {
+							token: getToken().access_token
+						},
 						forceNew: true
 					});
-					cancelLink = addLink(cancelZone, cancelChallenge, zones, 0);
+					cancelLink = addLink(cancelZone, redirectAfterChallenge, zones, 0);
 					socket.current!.on("connect", async () => {
 						await findRoom().then(data => {
 							if (data)
@@ -447,10 +439,10 @@ export default function Canvas()
 								position.current = JSON.parse(data).position;
 							}
 							else
-								alreadyInQueue = true;
+								gamePossible = false;
 						});
 						destroyLink(cancelLink);
-						if (!alreadyInQueue)
+						if (!gamePossible)
 							await launchGame();
 						else
 							alreadyInResearch()
@@ -487,13 +479,6 @@ export default function Canvas()
 				{
 					axiosInstance.current = await axiosToken();
 					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
-					axiosInstance.current = await axiosToken();
-					const currentGames: AxiosResponse = await axiosInstance.current.get('/game/');
-					if (isPlayerAlreadyInGame(user.data, currentGames))
-					{
-						alreadyInGame();
-						return ;
-					}
 					draw.current!.outGameBackground(background);
 					draw.current!.matchmaking();
 
@@ -502,6 +487,7 @@ export default function Canvas()
 						let zones = [cancelZone];
 					let playerData: PlayerData = {userId: user.data.id, id: "", username: user.data.username, skin: user.data.skin, powerUpMode: powerUpMode.current};
 					let alreadyInQueue = false;
+					axiosInstance.current = await axiosToken();
 					socket.current = io(`ws://localhost:3333/pong`,
 					{
 						transports: ["websocket"],
@@ -510,6 +496,9 @@ export default function Canvas()
 									spectator: false,
 									challenge: false
 								},
+						auth: {
+							token: getToken().access_token
+						},
 						forceNew: true
 					});
 					cancelLink = addLink(cancelZone, cancelMatchmaking, zones, 0);

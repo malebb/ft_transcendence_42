@@ -7,14 +7,15 @@ import { HistoryService } from '../history/history.service';
 import { UserService } from '../user/user.service';
 import { ChallengeService } from '../challenge/challenge.service';
 import { levels } from './levels';
-import { winSteps, levelSteps, modeExplorer,
-		fashionWeek, traveler, failureKnowledge } from 'ft_transcendence';
+import {
+	winSteps, levelSteps, modeExplorer,
+	fashionWeek, traveler, failureKnowledge
+} from 'ft_transcendence';
 import { Stats } from './Stats';
 import { Customisation, Skins, Maps } from './Customisation';
 import { PrismaService } from '../prisma/prisma.service';
 
-interface Challenger
-{
+interface Challenger {
 	challengerId: string;
 	challengeId: number;
 	challenger: PlayerData;
@@ -24,46 +25,26 @@ interface Challenger
 export class PongService {
 
 	constructor(private readonly gameService: GameService,
-			   	private readonly statsService: StatsService,
-			   	private readonly historyService: HistoryService,
-			   	private readonly userService: UserService,
-			   	private readonly challengeService: ChallengeService,
-			   	private readonly prisma: PrismaService) {}
+		private readonly statsService: StatsService,
+		private readonly historyService: HistoryService,
+		private readonly userService: UserService,
+		private readonly challengeService: ChallengeService,
+		private readonly prisma: PrismaService) { }
 
-	queue: 			PlayerData[] 	= [];
-	powerUpQueue:	PlayerData[] 	= [];
-	challengers:	Challenger[]	= [];
-	rooms 							= [];
-	sizeCanvas: 	Size			= { width: 700, height: 450 };
-	scoreToWin:		number			= 11;
 
-	checkIfAlreadyInQueue(player: PlayerData) : boolean
-	{
-		for (let i = 0; i < this.queue.length; ++i) {
-			if (this.queue[i].userId == player.userId)
-				return (true);
-		}
-		for (let i = 0; i < this.powerUpQueue.length; ++i) {
-			if (this.powerUpQueue[i].userId == player.userId)
-				return (true);
-		}
-		for (let i = 0; i < this.challengers.length; ++i) {
-			if (this.challengers[i].challenger.userId == player.userId)
-				return (true);
-		}
-		return (false);
-	}
 
-	addToQueue(player: PlayerData, queue: PlayerData[]) : boolean
-	{
-		if (this.checkIfAlreadyInQueue(player))
-			return (false);
+	queue: PlayerData[] = [];
+	powerUpQueue: PlayerData[] = [];
+	challengers: Challenger[] = [];
+	rooms = [];
+	sizeCanvas: Size = { width: 700, height: 450 };
+	scoreToWin: number = 11;
+
+	addToQueue(player: PlayerData, queue: PlayerData[]) {
 		queue.push(player);
-		return (true);
 	}
 
-	removeFromQueue(playerId: string)
-	{
+	removeFromQueue(playerId: string) {
 		for (let i = 0; i < this.queue.length; ++i) {
 			if (this.queue[i].id == playerId)
 				this.queue.splice(i, 1);
@@ -73,88 +54,65 @@ export class PongService {
 				this.powerUpQueue.splice(i, 1);
 		}
 		for (let i = 0; i < this.challengers.length; ++i) {
-			if (this.challengers[i].challengerId == playerId)
+			if (this.challengers[i].challengerId == playerId) {
+				try {
+					this.challengeService.deleteChallenge(this.challengers[i].challengeId, this.challengers[i].challenger.userId);
+				}
+				catch (error: any) {
+					console.log('error (delete challenge) :', error);
+				}
 				this.challengers.splice(i, 1);
+			}
 		}
 	}
 
-	spectateRoom(roomId: string, spectator: Socket)
+	spectateRoom(roomId: string, spectator: Socket, userId: number)
 	{
 		if (roomId in this.rooms)
 		{
-			this.joinRoom(spectator, roomId);
-			spectator.emit(spectator.id, JSON.stringify({joined: true, leftPlayer: this.rooms[roomId].leftPlayer, rightPlayer: this.rooms[roomId].rightPlayer, ball: this.rooms[roomId].ball}));
+			this.joinRoom(spectator, roomId, userId);
+			spectator.emit(spectator.id, JSON.stringify({ joined: true, leftPlayer: this.rooms[roomId].leftPlayer, rightPlayer: this.rooms[roomId].rightPlayer, ball: this.rooms[roomId].ball }));
 		}
 		else
-			spectator.emit(spectator.id, JSON.stringify({joined: false}));
+			spectator.emit(spectator.id, JSON.stringify({ joined: false }));
 	}
 
-	checkChallengers(challengeId: number, player: Socket)
-	{
+	checkChallengers(challengeId: number, player: Socket) {
 		let roomId: string = "";
 		let opponent: PlayerData;
 
-		for (let i = 0; i < this.challengers.length; ++i)
-		{
-			if (this.challengers[i].challengeId === challengeId)
-			{
+		for (let i = 0; i < this.challengers.length; ++i) {
+			if (this.challengers[i].challengeId === challengeId) {
 				roomId = this.challengers[i].challengerId < player.id ? this.challengers[i].challengerId + player.id : player.id + this.challengers[i].challengerId;
 				opponent = this.challengers[i].challenger;
 				this.removeFromQueue(player.id);
-				try
-				{
-					this.challengeService.deleteChallenge(challengeId, this.challengers[i].challenger.userId);
-				}
-				catch (error: any)
-				{
-					console.log('error (delete challenge) :', error);
-				}
 			}
 		}
-		return ({roomId: roomId, opponent: opponent});
+		return ({ roomId: roomId, opponent: opponent });
 	}
 
-	challenge(server: Server, player: Socket, challengeId: number, playerData: PlayerData)
-	{
-		let challenger: Challenger = {challengeId: challengeId, challengerId: player.id, challenger: playerData};
-		let challengerResearch = {roomId: null, opponent: null};
+	challenge(server: Server, player: Socket, challengeId: number, playerData: PlayerData) {
+		let challenger: Challenger = { challengeId: challengeId, challengerId: player.id, challenger: playerData };
+		let challengerResearch = { roomId: null, opponent: null };
 
 		playerData.id = player.id;
-		if (this.checkIfAlreadyInQueue(playerData))
-		{
-			server.emit(player.id + ':alreadyInResearch');
-			try
-			{
-				this.challengeService.deleteChallenge(challengeId, playerData.userId);
-				//TODO change invitation message status from open canceled 
-			}
-			catch (error: any)
-			{
-				console.log('error (delete challenge) :', error);
-			}
+		challengerResearch = this.checkChallengers(challengeId, player)
+		if (challengerResearch.roomId.length) {
+			let room: Room;
+			room = this.initRoom(challengerResearch.roomId, challengerResearch.opponent, playerData);
+			this.rooms[room.id] = room;
+			server.emit(challengerResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
+			server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
+			this.runRoom(room.id, server);
 		}
 		else
-		{
-			challengerResearch = this.checkChallengers(challengeId, player)
-			if (challengerResearch.roomId.length)
-			{
-				let room: Room;
-				room = this.initRoom(challengerResearch.roomId, challengerResearch.opponent, playerData);
-				this.rooms[room.id] = room;
-				server.emit(challengerResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
-				server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
-				this.runRoom(room.id, server);
-			}
-			else
-				this.challengers.push(challenger);
-			player.on("disconnecting", () => {
-				this.stopRoom(player);
-			});
-		}
+			this.challengers.push(challenger);
+		player.on("disconnecting", () => {
+			this.stopRoom(player);
+		});
 	}
 
-	checkQueue(player: PlayerData, queue: PlayerData[])
-	{
+	checkQueue(player: PlayerData, queue: PlayerData[]) {
 		let roomId: string = "";
 		let opponent: PlayerData;
 
@@ -169,14 +127,11 @@ export class PongService {
 		return ({ roomId: roomId, opponent: opponent });
 	}
 
-	initRoom(roomId: string, leftPlayer: PlayerData, rightPlayer: PlayerData): Room
-	{
-		try
-		{
+	initRoom(roomId: string, leftPlayer: PlayerData, rightPlayer: PlayerData): Room {
+		try {
 			this.gameService.addGame(roomId, leftPlayer.userId, rightPlayer.userId);
 		}
-		catch (error: any)
-		{
+		catch (error: any) {
 			console.log('error (add game to spectate) :', error);
 		}
 		return (
@@ -224,47 +179,38 @@ export class PongService {
 		);
 	}
 
-	findRoom(server: Server, player: Socket, playerData: PlayerData)
-	{
+	findRoom(server: Server, player: Socket, playerData: PlayerData) {
 		let room: Room;
 		let queueResearch = { roomId: null, opponent: null };
 		let queue: PlayerData[] = playerData.powerUpMode ? this.powerUpQueue : this.queue;
 
 		playerData.id = player.id;
-		if (!this.addToQueue(playerData, queue))
-			server.emit(player.id + ':alreadyInResearch');
-		else
-		{
-			queueResearch = this.checkQueue(playerData, queue);
-			if (queueResearch.roomId.length) {
-				room = this.initRoom(queueResearch.roomId, queueResearch.opponent, playerData);
-				this.rooms[room.id] = room;
-				server.emit(queueResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
-				server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
-				this.runRoom(room.id, server);
-			}
-			player.on("disconnecting", () => {
-				this.stopRoom(player);
-			});
+		this.addToQueue(playerData, queue);
+		queueResearch = this.checkQueue(playerData, queue);
+		if (queueResearch.roomId.length) {
+			room = this.initRoom(queueResearch.roomId, queueResearch.opponent, playerData);
+			this.rooms[room.id] = room;
+			server.emit(queueResearch.opponent.id, JSON.stringify({ room: room, position: "left" }));
+			server.emit(player.id, JSON.stringify({ room: room, position: "right" }));
+			this.runRoom(room.id, server);
 		}
+		player.on("disconnecting", () => {
+			this.stopRoom(player);
+		});
 	}
 
-	stopRoom(player: Socket)
-	{
+	stopRoom(player: Socket) {
 		let roomToLeave: string | undefined;
 
 		roomToLeave = Array.from(player.rooms)[1];
 		if (roomToLeave != undefined) {
 			if (this.rooms[roomToLeave].playerGoneCount == 1)
 				this.rooms[roomToLeave].playerGoneCount++;
-			else
-			{
-				try
-				{
+			else {
+				try {
 					this.gameService.removeGame(roomToLeave);
 				}
-				catch (error: any)
-				{
+				catch (error: any) {
 					console.log('error (remove game to spectate) :', error);
 				}
 				player.to(roomToLeave).emit("opponentDisconnection");
@@ -273,81 +219,80 @@ export class PongService {
 		}
 	}
 
-	movePlayer(roomId: string, position: string, key: string): Player
-	{
-		if (position == "left") {
-			this.rooms[roomId].leftPlayer.move(key);
-			return (this.rooms[roomId].leftPlayer);
+	movePlayer(roomId: string, position: string, key: string, userId: number): Player | null {
+		if (roomId in this.rooms) {
+			if (position == "left" && this.rooms[roomId].leftPlayer.id === userId) {
+				this.rooms[roomId].leftPlayer.move(key);
+				return (this.rooms[roomId].leftPlayer);
+			}
+			else if (position === "right" && this.rooms[roomId].rightPlayer.id === userId) {
+				this.rooms[roomId].rightPlayer.move(key);
+				return (this.rooms[roomId].rightPlayer);
+			}
 		}
-		else {
-			this.rooms[roomId].rightPlayer.move(key);
-			return (this.rooms[roomId].rightPlayer);
-		}
+		return (null);
 	}
 
-	joinRoom(player: Socket, roomId: string)
+	joinRoom(player: Socket, roomId: string, userId: number): boolean
 	{
-		player.join(roomId);
+		if (roomId in this.rooms)
+		{
+			if (this.rooms[roomId].leftPlayer.id === userId ||
+				this.rooms[roomId].rightPlayer.id === userId)
+			{
+				player.join(roomId);
+				return (true);
+			}
+		}
+		return (false);
 	}
 
 	async updateAchievements(player: Player, playerStats: Stats,
-							 levelUp: boolean, powerUpMode: boolean, winner: boolean)
-	{
+		levelUp: boolean, powerUpMode: boolean, winner: boolean) {
 		let playerCustomisation: Customisation = await
-		this.userService.getCustomisation(player.id);
+			this.userService.getCustomisation(player.id);
 
-		if (winner)
-		{
-			for (let i = 0; i < winSteps.length; ++i)
-			{
-				if (playerStats.victory == winSteps[i].goal)
-				{
+		if (winner) {
+			for (let i = 0; i < winSteps.length; ++i) {
+				if (playerStats.victory == winSteps[i].goal) {
 					await this.historyService.addAchievementDone(player.id,
-					winSteps[i].title, winSteps[i].desc);
-							break;
-				}
-			}
-		}
-		if (winner && levelUp)
-		{
-			for (let i = 0; i < levelSteps.length; ++i)
-			{
-				if (playerStats.level == levelSteps[i].goal)
-				{
-					await this.historyService.addAchievementDone(player.id,
-							levelSteps[i].title, levelSteps[i].desc);
+						winSteps[i].title, winSteps[i].desc);
 					break;
 				}
 			}
 		}
-		if (powerUpMode && !playerStats.modeExplorer)
-		{
+		if (winner && levelUp) {
+			for (let i = 0; i < levelSteps.length; ++i) {
+				if (playerStats.level == levelSteps[i].goal) {
+					await this.historyService.addAchievementDone(player.id,
+						levelSteps[i].title, levelSteps[i].desc);
+					break;
+				}
+			}
+		}
+		if (powerUpMode && !playerStats.modeExplorer) {
 			await this.historyService.addAchievementDone(player.id,
-									modeExplorer.title, modeExplorer.desc);
+				modeExplorer.title, modeExplorer.desc);
 			await this.statsService.updateModeExplorer(player.id);
 		}
-		if (playerCustomisation.skin != "white" && !playerStats.fashionWeek)
-		{
+		if (playerCustomisation.skin != "white" && !playerStats.fashionWeek) {
 			await this.historyService.addAchievementDone(player.id,
-									fashionWeek.title, fashionWeek.desc);
+				fashionWeek.title, fashionWeek.desc);
 			await this.statsService.updateFashionWeek(player.id);
 		}
-		if (playerCustomisation.map != "basic" && !playerStats.traveler)
-		{
+		if (playerCustomisation.map != "basic" && !playerStats.traveler) {
 			await this.historyService.addAchievementDone(player.id,
-									traveler.title, traveler.desc);
+				traveler.title, traveler.desc);
 			await this.statsService.updateTraveler(player.id);
 		}
-		if (!winner && playerStats.defeat == failureKnowledge.goal)
-		{
+		if (!winner && playerStats.defeat == failureKnowledge.goal) {
 			await this.historyService.addAchievementDone(player.id,
-									failureKnowledge.title, failureKnowledge.desc);
+				failureKnowledge.title, failureKnowledge.desc);
 			await this.statsService.updateFailureKnowledge(player.id);
 		}
 	}
 
-	async updateStats(winner: Player, loser: Player, powerUpMode: boolean)
-	{
+	async updateStats(winner: Player, loser: Player, powerUpMode: boolean) {
 		await this.statsService.addVictory(winner.id);
 		await this.statsService.addDefeat(loser.id);
 		await this.statsService.addXp(winner.id, 500);
@@ -357,14 +302,12 @@ export class PongService {
 
 		let newWinnerLevel = 0;
 
-		for (let i = 0; i < levels.length; ++i)
-		{
+		for (let i = 0; i < levels.length; ++i) {
 			if (levels[i] <= winnerStats.xp)
 				newWinnerLevel++;
 		}
 		let levelUp = false;
-		if (newWinnerLevel != winnerStats.level)
-		{
+		if (newWinnerLevel != winnerStats.level) {
 			await this.statsService.updateLevel(winner.id, newWinnerLevel);
 			winnerStats.level = newWinnerLevel;
 			levelUp = true;
@@ -374,75 +317,62 @@ export class PongService {
 	}
 
 	async updateHistory(leftId: number, rightId: number,
-						leftScore: number, rightScore: number)
-	{
+		leftScore: number, rightScore: number) {
 		this.historyService.addGamePlayed(leftId,
-						rightId, leftScore, rightScore);
+			rightId, leftScore, rightScore);
 	}
 
 	runRoom(roomId: string, server: Server) {
 		let scorer: string = "";
 
-		if (this.rooms[roomId].powerUpMode)
-		{
+		if (this.rooms[roomId].powerUpMode) {
 			this.programNextPowerUp(roomId, "left", server);
 			this.programNextPowerUp(roomId, "right", server);
 		}
-		this.rooms[roomId].roomInterval = setInterval(() =>
-		{
+		this.rooms[roomId].roomInterval = setInterval(() => {
 			if (this.rooms[roomId].playerGoneCount == 2) {
 				clearInterval(this.rooms[roomId].roomInterval);
 				clearTimeout(this.rooms[roomId].leftPowerUpTimeout);
 				clearTimeout(this.rooms[roomId].rightPowerUpTimeout);
 				delete this.rooms[roomId];
 			}
-			else
-			{
+			else {
 				if ((scorer = this.rooms[roomId].ball.move(
-					[this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer])).length)
-				{
-					if (scorer == "left")
-					{
+					[this.rooms[roomId].leftPlayer, this.rooms[roomId].rightPlayer])).length) {
+					if (scorer == "left") {
 						server.to(roomId).emit('updateScore',
-						JSON.stringify({ scorer: scorer, score: this.rooms[roomId].leftPlayer.score }));
-						if (this.rooms[roomId].leftPlayer.score == this.scoreToWin)
-						{
-							try
-							{
+							JSON.stringify({ scorer: scorer, score: this.rooms[roomId].leftPlayer.score }));
+						if (this.rooms[roomId].leftPlayer.score == this.scoreToWin) {
+							try {
 								this.updateStats(this.rooms[roomId].leftPlayer,
-												this.rooms[roomId].rightPlayer,
-												this.rooms[roomId].powerUpMode);
+									this.rooms[roomId].rightPlayer,
+									this.rooms[roomId].powerUpMode);
 								this.updateHistory(this.rooms[roomId].leftPlayer.id,
-												   this.rooms[roomId].rightPlayer.id,
-												  this.rooms[roomId].leftPlayer.score,
-												  this.rooms[roomId].rightPlayer.score);
+									this.rooms[roomId].rightPlayer.id,
+									this.rooms[roomId].leftPlayer.score,
+									this.rooms[roomId].rightPlayer.score);
 								server.to(roomId).emit('endGame', scorer);
 							}
-							catch (error: any)
-							{
+							catch (error: any) {
 								console.log('error (updating history / stats / achievements) :', error);
 							}
 						}
 					}
-					else if (scorer == "right")
-					{
+					else if (scorer == "right") {
 						server.to(roomId).emit('updateScore',
-								JSON.stringify({ scorer: scorer, score: this.rooms[roomId].rightPlayer.score }));
-						if (this.rooms[roomId].rightPlayer.score == this.scoreToWin)
-						{
-							try
-							{
+							JSON.stringify({ scorer: scorer, score: this.rooms[roomId].rightPlayer.score }));
+						if (this.rooms[roomId].rightPlayer.score == this.scoreToWin) {
+							try {
 								this.updateStats(this.rooms[roomId].rightPlayer,
-												 this.rooms[roomId].leftPlayer,
-												 this.rooms[roomId].powerUpMode);
+									this.rooms[roomId].leftPlayer,
+									this.rooms[roomId].powerUpMode);
 								this.updateHistory(this.rooms[roomId].leftPlayer.id,
-													   this.rooms[roomId].rightPlayer.id,
-												  this.rooms[roomId].leftPlayer.score,
-												  this.rooms[roomId].rightPlayer.score);
+									this.rooms[roomId].rightPlayer.id,
+									this.rooms[roomId].leftPlayer.score,
+									this.rooms[roomId].rightPlayer.score);
 								server.to(roomId).emit('endGame', scorer);
 							}
-							catch (error: any)
-							{
+							catch (error: any) {
 								console.log('error (updating history / stats / achievements) :', error);
 							}
 						}
@@ -454,12 +384,10 @@ export class PongService {
 		}, 10);
 	}
 
-	programNextPowerUp(roomId: string, position: string, server: Server)
-	{
+	programNextPowerUp(roomId: string, position: string, server: Server) {
 		let timeout: ReturnType<typeof setTimeout>;
 
-		timeout = setTimeout(() =>
-		{
+		timeout = setTimeout(() => {
 			server.to(roomId).emit('updateSpeedPowerUp', true, position);
 			if (position == "left")
 				this.rooms[roomId].leftPlayer.speedPowerUp = true;
@@ -473,21 +401,26 @@ export class PongService {
 
 	}
 
-	useSpeedPowerUp(roomId: string, position: string, server: Server)
+	useSpeedPowerUp(roomId: string, position: string, server: Server, userId: number): boolean
 	{
-		this.programNextPowerUp(roomId, position, server);
-		this.rooms[roomId].ball.speedPowerUp();
-		server.to(roomId).emit('updateSpeedPowerUp', false, position);
-		if (position == "left")
-			this.rooms[roomId].leftPlayer.speedPowerUp = false;
-		else
-			this.rooms[roomId].rightPlayer.speedPowerUp = false;
+		if (roomId in this.rooms && (position === 'left' &&
+			this.rooms[roomId].leftPlayer.id === userId ||
+			position === 'right' && this.rooms[roomId].rightPlayer.id === userId))
+		{
+			this.programNextPowerUp(roomId, position, server);
+			this.rooms[roomId].ball.speedPowerUp();
+			server.to(roomId).emit('updateSpeedPowerUp', false, position);
+			if (position == "left")
+				this.rooms[roomId].leftPlayer.speedPowerUp = false;
+			else
+				this.rooms[roomId].rightPlayer.speedPowerUp = false;
+			return (true);
+		}
+		return (false);
 	}
 
-	async updateSkin(userId: number, skin: string)
-	{
-		if (Skins.includes(skin))
-		{
+	async updateSkin(userId: number, skin: string) {
+		if (Skins.includes(skin)) {
 			await this.prisma.user.update({
 				where: {
 					id: userId,
@@ -501,10 +434,8 @@ export class PongService {
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 	}
 
-	async updateMap(userId: number, map: string)
-	{
-		if (Maps.includes(map))
-		{
+	async updateMap(userId: number, map: string) {
+		if (Maps.includes(map)) {
 			await this.prisma.user.update({
 				where: {
 					id: userId,

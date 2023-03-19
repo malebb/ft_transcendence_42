@@ -9,6 +9,7 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
+import { GetUser } from '../../auth/decorator';
 
 // les deux vont exposer les methodes
 // necessaires pour les messages des utilisateurs
@@ -45,7 +46,7 @@ export class MessageGateway
   handleConnection(client: Socket) {
     const sockets = this.server.sockets;
 
-    console.log(`Message Socket client with id: ${client.id} connected.`);
+    //console.log(`Message Socket client with id: ${client.id} connected.`);
     // this.logger.log(`Message Socket client with id: ${client.id} connected.`);
     // this.logger.debug(`Number of connected sockets: ${sockets.size}`);
   }

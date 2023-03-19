@@ -8,11 +8,12 @@ import { StatsModule } from '../stats/stats.module';
 import { HistoryModule } from '../history/history.module';
 import { UserModule } from '../user/user.module';
 import { ChallengeModule } from '../challenge/challenge.module';
+import { WsGuard } from '../auth/guard/ws.guard';
 
 @Module(
 {
 	imports: [GameModule, StatsModule, HistoryModule, UserModule, ChallengeModule],
 	controllers: [PongController],
-	providers : [GatewayPong, PongService]
+	providers : [GatewayPong, PongService, WsGuard]
 })
 export class PongModule{}
