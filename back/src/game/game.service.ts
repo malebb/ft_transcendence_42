@@ -54,4 +54,8 @@ export class GameService
 		})
 	}
 
+	async removeAllGames()
+	{
+		await this.prisma.game.deleteMany({})
+	}
 }

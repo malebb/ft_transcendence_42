@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { GameService } from './game/game.service';
 
 @Injectable()
-export class AppService {
+export class AppService implements OnModuleInit{
 
-  getHello(): string {
-    return 'Hello World!';
-  }
+	constructor(private readonly gameService: GameService) {};
 
+	onModuleInit()
+	{
+		this.gameService.removeAllGames();
+	}
 }

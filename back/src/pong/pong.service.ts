@@ -70,7 +70,7 @@ export class PongService {
 	{
 		if (roomId in this.rooms)
 		{
-			this.joinRoom(spectator, roomId, userId);
+			this.joinRoom(spectator, roomId, userId, true);
 			spectator.emit(spectator.id, JSON.stringify({ joined: true, leftPlayer: this.rooms[roomId].leftPlayer, rightPlayer: this.rooms[roomId].rightPlayer, ball: this.rooms[roomId].ball }));
 		}
 		else
@@ -233,12 +233,12 @@ export class PongService {
 		return (null);
 	}
 
-	joinRoom(player: Socket, roomId: string, userId: number): boolean
+	joinRoom(player: Socket, roomId: string, userId: number, spectator: boolean): boolean
 	{
 		if (roomId in this.rooms)
 		{
 			if (this.rooms[roomId].leftPlayer.id === userId ||
-				this.rooms[roomId].rightPlayer.id === userId)
+				this.rooms[roomId].rightPlayer.id === userId || spectator)
 			{
 				player.join(roomId);
 				return (true);

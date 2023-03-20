@@ -442,7 +442,7 @@ export default function Canvas()
 								gamePossible = false;
 						});
 						destroyLink(cancelLink);
-						if (!gamePossible)
+						if (gamePossible)
 							await launchGame();
 						else
 							alreadyInResearch()

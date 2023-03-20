@@ -161,7 +161,7 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 		const playerId: number = this.checkCredentialsOnEvent(player, token);
 		if (!playerId)
 			return ;
-		this.pongService.joinRoom(player, data.roomId, playerId);
+		this.pongService.joinRoom(player, data.roomId, playerId, false);
     }
 
 	@UseGuards(WsGuard)
