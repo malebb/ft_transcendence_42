@@ -43,12 +43,13 @@ export class MessageService {
         sendAt: new Date(),
       },
     });
+    return newMessage;
     // console.log("for " + roomName + " = " + rep);
   }
 
   async getAllMessagesByRoomName(roomName: string) {
     // console.log("service = ", roomName);
-    const message = await this.prisma.message.findMany({
+    const messages = await this.prisma.message.findMany({
       where: {
         room: {
           name: roomName,
@@ -63,7 +64,7 @@ export class MessageService {
       },
     });
     // console.log(message);
-    return message;
+    return messages;
   }
 
   async deleteAllMessagesByRoomName(roomName: string) {

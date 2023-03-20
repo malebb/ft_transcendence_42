@@ -4,4 +4,5 @@ export type NeutralUser = {
   id42: string | null
   username: string
   profilePicture: string | null
+  status: string
 }

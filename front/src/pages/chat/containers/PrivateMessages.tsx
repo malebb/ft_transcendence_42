@@ -1,61 +1,46 @@
 import { useEffect, useRef, useState } from "react";
-import InputButton from "../inputs/InputButton";
-import { AxiosInstance } from "axios";
 import { axiosToken } from "src/api/axios";
-import { useParams } from "react-router-dom";
-import { ChatRoom } from "ft_transcendence";
-import { User } from "ft_transcendence";
-import { Message } from "ft_transcendence";
-
-import "./message.style.css";
 import { Socket, io } from "socket.io-client";
+import { Message, User } from "ft_transcendence";
+import { AxiosInstance } from "axios";
+import { useParams } from "react-router-dom";
 
-function MessagesContainer() {
-  // declaration d'une variable d'etat
-  // useState = hook d'etat (pour une variable)
+import style from "../../../styles/private.message.module.css";
+import "./message.style.css";
+import InputButton from "../inputs/InputButton";
+
+function PrivateMessages() {
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const currentUser = useRef<User | null>(null);
-  const currentRoom = useRef<ChatRoom | null>(null);
+  const friend = useRef<User | null>(null);
   const axiosInstance = useRef<AxiosInstance | null>(null);
-  const roomId = useParams();
-  // const socket = SocketContext();
   const socket = useRef<Socket | null>(null);
+  const friendId = useParams();
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   let newMessage: Message;
 
-  // reference a l'element DOM contenant les messages (js)
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  function closeMessage(): void {
+    document.getElementById("myForm")!.style.display = "none";
+  }
 
   const scrollToBottom = () => {
-    // fait defiler la page vers le bas : utilise scrollview
-    // pour defiler jusqu'a la fin de la div
     document.getElementById("chatContainer")?.scrollTo({
       top: document.getElementById("chatContainer")?.scrollHeight,
       behavior: "smooth",
     });
   };
 
-  // https://devtrium.com/posts/async-functions-useeffect
   useEffect(() => {
-    // declare the async data fetching function
     const fetchData = async () => {
-      // get the data from the api
       axiosInstance.current = await axiosToken();
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
       axiosInstance.current = await axiosToken();
       await axiosInstance
-        .current!.get("/chatRoom/publicInfos/" + roomId.roomName)
+        .current!.get("/users/profile/" + friendId.userId)
         .then((response) => {
-          currentRoom.current = response.data;
-          socket.current?.emit("JOIN_ROOM", currentRoom.current);
-        });
-      axiosInstance.current = await axiosToken();
-      await axiosInstance
-        .current!.get("/message/" + currentRoom.current?.name)
-        .then((response) => {
-          setStateMessages(response.data);
-          console.log(response.data);
+          friend.current = response.data;
         });
     };
     fetchData().catch(console.error);
@@ -71,8 +56,8 @@ function MessagesContainer() {
       forceNew: true,
       upgrade: false,
     });
-    socket.current.on("connect", async () => {
-      socket.current!.on("ROOM_MESSAGE", (message: Message) => {
+    socket.current!.on("connect", async () => {
+      socket.current!.on("PRIVATE", function (message) {
         setStateMessages((stateMessages) => [...stateMessages, message]);
       });
       return () => {
@@ -99,12 +84,11 @@ function MessagesContainer() {
     const dateTS = new Date();
     newMessage = {
       user: currentUser.current!,
-      room: currentRoom.current!,
       message: inputMessage,
       sendAt: dateTS,
     };
 
-    socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
+    socket.current!.emit("PRIVATE", { msg: newMessage, friend: friend });
     setStateMessages([...stateMessages, newMessage]);
   }
 
@@ -155,45 +139,32 @@ function MessagesContainer() {
     );
   };
 
-  const GenInputButton = () => {
-    return (
-      <InputButton
-        onSubmit={handleSubmit}
-        inputProps={{
-          placeholder: "Tell us what you are thinking",
-          name: "messageInput",
-        }}
-        buttonText="SEND"
-      />
-    );
-  };
-
   return (
-    <>
-      <div className="chatPage">
-        <div id="content">
-          <div id="chatContainer" ref={messagesContainerRef}>
-            <GenMessages />
-          </div>
-          <GenInputButton />
+    <div>
+      <div className={style.chatpopup} id="myForm">
+        <div
+          className={style.formcontainer}
+          id="chatContainer"
+          ref={messagesContainerRef}
+        >
+          <GenMessages />
         </div>
+        <InputButton
+          onSubmit={handleSubmit}
+          inputProps={{
+            placeholder: "Tell us what you are thinking",
+            name: "messageInput",
+          }}
+          buttonText="SEND"
+        />
+        <button
+          type="button"
+          className={style.close}
+          onClick={closeMessage}
+        ></button>
       </div>
-    </>
+    </div>
   );
 }
 
-export default MessagesContainer;
-
-
-/*
-
-  setStateMessages((stateMessages) => [...stateMessages, message]);
-  ->
-  pourquoi (stateMessages) avant ?
-  les ... peuvent entraîner des problèmes de concurrence
-  car l'état précédent est conservé dans la closure
-  de la fonction de mise à jour (useEffect)
-  Prend donc l'etat precedent, au lieu du tableau et retourne le nouveau
-
-
-*/
+export default PrivateMessages;
