@@ -23,23 +23,16 @@
 }
 
 .openbutton {
-    background-color: #0163d4;
+    font-family: inherit;
+    background-color: transparent;
     color: #fff;
-    padding: 8px 14px;
     border: none;
-    /* opacity: 0.8; */
-    /* position: fixed; */
     cursor: pointer;
-    /* bottom: 20px; */
-    /* right: 2000px; */
-    /* width: 300px; */
     margin-top: 5px;
     margin-bottom: 4px;
-    font-size: 15px;
+    font-size: medium;
+    text-shadow: 0px 3px 6px rgba(150, 150, 150, 0.2);
     letter-spacing: 1px;
-    border-radius: 28px;
-    box-shadow: 10px 10px 30px -20px #000;
-
 }
 
 .chatpopup {
@@ -51,6 +44,7 @@
     border-radius: 10px;
     z-index: 9;
     box-shadow: 10px 10px 30px -20px #000;
+    height: 300px;
 }
 
 .formcontainer {

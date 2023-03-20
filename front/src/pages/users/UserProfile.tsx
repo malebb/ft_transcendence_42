@@ -16,7 +16,6 @@ import Stats from "./components/Stats";
 import Achievements from "./components/Achievements";
 import { FriendType } from "../friends/Friends";
 import Popup from "../../components/Popup";
-import PrivateMessages from "../chat/containers/PrivateMessages";
 import Status from "../settings/components/Status";
 
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
@@ -340,9 +339,8 @@ const UserProfile = () => {
           {/* </div> */}
           <div id="divprofileName" className="divprofileName">
             <p className="profileName">{user?.username?.slice(0, 15)}</p>
-            <Status />
+            <Status id={userId!} />
           </div>
-          {/* <PrivateMessages/> */}
           <Popup
             apparent={showConfirmation}
             title={popupTitle}

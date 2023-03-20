@@ -1,18 +1,9 @@
-div.container {
-  margin-left: 10px;
-  /* height: 100vh;
-  width: 93.5%;
-  display: flex;
-  justify-content: center;
-  align-items: center; */
-}
+/*let's chat*/
 
-/* div.pop_up {
-  position: relative;
-  left: 128px;
-  bottom: 68px;
-  width: 120px;
-  height: 80px;
+div.pop_up {
+  margin-left: 20px;
+  width: 100px;
+  height: 50px;
   background-color: #3795f6;
   border-radius: 5px;
   cursor: pointer;
@@ -20,25 +11,25 @@ div.container {
 
 div.pop_up p {
   position: relative;
-  bottom: 10px;
+  bottom: 25px;
   text-align: center;
   color: #fff;
 }
 
 div.arrow_down {
   position: relative;
-  top: 78px;
-  left: 45px;
-  width: 0; 
-  height: 0; 
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  
-  border-top: 15px solid #3795f6;
+  top: 10px;
+  right: 8px;
+  width: 0;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-right: 15px solid #3795f6;
 }
-  */
+
+/*online*/
 
 div.online_indicator {
+  margin-left: 10px;
   display: inline-block;
   width: 15px;
   height: 15px;
@@ -48,28 +39,20 @@ div.online_indicator {
   position: relative;
 }
 
-h2.text {
-  display: inline;
-  font-weight: 400;
-  font-size: larger;
-  text-shadow: 0px 3px 6px rgba(150, 150, 150, 0.2);
-  position: relative;
-  cursor: pointer;
-}
-
 span.online_blink {
   display: block;
   width: 15px;
   height: 15px;
-
   background-color: #0fcc45;
   opacity: 0.7;
   border-radius: 50%;
-  
   animation: blink 1s linear infinite;
 }
 
+/*offline*/
+
 div.offline_indicator {
+  margin-left: 10px;
   display: inline-block;
   width: 15px;
   height: 15px;
@@ -79,7 +62,7 @@ div.offline_indicator {
   position: relative;
 }
 
-h2.offline_text {
+text {
   display: inline;
   font-weight: 400;
   font-size: larger;
@@ -88,21 +71,7 @@ h2.offline_text {
   cursor: pointer;
 }
 
-span.offline_blink {
-  display: block;
-  width: 15px;
-  height: 15px;
-
-  background-color: #d81515;
-  opacity: 0.7;
-  border-radius: 50%;
-  
-  animation: blink 1s linear infinite;
-}
-
-
-
-/*Animations*/
+/*animation*/
 
 @keyframes blink {
   100% { transform: scale(2, 2); 

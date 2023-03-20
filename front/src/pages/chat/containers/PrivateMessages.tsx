@@ -3,11 +3,11 @@ import { axiosToken } from "src/api/axios";
 import { Socket, io } from "socket.io-client";
 import { Message, User } from "ft_transcendence";
 import { AxiosInstance } from "axios";
+import { useParams } from "react-router-dom";
 
-import style from "./private.message.module.css";
+import style from "../../../styles/private.message.module.css";
 import "./message.style.css";
 import InputButton from "../inputs/InputButton";
-import { useParams } from "react-router-dom";
 
 function PrivateMessages() {
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
@@ -15,15 +15,9 @@ function PrivateMessages() {
   const friend = useRef<User | null>(null);
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const socket = useRef<Socket | null>(null);
-  let newMessage: Message;
-
   const friendId = useParams();
-
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-
-  function openMessage(): void {
-    document.getElementById("myForm")!.style.display = "block";
-  }
+  let newMessage: Message;
 
   function closeMessage(): void {
     document.getElementById("myForm")!.style.display = "none";
@@ -63,7 +57,7 @@ function PrivateMessages() {
       upgrade: false,
     });
     socket.current!.on("connect", async () => {
-      socket.current!.on("PRIVATE", function(message) {
+      socket.current!.on("PRIVATE", function (message) {
         setStateMessages((stateMessages) => [...stateMessages, message]);
       });
       return () => {
@@ -94,7 +88,7 @@ function PrivateMessages() {
       sendAt: dateTS,
     };
 
-    socket.current!.emit("PRIVATE", {msg: newMessage, friend: friend});
+    socket.current!.emit("PRIVATE", { msg: newMessage, friend: friend });
     setStateMessages([...stateMessages, newMessage]);
   }
 
@@ -147,24 +141,22 @@ function PrivateMessages() {
 
   return (
     <div>
-      <button className={style.openbutton} onClick={openMessage}>
-        Send message
-      </button>
-
       <div className={style.chatpopup} id="myForm">
-        {/* <form className={style.formcontainer}> */}
-          <div className={style.formcontainer} id="chatContainer" ref={messagesContainerRef}>
-            <GenMessages />
-          </div>
-          <InputButton
-            onSubmit={handleSubmit}
-            inputProps={{
-              placeholder: "Tell us what you are thinking",
-              name: "messageInput",
-            }}
-            buttonText="SEND"
-          />
-        {/* </form> */}
+        <div
+          className={style.formcontainer}
+          id="chatContainer"
+          ref={messagesContainerRef}
+        >
+          <GenMessages />
+        </div>
+        <InputButton
+          onSubmit={handleSubmit}
+          inputProps={{
+            placeholder: "Tell us what you are thinking",
+            name: "messageInput",
+          }}
+          buttonText="SEND"
+        />
         <button
           type="button"
           className={style.close}
