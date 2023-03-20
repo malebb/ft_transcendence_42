@@ -4,7 +4,7 @@ import { SocketContext } from "../context/socket.context";
 import InputButton from "../inputs/InputButton";
 import { AxiosInstance } from "axios";
 import { axiosToken } from "src/api/axios";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { ChatRoom } from "ft_transcendence";
 import { User } from "ft_transcendence";
 import { Message } from "ft_transcendence";
@@ -119,7 +119,7 @@ function MessagesContainer() {
         return (
           <>
             <div className="chat-receiver">
-              <span>{newMessage?.user?.username + " : "}</span>
+              <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username}</Link> : </span>
               <span>{newMessage.message}</span>
             </div>
             <span className="date">{genDate(newMessage)}</span>
@@ -130,7 +130,7 @@ function MessagesContainer() {
         <div className="chat-sender">
           <span className="date">{genDate(newMessage)}</span>
           <div className="chat-username">
-            <span>{newMessage?.user?.username + " : "}</span>
+            <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username }</Link> : </span>
             <span>{newMessage.message}</span>
           </div>
         </div>
