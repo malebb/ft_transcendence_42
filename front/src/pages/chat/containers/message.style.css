@@ -112,3 +112,9 @@
 
 	overflow: hidden;
 }
+
+.msgProfileLink
+{
+	color: white;
+	text-decoration: none;
+}

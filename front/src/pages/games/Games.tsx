@@ -10,6 +10,7 @@ import "../../styles/Games.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
 import { trimUsername } from "src/utils/trim";
+import { getToken } from '../../api/axios';
 
 const Games = () =>
 {
@@ -133,7 +134,10 @@ const Games = () =>
 						challenge: false,
 						spectator: true,
 						roomId: gameId
-					}
+					},
+					auth: {
+						token: getToken().access_token
+					},
 				});
 
 			function spectateRoom(): Promise<string> {

@@ -252,9 +252,9 @@ export default class Draw
 		this.text("No game to spectate", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
 
-	alreadyInResearch()
+	error()
 	{
-		this.text("You are already looking for a player", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
+		this.text("An error has occured", this.ctx!.canvas.width / 2, this.ctx!.canvas.height / 2, 35, FONT_COLOR, CANVAS_FONT);
 	}
 
 	alreadyInGame()

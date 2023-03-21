@@ -506,7 +506,7 @@ export class ChatRoomService
 
 	async myBan(chatRoomName: string, userId: number)
 	{
-		const ban = this.prisma.chatRoom.findUnique(
+		const ban = await this.prisma.chatRoom.findUnique(
 		{
 			where: {
 				name: chatRoomName
@@ -526,5 +526,29 @@ export class ChatRoomService
 			}
 		});
 		return (ban);
+	}
+
+	async myMute(chatRoomName: string, userId: number)
+	{
+		const mute = await this.prisma.chatRoom.findUnique(
+		{
+			where: {
+				name: chatRoomName
+			},
+			select: {
+				penalties: {
+					where : {
+						targetId: userId,
+						type: 'MUTE'
+					},
+					select: {
+						id: true,
+						date: true,
+						durationInMin: true
+					}
+				}
+			}
+		});
+		return (mute);
 	}
 }

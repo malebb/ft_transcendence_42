@@ -14,6 +14,7 @@ CREATE TABLE "users" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "id42" TEXT,
     "username" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'OFFLINE',
     "email" TEXT NOT NULL,
     "hash" TEXT NOT NULL,
     "hashRt" TEXT,

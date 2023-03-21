@@ -9,6 +9,7 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
+import { GetUser } from '../../auth/decorator';
 
 // les deux vont exposer les methodes
 // necessaires pour les messages des utilisateurs
@@ -16,7 +17,13 @@ import { MessageService } from './message.service';
 
 // interfaces :
 import { ChatRoom, Message } from 'ft_transcendence';
-import { Logger } from '@nestjs/common';
+import { Logger, Body } from '@nestjs/common';
+import jwt_decode from "jwt-decode";
+
+type JwtDecoded = 
+{
+	sub: number
+}
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -43,6 +50,10 @@ export class MessageGateway
   handleConnection(client: Socket) {
     const sockets = this.server.sockets;
     console.log(`Message Socket client with id: ${client.id} connected.`);
+
+    //console.log(`Message Socket client with id: ${client.id} connected.`);
+    // this.logger.log(`Message Socket client with id: ${client.id} connected.`);
+    // this.logger.debug(`Number of connected sockets: ${sockets.size}`);
   }
 
   @SubscribeMessage('JOIN_ROOM')
@@ -50,18 +61,32 @@ export class MessageGateway
     client.join(String(room?.name));
   }
 
+	getIdFromToken(token: string)
+	{
+		const jwtDecoded: JwtDecoded = jwt_decode(token);
+		const id: number = jwtDecoded.sub;
+		return (id);
+	}
+
   @SubscribeMessage('SEND_ROOM_MESSAGE')
-  receiveMessage(client: Socket, message: Message) {
-    this.messageService.createMessage(message, message?.room?.name);
-    client.to(message.room?.name).emit('ROOM_MESSAGE', message);
+  async receiveMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token) {
+	try
+	{
+    	await this.messageService.createMessage(message, message?.room?.name, this.getIdFromToken(token));
+    	client.to(message.room?.name).emit('ROOM_MESSAGE', message);
+	}
+	catch (error: any)
+	{
+    	client.emit('ERROR', 'Cannot send Message');
+	}
   }
 
   @SubscribeMessage('PRIVATE')
   receivePrivateMessage(client: Socket, data) {
     const sockets = this.server.sockets;
     // console.log("PRIVATE");
-    console.log(data.friend);
-    console.log(data.friend.current.username);
+   // console.log(data.friend);
+   // console.log(data.friend.current.username);
     // client.on('PRIVATE', function(data) {
       // console.log(data);
       client.to[data.friend.current!.id].emit('PRIVATE', {

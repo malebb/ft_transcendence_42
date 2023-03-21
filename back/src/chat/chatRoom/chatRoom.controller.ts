@@ -130,9 +130,17 @@ class ChatRoomController
 	}
 
 	@Get('myBan/:name')
-	async myBan(@Param('name') chatRoomName: string, @GetUser('id') userId: number)
+	async myBan(@Param('name') chatRoomName: string,
+				@GetUser('id') userId: number)
 	{
 		return (await this.chatRoomService.myBan(chatRoomName, userId));
+	}
+
+	@Get('myMute/:name')
+	async myMute(@Param('name') chatRoomName: string,
+				@GetUser('id') userId: number)
+	{
+		return (await this.chatRoomService.myMute(chatRoomName, userId));
 	}
 }
 

@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Message } from 'ft_transcendence';
+import { ChatRoomService } from '../chatRoom/chatRoom.service';
+import { HttpStatus, HttpException } from '@nestjs/common';
 
 // Database, model Message:
 // relation 1-1 avec la ChatRoomService
@@ -23,28 +25,38 @@ import { Message } from 'ft_transcendence';
 export class MessageService {
   constructor(
     private prisma: PrismaService,
+	private readonly chatRoomService: ChatRoomService
   )
   {}
 
-  async createMessage(newMessage: Message, roomName: string) {
-    const rep = await this.prisma.message.create({
-      data: {
-        user: {
-          connect: {
-            email: newMessage?.user?.email,
-          },
-        },
-        message: newMessage.message,
-        room: {
-          connect: {
-            name: roomName,
-          },
-        },
-        sendAt: new Date(),
-      },
-    });
-    return newMessage;
-    // console.log("for " + roomName + " = " + rep);
+  async createMessage(newMessage: Message, roomName: string, userId: number)
+  {
+		const room = await this.chatRoomService.getChatRoom(roomName);
+		const mute = await this.chatRoomService.myMute(roomName, userId);
+
+		if (room && this.chatRoomService.isMember(room.members, userId) &&
+		   !mute.penalties.length)
+		{
+		    await this.prisma.message.create({
+    			data: {
+        			user: {
+          				connect: {
+          					  email: newMessage?.user?.email,
+       					},
+        			},
+       				message: newMessage.message,
+       				room: {
+          				connect: {
+           					name: roomName,
+          				},
+        			},
+        			sendAt: new Date(),
+      			},
+    		});
+   			return newMessage;
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 
   async getAllMessagesByRoomName(roomName: string) {

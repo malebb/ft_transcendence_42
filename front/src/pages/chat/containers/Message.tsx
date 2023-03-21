@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import InputButton from "../inputs/InputButton";
-import { AxiosInstance } from "axios";
-import { axiosToken } from "src/api/axios";
-import { useParams } from "react-router-dom";
+import { AxiosInstance, AxiosResponse } from 'axios';
+import { axiosToken, getToken } from "src/api/axios";
+import { useParams, Link } from "react-router-dom";
 import { ChatRoom } from "ft_transcendence";
 import { User } from "ft_transcendence";
 import { Message } from "ft_transcendence";
@@ -70,6 +70,9 @@ function MessagesContainer() {
       transports: ["websocket"],
       forceNew: true,
       upgrade: false,
+	  auth: {
+			token: getToken().access_token
+	  }
     });
     socket.current.on("connect", async () => {
       socket.current!.on("ROOM_MESSAGE", (message: Message) => {
@@ -81,7 +84,7 @@ function MessagesContainer() {
     });
   }, []);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
@@ -104,8 +107,20 @@ function MessagesContainer() {
       sendAt: dateTS,
     };
 
-    socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
-    setStateMessages([...stateMessages, newMessage]);
+	try
+	{
+	    axiosInstance.current = await axiosToken();
+		const mute: AxiosResponse = await axiosInstance.current.get('/chatRoom/myMute/' + roomId.roomName);
+		if (!mute.data.penalties.length)
+		{
+	   	 	socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
+   			setStateMessages([...stateMessages, newMessage]);
+		}
+	}
+	catch (error: any)
+	{
+		console.log('error (while sending message) :', error);
+	}
   }
 
   const GenMessages = () => {
@@ -121,7 +136,7 @@ function MessagesContainer() {
         return (
           <>
             <div className="chat-receiver">
-              <span>{newMessage?.user?.username + " : "}</span>
+              <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username}</Link> : </span>
               <span>{newMessage.message}</span>
             </div>
             <span className="date">{genDate(newMessage)}</span>
@@ -132,7 +147,7 @@ function MessagesContainer() {
         <div className="chat-sender">
           <span className="date">{genDate(newMessage)}</span>
           <div className="chat-username">
-            <span>{newMessage?.user?.username + " : "}</span>
+            <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username }</Link> : </span>
             <span>{newMessage.message}</span>
           </div>
         </div>

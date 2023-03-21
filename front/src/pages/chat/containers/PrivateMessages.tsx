@@ -82,11 +82,12 @@ function PrivateMessages() {
 
     // ! a la fin = signifie que la variable et non nulle et non non-definie
     const dateTS = new Date();
-    newMessage = {
+/*    newMessage = {
       user: currentUser.current!,
       message: inputMessage,
       sendAt: dateTS,
     };
+	*/
 
     socket.current!.emit("PRIVATE", { msg: newMessage, friend: friend });
     setStateMessages([...stateMessages, newMessage]);
