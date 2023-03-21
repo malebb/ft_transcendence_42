@@ -6,6 +6,7 @@ import { useParams, Link } from "react-router-dom";
 import { ChatRoom } from "ft_transcendence";
 import { User } from "ft_transcendence";
 import { Message } from "ft_transcendence";
+import { formatRemainTime } from '../utils/Penalty';
 
 import "./message.style.css";
 import { Socket, io } from "socket.io-client";
@@ -21,6 +22,7 @@ function MessagesContainer() {
   // const socket = SocketContext();
   const socket = useRef<Socket | null>(null);
   let newMessage: Message;
+  let [muteTimeLeft, setMuteTimeLeft] = useState<string>('');
 
   // reference a l'element DOM contenant les messages (js)
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -55,7 +57,6 @@ function MessagesContainer() {
         .current!.get("/message/" + currentRoom.current?.name)
         .then((response) => {
           setStateMessages(response.data);
-          console.log(response.data);
         });
     };
     fetchData().catch(console.error);
@@ -75,9 +76,18 @@ function MessagesContainer() {
 	  }
     });
     socket.current.on("connect", async () => {
+      await axiosInstance.current!.get("/users/me").then((response) => {
+        currentUser.current = response.data;
+      });
       socket.current!.on("ROOM_MESSAGE", (message: Message) => {
         setStateMessages((stateMessages) => [...stateMessages, message]);
+		if (message.user.id === currentUser.current!.id)
+	  		setMuteTimeLeft('');
       });
+      socket.current!.on("MUTE", (mute) => {
+	  	setMuteTimeLeft('You are muted (' + formatRemainTime(mute.penalties) + ')');
+      });
+
       return () => {
         socket.current?.disconnect();
       };
@@ -107,20 +117,7 @@ function MessagesContainer() {
       sendAt: dateTS,
     };
 
-	try
-	{
-	    axiosInstance.current = await axiosToken();
-		const mute: AxiosResponse = await axiosInstance.current.get('/chatRoom/myMute/' + roomId.roomName);
-		if (!mute.data.penalties.length)
-		{
-	   	 	socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
-   			setStateMessages([...stateMessages, newMessage]);
-		}
-	}
-	catch (error: any)
-	{
-		console.log('error (while sending message) :', error);
-	}
+   	socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
   }
 
   const GenMessages = () => {
@@ -190,6 +187,7 @@ function MessagesContainer() {
           <div id="chatContainer" ref={messagesContainerRef}>
             <GenMessages />
           </div>
+		  <p className="muteMsg">{muteTimeLeft}</p>
           <GenInputButton />
         </div>
       </div>

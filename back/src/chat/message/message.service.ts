@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Message } from 'ft_transcendence';
 import { ChatRoomService } from '../chatRoom/chatRoom.service';
 import { HttpStatus, HttpException } from '@nestjs/common';
+import PenaltyService from '../penalty/penalty.service';
 
 // Database, model Message:
 // relation 1-1 avec la ChatRoomService
@@ -25,7 +26,8 @@ import { HttpStatus, HttpException } from '@nestjs/common';
 export class MessageService {
   constructor(
     private prisma: PrismaService,
-	private readonly chatRoomService: ChatRoomService
+	private readonly chatRoomService: ChatRoomService,
+	private readonly penaltyService: PenaltyService
   )
   {}
 
@@ -34,9 +36,21 @@ export class MessageService {
 		const room = await this.chatRoomService.getChatRoom(roomName);
 		const mute = await this.chatRoomService.myMute(roomName, userId);
 
-		if (room && this.chatRoomService.isMember(room.members, userId) &&
-		   !mute.penalties.length)
+		if (room && this.chatRoomService.isMember(room.members, userId))
 		{
+			if (mute.penalties.length)
+			{
+				const penaltyTimeInMin = mute.penalties[0].durationInMin;
+				const startPenaltyTime = new Date(mute.penalties[0].date);
+				const endPenaltyTime = new Date(startPenaltyTime.getTime() + penaltyTimeInMin * 60000)
+				const currentTime = new Date(Date.now());
+				const msToEnd  = endPenaltyTime.getTime() - currentTime.getTime();
+				if (msToEnd <= 0)
+					this.penaltyService.deletePenalty(mute.penalties[0].id, userId);
+				else
+					throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+
+			}
 		    await this.prisma.message.create({
     			data: {
         			user: {
