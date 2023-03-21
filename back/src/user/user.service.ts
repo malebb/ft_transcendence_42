@@ -392,4 +392,25 @@ export class UserService {
     const ret = this.mapArrayUserToNeutralUser(users);
     return ret;
   }
+
+	async block(idToBlock: number, userId: number)
+	{
+		if (idToBlock !== userId)
+		{
+			await this.prisma.user.update({
+				where: {
+					id: userId
+				},
+				data: {
+					blockedByYou: {
+						connect: {
+							id: idToBlock
+						}
+					}
+				}
+			});
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+  }
 }

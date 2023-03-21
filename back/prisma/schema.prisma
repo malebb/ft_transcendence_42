@@ -52,6 +52,9 @@ model User {
   penaltiesAuthor		Penalty[] @relation(name: "PenaltiesAuthor")
   penaltiesTarget		Penalty[] @relation(name: "PenaltiesTarget")
 
+  blockedByYou				User[] @relation(name: "Blocked")
+  blockedYou				User[] @relation(name: "Blocked")
+
   @@map("users")
 }
 

@@ -10,6 +10,7 @@ import {
   UploadedFile,
   Param,
   Res,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { JwtGuard } from '../auth/guard';
 import { GetUser, Public } from '../auth/decorator';
@@ -175,5 +176,11 @@ export class UserController {
     @Param('userid') userid,
   ): Promise<string> {
     return this.userService.checkSenderStatus(myId, parseInt(userid));
+  }
+
+  @Patch('block/:id')
+  block(@Param('id', ParseIntPipe) idToBlock, @GetUser('id') userId: number)
+  {
+	  this.userService.block(idToBlock, userId);
   }
 }

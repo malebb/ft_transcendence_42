@@ -14,6 +14,7 @@ import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
 import Stats from "./components/Stats";
 import Achievements from "./components/Achievements";
+import BlockButton from './components/BlockButton';
 import { FriendType } from "../friends/Friends";
 import Popup from "../../components/Popup";
 import Status from "../settings/components/Status";
@@ -416,6 +417,7 @@ const UserProfile = () => {
             )}
           </div>
         </div>
+		<BlockButton userIdToBlock={Number(userId)}/>
         <br />
         <br />
         <br />
