@@ -358,7 +358,7 @@ function Rooms()
 						{
 							if (error.response.status === 403)
 							{
-								setTimeBannedRemain(formatRemainTime(ban.data));
+								setTimeBannedRemain(formatRemainTime(ban.data.penalties));
 								banned = true;
 								setBannedFromSelected(true);
 							}

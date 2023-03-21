@@ -11,7 +11,12 @@ import { formatRemainTime } from '../utils/Penalty';
 import "./message.style.css";
 import { Socket, io } from "socket.io-client";
 
-function MessagesContainer() {
+type MessagesProps = 
+{
+	updateRoomStatus: () => void;
+}
+
+function MessagesContainer({updateRoomStatus}: MessagesProps) { 
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
@@ -83,9 +88,11 @@ function MessagesContainer() {
         setStateMessages((stateMessages) => [...stateMessages, message]);
 		if (message.user.id === currentUser.current!.id)
 	  		setMuteTimeLeft('');
+		updateRoomStatus();
       });
       socket.current!.on("MUTE", (mute) => {
 	  	setMuteTimeLeft('You are muted (' + formatRemainTime(mute.penalties) + ')');
+		updateRoomStatus();
       });
 
       return () => {
@@ -98,6 +105,8 @@ function MessagesContainer() {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
+
+	updateRoomStatus();
 
     // Read the form data
     // @ts-ignore
