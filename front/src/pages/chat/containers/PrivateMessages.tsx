@@ -7,7 +7,6 @@ import { useParams } from "react-router-dom";
 
 import style from "../../../styles/private.message.module.css";
 import "./message.style.css";
-import InputButton from "../inputs/InputButton";
 
 function PrivateMessages() {
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
@@ -60,10 +59,11 @@ function PrivateMessages() {
       socket.current!.on("PRIVATE", function (message) {
         setStateMessages((stateMessages) => [...stateMessages, message]);
       });
-      return () => {
-        socket.current?.disconnect();
-      };
+
     });
+    return () => {
+      socket.current?.disconnect();
+    };
   }, []);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
@@ -88,7 +88,7 @@ function PrivateMessages() {
       sendAt: dateTS,
     };
 
-    socket.current!.emit("PRIVATE", { msg: newMessage, friend: friend });
+    socket.current!.emit("PRIVATE", { msg: newMessage, user: currentUser.current, friend: friend.current });
     setStateMessages([...stateMessages, newMessage]);
   }
 
@@ -149,14 +149,14 @@ function PrivateMessages() {
         >
           <GenMessages />
         </div>
-        <InputButton
-          onSubmit={handleSubmit}
-          inputProps={{
-            placeholder: "Tell us what you are thinking",
-            name: "messageInput",
-          }}
-          buttonText="SEND"
-        />
+        <form onSubmit={handleSubmit} className={style.sendInput}>
+          <input
+            name="messageInput"
+            placeholder="Write here..."
+            autoComplete="off"
+          />
+          <button type="submit">SEND</button>
+        </form>
         <button
           type="button"
           className={style.close}

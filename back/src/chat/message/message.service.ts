@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Message } from 'ft_transcendence';
+import { Message, User } from 'ft_transcendence';
 
 // Database, model Message:
 // relation 1-1 avec la ChatRoomService
@@ -21,10 +21,7 @@ import { Message } from 'ft_transcendence';
 // @Controller('messages')
 @Injectable()
 export class MessageService {
-  constructor(
-    private prisma: PrismaService,
-  )
-  {}
+  constructor(private prisma: PrismaService) {}
 
   async createMessage(newMessage: Message, roomName: string) {
     const rep = await this.prisma.message.create({
@@ -44,6 +41,113 @@ export class MessageService {
       },
     });
     return newMessage;
+    // console.log("for " + roomName + " = " + rep);
+  }
+
+  // async createPrivateMessage(
+  //   newMessage: Message,
+  //   currentUser: User,
+  //   friend: User,
+  // ) {
+  //   const rep = await this.prisma.message.create({
+  //     data: {
+  //       user: {
+  //         connect: {
+  //           email: friend.email,
+  //         },
+  //       },
+  //       message: newMessage.message,
+  //       sendAt: new Date(),
+  //     },
+  //   });
+  //   const currentUserModel = await this.prisma.user.findUnique({
+  //     where: {
+  //       email: currentUser.email,
+  //     },
+  //   });
+  //   if (currentUserModel) {
+  //     // currentUserModel.messages.push(rep);
+  //     // currentUserModel.messages.push(rep);
+
+  //     const updateUser = await this.prisma.user.update({
+  //       where: {
+  //         email: currentUser.email,
+  //       },
+  //       data: {
+  //         // messages: currentUser.messages,
+  //       },
+  //     });
+  //   }
+  //   // const userUpdate = await this.prisma.user.update({
+  //   //   where: {
+  //   //     id: currentUser.id,
+  //   //   },
+  //   //   data: {
+  //   //     messages: {
+  //   //       // push: rep,
+  //   //       // set: [...rep],
+  //   //     },
+  //   //   }
+  //   // });
+
+  //   console.log(rep);
+  //   return rep;
+  //   // console.log("for " + roomName + " = " + rep);
+  // }
+
+  async createPrivateMessage(
+    newMessage: Message,
+    currentUser: User,
+    friend: User,
+  ) {
+    // const rep = await this.prisma.message.create({
+
+    //   where: {
+    //     id: currentUser.id,
+    //   },
+    //   data: {
+    //     message: {
+    //       create: {
+    //         message: newMessage.message,
+    //         sendAt: new Date(),
+    //         user: {
+    //           connectOrCreate: {
+    //             id: friend.id,
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    //   include: {
+    //     user: true,
+    //   }
+    // });
+    const msgModel = await this.prisma.message.create({
+      data: {
+        user: {
+          connect: {
+            id: friend.id,
+          },
+        },
+        message: newMessage.message,
+        sendAt: new Date(),
+        room: {
+        }
+      },
+    });
+    const userUpdate = await this.prisma.user.update({
+      where: {
+        id: currentUser.id,
+      },
+      data: {
+        messages: {
+          create: [msgModel],
+        },
+      },
+    });
+
+    console.log(msgModel);
+    return userUpdate;
     // console.log("for " + roomName + " = " + rep);
   }
 

@@ -60,18 +60,18 @@ export class MessageGateway
   receivePrivateMessage(client: Socket, data) {
     const sockets = this.server.sockets;
     // console.log("PRIVATE");
+    this.messageService.createPrivateMessage(data.msg, data.user, data.friend);
     console.log(data.friend);
-    console.log(data.friend.current.username);
-    // client.on('PRIVATE', function(data) {
-      // console.log(data);
-      client.to[data.friend.current!.id].emit('PRIVATE', {
-        from: client.id,
-        to: data.friend.to,
-        msg: data.msg,
-      });
+
+
+      // client.to[data.friend!.id].emit('PRIVATE', {
+      //   from: client.id,
+      //   to: data.friend.to,
+      //   msg: data.msg,
+      // });
       // client.emit('PRIVATE', {
       //   from: client.id,
-      //   to: data.to,
+      //   to: data.friend.to,
       //   msg: data,
       // });
     // });

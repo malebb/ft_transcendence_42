@@ -36,15 +36,15 @@
 }
 
 .chatpopup {
-    display: none;
     position: fixed;
     bottom: 10px;
     right: 200px;
     border: 3px solid transparent;
-    border-radius: 10px;
+    border-radius: 12px;
     z-index: 9;
     box-shadow: 10px 10px 30px -20px #000;
-    height: 300px;
+    height: 260px;
+    background-color: var(--seis);
 }
 
 .formcontainer {
@@ -92,33 +92,35 @@
 
 .close {
     position: absolute;
+    background: transparent;
+    border: none;
     top: 0;
     left: 0;
     display: block;
-    width: 25px;
-    height: 25px;
-    font-size: 0;
-    border: none;
+    width: 32px;
+    height: 32px;
     border-radius: 10px;
+    opacity: 0.6;
+    margin-top: -12px;
 }
+.close:hover {
+    opacity: 1;
+  }
 .close:before, 
 .close:after {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 2px;
-    height: 15px;
-    background-color: #373535;
-    transform: rotate(45deg) translate(-50%, -50%);
-    transform-origin: top left;
-    content: '';
+    left: 15px;
+    content: ' ';
+    width: 3px;
+    height: 30px;
+    background-color: var(--tertiary);
 }
-.close:after {
-    transform: rotate(-45deg) translate(-50%, -50%);
-}
-
-
-
+.close:before {
+    transform: rotate(45deg);
+  }
+  .close:after {
+    transform: rotate(-45deg);
+  }
   
 /* .formcontainer .cancel {
     background-color: red;
@@ -322,3 +324,33 @@
     box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.1);
     cursor: pointer;
 }
+
+/*Input Button*/
+
+.sendInput {
+    padding: 8px 16px;
+    border-radius: 12px;
+    background: white;
+    display: flex;
+    align-items: center;
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+  .sendInput > input {
+	border: 8px;
+	flex: 1;
+	font-size: 17px;
+  }
+  .sendInput > input:focus-visible {
+	outline: none;
+  }
+  .sendInput button {
+    height: 100%;
+    padding: 6px 12px;
+    border: 0;
+    background-color: #413368;
+    font-weight: 700;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+  }
