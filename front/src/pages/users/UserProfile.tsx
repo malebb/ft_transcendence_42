@@ -349,6 +349,7 @@ const UserProfile = () => {
             handleTrue={(e: any) => deleteRequest(true)}
             handleFalse={(e: any) => deleteRequest(false)}
           />
+		  <div className="actionsOnUser">
           <div className="profileFriendButton">
             {friendStatus === "accepted" && (
               <div className="cyan">
@@ -416,8 +417,10 @@ const UserProfile = () => {
               <></>
             )}
           </div>
-        </div>
+
 		{(Number(userId) !== userSessionId) ? <BlockButton userIdToBlock={Number(userId)}/>: <></>}
+		  </div>
+        </div>
         <br />
         <br />
         <br />

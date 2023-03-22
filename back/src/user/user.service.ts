@@ -450,6 +450,6 @@ export class UserService {
 				}
 			}
 		});
-		return (blocked);
+		return (blocked.blockedByYou);
   }
 }

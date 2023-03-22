@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { AxiosInstance, AxiosResponse } from 'axios';
 import { axiosToken } from '../../../api/axios';
+import '../../../styles/BlockButton.css';
 
 type BlockButtonProps =
 {
@@ -16,7 +17,7 @@ const BlockButton = (props: BlockButtonProps) =>
 	{
 		axiosInstance.current = await axiosToken()
 		const userBlockedResponse = await axiosInstance.current.get('/users/blocked/' + props.userIdToBlock);
-		if (userBlockedResponse.data.blockedByYou.length)
+		if (userBlockedResponse.data.length)
 			setBlocked(true);
 		else
 			setBlocked(false);
@@ -43,7 +44,7 @@ const BlockButton = (props: BlockButtonProps) =>
 			console.log('error (while blocking user)', error);
 		}
 	}
-	return (<button onClick={handleBlock}>{blocked ? 'unblock' : 'block'} </button>);
+	return (<button style={{backgroundColor: blocked ? "#c07622" : "#BE3A3A"}} onClick={handleBlock} className="btn">{blocked ? 'Unblock' : 'Block'} </button>);
 }
 
 export default BlockButton;
