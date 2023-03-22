@@ -5,7 +5,6 @@ import { TokensInterface } from "src/interfaces/Sign";
 
 const baseURL = "http://localhost:3333";
 
-const context = useContext(AuthContext)
 
 export enum HTTP_METHOD{
   GET,
@@ -82,9 +81,9 @@ export async function axiosToken(token: TokensInterface, setToken: React.Dispatc
 // 
 // }
 //TODO check AxiosInstance
-  export async function axiosAuthReq<Type>(method: number, path: string, headers: AxiosHeaders, body: Object, setErrorMsg: Dispatch<SetStateAction<string>>, setData : Dispatch<SetStateAction<Type>>) : Promise<Type | undefined>{
+  export async function axiosAuthReq<Type>(token : TokensInterface, setToken: React.Dispatch<React.SetStateAction<TokensInterface | undefined>> ,method: number, path: string, headers: AxiosHeaders, body: Object, setErrorMsg: Dispatch<SetStateAction<string>>, setData : Dispatch<SetStateAction<Type>>) : Promise<Type | undefined>{
     try{
-      const AxiosInstance = await axiosToken();  
+      const AxiosInstance = await axiosToken(token, setToken);  
       if (method === HTTP_METHOD.POST)
       {
         const response : AxiosResponse = await AxiosInstance.post(path, body,{headers: headers});

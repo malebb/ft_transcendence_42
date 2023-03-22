@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { AxiosResponse, AxiosInstance, AxiosHeaders } from "axios";
 import axios from "axios";
@@ -10,6 +10,7 @@ import Stats from "./components/Stats";
 import Achievements from "./components/Achievements";
 import { FriendType } from "../friends/Friends";
 import Popup from "../../components/Popup";
+import AuthContext from "src/context/TokenContext";
 
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
 const GET_USER_PROFILE = "users/profile/";
@@ -48,6 +49,7 @@ interface i_renderProfile {
 const UserProfile = () => {
   const { userId } = useParams();
 
+  const { token , setToken } = useContext(AuthContext);
   const [renderProfile, setRenderProfile] = useState<i_renderProfile>();
   const [user, setUser] = useState<NeutralUser>();
   const [picture, setPicture] = useState("");
@@ -87,7 +89,7 @@ const UserProfile = () => {
         })*/
     try {
       const response: AxiosResponse = await (
-        await axiosToken()
+        await axiosToken(token!, setToken)
       ).get(ADD_FRIEND_PATH + userId);
       return response.data;
     } catch (err: any) {
@@ -108,66 +110,66 @@ const UserProfile = () => {
     setFriendStatus(newstatus);
   };
 
-  const getUserProfile = async () => {
-    try {
-      const token = getToken();
-      const response: AxiosResponse = await axiosMain.get(
-        "users/profile/" + userId,
-        {
-          headers: {
-            Authorization: "Bearer " + token["access_token"],
-          },
-        }
-      );
-      return response.data;
-    } catch (err: any) {
-      console.log("error getme");
-      if (!err?.response) {
-        setErrMsg("No Server Response");
-      } else if (err.response?.status === 403) {
-        setErrMsg("Invalid Credentials");
-      } else {
-        setErrMsg("Unauthorized");
-      }
-      return {} as NeutralUser;
-    }
-  };
+  // const getUserProfile = async () => {
+  //   try {
+  //     const token = getToken();
+  //     const response: AxiosResponse = await axiosToken(token!, setToken).get(
+  //       "users/profile/" + userId,
+  //       {
+  //         headers: {
+  //           Authorization: "Bearer " + token["access_token"],
+  //         },
+  //       }
+  //     );
+  //     return response.data;
+  //   } catch (err: any) {
+  //     console.log("error getme");
+  //     if (!err?.response) {
+  //       setErrMsg("No Server Response");
+  //     } else if (err.response?.status === 403) {
+  //       setErrMsg("Invalid Credentials");
+  //     } else {
+  //       setErrMsg("Unauthorized");
+  //     }
+  //     return {} as NeutralUser;
+  //   }
+  // };
 
-  const checkIsFriend = async (id: number) => {
-    try {
-      const token = getToken();
-      const response: AxiosResponse = await axiosMain.get(
-        GET_STATUS_PATH + id.toString(),
-        {
-          headers: {
-            Authorization: "Bearer " + token["access_token"],
-          },
-        }
-      );
-      return response.data;
-    } catch (err: any) {
-      console.log("error getme");
-      if (!err?.response) {
-        setErrMsg("No Server Response");
-      } else if (err.response?.status === 403) {
-        setErrMsg("Invalid Credentials");
-      } else {
-        setErrMsg("Unauthorized");
-      }
-      return "" as string;
-    }
-  };
-
+  // const checkIsFriend = async (id: number) => {
+  //   try {
+  //     const token = getToken();
+  //     const response: AxiosResponse = await axiosToken(token!, setToken).get(
+  //       GET_STATUS_PATH + id.toString(),
+  //       {
+  //         headers: {
+  //           Authorization: "Bearer " + token["access_token"],
+  //         },
+  //       }
+  //     );
+  //     return response.data;
+  //   } catch (err: any) {
+  //     console.log("error getme");
+  //     if (!err?.response) {
+  //       setErrMsg("No Server Response");
+  //     } else if (err.response?.status === 403) {
+  //       setErrMsg("Invalid Credentials");
+  //     } else {
+  //       setErrMsg("Unauthorized");
+  //     }
+  //     return "" as string;
+  //   }
+  // };
+//TODO change axiosAuthToken
   useEffect(() => {
     const treatData = async () => {
-      const profile = await axiosAuthReq(HTTP_METHOD.GET, GET_USER_PROFILE + userId, {} as AxiosHeaders, {}, setErrMsg, setUser);
+      const profile = await axiosAuthReq(token!, setToken, HTTP_METHOD.GET, GET_USER_PROFILE + userId, {} as AxiosHeaders, {}, setErrMsg, setUser);
       if (profile === undefined) return ;
       if (profile !== undefined){
         if (validURL(profile.profilePicture)) setPicture(profile.profilePicture);
         else
           setPicture(GET_PROFILE_PICTURE + profile.profilePicture.split("/")[2]);
         console.log(picture);
-        await axiosAuthReq(HTTP_METHOD.GET, GET_STATUS_PATH + userId, {} as AxiosHeaders, {}, setErrMsg, setFriendStatus);
+        await axiosAuthReq(token!, setToken, HTTP_METHOD.GET, GET_STATUS_PATH + userId, {} as AxiosHeaders, {}, setErrMsg, setFriendStatus);
       }
     };
     treatData();
@@ -177,7 +179,7 @@ const UserProfile = () => {
     if (confirmed) {
       try {
         const sendingReq: AxiosResponse = await (
-          await axiosToken()
+          await axiosToken(token!, setToken)
         ).get("users/destroy-friend-request-by-userid/" + userId);
         console.log(JSON.stringify(sendingReq.data));
         setFriendStatus("");
@@ -201,7 +203,7 @@ const UserProfile = () => {
   const refuseRequest = async () => {
     try {
       const sendingReq: AxiosResponse = await (
-        await axiosToken()
+        await axiosToken(token!, setToken)
       ).get("users/decline-friend-request-by-userid/" + userId);
       console.log(JSON.stringify(sendingReq.data));
       setFriendStatus("declined");
@@ -221,7 +223,7 @@ const UserProfile = () => {
   const acceptRequest = async () => {
     try {
       const sendingReq: AxiosResponse = await (
-        await axiosToken()
+        await axiosToken(token!, setToken)
       ).get("users/accept-friend-request-by-userid/" + userId);
       console.log(JSON.stringify(sendingReq.data));
       setFriendStatus("accepted");
@@ -241,7 +243,7 @@ const UserProfile = () => {
   const getReqSendingStatus = async (): Promise<string> => {
     try {
       const sendingReq: AxiosResponse = await (
-        await axiosToken()
+        await axiosToken(token!, setToken)
       ).get(CHECK_SENDER_PATH + userId);
       return sendingReq.data;
     } catch (err: any) {
@@ -283,7 +285,7 @@ const UserProfile = () => {
       let profileUser: NeutralUser;
       let myProfile: NeutralUser;
 
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = await axiosToken(token!, setToken);
       friendList = (await axiosInstance.current.get("/users/friend-list")).data;
       profileUser = (
         await axiosInstance.current.get("/users/profile/" + userId)

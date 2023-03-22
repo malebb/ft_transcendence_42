@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { SocketContext } from "../context/socket.context";
 // import io from "socket.io-client";
 import InputButton from "../inputs/InputButton";
@@ -11,11 +11,14 @@ import { Message } from "ft_transcendence";
 
 import "./message.style.css";
 import style from "../ChatRoom.module.css";
+import AuthContext from "src/context/TokenContext";
 // import { Socket } from "socket.io";
 
 function MessagesContainer() {
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
+
+	const { token , setToken } = useContext(AuthContext);
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const currentUser = useRef<User | null>(null);
   const currentRoom = useRef<ChatRoom | null>(null);
@@ -42,18 +45,18 @@ function MessagesContainer() {
     // declare the async data fetching function
     const fetchData = async () => {
       // get the data from the api
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = await axiosToken(token!, setToken);
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = await axiosToken(token!, setToken);
       await axiosInstance
         .current!.get("/chatRoom/" + roomId.roomName)
         .then((response) => {
           currentRoom.current = response.data;
           socket?.emit("JOIN_ROOM", currentRoom.current);
         });
-        axiosInstance.current = await axiosToken();
+        axiosInstance.current = await axiosToken(token!, setToken);
         await axiosInstance
           .current!.get("/message/" + currentRoom.current?.name)
           .then((response) => {

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import "../../styles/App.css";
 import Headers from "../../components/Headers";
-import Canvas from "./components/Canvas";
+import Canvas from "src/components/Canvas";
 import axios from "axios";
 import { getRefreshHeader } from "src/api/axios";
 import Sidebar from "../../components/Sidebar";
@@ -40,8 +40,10 @@ function Main() {
           <>
           <Canvas />
           <p tabIndex={99}>{username}</p>
+          {token?.access_token}
           </>
         )}
+        
       </main>
     </div>
   );

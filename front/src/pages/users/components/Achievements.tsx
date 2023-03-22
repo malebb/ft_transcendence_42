@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { AxiosInstance, AxiosResponse } from "axios";
 import { axiosToken } from "../../../api/axios";
 import StatsData from "../../../interfaces/StatsData";
@@ -13,9 +13,11 @@ import {
   levelSteps,
 } from "ft_transcendence";
 import "../../../styles/Achievements.css";
+import AuthContext from "src/context/TokenContext";
 
 const Achievements = () =>
 {
+	const { token , setToken } = useContext(AuthContext);
 	const axiosInstance = useRef<AxiosInstance | null>(null);
     const { userId } = useParams();
 	const [stats, setStats] = useState<StatsData | null>(null);
@@ -117,9 +119,9 @@ const Achievements = () =>
 		{
 			try
 			{
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = await axiosToken(token!, setToken);
 				const user: AxiosResponse = (await axiosInstance.current.get('users/profile/' + userId));
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = await axiosToken(token!, setToken);
 				const stats: AxiosResponse = await axiosInstance.current.get('/stats/' + user.data.id);
 				setStats(stats.data);
 			}

@@ -103,13 +103,13 @@ const Friends = () => {
   }, [renderType]);
 
   const acceptRequestWrap = (friendId: number) => {
-    acceptRequest(friendId);
+    acceptRequest(friendId, token!, setToken);
     if (recvArray)
       setRecvArray(recvArray.filter((item) => item.id !== friendId));
     getFriendArray();
   };
   const refuseRequestWrap = (friendId: number) => {
-    refuseRequest(friendId);
+    refuseRequest(friendId, token!, setToken);
     if (recvArray)
       setRecvArray(recvArray.filter((item) => item.id !== friendId));
   };
@@ -119,7 +119,7 @@ const Friends = () => {
     confirmed: boolean
   ) => {
     if (confirmed) {
-      const resp = deleteRequest(friendId);
+      const resp = deleteRequest(friendId, token!, setToken);
       console.log(JSON.stringify(resp));
       if (array == 0 && friendArray)
         setFriendArray(friendArray.filter((item) => item.id !== friendId));

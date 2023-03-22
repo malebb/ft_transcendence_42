@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { axiosToken } from "../../api/axios";
 import { AxiosInstance, AxiosResponse } from "axios";
 import "../../styles/History.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
 import { trimUsername } from "src/utils/trim";
+import AuthContext from "src/context/TokenContext";
 interface HistoryElem
 {
 	type: string;
@@ -13,6 +14,8 @@ interface HistoryElem
 
 const History = () =>
 {
+
+	const { token , setToken } = useContext(AuthContext);
 	const [sorted, setSorted] = useState<boolean>(false);
 	const historyElem = useRef<HistoryElem[]>([]);
 	const axiosInstance = useRef<AxiosInstance | null>(null);
@@ -66,11 +69,11 @@ const History = () =>
 		const initHistory = async () => {
 			try
 			{
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = await axiosToken(token!, setToken);
 				const user: AxiosResponse = (await axiosInstance.current.get('users/me'));
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = await axiosToken(token!, setToken);
 				const gamePlayed: AxiosResponse = await axiosInstance.current.get('history/gamePlayed/' + user.data.id);
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = await axiosToken(token!, setToken);
 				const achievementDone: AxiosResponse = await axiosInstance.current.get('history/achievementsDone/' + user.data.id);
 				for (let i = 0; i < gamePlayed.data.gamePlayed.length; ++i)
 				{

@@ -36,7 +36,10 @@ const Callback = () => {
       try {
         const response: AxiosResponse = await axiosMain.post<SignInterface>(CALLBACK_PATH, {
           code: code,
-        });
+        }, { withCredentials: true,  headers: {
+          "Access-Control-Allow-Origin": "localhost:3000",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+        }});
         console.log("response =+ " + JSON.stringify(response.data));
       if (response.data.isTfa === false)
       {

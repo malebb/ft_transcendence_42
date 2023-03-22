@@ -238,7 +238,7 @@ const User = () => {
   useEffect(() => {
     setValidUser(false);
     const getProfile = async () => {
-      const profile = await axiosAuthReq(HTTP_METHOD.GET, GETME_PATH, {} as AxiosHeaders, {}, setErrMsg, setUser);
+      const profile = await axiosAuthReq(token!, setToken, HTTP_METHOD.GET, GETME_PATH, {} as AxiosHeaders, {}, setErrMsg, setUser);
       if(profile !== undefined)
       {
         setValidUser(true);

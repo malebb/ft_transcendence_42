@@ -14,11 +14,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthDto, TFADto, SignupDto } from './dto';
 import { Tokens } from './types';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { JwtGuard, RtGuard } from './guard';
 import { GetUser, Public } from './decorator';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
 import { CallbackDto } from './dto/callback.dto';
 import { User } from '@prisma/client';
 import { SignInterface } from './interfaces';
@@ -46,7 +45,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Get('signin/42login')
-  signin42(@Res() res: Response) {
+  signin42(@Res({ passthrough: true }) res: Response) {
     /* let origin;
         if (req.headers.origin)
         {
@@ -60,7 +59,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('signin/42login/callback')
-  callback42(@Body() dto: CallbackDto): Promise<SignInterface> {
+  async callback42(@Body() dto: CallbackDto, @Res() res: Response) {
     /*let origin;
         if (req.headers.origin)
         {
@@ -70,7 +69,10 @@ export class AuthController {
             //res.setHeader("Access-Control-Allow-Origin", '*');
         }*/
     console.log('code from dto = ' + dto.code);
-    return this.authService.callback42(dto.code);
+    const token: SignInterface = await this.authService.callback42(dto.code);
+    console.log(res.cookie);
+    res.cookie('rt_token', token.tokens.refresh_token);
+    return res.send(token);
   }
 
   @Post('logout')

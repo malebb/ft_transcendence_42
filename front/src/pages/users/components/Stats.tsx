@@ -1,11 +1,14 @@
 import { useParams } from "react-router-dom";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { AxiosInstance, AxiosResponse } from "axios";
 import { axiosToken } from "../../../api/axios";
 import StatsData from "../../../interfaces/StatsData";
 import "../../../styles/Stats.css";
+import AuthContext from "src/context/TokenContext";
 
 const Stats = () => {
+
+  const { token , setToken } = useContext(AuthContext);
   const {userId} = useParams();
   
 const [victory, setVictory] = useState(0);
@@ -18,7 +21,7 @@ useEffect(() => {
     const initStats = async () => {
       try
       {
-        axiosInstance.current = await axiosToken();
+        axiosInstance.current = await axiosToken(token!, setToken);
         let stats: AxiosResponse = await axiosInstance.current.get('/stats/' + userId);
         let statsData: StatsData = stats.data
 

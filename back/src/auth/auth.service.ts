@@ -168,12 +168,14 @@ export class AuthService {
     const tokens = await this.signToken(user.id, user.email);
     this.updateRtHash(user.id, tokens.refresh_token);
     console.log('tokens ==' + JSON.stringify(tokens));
+    res.cookie('rt_token', tokens.refresh_token);
     return {
       tokens: tokens,
       isTfa: user.isTFA,
       userId: user.id,
       username: user.username,
     };
+
     //console.log("data = " + JSON.stringify(response.data));
     return response.data;
   }

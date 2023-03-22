@@ -15,7 +15,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   id42      String?  @unique
-  username  String  @unique
+  username  String   @unique
 
   email  String  @unique
   hash   String
@@ -25,42 +25,41 @@ model User {
   isTFA          Boolean @default(false)
   firstName      String?
   lastName       String?
-  profilePicture String?
+  profilePicture Bytes?
 
   skin String @default("white")
   map  String @default("basic")
 
-  stats           Stats?
-  gamePlayed      GamePlayed[]
-  achievementDone AchievementDone[]
-  leftPlayerToSpectate		Game[] @relation(name: "LeftPlayerToSpectate")
-  rightPlayerToSpectate		Game[] @relation(name: "RightPlayerToSpectate")
-  leftPlayerHistory		GamePlayed[] @relation(name: "LeftPlayerHistory")
-  rightPlayerHistory		GamePlayed[] @relation(name: "RightPlayerHistory")
+  stats                 Stats?
+  gamePlayed            GamePlayed[]
+  achievementDone       AchievementDone[]
+  leftPlayerToSpectate  Game[]            @relation(name: "LeftPlayerToSpectate")
+  rightPlayerToSpectate Game[]            @relation(name: "RightPlayerToSpectate")
+  leftPlayerHistory     GamePlayed[]      @relation(name: "LeftPlayerHistory")
+  rightPlayerHistory    GamePlayed[]      @relation(name: "RightPlayerHistory")
 
+  ownerChats  ChatRoom[]
+  adminChats  ChatRoom[] @relation(name: "UserAdmin")
+  memberChats ChatRoom[] @relation(name: "UserMember")
 
-  ownerChats	ChatRoom[]
-  adminChats	ChatRoom[] @relation(name: "UserAdmin")
-  memberChats	ChatRoom[] @relation(name: "UserMember")
+  challengesReceived Challenge[] @relation(name: "ChallengeRecv")
+  challengesSent     Challenge[] @relation(name: "ChallengeSent")
 
-  challengesReceived	Challenge[] @relation(name: "ChallengeRecv")
-  challengesSent		Challenge[] @relation(name: "ChallengeSent")
+  messages Message[]
 
-  messages	Message[]
-
-  penaltiesAuthor		Penalty[] @relation(name: "PenaltiesAuthor")
-  penaltiesTarget		Penalty[] @relation(name: "PenaltiesTarget")
+  penaltiesAuthor Penalty[] @relation(name: "PenaltiesAuthor")
+  penaltiesTarget Penalty[] @relation(name: "PenaltiesTarget")
 
   @@map("users")
 }
 
 model Challenge {
-	id       		 	Int    			  @id @default(autoincrement())
-	powerUpMode			Boolean
-	receiver			User			@relation(name: "ChallengeRecv", fields: [receiverId], references: [id])
-	receiverId			Int
-	sender				User			@relation(name: "ChallengeSent", fields: [senderId], references: [id])
-	senderId			Int
+  id          Int     @id @default(autoincrement())
+  powerUpMode Boolean
+  receiver    User    @relation(name: "ChallengeRecv", fields: [receiverId], references: [id])
+  receiverId  Int
+  sender      User    @relation(name: "ChallengeSent", fields: [senderId], references: [id])
+  senderId    Int
 }
 
 model ChatRoom {
@@ -71,9 +70,9 @@ model ChatRoom {
   owner         User          @relation(fields: [ownerId], references: [id])
   ownerId       Int
   admins        User[]        @relation(name: "UserAdmin")
-  members		User[]			@relation(name: "UserMember")
+  members       User[]        @relation(name: "UserMember")
   messages      Message[]
-  penalties		Penalty[]
+  penalties     Penalty[]
 }
 
 model Message {
@@ -83,7 +82,7 @@ model Message {
   message    String
   room       ChatRoom @relation(fields: [chatRoomId], references: [id])
   chatRoomId Int
-  sendAt     DateTime  @default(now())
+  sendAt     DateTime @default(now())
 }
 
 enum Accessibility {
@@ -93,21 +92,21 @@ enum Accessibility {
 }
 
 model Penalty {
-	id       		 	Int    		@id @default(autoincrement())
-  	date 				DateTime	@default(now())
-	chat				ChatRoom	@relation(fields: [chatId], references: [id])
-	chatId				Int
-	author				User @relation(name: "PenaltiesAuthor", fields: [authorId], references: [id])
-	authorId			Int
-	target				User @relation(name: "PenaltiesTarget", fields: [targetId], references: [id])
-	targetId			Int
-	type				PenaltyType
-	durationInMin		Int
+  id            Int         @id @default(autoincrement())
+  date          DateTime    @default(now())
+  chat          ChatRoom    @relation(fields: [chatId], references: [id])
+  chatId        Int
+  author        User        @relation(name: "PenaltiesAuthor", fields: [authorId], references: [id])
+  authorId      Int
+  target        User        @relation(name: "PenaltiesTarget", fields: [targetId], references: [id])
+  targetId      Int
+  type          PenaltyType
+  durationInMin Int
 }
 
 enum PenaltyType {
-	BAN
-	MUTE
+  BAN
+  MUTE
 }
 
 model FriendRequest {
@@ -141,15 +140,15 @@ model Stats {
 }
 
 model GamePlayed {
-	id				Int			@id @default(autoincrement())
-	leftPlayer 		User @relation(name: "LeftPlayerHistory", fields: [leftPlayerId], references: [id])
-	leftPlayerId	Int
-	rightPlayer		User @relation(name: "RightPlayerHistory", fields: [rightPlayerId], references: [id])
-	rightPlayerId	Int
-	leftScore		Int
-	rightScore		Int
-  	date DateTime @default(now())
-	user		User[]
+  id            Int      @id @default(autoincrement())
+  leftPlayer    User     @relation(name: "LeftPlayerHistory", fields: [leftPlayerId], references: [id])
+  leftPlayerId  Int
+  rightPlayer   User     @relation(name: "RightPlayerHistory", fields: [rightPlayerId], references: [id])
+  rightPlayerId Int
+  leftScore     Int
+  rightScore    Int
+  date          DateTime @default(now())
+  user          User[]
 }
 
 model AchievementDone {
@@ -162,10 +161,10 @@ model AchievementDone {
 }
 
 model Game {
-	id				Int			@id @default(autoincrement())
-	gameId			String		@unique
-	leftPlayer 		User @relation(name: "LeftPlayerToSpectate", fields: [leftPlayerId], references: [id])
-	leftPlayerId	Int
-	rightPlayer		User @relation(name: "RightPlayerToSpectate", fields: [rightPlayerId], references: [id])
-	rightPlayerId	Int
+  id            Int    @id @default(autoincrement())
+  gameId        String @unique
+  leftPlayer    User   @relation(name: "LeftPlayerToSpectate", fields: [leftPlayerId], references: [id])
+  leftPlayerId  Int
+  rightPlayer   User   @relation(name: "RightPlayerToSpectate", fields: [rightPlayerId], references: [id])
+  rightPlayerId Int
 }

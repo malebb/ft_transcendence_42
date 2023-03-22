@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import InputButton from "../inputs/InputButton";
 import { accessibilities } from "../utils/RoomAccessibilities";
 import { AxiosInstance, AxiosResponse } from 'axios';
@@ -8,10 +8,12 @@ import './rooms.style.css';
 import { ChatRoomFilter } from '../utils/ChatRoomFilter';
 import { Penalty } from '../utils/Penalty';
 import { trimUsername } from '../../../utils/trim';
+import AuthContext from "src/context/TokenContext";
 
 function Rooms()
 {
 	const axiosInstance = useRef<AxiosInstance | null>(null);
+	const { token , setToken } = useContext(AuthContext);
 
 	const CreateRoom = () =>
 	{
@@ -112,12 +114,12 @@ function Rooms()
 	
 				if (!checkPassword())
 					return ;
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = await axiosToken(token!, setToken);
 				if (!checkName(roomName))
 					return ;
 				if (!isNameAvailable(roomName, await axiosInstance.current!.get('/chatRoom/' + roomName)))
 					return ;
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = await axiosToken(token!, setToken);
 				user = await axiosInstance.current!.get('/users/me');
 				let newRoom: ChatRoom =
 				{
@@ -126,7 +128,7 @@ function Rooms()
 					accessibility: Accessibility[roomAccessibility as keyof typeof Accessibility],
 					password: roomAccessibility === 'PROTECTED' ? password : ''
 				};
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = await axiosToken(token!, setToken);
 				await axiosInstance.current!.post('/chatRoom/',
 					newRoom,
 					{headers: {'Content-Type': 'application/json'},
@@ -252,9 +254,9 @@ function Rooms()
 		const joinRoom = async (roomName: string) =>
 		{
 			try {
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = await axiosToken(token!, setToken);
 				const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = await axiosToken(token!, setToken);
 				const user: AxiosResponse = await axiosInstance.current.get('/users/me');
 					await axiosInstance.current.post('/chatRoom/' + roomName,
 						{userId: user.data.id},
@@ -279,12 +281,12 @@ function Rooms()
 			e.preventDefault();
 			try
 			{
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = await axiosToken(token!, setToken);
 				const room: AxiosResponse = await axiosInstance.current.get('chatRoom/' + chatRoom.name);
 
 				if (room.data.password.length)
 				{
-					axiosInstance.current = await axiosToken();
+					axiosInstance.current = await axiosToken(token!, setToken);
 					await axiosInstance.current.post('/chatRoom/checkPassword/' + chatRoom.name,
 						{password: roomPassword}, { headers: {"Content-Type": "application/json"}});
 					joinRoom(chatRoom.name);
@@ -385,11 +387,11 @@ function Rooms()
 			{
 				try
 				{
-					axiosInstance.current = await axiosToken();
+					axiosInstance.current = await axiosToken(token!, setToken);
 					const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + newChatRoomSelected);
 					accessibilityAfterSelect.current = room.data.accessibility;
 					const penalties: Penalty[] = room.data.penalties;
-					axiosInstance.current = await axiosToken();
+					axiosInstance.current = await axiosToken(token!, setToken);
 					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
 					let banned = false;
 					for(const penalty of penalties)
@@ -410,7 +412,7 @@ function Rooms()
 							else
 							{
 								setBannedFromSelected(false);
-								axiosInstance.current = await axiosToken();
+								axiosInstance.current = await axiosToken(token!, setToken);
 								axiosInstance.current.delete('/penalty/' + penalty.id);
 							}
 						}
@@ -489,16 +491,16 @@ function Rooms()
 				try
 				{
 					let chatRooms: AxiosResponse;
-					axiosInstance.current = await axiosToken();
+					axiosInstance.current = await axiosToken(token!, setToken);
 					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
 					if (chatRoomFilter === 'JOINED')
 					{
-						axiosInstance.current = await axiosToken();
+						axiosInstance.current = await axiosToken(token!, setToken);
 						chatRooms = await axiosInstance.current!.get('/chatRoom/joined/' + user.data.id);
 					}
 					else
 					{
-						axiosInstance.current = await axiosToken();
+						axiosInstance.current = await axiosToken(token!, setToken);
 						chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined/' + user.data.id);
 					}
 					setChatRoomsList(chatRooms.data.sort((a: ChatRoom, b: ChatRoom) =>
