@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Message, User } from 'ft_transcendence';
+import { ChatRoom, Message, User } from 'ft_transcendence';
+import { PrivateMessage } from '@prisma/client';
 
 // Database, model Message:
 // relation 1-1 avec la ChatRoomService
@@ -44,111 +45,41 @@ export class MessageService {
     // console.log("for " + roomName + " = " + rep);
   }
 
-  // async createPrivateMessage(
-  //   newMessage: Message,
-  //   currentUser: User,
-  //   friend: User,
-  // ) {
-  //   const rep = await this.prisma.message.create({
-  //     data: {
-  //       user: {
-  //         connect: {
-  //           email: friend.email,
-  //         },
-  //       },
-  //       message: newMessage.message,
-  //       sendAt: new Date(),
-  //     },
-  //   });
-  //   const currentUserModel = await this.prisma.user.findUnique({
-  //     where: {
-  //       email: currentUser.email,
-  //     },
-  //   });
-  //   if (currentUserModel) {
-  //     // currentUserModel.messages.push(rep);
-  //     // currentUserModel.messages.push(rep);
-
-  //     const updateUser = await this.prisma.user.update({
-  //       where: {
-  //         email: currentUser.email,
-  //       },
-  //       data: {
-  //         // messages: currentUser.messages,
-  //       },
-  //     });
-  //   }
-  //   // const userUpdate = await this.prisma.user.update({
-  //   //   where: {
-  //   //     id: currentUser.id,
-  //   //   },
-  //   //   data: {
-  //   //     messages: {
-  //   //       // push: rep,
-  //   //       // set: [...rep],
-  //   //     },
-  //   //   }
-  //   // });
-
-  //   console.log(rep);
-  //   return rep;
-  //   // console.log("for " + roomName + " = " + rep);
-  // }
-
   async createPrivateMessage(
+    room: ChatRoom,
     newMessage: Message,
-    currentUser: User,
-    friend: User,
+    sender: User,
+    receiver: User,
   ) {
-    // const rep = await this.prisma.message.create({
-
-    //   where: {
-    //     id: currentUser.id,
-    //   },
-    //   data: {
-    //     message: {
-    //       create: {
-    //         message: newMessage.message,
-    //         sendAt: new Date(),
-    //         user: {
-    //           connectOrCreate: {
-    //             id: friend.id,
-    //           },
-    //         },
-    //       },
-    //     },
-    //   },
-    //   include: {
-    //     user: true,
-    //   }
-    // });
-    const msgModel = await this.prisma.message.create({
+    const privateMessage = await this.prisma.privateMessage.create({
       data: {
-        user: {
+        sender: {
           connect: {
-            id: friend.id,
+            id: sender.id,
           },
         },
-        message: newMessage.message,
-        sendAt: new Date(),
-        room: {
-        }
-      },
-    });
-    const userUpdate = await this.prisma.user.update({
-      where: {
-        id: currentUser.id,
-      },
-      data: {
-        messages: {
-          create: [msgModel],
+        receiver: {
+          connect: {
+            id: receiver.id,
+          },
+        },
+        message: {
+          create: [
+            {
+              user: {
+                connect: {
+                  id: sender.id,
+                },
+              },
+              message: newMessage.message,
+              sendAt: new Date(),
+            },
+          ],
         },
       },
     });
 
-    console.log(msgModel);
-    return userUpdate;
-    // console.log("for " + roomName + " = " + rep);
+    return privateMessage;
   }
 
   async getAllMessagesByRoomName(roomName: string) {
@@ -179,6 +110,47 @@ export class MessageService {
         },
       },
     });
+  }
+
+  async createPrivateRoom(sender: User, receiver: User
+    // , roomId: number
+    ) {
+    const privateRoom = await this.prisma.chatRoom.create({
+      data: {
+        owner: {
+          connect: {
+            id: sender.id,
+          },
+        },
+        admins: {
+          connect: {
+            id: sender.id,
+          },
+        },
+        members: {
+          connect: {
+            id: sender.id,
+          },
+        },
+        name: String(roomId),
+        password: '',
+        accessibility: 'PUBLIC',
+      },
+    });
+    const receiverJoinRoom = await this.prisma.user.update({
+      where: {
+        id: receiver.id,
+      },
+      data: {
+        memberChats: {
+          connect: {
+            name: privateRoom.name,
+          },
+        },
+      },
+    });
+
+    return privateRoom;
   }
 }
 

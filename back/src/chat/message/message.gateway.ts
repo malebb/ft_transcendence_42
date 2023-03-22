@@ -57,23 +57,39 @@ export class MessageGateway
   }
 
   @SubscribeMessage('PRIVATE')
-  receivePrivateMessage(client: Socket, data) {
-    const sockets = this.server.sockets;
-    // console.log("PRIVATE");
-    this.messageService.createPrivateMessage(data.msg, data.user, data.friend);
-    console.log(data.friend);
+  async receivePrivateMessage(client: Socket, data) {
+    // console.log(privateMessage);
+    const privateMessage = await this.messageService.createPrivateMessage(
+      privateRoom,
+      data.msg,
+      data.sender,
+      data.receiver,
+    );
+    const privateRoom = await this.messageService.createPrivateRoom(
+      data.sender,
+      data.receiver,
+      // privateMessage.id,
+    );
+    // const privateRoom = String(privateMessage.id)
+    // client.join(privateRoom);
+    console.log(42);
+    console.log(privateRoom);
+    console.log(42);
+    // client.emit('PRIVATE_ROOM');
 
+    // client.to(privateRoom).emit(data.receiver.id, data.msg)
+    // client.to(privateRoom).emit('PRIVATE', data.msg);
 
-      // client.to[data.friend!.id].emit('PRIVATE', {
-      //   from: client.id,
-      //   to: data.friend.to,
-      //   msg: data.msg,
-      // });
-      // client.emit('PRIVATE', {
-      //   from: client.id,
-      //   to: data.friend.to,
-      //   msg: data,
-      // });
+    // client.to[data.friend!.id].emit('PRIVATE', {
+    //   from: client.id,
+    //   to: data.friend.to,
+    //   msg: data.msg,
+    // });
+    // client.emit('PRIVATE', {
+    //   from: client.id,
+    //   to: data.friend.to,
+    //   msg: data,
+    // });
     // });
   }
 

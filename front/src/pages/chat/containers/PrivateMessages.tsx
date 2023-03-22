@@ -56,7 +56,10 @@ function PrivateMessages() {
       upgrade: false,
     });
     socket.current!.on("connect", async () => {
-      socket.current!.on("PRIVATE", function (message) {
+      socket.current!.on("PRIVATE_ROOM", function () {
+        console.log("STEUPLE PUTAIN");
+      });
+      socket.current!.on("PRIVATE_MESSAGE", function (message) {
         setStateMessages((stateMessages) => [...stateMessages, message]);
       });
 
@@ -88,7 +91,7 @@ function PrivateMessages() {
       sendAt: dateTS,
     };
 
-    socket.current!.emit("PRIVATE", { msg: newMessage, user: currentUser.current, friend: friend.current });
+    socket.current!.emit("PRIVATE", { msg: newMessage, sender: currentUser.current, receiver: friend.current });
     setStateMessages([...stateMessages, newMessage]);
   }
 
