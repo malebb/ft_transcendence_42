@@ -4,6 +4,8 @@ import { Message } from 'ft_transcendence';
 import { ChatRoomService } from '../chatRoom/chatRoom.service';
 import { HttpStatus, HttpException } from '@nestjs/common';
 import PenaltyService from '../penalty/penalty.service';
+import { UserService } from '../../user/user.service';
+import { User } from '@prisma/client';
 
 // Database, model Message:
 // relation 1-1 avec la ChatRoomService
@@ -27,7 +29,8 @@ export class MessageService {
   constructor(
     private prisma: PrismaService,
 	private readonly chatRoomService: ChatRoomService,
-	private readonly penaltyService: PenaltyService
+	private readonly penaltyService: PenaltyService,
+	private readonly userService: UserService,
   )
   {}
 
@@ -72,9 +75,20 @@ export class MessageService {
 		else
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
+/*
+  isBlocked(blocked: User[], userToCheck: User): boolean
+  {
+		for (let i = 0; i < blocked.length; ++i)
+		{
+			if 
+		}
+  }
+  */
 
-  async getAllMessagesByRoomName(roomName: string) {
-    // console.log("service = ", roomName);
+  async getAllMessagesByRoomName(roomName: string, userId: number)
+  {
+	const blocked  = await this.userService.getAllBlocked(userId);
+
     const messages = await this.prisma.message.findMany({
       where: {
         room: {
@@ -89,7 +103,17 @@ export class MessageService {
         room: true,
       },
     });
-    // console.log(message);
+	for (let i = 0; i < blocked.length; ++i)
+	{
+		for (let j = 0; j < messages.length; ++j)
+		{
+			if (messages[j].user.id === blocked[i].id)
+			{
+				messages.splice(j, 1);
+				j--;
+			}
+		}
+	}
     return messages;
   }
 

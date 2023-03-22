@@ -84,11 +84,15 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-      socket.current!.on("ROOM_MESSAGE", (message: Message) => {
-        setStateMessages((stateMessages) => [...stateMessages, message]);
-		if (message.user.id === currentUser.current!.id)
-	  		setMuteTimeLeft('');
-		updateRoomStatus();
+      socket.current!.on("ROOM_MESSAGE", async (message: Message) => {
+		const blocked: AxiosResponse = await axiosInstance.current!.get("/users/blocked/" + message.user.id)
+		if (!blocked.data.length)
+		{
+       		setStateMessages((stateMessages) => [...stateMessages, message]);
+			if (message.user.id === currentUser.current!.id)
+	  			setMuteTimeLeft('');
+			updateRoomStatus();
+		}
       });
       socket.current!.on("MUTE", (mute) => {
 	  	setMuteTimeLeft('You are muted (' + formatRemainTime(mute.penalties) + ')');

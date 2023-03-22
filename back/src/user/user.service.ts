@@ -451,5 +451,20 @@ export class UserService {
 			}
 		});
 		return (blocked.blockedByYou);
+	}
+
+	async getAllBlocked(userId: number)
+	{
+		const blocked = await this.prisma.user.findUnique({
+			where: {
+				id: userId
+			},
+			select: {
+				blockedByYou: {
+					select: {id: true}
+				}
+			}
+		});
+		return (blocked.blockedByYou);
   }
 }
