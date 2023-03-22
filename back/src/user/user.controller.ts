@@ -179,8 +179,22 @@ export class UserController {
   }
 
   @Patch('block/:id')
-  block(@Param('id', ParseIntPipe) idToBlock, @GetUser('id') userId: number)
+  async block(@Param('id', ParseIntPipe) idToBlock: number, @GetUser('id') userId: number)
   {
-	  this.userService.block(idToBlock, userId);
+	  console.log('BLOCK');
+	  await this.userService.block(idToBlock, userId);
+  }
+
+  @Patch('unblock/:id')
+  async unblock(@Param('id', ParseIntPipe) idToBlock: number, @GetUser('id') userId: number)
+  {
+	  console.log('UNBLOCK');
+	  await this.userService.unblock(idToBlock, userId);
+  }
+
+  @Get('blocked/:id')
+  async getBlocked(@Param('id', ParseIntPipe) idBlocked: number, @GetUser('id') userId: number)
+  {
+	  return (await this.userService.getBlocked(idBlocked, userId));
   }
 }

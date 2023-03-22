@@ -413,4 +413,43 @@ export class UserService {
 		else
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
+
+	async unblock(idToBlock: number, userId: number)
+	{
+		if (idToBlock !== userId)
+		{
+			await this.prisma.user.update({
+				where: {
+					id: userId
+				},
+				data: {
+					blockedByYou: {
+						disconnect: {
+							id: idToBlock
+						}
+					}
+				}
+			});
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+  }
+
+	async getBlocked(idBlocked: number, userId: number)
+	{
+		const blocked = await this.prisma.user.findUnique({
+			where: {
+				id: userId
+			},
+			select: {
+				blockedByYou: {
+					where: {
+						id: idBlocked
+					},
+					select: {id: true}
+				}
+			}
+		});
+		return (blocked);
+  }
 }

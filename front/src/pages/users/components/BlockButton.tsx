@@ -9,11 +9,22 @@ type BlockButtonProps =
 
 const BlockButton = (props: BlockButtonProps) =>
 {
-	const [blockValue, setBlockValue] = useState('block');
+	const [blocked, setBlocked] = useState<boolean>(false);
 	const axiosInstance = useRef<AxiosInstance | null>(null);
+
+	const updateBlockStatus = async () =>
+	{
+		axiosInstance.current = await axiosToken()
+		const userBlockedResponse = await axiosInstance.current.get('/users/blocked/' + props.userIdToBlock);
+		if (userBlockedResponse.data.blockedByYou.length)
+			setBlocked(true);
+		else
+			setBlocked(false);
+	}
 
 	useEffect(() =>
 	{
+		updateBlockStatus();
 	}, [])
 
 	const handleBlock = async () =>
@@ -21,14 +32,18 @@ const BlockButton = (props: BlockButtonProps) =>
 		try
 		{
 			axiosInstance.current = await axiosToken()
-			axiosInstance.current = await axiosInstance.current.patch('/users/block/' + props.userIdToBlock);
+			if (!blocked)
+				axiosInstance.current = await axiosInstance.current.patch('/users/block/' + props.userIdToBlock);
+			else
+				axiosInstance.current = await axiosInstance.current.patch('/users/unblock/' + props.userIdToBlock);
+			await updateBlockStatus();
 		}
 		catch (error: any)
 		{
 			console.log('error (while blocking user)', error);
 		}
 	}
-	return (<button onClick={handleBlock}>{blockValue}</button>);
+	return (<button onClick={handleBlock}>{blocked ? 'unblock' : 'block'} </button>);
 }
 
 export default BlockButton;

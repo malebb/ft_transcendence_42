@@ -417,7 +417,7 @@ const UserProfile = () => {
             )}
           </div>
         </div>
-		<BlockButton userIdToBlock={Number(userId)}/>
+		{(Number(userId) !== userSessionId) ? <BlockButton userIdToBlock={Number(userId)}/>: <></>}
         <br />
         <br />
         <br />
