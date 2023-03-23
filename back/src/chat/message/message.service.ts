@@ -29,7 +29,7 @@ export class MessageService {
       data: {
         user: {
           connect: {
-            email: newMessage?.user?.email,
+            id: newMessage?.user?.id,
           },
         },
         message: newMessage.message,
@@ -41,13 +41,11 @@ export class MessageService {
         sendAt: new Date(),
       },
     });
-    return newMessage;
-    // console.log("for " + roomName + " = " + rep);
+
+    return rep;
   }
 
-  async createPrivateMessage(
-    room: ChatRoom,
-    newMessage: Message,
+  async createPrivateRoom(
     sender: User,
     receiver: User,
   ) {
@@ -63,6 +61,28 @@ export class MessageService {
             id: receiver.id,
           },
         },
+      },
+    });
+    const room = await this.prisma.privateMessage.update({
+      where: {
+        id: privateMessage.id,
+      },
+      data: {
+        name: String(privateMessage.id),
+      },
+    });
+    console.log(privateMessage);
+    console.log(room);
+
+    return room;
+  }
+
+  async updatePrivateConv(room: number, newMessage: Message, sender: User) {
+    const updateConv = await this.prisma.privateMessage.update({
+      where: {
+        id: room,
+      },
+      data: {
         message: {
           create: [
             {
@@ -77,13 +97,15 @@ export class MessageService {
           ],
         },
       },
+      include: {
+        message: true,
+      },
     });
 
-    return privateMessage;
+    return updateConv;
   }
 
   async getAllMessagesByRoomName(roomName: string) {
-    // console.log("service = ", roomName);
     const messages = await this.prisma.message.findMany({
       where: {
         room: {
@@ -98,7 +120,7 @@ export class MessageService {
         room: true,
       },
     });
-    // console.log(message);
+
     return messages;
   }
 
@@ -110,47 +132,39 @@ export class MessageService {
         },
       },
     });
+
+    return roomName;
   }
 
-  async createPrivateRoom(sender: User, receiver: User
-    // , roomId: number
-    ) {
-    const privateRoom = await this.prisma.chatRoom.create({
-      data: {
-        owner: {
-          connect: {
-            id: sender.id,
-          },
-        },
-        admins: {
-          connect: {
-            id: sender.id,
-          },
-        },
-        members: {
-          connect: {
-            id: sender.id,
-          },
-        },
-        name: String(roomId),
-        password: '',
-        accessibility: 'PUBLIC',
-      },
-    });
-    const receiverJoinRoom = await this.prisma.user.update({
+  async checkIfPrivateConvExist(user1: User, user2: User) {
+    const conv = await this.prisma.privateMessage.findFirst({
       where: {
-        id: receiver.id,
-      },
-      data: {
-        memberChats: {
-          connect: {
-            name: privateRoom.name,
+        OR: [
+          {
+            AND: {
+              sender: {
+                id: user1.id,
+              },
+              receiver: {
+                id: user2.id,
+              },
+            },
           },
-        },
+          {
+            AND: {
+              sender: {
+                id: user2.id,
+              },
+              receiver: {
+                id: user1.id,
+              },
+            },
+          },
+        ],
       },
     });
 
-    return privateRoom;
+    return conv;
   }
 }
 

@@ -56,52 +56,29 @@ export class MessageGateway
     client.to(message.room?.name).emit('ROOM_MESSAGE', message);
   }
 
-  @SubscribeMessage('PRIVATE')
+  @SubscribeMessage('SEND_PRIVATE_ROOM_MESSAGE')
   async receivePrivateMessage(client: Socket, data) {
-    // console.log(privateMessage);
-    const privateMessage = await this.messageService.createPrivateMessage(
-      privateRoom,
-      data.msg,
+    const newMessage = await this.messageService.updatePrivateConv(data.room.id, data.msg, data.sender);
+    client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
+  }
+
+  @SubscribeMessage('JOIN_PRIVATE_ROOM')
+  async joinPrivateRoom(client: Socket, data) {
+    let privateRoom = await this.messageService.checkIfPrivateConvExist(
       data.sender,
       data.receiver,
     );
-    const privateRoom = await this.messageService.createPrivateRoom(
-      data.sender,
-      data.receiver,
-      // privateMessage.id,
-    );
-    // const privateRoom = String(privateMessage.id)
-    // client.join(privateRoom);
-    console.log(42);
-    console.log(privateRoom);
-    console.log(42);
-    // client.emit('PRIVATE_ROOM');
-
-    // client.to(privateRoom).emit(data.receiver.id, data.msg)
-    // client.to(privateRoom).emit('PRIVATE', data.msg);
-
-    // client.to[data.friend!.id].emit('PRIVATE', {
-    //   from: client.id,
-    //   to: data.friend.to,
-    //   msg: data.msg,
-    // });
-    // client.emit('PRIVATE', {
-    //   from: client.id,
-    //   to: data.friend.to,
-    //   msg: data,
-    // });
-    // });
+    if (privateRoom === null) {
+      privateRoom = await this.messageService.createPrivateRoom(
+        data.sender,
+        data.receiver,
+      );
+    }
+    client.join(privateRoom.name);
+    client.emit("GET_ROOM", privateRoom);
   }
 
-  afterInit(server: Server) {
-    // console.log(server);
-    // a faire
-  }
-
-  // @SubscribeMessage('all-messages')
-  // getAllMessages(room: ChatRoom) {
-  //   this.messageService.getAllMessagesByRoomName(room.name);
-  // }
+  afterInit(server: Server) {}
 
   handleDisconnect(client: Socket) {
     const sockets = this.server.sockets;

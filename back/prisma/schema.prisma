@@ -92,6 +92,7 @@ model Message {
 
 model PrivateMessage {
   id         Int       @id @default(autoincrement())
+  name       String    @default("PRIVATE")
   sender     User      @relation("PrivateMessageSender", fields: [senderId], references: [id])
   senderId   Int
   receiver   User      @relation("PrivateMessageReceiver", fields: [receiverId], references: [id])
