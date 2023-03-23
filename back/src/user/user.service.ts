@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { EditUserDto } from './dto';
 import * as fs from 'fs';
 import { Friend, NeutralUser } from './types';
-import { User } from '@prisma/client';
+import { User, Activity } from '@prisma/client';
 import { throwError } from 'rxjs';
 
 const DEFAULT_IMG = 'uploads/profileimages/default_profile_picture.png';
@@ -34,7 +34,7 @@ export class UserService {
     delete user.hash;
     return user;
   }
-  async setUserOnLineOffline(userId: number, newStatus: string) {
+  async setUserOnLineOffline(userId: number, newStatus: Activity) {
     const user = await this.prisma.user.update({
       where: {
         id: userId,

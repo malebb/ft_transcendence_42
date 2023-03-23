@@ -5,3 +5,10 @@ export interface User
 	username: string;
 	profilePicture: string;
 }
+
+export enum Activity
+{
+	ONLINE = "ONLINE",
+	OFFLINE = "OFFLINE",
+	IN_GAME = "IN_GAME"
+}
