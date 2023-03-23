@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { axiosToken } from "src/api/axios";
 import { AxiosInstance } from "axios";
 import { useParams } from "react-router-dom";
@@ -6,6 +6,7 @@ import PrivateMessages from "../../chat/containers/PrivateMessages";
 
 import styleStatus from "../../../styles/Status.module.css";
 import styleMessage from "../../../styles/private.message.module.css";
+import { SocketContext } from '../../../context/SocketContext';
 
 // https://stackoverflow.com/questions/58315741/how-to-check-online-user-in-nodejs-socketio
 //! ERROR: render offline une fraction de seconde quand refresh
@@ -13,8 +14,9 @@ import styleMessage from "../../../styles/private.message.module.css";
 function Status({ id }: { id: string }) {
   const userId = useParams();
   const axiosInstance = useRef<AxiosInstance | null>(null);
-  const userStatus = useRef<boolean>(false);
+  const [userStatus, setUserStatus] = useState<boolean>(false);
   const currentUser = useRef<boolean>(false);
+  const socket = useContext(SocketContext);
 
   function openMessage(): void {
     document.getElementById("myForm")!.style.display = "block";
@@ -26,7 +28,7 @@ function Status({ id }: { id: string }) {
       await axiosInstance
         .current!.get("/users/profile/" + userId.userId)
         .then((response) => {
-          userStatus.current = response.data.status === "ONLINE" ? true : false;
+          setUserStatus(response.data.status === "ONLINE");
         });
       axiosInstance.current = await axiosToken();
       await axiosInstance.current!.get("/users/me").then((response) => {
@@ -36,16 +38,28 @@ function Status({ id }: { id: string }) {
           "response.data.id = " + response.data.id + typeof response.data.id
         );
         console.log("userId.userId = " + userId.userId + typeof userId.userId);
-
-        console.log(currentUser.current);
       });
     };
 
     fetchData().catch(console.error);
   }, [id]);
 
+	useEffect(() => {
+		const initSocket = async () =>
+		{
+      		axiosInstance.current = await axiosToken();
+      		const currentUser = await axiosInstance.current!.get("/users/me");
+			socket.on('CHANGE_STATUS', (data) =>
+			{
+				if (data.id === Number(id))
+					setUserStatus(data.status === 'ONLINE');
+			});
+		}
+		initSocket();
+	}, [id]);
+
   const GenStatus = () => {
-    if (userStatus.current) {
+    if (userStatus) {
       if (!currentUser.current) {
         return (
           <>

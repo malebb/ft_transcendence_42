@@ -1,6 +1,6 @@
 import React from "react";
 import "../../styles/signin.css";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import {
   faCheck,
   faTimes,
@@ -16,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import Headers from "src/components/Headers";
 import "../../styles/VerifTfa.css";
+import { SocketContext } from '../../context/SocketContext';
+import { getToken } from '../../api/axios';
 
 const EMAIL_REGEX = /^[a-z0-9-_@.]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,24}$/;
@@ -68,6 +70,7 @@ const Signin = () => {
 
   const navigate = useNavigate();
   const snackBar = useSnackbar();
+  const socket = useContext(SocketContext);
 
   useEffect(() => {
     // userRef.current.focus();
@@ -120,7 +123,8 @@ const Signin = () => {
           //withCredentials: true
         }
       );
-      console.log(response.data);
+
+//	  console.log('socket = ', socket);
       setSuccess(true);
       setToken(response.data.token);
       setIsTfa(response.data.isTfa);
@@ -136,10 +140,9 @@ const Signin = () => {
         setResp((prev) => ({...prev, id: response.data.userId}))
         setResp((prev) => ({...prev, tokens: response.data.tokens}))
       }
-      console.log(response.data.access_token);
-      console.log(token);
-      // if (response.data.isTfa === false) navigate("/");
-      // else navigate("/2faverif");
+	  socket.auth = {token:getToken().access_token}
+	  socket.connect();
+	  console.log('my socket = ', socket);
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");

@@ -18,12 +18,7 @@ import { ChatRoomService } from '../chatRoom/chatRoom.service';
 // interfaces :
 import { ChatRoom, Message } from 'ft_transcendence';
 import { Logger, Body } from '@nestjs/common';
-import jwt_decode from "jwt-decode";
-
-type JwtDecoded = 
-{
-	sub: number
-}
+import { getIdFromToken } from '../../gatewayUtils/gatewayUtils';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -62,16 +57,10 @@ export class MessageGateway
     client.join(String(room?.name));
   }
 
-	getIdFromToken(token: string)
-	{
-		const jwtDecoded: JwtDecoded = jwt_decode(token);
-		const id: number = jwtDecoded.sub;
-		return (id);
-	}
 
   @SubscribeMessage('SEND_ROOM_MESSAGE')
   async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token) {
-	const id = this.getIdFromToken(token);
+	const id = getIdFromToken(token);
 	try
 	{
     	await this.messageService.createMessage(message, message?.room?.name, id);

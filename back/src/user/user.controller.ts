@@ -52,7 +52,6 @@ export class UserController {
 
   @Get('profile/:userid')
   getUserProfile(@Param('userid') userid: string) {
-    console.log(userid);
     return this.userService.getUserProfile(parseInt(userid));
   }
 
@@ -90,10 +89,8 @@ export class UserController {
     @GetUser() user: User,
     @Body() dto: EditUserDto,
   ) {
-    //    console.log("file = " + file);
     let ret_pic;
     let ret_login;
-    console.log('PROFILE PATCH DTO = ' + JSON.stringify(dto.login));
     if (file !== undefined)
       ret_pic = this.userService.uploadPicture(user.id, file.path);
     if (dto.login !== undefined) {

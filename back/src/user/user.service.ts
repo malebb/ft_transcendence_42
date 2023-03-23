@@ -19,7 +19,6 @@ export class UserService {
       },
     });
     if (!user) return;
-    console.log(user);
     return this.mapUserToNeutralUser(user);
   }
   async editUser(userId: number, dto: EditUserDto) {
@@ -45,7 +44,6 @@ export class UserService {
         status: newStatus,
       },
     });
-    //console.log(user);
     return user;
   }
 
@@ -83,7 +81,6 @@ export class UserService {
         id: userId,
       },
     });
-    console.log('img to del = ' + img_to_del.profilePicture);
     if (
       img_to_del.profilePicture !== user.profilePicture &&
       img_to_del.profilePicture !== DEFAULT_IMG
@@ -124,7 +121,6 @@ export class UserService {
         id: receiverId,
       },
     });
-    console.log('user = ' + user);
     if (!user) return 'error';
     let request = await this.prisma.friendRequest.findFirst({
       where: {
@@ -281,7 +277,6 @@ export class UserService {
         status: 'accepted',
       },
     });
-    console.log(crea_request);
     await Promise.all(
       crea_request.map(async (req) => {
         const user = await this.prisma.user.findUnique({
@@ -289,8 +284,7 @@ export class UserService {
             id: req.receiverId,
           },
         });
-        console.log(user);
-        if (user) console.log(friendArray.push(this.mapUserToFriend(user)));
+        if (user) friendArray.push(this.mapUserToFriend(user));
       }),
     );
     let recv_request = await this.prisma.friendRequest.findMany({
@@ -299,7 +293,6 @@ export class UserService {
         status: 'accepted',
       },
     });
-    console.log(recv_request);
     await Promise.all(
       recv_request.map(async (req) => {
         const user = await this.prisma.user.findUnique({
@@ -307,24 +300,20 @@ export class UserService {
             id: req.creatorId,
           },
         });
-        console.log(user);
-        if (user) console.log(friendArray.push(this.mapUserToFriend(user)));
+        if (user) friendArray.push(this.mapUserToFriend(user));
       }),
     );
-    console.log(JSON.stringify(friendArray));
     return friendArray;
   }
   async getRecvPendingRequest(userId: number): Promise<NeutralUser[]> {
     //TODO maybe create a particular mapping to remove email from not friend user
     let waitingArray: NeutralUser[] = [];
-    console.log('momi');
     let recv_request = await this.prisma.friendRequest.findMany({
       where: {
         receiverId: userId,
         status: 'pending',
       },
     });
-    console.log(recv_request);
     await Promise.all(
       recv_request.map(async (req) => {
         const user = await this.prisma.user.findUnique({
@@ -332,12 +321,10 @@ export class UserService {
             id: req.creatorId,
           },
         });
-        console.log(user);
         if (user)
-          console.log(waitingArray.push(this.mapUserToNeutralUser(user)));
+          waitingArray.push(this.mapUserToNeutralUser(user));
       }),
     );
-    console.log(JSON.stringify(waitingArray));
     return waitingArray;
   }
   async getCreatedPendingRequest(userId: number): Promise<NeutralUser[]> {
@@ -349,7 +336,6 @@ export class UserService {
         status: 'pending',
       },
     });
-    console.log(crea_request);
     await Promise.all(
       crea_request.map(async (req) => {
         const user = await this.prisma.user.findUnique({
@@ -357,12 +343,10 @@ export class UserService {
             id: req.receiverId,
           },
         });
-        console.log(user);
         if (user)
-          console.log(pendingArray.push(this.mapUserToNeutralUser(user)));
+          pendingArray.push(this.mapUserToNeutralUser(user));
       }),
     );
-    console.log(JSON.stringify(pendingArray));
     return pendingArray;
   }
 
@@ -373,7 +357,6 @@ export class UserService {
         creatorId: userId,
       },
     });
-    console.log('req = ' + JSON.stringify(req));
     if (!req) {
       req = await this.prisma.friendRequest.findFirst({
         where: {
