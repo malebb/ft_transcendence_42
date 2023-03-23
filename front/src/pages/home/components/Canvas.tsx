@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useContext } from "react";
 import Draw from "../../../classes/Draw";
 import { io, Socket } from "socket.io-client";
 import { Ball, Room, Player, PlayerData, User } from "ft_transcendence";
@@ -9,6 +9,7 @@ import { useParams, useNavigate, Link} from 'react-router-dom';
 import { CANVAS_FONT, FONT_COLOR } from '../../../classes/Draw';
 import style from '../../../styles/canvas.module.css';
 import { trimUsername } from '../../../utils/trim';
+import { SocketContext } from '../../../context/SocketContext';
 
 interface CheckboxData
 {
@@ -39,6 +40,7 @@ export default function Canvas()
 	const navigate 							= useRef(useNavigate());
 	const {challengeId}						= useParams()
 	const [isChallenger, setIsChallenger]	= useState(true);
+	const statusSocket = useContext(SocketContext);
 
 	useEffect(() =>
 	{
@@ -67,6 +69,7 @@ export default function Canvas()
 
 		function stopGame()
 		{
+			statusSocket.emit('ONLINE');
 			window.cancelAnimationFrame(animationFrameId.current)
 			kd.current.stop();
 			document!.removeEventListener('keypress', powerUp);
@@ -220,6 +223,7 @@ export default function Canvas()
 
 		async function launchGame()
 		{
+			statusSocket.emit('IN_GAME');
 			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", 0, null, null), room.current!.leftPlayer);
 			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", 0, null, null), room.current!.rightPlayer);
 

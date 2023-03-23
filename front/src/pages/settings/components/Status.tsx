@@ -99,7 +99,7 @@ function Status({ id }: { id: string }) {
 	case 'IN_GAME':
 	return (
 			<>
-   	     		<div className={styleStatus.offline_indicator}></div>
+   	     		<div className={styleStatus.in_game_indicator}></div>
         		<div className={styleStatus.text}>In Game</div>
 			</>);
     }

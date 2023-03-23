@@ -11,6 +11,7 @@ import {
 import { Socket, Server } from 'socket.io';
 import { UserService } from './user.service';
 import { getIdFromToken, isAuthEmpty } from '../gatewayUtils/gatewayUtils';
+import { GetUser } from '../auth/decorator';
 
 @WebSocketGateway({
 	namespace: '/user',
@@ -32,6 +33,20 @@ export class UserGateway
 			return ;
 		const userId = getIdFromToken(client.handshake.auth.token);
 		this.userService.setUserOnLineOffline(userId, "ONLINE");
+		this.server.emit('CHANGE_STATUS', {status: 'ONLINE', id: userId});
+	}
+
+	@SubscribeMessage('IN_GAME')
+	handleInGame(@GetUser() token: string)
+	{
+		const userId = getIdFromToken(token);
+		this.server.emit('CHANGE_STATUS', {status: 'IN_GAME', id: userId});
+	}
+
+	@SubscribeMessage('ONLINE')
+	handleOnline(@GetUser() token: string)
+	{
+		const userId = getIdFromToken(token);
 		this.server.emit('CHANGE_STATUS', {status: 'ONLINE', id: userId});
 	}
 
