@@ -22,7 +22,7 @@ function PrivateMessages() {
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const socket = useRef<Socket | null>(null);
   const friendId = useParams();
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
+//   const messagesContainerRef = useRef<HTMLDivElement>(null);
   let newMessage: Message;
   const [initSocket, setInitSocket] = useState<boolean>(false);
 
@@ -36,22 +36,6 @@ function PrivateMessages() {
       behavior: "smooth",
     });
   };
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     axiosInstance.current = await axiosToken();
-  //     await axiosInstance.current!.get("/users/me").then((response) => {
-  //       currentUser.current = response.data;
-  //     });
-  //     axiosInstance.current = await axiosToken();
-  //     await axiosInstance
-  //       .current!.get("/users/profile/" + friendId.userId)
-  //       .then((response) => {
-  //         friend.current = response.data;
-  //       });
-  //   };
-  //   fetchData().catch(console.error);
-  // }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -98,9 +82,9 @@ function PrivateMessages() {
           setStateMessages((stateMessages) => [...stateMessages, message]);
         });
       });
-      // return () => {
-      //   socket.current?.disconnect();
-      // };
+      return () => {
+        socket.current?.disconnect();
+      };
     };
     initPrivateChat().catch(console.error);
   }, []);
@@ -110,10 +94,11 @@ function PrivateMessages() {
     // Prevent the browser from reloading the page
     event.preventDefault();
 
+
     // Read the form data
-    // @ts-ignore
+	// https://stackoverflow.com/questions/36683770/how-to-get-the-value-of-an-input-field-using-reactjs
     const form = new FormData(event.target);
-    const inputMessage = form.get("messageInput")?.toString()?.trim();
+    let inputMessage = form.get("messageInput")?.toString()?.trim();
 
     if (!inputMessage?.length) return;
 
@@ -133,8 +118,6 @@ function PrivateMessages() {
       sender: currentUser.current,
       receiver: friend.current,
     });
-    // console.log("merde");
-    setStateMessages([...stateMessages, newMessage]);
   }
 
   const GenMessages = () => {
@@ -195,11 +178,11 @@ function PrivateMessages() {
         <div
           className={style.formcontainer}
           id="chatContainer"
-          ref={messagesContainerRef}
+        //   ref={messagesContainerRef}
         >
           <DisplayMessages />
         </div>
-        <form onSubmit={handleSubmit} className={style.sendInput}>
+        <form id="myForm" onSubmit={handleSubmit} className={style.sendInput}>
           <input
             name="messageInput"
             placeholder="Write here..."

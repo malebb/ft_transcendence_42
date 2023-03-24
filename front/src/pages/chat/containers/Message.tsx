@@ -18,7 +18,6 @@ function MessagesContainer() {
   const currentRoom = useRef<ChatRoom | null>(null);
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const roomId = useParams();
-  // const socket = SocketContext();
   const socket = useRef<Socket | null>(null);
   let newMessage: Message;
 

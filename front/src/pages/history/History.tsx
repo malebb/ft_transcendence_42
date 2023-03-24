@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { axiosToken } from "../../api/axios";
 import { AxiosInstance, AxiosResponse } from "axios";
-import "../../styles/History.css";
+import "../../styles/history.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
 import { trimUsername } from "src/utils/trim";
