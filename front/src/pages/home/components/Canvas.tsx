@@ -735,7 +735,15 @@ export default function Canvas()
 			return (
 			<>
 				{challengeTitle()}
-				<center><canvas id="canvas" style={{marginTop: 50}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>
+				<center><canvas id="canvas" style={{marginTop: 10}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>
+				<div id={style.controlsContainer}>
+					<h4>Controls</h4>
+					<ul id="controls">
+						<li>Move up : <span>UP ARROW</span></li>
+						<li>Move down : <span>DOWN ARROW</span></li>
+						<li>Use power up : <span>SPACE</span></li>
+					</ul>
+				</div>
 			</>
 			);
 		}
