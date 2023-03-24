@@ -8,3 +8,4 @@ export * from './ChatRoom';
 export * from './Events';
 export * from './achievements';
 export * from './Message';
+export * from './PrivateMessage';

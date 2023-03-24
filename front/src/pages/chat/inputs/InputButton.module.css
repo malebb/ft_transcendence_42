@@ -1,6 +1,5 @@
 .sendInput {
 	padding: 8px 16px;
-	height: 34px;
 	border-radius: 12px;
 	background: white;
 	display: flex;
@@ -8,7 +7,6 @@
 	margin-left: 8px;
   }
   .sendInput > input {
-	height: 34px;
 	border: 8px;
 	flex: 1;
 	font-size: 17px;

@@ -81,36 +81,29 @@ export class MessageGateway
 	}
   }
 
-  @SubscribeMessage('PRIVATE')
-  receivePrivateMessage(client: Socket, data) {
-    const sockets = this.server.sockets;
-    // console.log("PRIVATE");
-   // console.log(data.friend);
-   // console.log(data.friend.current.username);
-    // client.on('PRIVATE', function(data) {
-      // console.log(data);
-      client.to[data.friend.current!.id].emit('PRIVATE', {
-        from: client.id,
-        to: data.friend.to,
-        msg: data.msg,
-      });
-      // client.emit('PRIVATE', {
-      //   from: client.id,
-      //   to: data.to,
-      //   msg: data,
-      // });
-    // });
+  @SubscribeMessage('SEND_PRIVATE_ROOM_MESSAGE')
+  async receivePrivateMessage(client: Socket, data) {
+    const newMessage = await this.messageService.updatePrivateConv(data.room.id, data.msg, data.sender);
+    client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
   }
 
-  afterInit(server: Server) {
-    // console.log(server);
-    // a faire
+  @SubscribeMessage('JOIN_PRIVATE_ROOM')
+  async joinPrivateRoom(client: Socket, data) {
+    let privateRoom = await this.messageService.checkIfPrivateConvExist(
+      data.sender,
+      data.receiver,
+    );
+    if (privateRoom === null) {
+      privateRoom = await this.messageService.createPrivateRoom(
+        data.sender,
+        data.receiver,
+      );
+    }
+    client.join(privateRoom.name);
+    client.emit("GET_ROOM", privateRoom);
   }
 
-  // @SubscribeMessage('all-messages')
-  // getAllMessages(room: ChatRoom) {
-  //   this.messageService.getAllMessagesByRoomName(room.name);
-  // }
+  afterInit(server: Server) {}
 
   handleDisconnect(client: Socket) {
     const sockets = this.server.sockets;

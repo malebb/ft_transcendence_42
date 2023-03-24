@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Message } from 'ft_transcendence';
-import { ChatRoomService } from '../chatRoom/chatRoom.service';
-import { HttpStatus, HttpException } from '@nestjs/common';
+import { ChatRoom, Message, User } from 'ft_transcendence';
+import { PrivateMessage } from '@prisma/client';
 
 // Database, model Message:
 // relation 1-1 avec la ChatRoomService
@@ -23,44 +22,90 @@ import { HttpStatus, HttpException } from '@nestjs/common';
 // @Controller('messages')
 @Injectable()
 export class MessageService {
-  constructor(
-    private prisma: PrismaService,
-	private readonly chatRoomService: ChatRoomService
-  )
-  {}
+  constructor(private prisma: PrismaService) {}
 
-  async createMessage(newMessage: Message, roomName: string, userId: number)
-  {
-		const room = await this.chatRoomService.getChatRoom(roomName);
-		const mute = await this.chatRoomService.myMute(roomName, userId);
+  async createMessage(newMessage: Message, roomName: string) {
+    const rep = await this.prisma.message.create({
+      data: {
+        user: {
+          connect: {
+            id: newMessage?.user?.id,
+          },
+        },
+        message: newMessage.message,
+        room: {
+          connect: {
+            name: roomName,
+          },
+        },
+        sendAt: new Date(),
+      },
+    });
 
-		if (room && this.chatRoomService.isMember(room.members, userId) &&
-		   !mute.penalties.length)
-		{
-		    await this.prisma.message.create({
-    			data: {
-        			user: {
-          				connect: {
-          					  email: newMessage?.user?.email,
-       					},
-        			},
-       				message: newMessage.message,
-       				room: {
-          				connect: {
-           					name: roomName,
-          				},
-        			},
-        			sendAt: new Date(),
-      			},
-    		});
-   			return newMessage;
-		}
-		else
-			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    return rep;
+  }
+
+  async createPrivateRoom(
+    sender: User,
+    receiver: User,
+  ) {
+    const privateMessage = await this.prisma.privateMessage.create({
+      data: {
+        sender: {
+          connect: {
+            id: sender.id,
+          },
+        },
+        receiver: {
+          connect: {
+            id: receiver.id,
+          },
+        },
+      },
+    });
+    const room = await this.prisma.privateMessage.update({
+      where: {
+        id: privateMessage.id,
+      },
+      data: {
+        name: String(privateMessage.id),
+      },
+    });
+    console.log(privateMessage);
+    console.log(room);
+
+    return room;
+  }
+
+  async updatePrivateConv(room: number, newMessage: Message, sender: User) {
+    const updateConv = await this.prisma.privateMessage.update({
+      where: {
+        id: room,
+      },
+      data: {
+        message: {
+          create: [
+            {
+              user: {
+                connect: {
+                  id: sender.id,
+                },
+              },
+              message: newMessage.message,
+              sendAt: new Date(),
+            },
+          ],
+        },
+      },
+      include: {
+        message: true,
+      },
+    });
+
+    return updateConv;
   }
 
   async getAllMessagesByRoomName(roomName: string) {
-    // console.log("service = ", roomName);
     const messages = await this.prisma.message.findMany({
       where: {
         room: {
@@ -75,7 +120,7 @@ export class MessageService {
         room: true,
       },
     });
-    // console.log(message);
+
     return messages;
   }
 
@@ -87,6 +132,39 @@ export class MessageService {
         },
       },
     });
+
+    return roomName;
+  }
+
+  async checkIfPrivateConvExist(user1: User, user2: User) {
+    const conv = await this.prisma.privateMessage.findFirst({
+      where: {
+        OR: [
+          {
+            AND: {
+              sender: {
+                id: user1.id,
+              },
+              receiver: {
+                id: user2.id,
+              },
+            },
+          },
+          {
+            AND: {
+              sender: {
+                id: user2.id,
+              },
+              receiver: {
+                id: user1.id,
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    return conv;
   }
 }
 

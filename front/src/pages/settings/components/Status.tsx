@@ -4,7 +4,7 @@ import { AxiosInstance } from "axios";
 import { useParams } from "react-router-dom";
 import PrivateMessages from "../../chat/containers/PrivateMessages";
 
-import styleStatus from "../../../styles/Status.module.css";
+import styleStatus from "../../../styles/status.module.css";
 import styleMessage from "../../../styles/private.message.module.css";
 
 // https://stackoverflow.com/questions/58315741/how-to-check-online-user-in-nodejs-socketio
@@ -32,12 +32,6 @@ function Status({ id }: { id: string }) {
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current =
           response.data.id === Number(userId.userId) ? true : false;
-        console.log(
-          "response.data.id = " + response.data.id + typeof response.data.id
-        );
-        console.log("userId.userId = " + userId.userId + typeof userId.userId);
-
-        console.log(currentUser.current);
       });
     };
 

@@ -55,7 +55,7 @@ function MessagesContainer() {
         .current!.get("/message/" + currentRoom.current?.name)
         .then((response) => {
           setStateMessages(response.data);
-          console.log(response.data);
+          // console.log(response.data);
         });
     };
     fetchData().catch(console.error);
@@ -74,6 +74,7 @@ function MessagesContainer() {
 			token: getToken().access_token
 	  }
     });
+
     socket.current.on("connect", async () => {
       socket.current!.on("ROOM_MESSAGE", (message: Message) => {
         setStateMessages((stateMessages) => [...stateMessages, message]);
@@ -198,7 +199,6 @@ function MessagesContainer() {
 }
 
 export default MessagesContainer;
-
 
 /*
 

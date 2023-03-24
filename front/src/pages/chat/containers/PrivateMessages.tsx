@@ -7,17 +7,24 @@ import { useParams } from "react-router-dom";
 
 import style from "../../../styles/private.message.module.css";
 import "./message.style.css";
-import InputButton from "../inputs/InputButton";
+
+export interface PrivateMessage {
+  sender: User;
+  receiver: User;
+  message: Message;
+}
 
 function PrivateMessages() {
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const currentUser = useRef<User | null>(null);
   const friend = useRef<User | null>(null);
+  const room = useRef<object | null>(null);
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const socket = useRef<Socket | null>(null);
   const friendId = useParams();
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   let newMessage: Message;
+  const [initSocket, setInitSocket] = useState<boolean>(false);
 
   function closeMessage(): void {
     document.getElementById("myForm")!.style.display = "none";
@@ -29,6 +36,26 @@ function PrivateMessages() {
       behavior: "smooth",
     });
   };
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     axiosInstance.current = await axiosToken();
+  //     await axiosInstance.current!.get("/users/me").then((response) => {
+  //       currentUser.current = response.data;
+  //     });
+  //     axiosInstance.current = await axiosToken();
+  //     await axiosInstance
+  //       .current!.get("/users/profile/" + friendId.userId)
+  //       .then((response) => {
+  //         friend.current = response.data;
+  //       });
+  //   };
+  //   fetchData().catch(console.error);
+  // }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [stateMessages]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,27 +70,39 @@ function PrivateMessages() {
           friend.current = response.data;
         });
     };
-    fetchData().catch(console.error);
-  }, []);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [stateMessages]);
-
-  useEffect(() => {
-    socket.current = io("ws://localhost:3333/chat", {
-      transports: ["websocket"],
-      forceNew: true,
-      upgrade: false,
-    });
-    socket.current!.on("connect", async () => {
-      socket.current!.on("PRIVATE", function (message) {
-        setStateMessages((stateMessages) => [...stateMessages, message]);
+    const initPrivateChat = async () => {
+      await fetchData().catch(console.error);
+      socket.current = io("ws://localhost:3333/chat", {
+        transports: ["websocket"],
+        forceNew: true,
+        upgrade: false,
       });
-      return () => {
-        socket.current?.disconnect();
-      };
-    });
+      socket.current!.on("connect", async () => {
+        socket.current?.emit("JOIN_PRIVATE_ROOM", {
+          sender: currentUser.current,
+          receiver: friend.current,
+        });
+        const joinRoom = async (): Promise<object> => {
+          return await new Promise(function (resolve) {
+            socket.current!.on("GET_ROOM", async (data) => {
+              resolve(data);
+            });
+          });
+        };
+        joinRoom().then(function (data) {
+          room.current = data;
+          setInitSocket(true);
+        });
+        socket.current!.on("RECEIVE_PRIVATE_ROOM_MESSAGE", function (message) {
+          setStateMessages((stateMessages) => [...stateMessages, message]);
+        });
+      });
+      // return () => {
+      //   socket.current?.disconnect();
+      // };
+    };
+    initPrivateChat().catch(console.error);
   }, []);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
@@ -89,7 +128,13 @@ function PrivateMessages() {
     };
 	*/
 
-    socket.current!.emit("PRIVATE", { msg: newMessage, friend: friend });
+    socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
+      msg: newMessage,
+      room: room.current,
+      sender: currentUser.current,
+      receiver: friend.current,
+    });
+    // console.log("merde");
     setStateMessages([...stateMessages, newMessage]);
   }
 
@@ -140,6 +185,11 @@ function PrivateMessages() {
     );
   };
 
+  const DisplayMessages = () => {
+    if (initSocket === true) return <GenMessages />;
+    return (<></>)
+  };
+
   return (
     <div>
       <div className={style.chatpopup} id="myForm">
@@ -148,16 +198,16 @@ function PrivateMessages() {
           id="chatContainer"
           ref={messagesContainerRef}
         >
-          <GenMessages />
+          <DisplayMessages />
         </div>
-        <InputButton
-          onSubmit={handleSubmit}
-          inputProps={{
-            placeholder: "Tell us what you are thinking",
-            name: "messageInput",
-          }}
-          buttonText="SEND"
-        />
+        <form onSubmit={handleSubmit} className={style.sendInput}>
+          <input
+            name="messageInput"
+            placeholder="Write here..."
+            autoComplete="off"
+          />
+          <button type="submit">SEND</button>
+        </form>
         <button
           type="button"
           className={style.close}
