@@ -1,11 +1,9 @@
-FROM node:16.18.1
+FROM node:19-alpine3.16
 
 WORKDIR /app
 
-COPY ./back ./
+COPY ./front ./
 COPY ../lib ../app-lib
-COPY ../.env ./
-
 
 # RUN npm install;
 # RUN npm install ../lib;
@@ -13,7 +11,6 @@ COPY ../.env ./
 # CMD ["npm", "run", "start:dev"]
 RUN yarn install;
 RUN yarn add ../app-lib;
-RUN npx prisma generate
 
-CMD ["yarn", "start:dev"]
+CMD ["yarn", "start"]
 # CMD [ "tail", "-f", "/dev/null" ]

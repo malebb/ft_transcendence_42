@@ -25,7 +25,7 @@ model User {
   isTFA          Boolean @default(false)
   firstName      String?
   lastName       String?
-  profilePicture Bytes?
+  profilePicture String
 
   skin String @default("white")
   map  String @default("basic")

@@ -59,7 +59,10 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('signin/42login/callback')
-  async callback42(@Body() dto: CallbackDto, @Res() res: Response) {
+  async callback42(
+    @Body() dto: CallbackDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     /*let origin;
         if (req.headers.origin)
         {
@@ -71,7 +74,13 @@ export class AuthController {
     console.log('code from dto = ' + dto.code);
     const token: SignInterface = await this.authService.callback42(dto.code);
     console.log(res.cookie);
-    res.cookie('rt_token', token.tokens.refresh_token);
+    res.cookie('rt_token', token.tokens.refresh_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', 'localhost:3000');
     return res.send(token);
   }
 
@@ -84,9 +93,10 @@ export class AuthController {
   @UseGuards(RtGuard)
   @Post('refresh')
   //refreshToken(@GetUser() user: User, @Req() req: Request)
-  refreshToken(
+  async refreshToken(
     @GetUser('sub') userId: number,
-    @GetUser('refreshToken') token, //refreshToken(@Req() req: Request)
+    @Req() req: Request, //refreshToken(@Req() req: Request)
+    @Res({ passthrough: true }) res: Response,
   ) {
     /*console.log(req);
         let rToken;
@@ -94,7 +104,19 @@ export class AuthController {
         if (req.get('authorization') && user.id)
         {
             rToken = req.get('authorization').replace('Bearer', '').trim();*/
-    return this.authService.refreshToken(userId, token);
+    console.log('REF TOK = ' + req.user);
+    const ret_token = await this.authService.refreshToken(
+      userId,
+      req.cookies['rt_token'],
+    );
+    res.cookie('rt_token', ret_token.refresh_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', 'localhost:3000');
+    return res.send(ret_token);
     /*}
         console.log("aieeee");
         return ;*/

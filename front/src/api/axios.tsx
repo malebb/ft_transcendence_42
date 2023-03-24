@@ -2,6 +2,7 @@ import axios, { AxiosHeaders, AxiosResponse } from "axios";
 import { Dispatch, SetStateAction, useContext } from "react";
 import AuthContext from "src/context/TokenContext";
 import { TokensInterface } from "src/interfaces/Sign";
+import Cookies from 'js-cookie';
 
 const baseURL = "http://localhost:3333";
 
@@ -16,23 +17,67 @@ export const axiosMain = axios.create({
   baseURL,
 });
 
+export const axiosPrivate = axios.create({
+  baseURL,
+  headers: {'Content-Type': 'application/json'},
+  withCredentials: true
+});
+
 export function getToken() {
-  return JSON.parse(localStorage.getItem("tokens")!);
+  return Cookies.get("rt_token")!;
 }
 
-export function getAuthorizationHeader() {
-  if (!getToken()) return null;
-  return `Bearer ${getToken().access_token}`;
-}
 export function getRefreshHeader() {
   if (!getToken()) return null;
-  console.log(getToken().refresh_token);
-  return `Bearer ${getToken().refresh_token}`;
+  console.log('cookie = ' + getToken());
+  return `Bearer ${getToken()}`;
+}
+
+export async function getJWTfromRt(setToken: React.Dispatch<React.SetStateAction<TokensInterface | undefined>>): Promise<boolean> {
+  try{
+    const new_jwt: AxiosResponse = await axiosMain.post(
+      "/auth/refresh",
+      {},
+      {
+        headers: {
+          Authorization: getRefreshHeader(),
+        },
+      }
+    );
+    setToken(new_jwt.data);
+    // Cookies.set('rt_token', new_jwt.data.rt_token);
+    console.log('data = ' + JSON.stringify(new_jwt.data));
+  }
+  catch(err: any)
+  {
+    return false;
+  }
+  return true;
 }
 
 export async function axiosToken(token: TokensInterface, setToken: React.Dispatch<React.SetStateAction<TokensInterface | undefined>> ) {
   const date = new Date();
-  const time = token["expireIn"];
+  console.log(JSON.stringify(token));
+  if(token === undefined)
+  {
+    const new_jwt: AxiosResponse = await axiosMain.post(
+      "/auth/refresh",
+      {},
+      {
+        headers: {
+          Authorization: getRefreshHeader(),
+        },
+      }
+    );
+    localStorage.setItem("tokens", JSON.stringify(new_jwt.data));
+    setToken(new_jwt.data);
+    return axios.create({
+      baseURL,
+      headers: { Authorization: `Bearer ${new_jwt.data.access_token}` },
+  });
+  }
+    else {
+  const time = token['expireIn'];
   const crea_time = new Date(token["crea_time"]);
   if (date.getTime() >= crea_time.getTime() + (time - 10) * 1000) {
     const new_jwt: AxiosResponse = await axiosMain.post(
@@ -50,7 +95,7 @@ export async function axiosToken(token: TokensInterface, setToken: React.Dispatc
       baseURL,
       headers: { Authorization: `Bearer ${new_jwt.data.access_token}` },
   });
-  }
+  }}
     return axios.create({
       baseURL,
       headers: { Authorization: `Bearer ${token.access_token}` },

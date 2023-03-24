@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "../styles/App.css";
-import { Route, Routes, BrowserRouter } from "react-router-dom";
+import { Route, Routes, BrowserRouter, useNavigate } from "react-router-dom";
 import AuthContext, { AuthProvider } from "../context/TokenContext";
 import Main from "./home/Main";
 import Signin from "./signin/signin";
@@ -21,13 +21,15 @@ import { SnackbarProvider } from "notistack";
 import NotAuthRoutes from "./privateRoute/NotAuthRoutes";
 import NotFound from "./error/NotFound";
 import Logout from "./logout/Logout";
+import { getJWTfromRt } from "src/api/axios";
+import Cookies from "js-cookie";
+import Loading from "./Loading";
 
 /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
 function App() {
 
   const context = useContext(AuthContext);
-  console.log(context);
   return (
     <AuthProvider>
       <SnackbarProvider maxSnack={4}>

@@ -168,7 +168,6 @@ export class AuthService {
     const tokens = await this.signToken(user.id, user.email);
     this.updateRtHash(user.id, tokens.refresh_token);
     console.log('tokens ==' + JSON.stringify(tokens));
-    res.cookie('rt_token', tokens.refresh_token);
     return {
       tokens: tokens,
       isTfa: user.isTFA,
@@ -236,12 +235,12 @@ export class AuthService {
       },
     });
     if (!user || !user.hashRt) {
-      console.log('!user');
+      console.log('!rtuser');
       throw new ForbiddenException('Incorrect User');
     }
     const rtMatches = await argon.verify(user.hashRt, rt);
     if (!rtMatches) {
-      console.log('!user');
+      console.log('!rtmatches');
       throw new ForbiddenException('ACESS DENIED');
     }
 
