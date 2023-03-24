@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useContext} from "react";
 import "../../styles/App.css";
 import Headers from "../../components/Headers";
 import Canvas from "./components/Canvas";
@@ -7,29 +7,32 @@ import { axiosToken, getRefreshHeader } from "src/api/axios";
 import Sidebar from "../../components/Sidebar";
 import backgroundVideo from "../../content/background.mp4";
 import { Socket, io } from "socket.io-client";
+import { SocketContext } from '../../context/SocketContext';
 
 function Main() {
 
-  const socket = useRef<Socket | null>(null);
+//  const socket = useRef<Socket | null>(null);
 
   const userSessionId = JSON.parse(sessionStorage.getItem("id")!);
+  const socket = useContext(SocketContext);
 
   useEffect(() => {
-    if (typeof userSessionId === "number") {
-      socket.current = io("ws://localhost:3333/user", {
+//    if (typeof userSessionId === "number") {
+ /*     socket.current = io("ws://localhost:3333/user", {
         transports: ["websocket"],
         forceNew: true,
         upgrade: false,
-      });
-      socket.current.on("connect", async () => {
+      });*/
+     // this.props.socket.current.on("connect", async () => {
+
         // It's possible that the value of userId is being converted to an object during the WebSocket communication.
         // When you emit the USER_ONLINE event with userId in your frontend code, you are passing it as a parameter to the emit method, which serializes the data into a JSON string before sending it over the WebSocket connection. Then, in your backend code, the userId parameter is deserialized from the JSON string, which may cause it to be converted to an object if the serialization and deserialization process is not handled correctly.
-        socket.current!.emit("USER_ONLINE", userSessionId);
-        return () => {
-          socket.current?.disconnect();
-        };
-      });
-    }
+//        socket.emit("USER_ONLINE", userSessionId);
+ //       return () => {
+     //     socket.current?.disconnect();
+   //     };
+   //   });
+  //  }
   }, []);
 
   const onClick = async () => {

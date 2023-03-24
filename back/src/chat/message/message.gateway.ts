@@ -14,16 +14,11 @@ import { GetUser } from '../../auth/decorator';
 // les deux vont exposer les methodes
 // necessaires pour les messages des utilisateurs
 import { MessageService } from './message.service';
-
+import { ChatRoomService } from '../chatRoom/chatRoom.service';
 // interfaces :
 import { ChatRoom, Message } from 'ft_transcendence';
 import { Logger, Body } from '@nestjs/common';
-import jwt_decode from "jwt-decode";
-
-type JwtDecoded = 
-{
-	sub: number
-}
+import { getIdFromToken } from '../../gatewayUtils/gatewayUtils';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -41,7 +36,8 @@ export class MessageGateway
   private readonly logger = new Logger(MessageGateway.name);
 
   // va bind l'application MessageService
-  constructor(private messageService: MessageService) {}
+  constructor(private messageService: MessageService,
+			 private chatRoomService: ChatRoomService) {}
 
   // creation d'une instance server
   @WebSocketServer()
@@ -61,28 +57,26 @@ export class MessageGateway
     client.join(String(room?.name));
   }
 
-	getIdFromToken(token: string)
-	{
-		const jwtDecoded: JwtDecoded = jwt_decode(token);
-		const id: number = jwtDecoded.sub;
-		return (id);
-	}
 
   @SubscribeMessage('SEND_ROOM_MESSAGE')
-  async receiveMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token) {
+  async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token) {
+	const id = getIdFromToken(token);
 	try
 	{
-    	await this.messageService.createMessage(message, message?.room?.name, this.getIdFromToken(token));
-    	client.to(message.room?.name).emit('ROOM_MESSAGE', message);
+    	await this.messageService.createMessage(message, message?.room?.name, id);
+    	this.server.to(message.room?.name).emit('ROOM_MESSAGE', message);
 	}
 	catch (error: any)
 	{
-    	client.emit('ERROR', 'Cannot send Message');
+		const mute = await this.chatRoomService.myMute(message!.room!.name, id);
+		if (mute.penalties.length)
+	   		client.emit('MUTE', mute);
 	}
   }
 
   @SubscribeMessage('SEND_PRIVATE_ROOM_MESSAGE')
   async receivePrivateMessage(client: Socket, data) {
+	  console.log('DATA = ', data);
     const newMessage = await this.messageService.updatePrivateConv(data.room.id, data.msg, data.sender);
     client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
   }

@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChatRoom, Message, User } from 'ft_transcendence';
 import { PrivateMessage } from '@prisma/client';
+import { ChatRoomService } from '../chatRoom/chatRoom.service';
+import { HttpStatus, HttpException } from '@nestjs/common';
+import PenaltyService from '../penalty/penalty.service';
+import { UserService } from '../../user/user.service';
 
 // Database, model Message:
 // relation 1-1 avec la ChatRoomService
@@ -22,28 +26,13 @@ import { PrivateMessage } from '@prisma/client';
 // @Controller('messages')
 @Injectable()
 export class MessageService {
-  constructor(private prisma: PrismaService) {}
-
-  async createMessage(newMessage: Message, roomName: string) {
-    const rep = await this.prisma.message.create({
-      data: {
-        user: {
-          connect: {
-            id: newMessage?.user?.id,
-          },
-        },
-        message: newMessage.message,
-        room: {
-          connect: {
-            name: roomName,
-          },
-        },
-        sendAt: new Date(),
-      },
-    });
-
-    return rep;
-  }
+  constructor(
+    private prisma: PrismaService,
+	private readonly chatRoomService: ChatRoomService,
+	private readonly penaltyService: PenaltyService,
+	private readonly userService: UserService,
+  )
+  {}
 
   async createPrivateRoom(
     sender: User,
@@ -105,7 +94,61 @@ export class MessageService {
     return updateConv;
   }
 
-  async getAllMessagesByRoomName(roomName: string) {
+  async createMessage(newMessage: Message, roomName: string, userId: number)
+  {
+		const room = await this.chatRoomService.getChatRoom(roomName);
+		const mute = await this.chatRoomService.myMute(roomName, userId);
+
+		if (room && this.chatRoomService.isMember(room.members, userId))
+		{
+			if (mute.penalties.length)
+			{
+				const penaltyTimeInMin = mute.penalties[0].durationInMin;
+				const startPenaltyTime = new Date(mute.penalties[0].date);
+				const endPenaltyTime = new Date(startPenaltyTime.getTime() + penaltyTimeInMin * 60000)
+				const currentTime = new Date(Date.now());
+				const msToEnd  = endPenaltyTime.getTime() - currentTime.getTime();
+				if (msToEnd <= 0)
+					this.penaltyService.deletePenalty(mute.penalties[0].id, userId);
+				else
+					throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+
+			}
+		    await this.prisma.message.create({
+    			data: {
+        			user: {
+          				connect: {
+          					  email: newMessage?.user?.email,
+       					},
+        			},
+       				message: newMessage.message,
+       				room: {
+          				connect: {
+           					name: roomName,
+          				},
+        			},
+        			sendAt: new Date(),
+      			},
+    		});
+   			return newMessage;
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+  }
+/*
+  isBlocked(blocked: User[], userToCheck: User): boolean
+  {
+		for (let i = 0; i < blocked.length; ++i)
+		{
+			if 
+		}
+  }
+  */
+
+  async getAllMessagesByRoomName(roomName: string, userId: number)
+  {
+	const blocked  = await this.userService.getAllBlocked(userId);
+
     const messages = await this.prisma.message.findMany({
       where: {
         room: {
@@ -121,6 +164,17 @@ export class MessageService {
       },
     });
 
+	for (let i = 0; i < blocked.length; ++i)
+	{
+		for (let j = 0; j < messages.length; ++j)
+		{
+			if (messages[j].user.id === blocked[i].id)
+			{
+				messages.splice(j, 1);
+				j--;
+			}
+		}
+	}
     return messages;
   }
 

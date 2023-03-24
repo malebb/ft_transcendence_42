@@ -173,7 +173,7 @@ const ChatRoomBase = () => {
 							className={style.passwordSubmitBtn} />
 					</form>
 					<form onSubmit={handleRemovePassword} className={style.removePassword}>
-						<input type="submit" value="remove password"
+						<input type="submit" value="Remove password"
 							className={style.passwordSubmitBtn} />
 					</form>
 				</div>
@@ -663,7 +663,7 @@ const ChatRoomBase = () => {
 		return (
 			<div id={style.leaveRoom}>
 				<form onSubmit={handleLeaveRoom}>
-					<input type="submit" value="leave room"
+					<input type="submit" value="Leave room"
 						className={style.leaveBtn} />
 				</form>
 			</div>
@@ -685,7 +685,7 @@ const ChatRoomBase = () => {
 						</div>
 					</div>
 					<div className={style.chat}>
-						<MessagesContainer />
+						<MessagesContainer updateRoomStatus={updateRoomStatus}/>
 					</div>
 				</>
 			);

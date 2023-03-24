@@ -121,12 +121,12 @@ function PrivateMessages() {
 
     // ! a la fin = signifie que la variable et non nulle et non non-definie
     const dateTS = new Date();
-/*    newMessage = {
+    newMessage = {
       user: currentUser.current!,
       message: inputMessage,
       sendAt: dateTS,
     };
-	*/
+
 
     socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
       msg: newMessage,

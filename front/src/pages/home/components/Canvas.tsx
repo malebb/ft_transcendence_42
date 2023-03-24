@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useContext } from "react";
 import Draw from "../../../classes/Draw";
 import { io, Socket } from "socket.io-client";
 import { Ball, Room, Player, PlayerData, User } from "ft_transcendence";
@@ -9,6 +9,7 @@ import { useParams, useNavigate, Link} from 'react-router-dom';
 import { CANVAS_FONT, FONT_COLOR } from '../../../classes/Draw';
 import style from '../../../styles/canvas.module.css';
 import { trimUsername } from '../../../utils/trim';
+import { SocketContext } from '../../../context/SocketContext';
 
 interface CheckboxData
 {
@@ -39,6 +40,7 @@ export default function Canvas()
 	const navigate 							= useRef(useNavigate());
 	const {challengeId}						= useParams()
 	const [isChallenger, setIsChallenger]	= useState(true);
+	const statusSocket = useContext(SocketContext);
 
 	useEffect(() =>
 	{
@@ -67,6 +69,7 @@ export default function Canvas()
 
 		function stopGame()
 		{
+			statusSocket.emit('ONLINE');
 			window.cancelAnimationFrame(animationFrameId.current)
 			kd.current.stop();
 			document!.removeEventListener('keypress', powerUp);
@@ -220,6 +223,7 @@ export default function Canvas()
 
 		async function launchGame()
 		{
+			statusSocket.emit('IN_GAME');
 			leftPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", 0, null, null), room.current!.leftPlayer);
 			rightPlayer.current = Object.assign(new Player(0, 0, 0, 0, 0, "", "", "", 0, null, null), room.current!.rightPlayer);
 
@@ -731,7 +735,15 @@ export default function Canvas()
 			return (
 			<>
 				{challengeTitle()}
-				<center><canvas id="canvas" style={{marginTop: 50}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>
+				<center><canvas id="canvas" style={{marginTop: 10}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>
+				<div id={style.controlsContainer}>
+					<h4>Controls</h4>
+					<ul id="controls">
+						<li>Move up : <span>UP ARROW</span></li>
+						<li>Move down : <span>DOWN ARROW</span></li>
+						<li>Use power up : <span>SPACE</span></li>
+					</ul>
+				</div>
 			</>
 			);
 		}

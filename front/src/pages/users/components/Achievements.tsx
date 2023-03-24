@@ -26,8 +26,8 @@ const Achievements = () =>
 
 	function printStatus(achievement: AchievementsData)
 	{
-		const achievementDone = <img width="58px" src="http://localhost:3000/images/achievementDone.png" alt="achievementDone"/>
-		const achievementToDo = <img width="50px" src="http://localhost:3000/images/achievementToDo.png" alt="achievementToDo"/>
+		const achievementDone = <img width="40px" src="http://localhost:3000/images/achievementDone.png" alt="achievementDone"/>
+		const achievementToDo = <img width="35px" src="http://localhost:3000/images/achievementToDo.png" alt="achievementToDo"/>
 
 		if (achievement.title === "Mode explorer")
 			return (stats!.modeExplorer ? achievementDone : achievementToDo);
@@ -56,8 +56,8 @@ const Achievements = () =>
 				oneStepAchievements.map((achievement) => {
 					return (
 						<div className="achievement" key={achievement.title}>
-							<h3>{achievement.title}</h3>
-							<p>{achievement.desc}</p>
+							<h3 className="title">{achievement.title}</h3>
+							<p className="desc">{achievement.desc}</p>
 							{printStatus(achievement)}
 						</div>);
 				}));

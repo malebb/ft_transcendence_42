@@ -181,6 +181,7 @@ ul
 	margin-right: 10px;
 	margin-left: 10px;
 	border-radius: 3px;
+	text-align: center;
 }
 
 .removePassword
@@ -196,6 +197,7 @@ ul
 	height: 25px;
 	cursor: pointer;
 	border-radius: 3px;
+	padding: 5px;
 }
 
 #roomsBtn, #roomStatusBtn

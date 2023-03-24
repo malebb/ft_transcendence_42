@@ -10,6 +10,7 @@ import {
   UploadedFile,
   Param,
   Res,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { JwtGuard } from '../auth/guard';
 import { GetUser, Public } from '../auth/decorator';
@@ -51,7 +52,6 @@ export class UserController {
 
   @Get('profile/:userid')
   getUserProfile(@Param('userid') userid: string) {
-    console.log(userid);
     return this.userService.getUserProfile(parseInt(userid));
   }
 
@@ -89,10 +89,8 @@ export class UserController {
     @GetUser() user: User,
     @Body() dto: EditUserDto,
   ) {
-    //    console.log("file = " + file);
     let ret_pic;
     let ret_login;
-    console.log('PROFILE PATCH DTO = ' + JSON.stringify(dto.login));
     if (file !== undefined)
       ret_pic = this.userService.uploadPicture(user.id, file.path);
     if (dto.login !== undefined) {
@@ -175,5 +173,23 @@ export class UserController {
     @Param('userid') userid,
   ): Promise<string> {
     return this.userService.checkSenderStatus(myId, parseInt(userid));
+  }
+
+  @Patch('block/:id')
+  async block(@Param('id', ParseIntPipe) idToBlock: number, @GetUser('id') userId: number)
+  {
+	  await this.userService.block(idToBlock, userId);
+  }
+
+  @Patch('unblock/:id')
+  async unblock(@Param('id', ParseIntPipe) idToBlock: number, @GetUser('id') userId: number)
+  {
+	  await this.userService.unblock(idToBlock, userId);
+  }
+
+  @Get('blocked/:id')
+  async getBlocked(@Param('id', ParseIntPipe) idBlocked: number, @GetUser('id') userId: number)
+  {
+	  return (await this.userService.getBlocked(idBlocked, userId));
   }
 }

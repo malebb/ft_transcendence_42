@@ -6,7 +6,7 @@ import { axiosToken } from '../../../api/axios';
 import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
 import { ChatRoomFilter } from '../utils/ChatRoomFilter';
-import { Penalty } from '../utils/Penalty';
+import { Penalty, formatRemainTime } from '../utils/Penalty';
 import { trimUsername } from '../../../utils/trim';
 
 function Rooms()
@@ -336,35 +336,6 @@ function Rooms()
 						);
 			}
 
-			const formatRemainTime = (currentTime: Date, endPenaltyTime: Date) =>
-			{
-				const oneSecondInMs = 1000;
-				const oneMinuteInMs = oneSecondInMs * 60;
-				const oneHourInMs = oneMinuteInMs * 60;
-				const oneDayInMs = oneHourInMs * 24;
-				const msToEnd  = endPenaltyTime.getTime() - currentTime.getTime();
-
-				if (msToEnd < oneMinuteInMs)
-				{
-					setTimeBannedRemain(Math.floor(msToEnd / oneSecondInMs) + ' second'
-					+ ((Math.floor(msToEnd / oneSecondInMs) > 1) ? 's' : '') + ' left');
-				}
-				else if (msToEnd < oneHourInMs)
-				{
-					setTimeBannedRemain(Math.floor(msToEnd / oneMinuteInMs) + ' minute'
-					+ ((Math.floor(msToEnd / oneMinuteInMs) > 1) ? 's' : '') + ' left');
-				}
-				else if (msToEnd < oneDayInMs)
-				{
-					setTimeBannedRemain(Math.floor(msToEnd / oneHourInMs) + ' hour'
-					+ ((Math.floor(msToEnd / oneHourInMs) > 1) ? 's' : '') + ' left');
-				}
-				else
-				{
-					setTimeBannedRemain(Math.floor(msToEnd / oneDayInMs) + ' day'
-					+ ((Math.floor(msToEnd / oneDayInMs) > 1) ? 's' : '') + ' left');
-				}
-			}
 
 			const updateSelectChatRoom = async (newChatRoomSelected: string) =>
 			{
@@ -387,12 +358,7 @@ function Rooms()
 						{
 							if (error.response.status === 403)
 							{
-								const penaltyTimeInMin = ban.data.penalties[0].durationInMin;
-								const startPenaltyTime = new Date(ban.data.penalties[0].date);
-								const endPenaltyTime = new Date(startPenaltyTime.getTime() + penaltyTimeInMin * 60000)
-								const currentTime = new Date(Date.now());
-
-								formatRemainTime(currentTime, endPenaltyTime);
+								setTimeBannedRemain(formatRemainTime(ban.data.penalties));
 								banned = true;
 								setBannedFromSelected(true);
 							}

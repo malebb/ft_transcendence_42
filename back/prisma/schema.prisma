@@ -15,9 +15,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   id42      String?  @unique
-  username  String   @unique
-  status    String   @default("OFFLINE")
-
+  username  String  @unique
+  status    Activity @default(OFFLINE)
   email  String  @unique
   hash   String
   hashRt String?
@@ -53,7 +52,16 @@ model User {
   penaltiesAuthor Penalty[] @relation(name: "PenaltiesAuthor")
   penaltiesTarget Penalty[] @relation(name: "PenaltiesTarget")
 
+  blockedByYou				User[] @relation(name: "Blocked")
+  blockedYou				User[] @relation(name: "Blocked")
+
   @@map("users")
+}
+
+enum Activity {
+	ONLINE
+	OFFLINE
+	IN_GAME
 }
 
 model Challenge {

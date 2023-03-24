@@ -14,6 +14,7 @@ import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
 import Stats from "./components/Stats";
 import Achievements from "./components/Achievements";
+import BlockButton from './components/BlockButton';
 import { FriendType } from "../friends/Friends";
 import Popup from "../../components/Popup";
 import Status from "../settings/components/Status";
@@ -348,6 +349,7 @@ const UserProfile = () => {
             handleTrue={(e: any) => deleteRequest(true)}
             handleFalse={(e: any) => deleteRequest(false)}
           />
+		  <div className="actionsOnUser">
           <div className="profileFriendButton">
             {friendStatus === "accepted" && (
               <div className="cyan">
@@ -415,6 +417,9 @@ const UserProfile = () => {
               <></>
             )}
           </div>
+
+		{(Number(userId) !== userSessionId) ? <BlockButton userIdToBlock={Number(userId)}/>: <></>}
+		  </div>
         </div>
         <br />
         <br />

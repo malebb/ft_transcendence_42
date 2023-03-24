@@ -8,3 +8,10 @@ export interface User
 	profilePicture: string;
 	messages: Message[];
 }
+
+export enum Activity
+{
+	ONLINE = "ONLINE",
+	OFFLINE = "OFFLINE",
+	IN_GAME = "IN_GAME"
+}

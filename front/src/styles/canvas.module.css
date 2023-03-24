@@ -28,3 +28,29 @@
 	background-color: #613981;
 }
 
+#controlsContainer
+{
+	margin: auto;
+	width: 300px;
+}
+
+#controlsContainer > h4
+{
+	text-align: center;
+}
+
+#controlsContainer > ul > li
+{
+	width: 300px;
+}
+
+#controlsContainer > ul > li > span
+{
+	float: right;
+}
+
+#controlsContainer > h4
+{
+	text-align: center;
+}
+

@@ -62,6 +62,17 @@ div.offline_indicator {
   position: relative;
 }
 
+div.in_game_indicator {
+  margin-left: 10px;
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-right: 10px;
+  background-color:  #E6DC07;
+  border-radius: 50%;
+  position: relative;
+}
+
 .text {
   font-family: inherit;
   letter-spacing: 1px;

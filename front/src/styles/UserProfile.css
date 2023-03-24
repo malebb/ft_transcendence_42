@@ -178,3 +178,9 @@ main {
 	width: 325px;
 	margin: auto;
 }
+
+.actionsOnUser
+{
+	display: flex;
+	align-items: center;
+}

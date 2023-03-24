@@ -6,11 +6,17 @@ import { useParams, Link } from "react-router-dom";
 import { ChatRoom } from "ft_transcendence";
 import { User } from "ft_transcendence";
 import { Message } from "ft_transcendence";
+import { formatRemainTime } from '../utils/Penalty';
 
 import "./message.style.css";
 import { Socket, io } from "socket.io-client";
 
-function MessagesContainer() {
+type MessagesProps = 
+{
+	updateRoomStatus: () => void;
+}
+
+function MessagesContainer({updateRoomStatus}: MessagesProps) { 
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
@@ -21,6 +27,7 @@ function MessagesContainer() {
   // const socket = SocketContext();
   const socket = useRef<Socket | null>(null);
   let newMessage: Message;
+  let [muteTimeLeft, setMuteTimeLeft] = useState<string>('');
 
   // reference a l'element DOM contenant les messages (js)
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -55,7 +62,6 @@ function MessagesContainer() {
         .current!.get("/message/" + currentRoom.current?.name)
         .then((response) => {
           setStateMessages(response.data);
-          // console.log(response.data);
         });
     };
     fetchData().catch(console.error);
@@ -76,9 +82,24 @@ function MessagesContainer() {
     });
 
     socket.current.on("connect", async () => {
-      socket.current!.on("ROOM_MESSAGE", (message: Message) => {
-        setStateMessages((stateMessages) => [...stateMessages, message]);
+      await axiosInstance.current!.get("/users/me").then((response) => {
+        currentUser.current = response.data;
       });
+      socket.current!.on("ROOM_MESSAGE", async (message: Message) => {
+		const blocked: AxiosResponse = await axiosInstance.current!.get("/users/blocked/" + message.user.id)
+		if (!blocked.data.length)
+		{
+       		setStateMessages((stateMessages) => [...stateMessages, message]);
+			if (message.user.id === currentUser.current!.id)
+	  			setMuteTimeLeft('');
+			updateRoomStatus();
+		}
+      });
+      socket.current!.on("MUTE", (mute) => {
+	  	setMuteTimeLeft('You are muted (' + formatRemainTime(mute.penalties) + ')');
+		updateRoomStatus();
+      });
+
       return () => {
         socket.current?.disconnect();
       };
@@ -89,6 +110,8 @@ function MessagesContainer() {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
+
+	updateRoomStatus();
 
     // Read the form data
     // @ts-ignore
@@ -108,20 +131,7 @@ function MessagesContainer() {
       sendAt: dateTS,
     };
 
-	try
-	{
-	    axiosInstance.current = await axiosToken();
-		const mute: AxiosResponse = await axiosInstance.current.get('/chatRoom/myMute/' + roomId.roomName);
-		if (!mute.data.penalties.length)
-		{
-	   	 	socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
-   			setStateMessages([...stateMessages, newMessage]);
-		}
-	}
-	catch (error: any)
-	{
-		console.log('error (while sending message) :', error);
-	}
+   	socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
   }
 
   const GenMessages = () => {
@@ -191,6 +201,7 @@ function MessagesContainer() {
           <div id="chatContainer" ref={messagesContainerRef}>
             <GenMessages />
           </div>
+		  <p className="muteMsg">{muteTimeLeft}</p>
           <GenInputButton />
         </div>
       </div>
