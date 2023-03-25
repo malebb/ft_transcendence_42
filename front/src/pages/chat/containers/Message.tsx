@@ -1,28 +1,26 @@
 import { useEffect, useRef, useState } from "react";
-import InputButton from "../inputs/InputButton";
 import { AxiosInstance } from "axios";
 import { axiosToken } from "src/api/axios";
 import { useParams } from "react-router-dom";
 import { ChatRoom } from "ft_transcendence";
 import { User } from "ft_transcendence";
 import { Message } from "ft_transcendence";
+import { Socket, io } from "socket.io-client";
 
 import "./message.style.css";
-import { Socket, io } from "socket.io-client";
+import style from "../inputs/InputButton.module.css"
 
 function MessagesContainer() {
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
+  const [inputMessage, setInputMessage] = useState('');
   const currentUser = useRef<User | null>(null);
   const currentRoom = useRef<ChatRoom | null>(null);
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const roomId = useParams();
   const socket = useRef<Socket | null>(null);
   let newMessage: Message;
-
-  // reference a l'element DOM contenant les messages (js)
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     // fait defiler la page vers le bas : utilise scrollview
@@ -80,19 +78,12 @@ function MessagesContainer() {
     });
   }, []);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
 
-    // Read the form data
-    // @ts-ignore
-    const form = new FormData(event.target);
-    const inputMessage = form.get("messageInput")?.toString()?.trim();
-
     if (!inputMessage?.length) return;
-
-    // debugger;
 
     // ! a la fin = signifie que la variable et non nulle et non non-definie
     const dateTS = new Date();
@@ -105,6 +96,7 @@ function MessagesContainer() {
 
     socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
     setStateMessages([...stateMessages, newMessage]);
+	setInputMessage('');
   }
 
   const GenMessages = () => {
@@ -154,27 +146,23 @@ function MessagesContainer() {
     );
   };
 
-  const GenInputButton = () => {
-    return (
-      <InputButton
-        onSubmit={handleSubmit}
-        inputProps={{
-          placeholder: "Tell us what you are thinking",
-          name: "messageInput",
-        }}
-        buttonText="SEND"
-      />
-    );
-  };
-
   return (
     <>
       <div className="chatPage">
         <div id="content">
-          <div id="chatContainer" ref={messagesContainerRef}>
+          <div id="chatContainer">
             <GenMessages />
           </div>
-          <GenInputButton />
+		  <form onSubmit={handleSubmit} className={style.sendInput}>
+      <input
+		name="messageInput"
+		placeholder="Tell us what you are thinking"
+		autoComplete="off"
+		value={inputMessage}
+		onChange={(event) => setInputMessage(event.target.value)}
+      />
+	  	<button type="submit">SEND</button>
+	  </form>
         </div>
       </div>
     </>

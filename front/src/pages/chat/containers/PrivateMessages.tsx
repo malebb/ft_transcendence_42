@@ -77,16 +77,14 @@ function PrivateMessages() {
             await axiosInstance
             .current!.get("/message/private/" + JSON.stringify(room.current))
             .then((response) => {
-              console.log(response.data);
                 setStateMessages(response.data);
               })
               .catch((e) => {
                 console.log(e);
               });
           };
-          // console.log(room.current.id);
           getAllMessages()
-            setInitSocket(true);
+           	setInitSocket(true);
           });
 
           socket.current!.on(
@@ -95,16 +93,6 @@ function PrivateMessages() {
               setStateMessages((stateMessages) => [...stateMessages, message]);
             }
           );
-          // console.log(room.current);
-          // axiosInstance.current = await axiosToken();
-          // await axiosInstance
-          //   .current!.get("/message/private/" + room.current)
-          //   .then((response) => {
-          //     setStateMessages(response.data);
-          //   })
-          //   .catch(e => {
-          //     console.log(e);
-          //   });
         });
       } catch (error) {
         console.log(error);
