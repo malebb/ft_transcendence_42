@@ -8,12 +8,6 @@ import { useParams } from "react-router-dom";
 import style from "../../../styles/private.message.module.css";
 import "./message.style.css";
 
-export interface PrivateMessage {
-  sender: User;
-  receiver: User;
-  message: Message;
-}
-
 function PrivateMessages() {
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const currentUser = useRef<User | null>(null);
@@ -22,7 +16,7 @@ function PrivateMessages() {
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const socket = useRef<Socket | null>(null);
   const friendId = useParams();
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [inputMessage, setInputMessage] = useState("");
   let newMessage: Message;
   const [initSocket, setInitSocket] = useState<boolean>(false);
 
@@ -36,22 +30,6 @@ function PrivateMessages() {
       behavior: "smooth",
     });
   };
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     axiosInstance.current = await axiosToken();
-  //     await axiosInstance.current!.get("/users/me").then((response) => {
-  //       currentUser.current = response.data;
-  //     });
-  //     axiosInstance.current = await axiosToken();
-  //     await axiosInstance
-  //       .current!.get("/users/profile/" + friendId.userId)
-  //       .then((response) => {
-  //         friend.current = response.data;
-  //       });
-  //   };
-  //   fetchData().catch(console.error);
-  // }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -72,52 +50,67 @@ function PrivateMessages() {
     };
 
     const initPrivateChat = async () => {
-      await fetchData().catch(console.error);
-      socket.current = io("ws://localhost:3333/chat", {
-        transports: ["websocket"],
-        forceNew: true,
-        upgrade: false,
-      });
-      socket.current!.on("connect", async () => {
-        socket.current?.emit("JOIN_PRIVATE_ROOM", {
-          sender: currentUser.current,
-          receiver: friend.current,
+      try {
+        await fetchData().catch(console.error);
+        socket.current = io("ws://localhost:3333/chat", {
+          transports: ["websocket"],
+          forceNew: true,
+          upgrade: false,
         });
-        const joinRoom = async (): Promise<object> => {
-          return await new Promise(function (resolve) {
-            socket.current!.on("GET_ROOM", async (data) => {
-              resolve(data);
-            });
+        socket.current!.on("connect", async () => {
+          socket.current?.emit("JOIN_PRIVATE_ROOM", {
+            sender: currentUser.current,
+            receiver: friend.current,
           });
-        };
-        joinRoom().then(function (data) {
-          room.current = data;
-          setInitSocket(true);
+          const joinRoom = async (): Promise<object> => {
+            return await new Promise(function (resolve) {
+              socket.current!.on("GET_ROOM", async (data) => {
+                // https://stackoverflow.com/questions/51712030/promise-throwing-error-because-it-cannot-access-this
+                return resolve(data);
+              });
+            });
+          };
+          joinRoom().then(function (data) {
+            room.current = data;
+          const getAllMessages = async () => {
+            axiosInstance.current = await axiosToken();
+            await axiosInstance
+            .current!.get("/message/private/" + JSON.stringify(room.current))
+            .then((response) => {
+                setStateMessages(response.data);
+              })
+              .catch((e) => {
+                console.log(e);
+              });
+          };
+          getAllMessages()
+           	setInitSocket(true);
+          });
+
+          socket.current!.on(
+            "RECEIVE_PRIVATE_ROOM_MESSAGE",
+            function (message: Message) {
+              setStateMessages((stateMessages) => [...stateMessages, message]);
+            }
+          );
         });
-        socket.current!.on("RECEIVE_PRIVATE_ROOM_MESSAGE", function (message) {
-          setStateMessages((stateMessages) => [...stateMessages, message]);
-        });
-      });
-      // return () => {
-      //   socket.current?.disconnect();
-      // };
+      } catch (error) {
+        console.log(error);
+      }
+      return () => {
+        socket.current?.disconnect();
+      };
     };
     initPrivateChat().catch(console.error);
-  }, []);
+  }, [friendId.userId]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
+    //React.FormEvent<HTMLFormElement>): void {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
 
-    // Read the form data
-    // @ts-ignore
-    const form = new FormData(event.target);
-    const inputMessage = form.get("messageInput")?.toString()?.trim();
-
     if (!inputMessage?.length) return;
-
-    // debugger;
 
     // ! a la fin = signifie que la variable et non nulle et non non-definie
     const dateTS = new Date();
@@ -134,8 +127,8 @@ function PrivateMessages() {
       sender: currentUser.current,
       receiver: friend.current,
     });
-    // console.log("merde");
     setStateMessages([...stateMessages, newMessage]);
+    (event.target as HTMLFormElement).reset();
   }
 
   const GenMessages = () => {
@@ -187,24 +180,21 @@ function PrivateMessages() {
 
   const DisplayMessages = () => {
     if (initSocket === true) return <GenMessages />;
-    return (<></>)
+    return <></>;
   };
 
   return (
     <div>
       <div className={style.chatpopup} id="myForm">
-        <div
-          className={style.formcontainer}
-          id="chatContainer"
-          ref={messagesContainerRef}
-        >
+        <div className={style.formcontainer} id="chatContainer">
           <DisplayMessages />
         </div>
-        <form onSubmit={handleSubmit} className={style.sendInput}>
+        <form id="myForm" onSubmit={handleSubmit} className={style.sendInput}>
           <input
             name="messageInput"
             placeholder="Write here..."
             autoComplete="off"
+            onChange={(event) => setInputMessage(event.target.value)}
           />
           <button type="submit">SEND</button>
         </form>
@@ -219,3 +209,16 @@ function PrivateMessages() {
 }
 
 export default PrivateMessages;
+
+/*
+notes: 
+  Read the form data
+  https://stackoverflow.com/questions/36683770/how-to-get-the-value-of-an-input-field-using-reactjs
+  const form = new FormData(event.target);
+  const form = (document.getElementsByTagName("messageInput")[1] as HTMLInputElement).value;
+
+se debarasser de any :
+https://freshman.tech/snippets/typescript/fix-value-not-exist-eventtarget/
+https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/forms_and_events/
+
+*/

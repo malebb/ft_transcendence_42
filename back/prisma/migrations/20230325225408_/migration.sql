@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "Activity" AS ENUM ('ONLINE', 'OFFLINE', 'IN_GAME');
+
+-- CreateEnum
 CREATE TYPE "Accessibility" AS ENUM ('PUBLIC', 'PRIVATE', 'PROTECTED', 'PRIVATE_PROTECTED');
 
 -- CreateEnum
@@ -14,7 +17,7 @@ CREATE TABLE "users" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "id42" TEXT,
     "username" TEXT NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'OFFLINE',
+    "status" "Activity" NOT NULL DEFAULT 'OFFLINE',
     "email" TEXT NOT NULL,
     "hash" TEXT NOT NULL,
     "hashRt" TEXT,
@@ -55,10 +58,21 @@ CREATE TABLE "Message" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
     "message" TEXT NOT NULL,
-    "chatRoomId" INTEGER NOT NULL,
+    "chatRoomId" INTEGER,
     "sendAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "privateMessageId" INTEGER,
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PrivateMessage" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL DEFAULT 'PRIVATE',
+    "senderId" INTEGER NOT NULL,
+    "receiverId" INTEGER NOT NULL,
+
+    CONSTRAINT "PrivateMessage_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -212,7 +226,16 @@ ALTER TABLE "ChatRoom" ADD CONSTRAINT "ChatRoom_ownerId_fkey" FOREIGN KEY ("owne
 ALTER TABLE "Message" ADD CONSTRAINT "Message_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Message" ADD CONSTRAINT "Message_chatRoomId_fkey" FOREIGN KEY ("chatRoomId") REFERENCES "ChatRoom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Message" ADD CONSTRAINT "Message_chatRoomId_fkey" FOREIGN KEY ("chatRoomId") REFERENCES "ChatRoom"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Message" ADD CONSTRAINT "Message_privateMessageId_fkey" FOREIGN KEY ("privateMessageId") REFERENCES "PrivateMessage"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PrivateMessage" ADD CONSTRAINT "PrivateMessage_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PrivateMessage" ADD CONSTRAINT "PrivateMessage_receiverId_fkey" FOREIGN KEY ("receiverId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Penalty" ADD CONSTRAINT "Penalty_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "ChatRoom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

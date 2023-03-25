@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ChatRoom, Message, User } from 'ft_transcendence';
-import { PrivateMessage } from '@prisma/client';
+import { Message, User } from 'ft_transcendence';
 import { ChatRoomService } from '../chatRoom/chatRoom.service';
 import { HttpStatus, HttpException } from '@nestjs/common';
 import PenaltyService from '../penalty/penalty.service';
@@ -60,8 +59,6 @@ export class MessageService {
         name: String(privateMessage.id),
       },
     });
-    console.log(privateMessage);
-    console.log(room);
 
     return room;
   }
@@ -175,6 +172,24 @@ export class MessageService {
 			}
 		}
 	}
+    return messages;
+  }
+
+  async getAllPrivateRoomMessagesByRoomId(roomId: number) {
+    const messages = await this.prisma.message.findMany({
+      where: {
+        privateMessage: {
+			id: roomId,
+		},
+      },
+      orderBy: {
+        sendAt: 'asc',
+      },
+      include: {
+        user: true,
+      },
+    });
+
     return messages;
   }
 

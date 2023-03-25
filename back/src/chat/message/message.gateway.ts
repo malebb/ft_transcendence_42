@@ -5,7 +5,6 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
@@ -76,8 +75,7 @@ export class MessageGateway
 
   @SubscribeMessage('SEND_PRIVATE_ROOM_MESSAGE')
   async receivePrivateMessage(client: Socket, data) {
-	  console.log('DATA = ', data);
-    const newMessage = await this.messageService.updatePrivateConv(data.room.id, data.msg, data.sender);
+    await this.messageService.updatePrivateConv(data.room.id, data.msg, data.sender);
     client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
   }
 

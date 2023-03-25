@@ -4,7 +4,7 @@ export interface User {
     email: string;
     username: string;
     profilePicture: string;
-    messages: Message[];
+    messages?: Message[];
 }
 export declare enum Activity {
     ONLINE = "ONLINE",

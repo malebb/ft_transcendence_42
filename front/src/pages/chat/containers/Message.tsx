@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import InputButton from "../inputs/InputButton";
-import { AxiosInstance, AxiosResponse } from 'axios';
+import { AxiosInstance, AxiosResponse } from "axios";
 import { axiosToken, getToken } from "src/api/axios";
-import { useParams, Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ChatRoom } from "ft_transcendence";
 import { User } from "ft_transcendence";
 import { Message } from "ft_transcendence";
-import { formatRemainTime } from '../utils/Penalty';
+import { Socket, io } from "socket.io-client";
 
 import "./message.style.css";
-import { Socket, io } from "socket.io-client";
+import style from "../inputs/InputButton.module.css"
+import { formatRemainTime } from "../utils/Penalty";
 
 type MessagesProps = 
 {
@@ -20,17 +20,14 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
+  const [inputMessage, setInputMessage] = useState('');
   const currentUser = useRef<User | null>(null);
   const currentRoom = useRef<ChatRoom | null>(null);
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const roomId = useParams();
-  // const socket = SocketContext();
   const socket = useRef<Socket | null>(null);
   let newMessage: Message;
   let [muteTimeLeft, setMuteTimeLeft] = useState<string>('');
-
-  // reference a l'element DOM contenant les messages (js)
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     // fait defiler la page vers le bas : utilise scrollview
@@ -65,7 +62,7 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
         });
     };
     fetchData().catch(console.error);
-  }, []);
+  }, [roomId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -89,7 +86,8 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
 		const blocked: AxiosResponse = await axiosInstance.current!.get("/users/blocked/" + message.user.id)
 		if (!blocked.data.length)
 		{
-       		setStateMessages((stateMessages) => [...stateMessages, message]);
+			if (message.user.id !== currentUser.current?.id)
+       			setStateMessages((stateMessages) => [...stateMessages, message]);
 			if (message.user.id === currentUser.current!.id)
 	  			setMuteTimeLeft('');
 			updateRoomStatus();
@@ -104,23 +102,14 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
         socket.current?.disconnect();
       };
     });
-  }, []);
+  }, [updateRoomStatus]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
 
-	updateRoomStatus();
-
-    // Read the form data
-    // @ts-ignore
-    const form = new FormData(event.target);
-    const inputMessage = form.get("messageInput")?.toString()?.trim();
-
     if (!inputMessage?.length) return;
-
-    // debugger;
 
     // ! a la fin = signifie que la variable et non nulle et non non-definie
     const dateTS = new Date();
@@ -131,7 +120,9 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
       sendAt: dateTS,
     };
 
-   	socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
+    socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
+    setStateMessages([...stateMessages, newMessage]);
+	setInputMessage('');
   }
 
   const GenMessages = () => {
@@ -147,8 +138,10 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
         return (
           <>
             <div className="chat-receiver">
-              <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username}</Link> : </span>
-              <span>{newMessage.message}</span>
+			{/* <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username}</Link> : </span> */}
+              {/* <span>{newMessage.message}</span> */}
+			  <span><a className="a" href={"/user/" + newMessage.user.id}> {newMessage?.user?.username}</a></span>
+              <span>{" : " + newMessage.message}</span>
             </div>
             <span className="date">{genDate(newMessage)}</span>
           </>
@@ -158,7 +151,8 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
         <div className="chat-sender">
           <span className="date">{genDate(newMessage)}</span>
           <div className="chat-username">
-            <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username }</Link> : </span>
+		  {/* <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username }</Link> : </span> */}
+		  <span>{newMessage?.user?.username + " : "}</span>
             <span>{newMessage.message}</span>
           </div>
         </div>
@@ -181,28 +175,24 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
     );
   };
 
-  const GenInputButton = () => {
-    return (
-      <InputButton
-        onSubmit={handleSubmit}
-        inputProps={{
-          placeholder: "Tell us what you are thinking",
-          name: "messageInput",
-        }}
-        buttonText="SEND"
-      />
-    );
-  };
-
   return (
     <>
       <div className="chatPage">
         <div id="content">
-          <div id="chatContainer" ref={messagesContainerRef}>
+          <div id="chatContainer">
             <GenMessages />
           </div>
 		  <p className="muteMsg">{muteTimeLeft}</p>
-          <GenInputButton />
+		  <form onSubmit={handleSubmit} className={style.sendInput}>
+      <input
+		name="messageInput"
+		placeholder="Tell us what you are thinking"
+		autoComplete="off"
+		value={inputMessage}
+		onChange={(event) => setInputMessage(event.target.value)}
+      />
+	  	<button type="submit">SEND</button>
+	  </form>
         </div>
       </div>
     </>

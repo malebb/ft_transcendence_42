@@ -94,7 +94,7 @@ model Message {
   room             ChatRoom?       @relation(fields: [chatRoomId], references: [id])
   chatRoomId       Int?
   sendAt           DateTime        @default(now())
-  PrivateMessage   PrivateMessage? @relation(fields: [privateMessageId], references: [id])
+  privateMessage   PrivateMessage? @relation(fields: [privateMessageId], references: [id])
   privateMessageId Int?
 }
 

@@ -6,7 +6,7 @@ export interface User
 	email: string;
 	username: string;
 	profilePicture: string;
-	messages: Message[];
+	messages?: Message[];
 }
 
 export enum Activity
