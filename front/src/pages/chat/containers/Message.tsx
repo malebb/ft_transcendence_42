@@ -54,7 +54,6 @@ function MessagesContainer() {
         .current!.get("/message/" + currentRoom.current?.name)
         .then((response) => {
           setStateMessages(response.data);
-          // console.log(response.data);
         });
     };
     fetchData().catch(console.error);

@@ -124,6 +124,26 @@ export class MessageService {
     return messages;
   }
 
+  async getAllPrivateRoomMessagesByRoomId(roomId: number) {
+    const messages = await this.prisma.privateMessage.findMany({
+      where: {
+        id: roomId,
+      },
+      // orderBy: {
+      //   message: {
+      //     sendAt: 'asc',
+      //   },
+      // },
+      include: {
+        sender: true,
+        receiver: true,
+      }
+
+    });
+
+    return messages;
+  }
+
   async deleteAllMessagesByRoomName(roomName: string) {
     const deleteMessages = await this.prisma.message.deleteMany({
       where: {

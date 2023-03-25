@@ -16,7 +16,6 @@ class MessageController
 	@Get(':room')
 	async getAllMessagesByRoomName(@Param('room') room: string)
 	{
-		// console.log("controller = ", room);
 		return (await this.messageService.getAllMessagesByRoomName(room));
 	}
 
@@ -24,6 +23,13 @@ class MessageController
 	async deleteAllMessagesByRoomName(room: string)
 	{
 		return (await this.messageService.deleteAllMessagesByRoomName(room));
+	}
+
+	@Get('/private/:roomId')
+	async getAllPrivateRoomMessagesByRoomId(@Param('roomId') roomDataString: string)
+	{
+		const roomId = JSON.parse(roomDataString).id;
+		return (await this.messageService.getAllPrivateRoomMessagesByRoomId(roomId));
 	}
 
 }
