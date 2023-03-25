@@ -65,7 +65,7 @@ function PrivateMessages() {
           const joinRoom = async (): Promise<object> => {
             return await new Promise(function (resolve) {
               socket.current!.on("GET_ROOM", async (data) => {
-                https://stackoverflow.com/questions/51712030/promise-throwing-error-because-it-cannot-access-this
+                // https://stackoverflow.com/questions/51712030/promise-throwing-error-because-it-cannot-access-this
                 return resolve(data);
               });
             });
@@ -102,7 +102,7 @@ function PrivateMessages() {
       };
     };
     initPrivateChat().catch(console.error);
-  }, []);
+  }, [friendId.userId]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
     //React.FormEvent<HTMLFormElement>): void {

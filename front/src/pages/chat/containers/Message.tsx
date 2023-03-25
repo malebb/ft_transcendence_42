@@ -55,7 +55,7 @@ function MessagesContainer() {
         });
     };
     fetchData().catch(console.error);
-  }, []);
+  }, [roomId]);
 
   useEffect(() => {
     scrollToBottom();
