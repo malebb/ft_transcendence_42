@@ -71,8 +71,6 @@ export class MessageService {
         name: String(privateMessage.id),
       },
     });
-    console.log(privateMessage);
-    console.log(room);
 
     return room;
   }
@@ -125,20 +123,18 @@ export class MessageService {
   }
 
   async getAllPrivateRoomMessagesByRoomId(roomId: number) {
-    const messages = await this.prisma.privateMessage.findMany({
+    const messages = await this.prisma.message.findMany({
       where: {
-        id: roomId,
+        privateMessage: {
+			id: roomId,
+		},
       },
-      // orderBy: {
-      //   message: {
-      //     sendAt: 'asc',
-      //   },
-      // },
+      orderBy: {
+        sendAt: 'asc',
+      },
       include: {
-        sender: true,
-        receiver: true,
-      }
-
+        user: true,
+      },
     });
 
     return messages;
