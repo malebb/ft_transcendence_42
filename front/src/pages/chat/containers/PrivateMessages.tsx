@@ -8,12 +8,6 @@ import { useParams } from "react-router-dom";
 import style from "../../../styles/private.message.module.css";
 import "./message.style.css";
 
-export interface PrivateMessage {
-  sender: User;
-  receiver: User;
-  message: Message;
-}
-
 function PrivateMessages() {
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const currentUser = useRef<User | null>(null);
@@ -89,7 +83,7 @@ function PrivateMessages() {
     initPrivateChat().catch(console.error);
   }, []);
 
-  function handleSubmit(event: any):void { //React.FormEvent<HTMLFormElement>): void {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement> ):void { //React.FormEvent<HTMLFormElement>): void {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
@@ -111,7 +105,7 @@ function PrivateMessages() {
       receiver: friend.current,
     });
     setStateMessages([...stateMessages, newMessage]);
-    event.target.reset();
+    (event.target as HTMLFormElement).reset();
   }
 
   const GenMessages = () => {
