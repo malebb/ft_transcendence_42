@@ -111,6 +111,7 @@ function PrivateMessages() {
       receiver: friend.current,
     });
     setStateMessages([...stateMessages, newMessage]);
+    event.target.reset();
   }
 
   const GenMessages = () => {
