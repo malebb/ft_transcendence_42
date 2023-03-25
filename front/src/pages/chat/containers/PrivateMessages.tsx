@@ -22,7 +22,7 @@ function PrivateMessages() {
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const socket = useRef<Socket | null>(null);
   const friendId = useParams();
-//   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [inputMessage, setInputMessage] = useState('');
   let newMessage: Message;
   const [initSocket, setInitSocket] = useState<boolean>(false);
 
@@ -89,20 +89,12 @@ function PrivateMessages() {
     initPrivateChat().catch(console.error);
   }, []);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
+  function handleSubmit(event: any):void { //React.FormEvent<HTMLFormElement>): void {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
     // Prevent the browser from reloading the page
     event.preventDefault();
 
-
-    // Read the form data
-	// https://stackoverflow.com/questions/36683770/how-to-get-the-value-of-an-input-field-using-reactjs
-    const form = new FormData(event.target);
-    let inputMessage = form.get("messageInput")?.toString()?.trim();
-
     if (!inputMessage?.length) return;
-
-    // debugger;
 
     // ! a la fin = signifie que la variable et non nulle et non non-definie
     const dateTS = new Date();
@@ -118,6 +110,7 @@ function PrivateMessages() {
       sender: currentUser.current,
       receiver: friend.current,
     });
+    setStateMessages([...stateMessages, newMessage]);
   }
 
   const GenMessages = () => {
@@ -178,7 +171,6 @@ function PrivateMessages() {
         <div
           className={style.formcontainer}
           id="chatContainer"
-        //   ref={messagesContainerRef}
         >
           <DisplayMessages />
         </div>
@@ -187,6 +179,7 @@ function PrivateMessages() {
             name="messageInput"
             placeholder="Write here..."
             autoComplete="off"
+            onChange={(event) => setInputMessage(event.target.value)}
           />
           <button type="submit">SEND</button>
         </form>
@@ -201,3 +194,12 @@ function PrivateMessages() {
 }
 
 export default PrivateMessages;
+
+/*
+notes: 
+  Read the form data
+  https://stackoverflow.com/questions/36683770/how-to-get-the-value-of-an-input-field-using-reactjs
+  const form = new FormData(event.target);
+  const form = (document.getElementsByTagName("messageInput")[1] as HTMLInputElement).value;
+
+*/
