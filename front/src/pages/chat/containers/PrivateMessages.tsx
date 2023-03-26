@@ -186,9 +186,15 @@ function PrivateMessages() {
   return (
     <div>
       <div className={style.chatpopup} id="myForm">
+		<button 
+			type="button"
+			className={style.close}
+			onClick={closeMessage}>
+			</button>
         <div className={style.formcontainer} id="chatContainer">
           <DisplayMessages />
         </div>
+
         <form id="myForm" onSubmit={handleSubmit} className={style.sendInput}>
           <input
             name="messageInput"
@@ -198,11 +204,6 @@ function PrivateMessages() {
           />
           <button type="submit">SEND</button>
         </form>
-        <button
-          type="button"
-          className={style.close}
-          onClick={closeMessage}
-        ></button>
       </div>
     </div>
   );
