@@ -141,6 +141,9 @@ const Signin = () => {
         setResp((prev) => ({...prev, tokens: response.data.tokens}))
       }
 	  socket.auth = {token:getToken().access_token}
+	  //socket.on('connect', () => {
+		//	socket.emit('ONLINE');
+	  //})
 	  socket.connect();
 	  console.log('my socket = ', socket);
     } catch (err: any) {

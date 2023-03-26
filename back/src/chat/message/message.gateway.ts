@@ -57,7 +57,6 @@ export class MessageGateway
     client.join(String(room?.name));
   }
 
-
   @SubscribeMessage('SEND_ROOM_MESSAGE')
   async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token) {
 	const id = getIdFromToken(token);
@@ -75,24 +74,19 @@ export class MessageGateway
   }
 
   @SubscribeMessage('SEND_PRIVATE_ROOM_MESSAGE')
-  async receivePrivateMessage(client: Socket, data) {
-	  console.log('DATA = ', data);
-    const newMessage = await this.messageService.updatePrivateConv(data.room.id, data.msg, data.sender);
+  async receivePrivateMessage(client: Socket, data)
+  {
+   await this.messageService.updatePrivateConv(data.room.id, data.msg.message, data.senderId, data.receiverId, data.msg.type, data.msg.challengeId);
+
     client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
   }
 
   @SubscribeMessage('JOIN_PRIVATE_ROOM')
   async joinPrivateRoom(client: Socket, data) {
-    let privateRoom = await this.messageService.checkIfPrivateConvExist(
-      data.sender,
-      data.receiver,
-    );
-    if (privateRoom === null) {
-      privateRoom = await this.messageService.createPrivateRoom(
-        data.sender,
-        data.receiver,
+      const privateRoom = await this.messageService.createPrivateRoom(
+        data.senderId,
+        data.receiverId,
       );
-    }
     client.join(privateRoom.name);
     client.emit("GET_ROOM", privateRoom);
   }

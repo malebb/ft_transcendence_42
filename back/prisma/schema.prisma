@@ -96,6 +96,13 @@ model Message {
   sendAt           DateTime        @default(now())
   PrivateMessage   PrivateMessage? @relation(fields: [privateMessageId], references: [id])
   privateMessageId Int?
+  challengeId		Int? 
+  type				MessageType @default(STANDARD)
+}
+
+enum MessageType {
+	STANDARD
+	INVITATION
 }
 
 model PrivateMessage {
@@ -126,6 +133,7 @@ model Penalty {
   targetId      Int
   type          PenaltyType
   durationInMin Int
+
 }
 
 enum PenaltyType {

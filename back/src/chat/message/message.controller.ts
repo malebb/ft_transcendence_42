@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, ParseIntPipe} from '@nestjs/common';
 import { MessageService } from './message.service';
 import { Message } from 'ft_transcendence';
 import { GetUser } from '../../auth/decorator';
@@ -17,6 +17,13 @@ class MessageController {
 								  @GetUser('id') userId: number) {
 		// console.log("controller = ", room);
 		return (await this.messageService.getAllMessagesByRoomName(room, userId));
+	}
+
+	@Get('private/:userId')
+	async getAllMessagesFromPrivate(@Param('userId', ParseIntPipe) userId: number,
+								  @GetUser('id') myId: number) {
+		// console.log("controller = ", room);
+		return (await this.messageService.getAllMessagesFromPrivate(userId, myId));
 	}
 
 	@Delete('delete-messages')

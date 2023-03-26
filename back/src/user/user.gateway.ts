@@ -40,6 +40,7 @@ export class UserGateway
 	handleInGame(@GetUser() token: string)
 	{
 		const userId = getIdFromToken(token);
+		this.userService.setUserOnLineOffline(userId, "IN_GAME");
 		this.server.emit('CHANGE_STATUS', {status: 'IN_GAME', id: userId});
 	}
 
@@ -47,7 +48,14 @@ export class UserGateway
 	handleOnline(@GetUser() token: string)
 	{
 		const userId = getIdFromToken(token);
+		this.userService.setUserOnLineOffline(userId, "ONLINE");
 		this.server.emit('CHANGE_STATUS', {status: 'ONLINE', id: userId});
+	}
+
+	@SubscribeMessage('OFFLINE')
+	handleOffline(@GetUser() token: string)
+	{
+		const userId = getIdFromToken(token);
 	}
 
 	handleDisconnect(client: Socket) {

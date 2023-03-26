@@ -1,9 +1,9 @@
 import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
-import { PenaltyTimes, Accessibility, User } from 'ft_transcendence';
+import { PenaltyTimes, Accessibility } from 'ft_transcendence';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PenaltyDto } from '../penalty/Penalty';
 import PenaltyService from '../penalty/penalty.service';
-import { Penalty, PenaltyType } from '@prisma/client';
+import { User, Penalty, PenaltyType } from '@prisma/client';
 import { ChatRoomDto } from './ChatRoomDto';
 import * as argon2 from 'argon2';
 

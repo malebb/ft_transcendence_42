@@ -8,11 +8,12 @@ import style from "./ChatRoom.module.css"
 import Headers from 'src/components/Headers';
 import Sidebar from 'src/components/Sidebar';
 import { RoomStatus } from './utils/RoomStatus';
-import { User, PenaltyType } from 'ft_transcendence';
+import { User, PenaltyType, MessageType } from 'ft_transcendence';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import alertStyle from './alertBox.module.css';
 import { trimUsername } from '../../utils/trim';
+import { Socket, io } from "socket.io-client";
 
 const ChatRoomBase = () => {
 	const { roomName } = useParams();
@@ -23,6 +24,7 @@ const ChatRoomBase = () => {
 	const [btnValue, setBtnValue] = useState("set");
 	const regexPassword = useRef(/^[0-9]*$/);
 	const [isCurrentUserOwner, setIsCurrentUserOwner] = useState<boolean>(false);
+	const socket = useRef<Socket | null>(null);
 
 	// members list data :
 	const [membersMuted, setMembersMuted] = useState<User[]>([]);
@@ -403,25 +405,55 @@ const ChatRoomBase = () => {
 	{
 		try
 		{
-			axiosInstance.current = await axiosToken();
-			const challengeResponse = await axiosInstance.current.post('/challenge/', { powerUpMode: powerUpMode, receiverId: member.id },
+      		socket.current = io("ws://localhost:3333/chat", {
+        		transports: ["websocket"],
+     			forceNew: true,
+        		upgrade: false,
+      		});
+      		socket.current!.on("connect", async () =>
 			{
-				headers:
+				axiosInstance.current = await axiosToken();
+				const challengeResponse = await axiosInstance.current.post('/challenge/', { powerUpMode: powerUpMode, receiverId: member.id },
 				{
-					"Content-Type": "application/json"
-				}
+					headers:
+					{
+						"Content-Type": "application/json"
+					}
+				});
+        		socket.current?.emit("JOIN_PRIVATE_ROOM", {
+          			senderId: currentUser!.id,
+          			receiverId: member!.id,
+		        });
+        		const joinRoom = async (): Promise<object> => {
+         			return await new Promise(function (resolve) {
+          				socket.current!.on("GET_ROOM", async (data) => {
+              				resolve(data);
+            			});
+          			});
+        		};
+        		joinRoom().then(function (data) {
+					const room = data;
+    				socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
+  					    msg: {user: currentUser, message: "Join me for a game !", sendAt: new Date(), type: "INVITATION", challengeId: challengeResponse.data},
+     					room: room,
+      					senderId: currentUser!.id,
+      					receiverId: member.id,
+						type: MessageType["INVITATION" as keyof typeof MessageType]
+    				});
+					socket.current!.disconnect();
+					window.location.href = 'http://localhost:3000/challenge/' + challengeResponse.data;
+        		});
 			});
-			window.location.href = 'http://localhost:3000/challenge/' + challengeResponse.data;
-		}
-		catch (error: any)
-		{
-			if (error.response.status === 403)
+			}
+			catch (error: any)
 			{
-				printInfosBox('You are already playing in another game');
-				await updateMembersData();
+				if (error.response.status === 403)
+				{
+					printInfosBox('You are already playing in another game');
+					await updateMembersData();
+				}
 			}
 		}
-	}
 
 	const selectMode = (member: User) =>
 	{

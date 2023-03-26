@@ -42,41 +42,41 @@ export default function Canvas()
 	const [isChallenger, setIsChallenger]	= useState(true);
 	const statusSocket = useContext(SocketContext);
 
+	function powerUpEnabled()
+	{
+		return ((position.current === "left" && leftPlayer.current!.speedPowerUp) ||
+		(position.current === "right" && rightPlayer.current!.speedPowerUp))
+	}
+
+	async function powerUp(e: KeyboardEvent)
+	{
+		if (keyPressed.current)
+			return;
+		if (e.key === ' ' && powerUpEnabled())
+		{
+			await axiosToken();
+			socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
+			keyPressed.current = true;
+		}
+	}
+
+	function notifyKeyReleased()
+	{
+		keyPressed.current = false;
+	}
+
+	function stopGame()
+	{
+		statusSocket.emit('ONLINE');
+		window.cancelAnimationFrame(animationFrameId.current)
+		kd.current.stop();
+		document!.removeEventListener('keypress', powerUp);
+		document!.removeEventListener('keyup', notifyKeyReleased);
+		socket.current!.disconnect();
+	}
+
 	useEffect(() =>
 	{
-		function powerUpEnabled()
-		{
-			return ((position.current === "left" && leftPlayer.current!.speedPowerUp) ||
-			(position.current === "right" && rightPlayer.current!.speedPowerUp))
-		}
-
-		async function powerUp(e: KeyboardEvent)
-		{
-			if (keyPressed.current)
-				return;
-			if (e.key === ' ' && powerUpEnabled())
-			{
-				await axiosToken();
-				socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
-				keyPressed.current = true;
-			}
-		}
-
-		function notifyKeyReleased()
-		{
-			keyPressed.current = false;
-		}
-
-		function stopGame()
-		{
-			statusSocket.emit('ONLINE');
-			window.cancelAnimationFrame(animationFrameId.current)
-			kd.current.stop();
-			document!.removeEventListener('keypress', powerUp);
-			document!.removeEventListener('keyup', notifyKeyReleased);
-			socket.current!.disconnect();
-		}
-
 		const pong = async () => 
 		{
 			function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
@@ -716,12 +716,19 @@ export default function Canvas()
 		
 		pong();
 		return () =>
-		{ 
+		{
 			if (socket.current != null)
 				stopGame();
+			statusSocket.emit('ONLINE');
 		}
 
 	}, [challengeId]);
+
+	useEffect(() => {
+		if (socket.current != null)
+			stopGame();
+		statusSocket.emit('ONLINE');
+	}, []);
 
 	const challengeTitle = () =>
 	{

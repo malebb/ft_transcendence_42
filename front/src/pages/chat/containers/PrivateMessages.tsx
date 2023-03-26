@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { axiosToken } from "src/api/axios";
 import { Socket, io } from "socket.io-client";
-import { Message, User } from "ft_transcendence";
+import { Message, MessageType, User } from "ft_transcendence";
 import { AxiosInstance } from "axios";
 import { useParams } from "react-router-dom";
 
@@ -36,7 +36,6 @@ function PrivateMessages() {
       behavior: "smooth",
     });
   };
-
   // useEffect(() => {
   //   const fetchData = async () => {
   //     axiosInstance.current = await axiosToken();
@@ -69,6 +68,12 @@ function PrivateMessages() {
         .then((response) => {
           friend.current = response.data;
         });
+      axiosInstance.current = await axiosToken();
+      await axiosInstance
+        .current!.get("/message/private/" + friendId.userId)
+        .then((response) => {
+          setStateMessages(response.data);
+        });
     };
 
     const initPrivateChat = async () => {
@@ -80,8 +85,8 @@ function PrivateMessages() {
       });
       socket.current!.on("connect", async () => {
         socket.current?.emit("JOIN_PRIVATE_ROOM", {
-          sender: currentUser.current,
-          receiver: friend.current,
+          senderId: currentUser.current!.id,
+          receiverId: friend.current!.id,
         });
         const joinRoom = async (): Promise<object> => {
           return await new Promise(function (resolve) {
@@ -125,16 +130,17 @@ function PrivateMessages() {
       user: currentUser.current!,
       message: inputMessage,
       sendAt: dateTS,
+	  type: MessageType["STANDARD" as keyof typeof MessageType],
+	  challengeId: 0
     };
 
 
     socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
       msg: newMessage,
       room: room.current,
-      sender: currentUser.current,
-      receiver: friend.current,
+      senderId: currentUser.current!.id,
+      receiverId: friend.current!.id,
     });
-    // console.log("merde");
     setStateMessages([...stateMessages, newMessage]);
   }
 
@@ -146,6 +152,11 @@ function PrivateMessages() {
       ).slice(-2)}`;
     };
 
+	const goToInvitation = (challengeId: number) =>
+	{
+		window.location.href = 'http://localhost:3000/challenge/' + challengeId;
+	}
+
     const genMessage = (isCurrentUser: boolean, newMessage: Message) => {
       if (!isCurrentUser) {
         return (
@@ -153,6 +164,7 @@ function PrivateMessages() {
             <div className="chat-receiver">
               <span>{newMessage?.user?.username + " : "}</span>
               <span>{newMessage.message}</span>
+			  {newMessage.type === 'INVITATION' ? <button className={style.invitationBtn} onClick={() => goToInvitation(newMessage.challengeId)}>join</button> : <></>}
             </div>
             <span className="date">{genDate(newMessage)}</span>
           </>
