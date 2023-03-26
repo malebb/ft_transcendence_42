@@ -39,9 +39,7 @@ function Status({ id }: { id: string }) {
     };
 
     fetchData().catch(console.error);
-  }, [id]);
-	useEffect(() => {
-}, []);
+  }, [id, userId.userId]);
 
 	useEffect(() => {
 		const initSocket = async () =>

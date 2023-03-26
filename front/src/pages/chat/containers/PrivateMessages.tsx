@@ -36,6 +36,17 @@ function PrivateMessages() {
     scrollToBottom();
   }, [stateMessages]);
 
+	const fetchChallenge = async () =>
+	{
+		axiosInstance.current = await axiosToken();
+		await axiosInstance.current!.get("/challenge/myChallenges").then((response) => {
+		if (response.data)
+			setChallenges(response);
+     		}).catch((e) => {
+               console.log(e);
+       	});
+	}
+
   useEffect(() => {
     const fetchData = async () => {
       axiosInstance.current = await axiosToken();
@@ -49,7 +60,6 @@ function PrivateMessages() {
           friend.current = response.data;
         });
     };
-
     const initPrivateChat = async () => {
       try {
       await fetchData().catch(console.error);
@@ -90,8 +100,11 @@ function PrivateMessages() {
 
           socket.current!.on(
             "RECEIVE_PRIVATE_ROOM_MESSAGE",
-            function (message: Message) {
+            async function (message: Message) {
               setStateMessages((stateMessages) => [...stateMessages, message]);
+			  if (message.type === 'INVITATION')
+			  	fetchChallenge();
+			  	
             }
           );
         });
@@ -106,16 +119,7 @@ function PrivateMessages() {
   }, [friendId.userId]);
 
 	useEffect(() => {
-		const fetchChallenge = async () =>
-		{
-			axiosInstance.current = await axiosToken();
-			await axiosInstance.current!.get("/challenge/myChallenges").then((response) => {
-			if (response.data)
-				setChallenges(response);
-      		}).catch((e) => {
-                console.log(e);
-        	});
-		}
+
 		fetchChallenge();
 	}, []);
 
@@ -222,9 +226,15 @@ function PrivateMessages() {
   return (
     <div>
       <div className={style.chatpopup} id="myForm">
+		<button 
+			type="button"
+			className={style.close}
+			onClick={closeMessage}>
+			</button>
         <div className={style.formcontainer} id="chatContainer">
           <DisplayMessages />
         </div>
+
         <form id="myForm" onSubmit={handleSubmit} className={style.sendInput}>
           <input
             name="messageInput"
@@ -234,11 +244,6 @@ function PrivateMessages() {
           />
           <button type="submit">SEND</button>
         </form>
-        <button
-          type="button"
-          className={style.close}
-          onClick={closeMessage}
-        ></button>
       </div>
     </div>
   );
