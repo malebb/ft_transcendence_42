@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { axiosToken } from "src/api/axios";
 import { AxiosInstance } from "axios";
 import { useParams } from "react-router-dom";
@@ -36,7 +36,7 @@ function Status({ id }: { id: string }) {
     };
 
     fetchData().catch(console.error);
-  }, [id]);
+  }, [id, userId.userId]);
 
   const GenStatus = () => {
     if (userStatus.current) {
