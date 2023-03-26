@@ -1,11 +1,10 @@
 import { useEffect, useState, useRef, useContext } from "react";
-import { axiosToken } from "../../api/axios";
 import { AxiosInstance, AxiosResponse } from "axios";
 import "../../styles/History.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
 import { trimUsername } from "src/utils/trim";
-import AuthContext from "src/context/TokenContext";
+import useAxiosPrivate from "src/hooks/usePrivate";
 interface HistoryElem
 {
 	type: string;
@@ -15,10 +14,10 @@ interface HistoryElem
 const History = () =>
 {
 
-	const { token , setToken } = useContext(AuthContext);
+	const axiosPrivate = useAxiosPrivate();
 	const [sorted, setSorted] = useState<boolean>(false);
 	const historyElem = useRef<HistoryElem[]>([]);
-	const axiosInstance = useRef<AxiosInstance | null>(null);
+	// const axiosInstance = useRef<AxiosInstance | null>(null);
 
 	const printHistory = () =>
 	{
@@ -69,12 +68,12 @@ const History = () =>
 		const initHistory = async () => {
 			try
 			{
-				axiosInstance.current = await axiosToken(token!, setToken);
-				const user: AxiosResponse = (await axiosInstance.current.get('users/me'));
-				axiosInstance.current = await axiosToken(token!, setToken);
-				const gamePlayed: AxiosResponse = await axiosInstance.current.get('history/gamePlayed/' + user.data.id);
-				axiosInstance.current = await axiosToken(token!, setToken);
-				const achievementDone: AxiosResponse = await axiosInstance.current.get('history/achievementsDone/' + user.data.id);
+				// axiosInstance.current = axiosPrivate;
+				const user: AxiosResponse = (await axiosPrivate.get('users/me'));
+				// axiosInstance.current = axiosPrivate;
+				const gamePlayed: AxiosResponse = await axiosPrivate.get('history/gamePlayed/' + user.data.id);
+				// axiosInstance.current = axiosPrivate;
+				const achievementDone: AxiosResponse = await axiosPrivate.get('history/achievementsDone/' + user.data.id);
 				for (let i = 0; i < gamePlayed.data.gamePlayed.length; ++i)
 				{
 					historyElem.current.push({type: "game", value: gamePlayed.data.gamePlayed[i]});

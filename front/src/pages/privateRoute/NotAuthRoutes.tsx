@@ -1,20 +1,16 @@
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import {Axios, AxiosHeaders} from "axios";
-import { AxiosResponse } from "axios";
-import { axiosAuthReq, axiosMain, axiosToken, HTTP_METHOD } from "../../api/axios";
+import { AxiosHeaders} from "axios";
+import { axiosAuthReq, HTTP_METHOD } from "../../api/axios";
 import Loading from "../Loading";
-import { Snackbar } from "@mui/material";
 import { useSnackbar } from "notistack";
-import AuthContext from "src/context/TokenContext";
 
 const AUTH_VERIF_PATH = "/auth/verify";
 
 
 const PrivateRoutes = () => {
   
-  const {token, setToken} = useContext(AuthContext);
   const [isAuth, setIsAuth] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const [errMsg, setErrMsg] = useState<string>("");
@@ -24,7 +20,7 @@ const PrivateRoutes = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const user = await axiosAuthReq(token!, setToken, HTTP_METHOD.GET, AUTH_VERIF_PATH, {} as AxiosHeaders, {}, setErrMsg, setData);
+      const user = await axiosAuthReq(HTTP_METHOD.GET, AUTH_VERIF_PATH, {} as AxiosHeaders, {}, setErrMsg, setData);
         if (user !== undefined) 
           setIsAuth(user);
       setIsChecking(false);
@@ -32,12 +28,7 @@ const PrivateRoutes = () => {
     checkAuth();
   }, []);
 
-  if (isChecking) {
-    return <Loading />;
-  }
-
-  console.log("err ==" + JSON.stringify(errMsg));
-  console.log("user ==" + JSON.stringify(data));
+  if (isChecking) return <Loading />;
 
   return isAuth ? 
     <>

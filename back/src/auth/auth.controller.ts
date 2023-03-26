@@ -21,6 +21,7 @@ import { ConfigService } from '@nestjs/config';
 import { CallbackDto } from './dto/callback.dto';
 import { User } from '@prisma/client';
 import { SignInterface } from './interfaces';
+import { parse, stringify } from 'flatted';
 
 @Controller('auth')
 export class AuthController {
@@ -71,9 +72,7 @@ export class AuthController {
             res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3333');
             //res.setHeader("Access-Control-Allow-Origin", '*');
         }*/
-    console.log('code from dto = ' + dto.code);
     const token: SignInterface = await this.authService.callback42(dto.code);
-    console.log(res.cookie);
     res.cookie('rt_token', token.tokens.refresh_token, {
       httpOnly: true,
       secure: true,
@@ -85,8 +84,15 @@ export class AuthController {
   }
 
   @Post('logout')
-  logout(@GetUser('sub') userId: number) {
-    return this.authService.logout(userId);
+  logout(
+    @GetUser('sub') userId: number,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const ret = this.authService.logout(userId);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', 'localhost:3000');
+    res.clearCookie('rt_token');
+    return res.send(ret);
   }
 
   @Public()
@@ -94,7 +100,7 @@ export class AuthController {
   @Post('refresh')
   //refreshToken(@GetUser() user: User, @Req() req: Request)
   async refreshToken(
-    @GetUser('sub') userId: number,
+    @GetUser('id') userId: number,
     @Req() req: Request, //refreshToken(@Req() req: Request)
     @Res({ passthrough: true }) res: Response,
   ) {
@@ -104,12 +110,17 @@ export class AuthController {
         if (req.get('authorization') && user.id)
         {
             rToken = req.get('authorization').replace('Bearer', '').trim();*/
-    console.log('REF TOK = ' + req.user);
-    const ret_token = await this.authService.refreshToken(
+    console.log(
+      'REF TOK = ' +
+        stringify(req.user) +
+        '=============================================================================================================',
+    );
+    console.log('userid = ' + userId);
+    const ret_token: SignInterface = await this.authService.refreshToken(
       userId,
       req.cookies['rt_token'],
     );
-    res.cookie('rt_token', ret_token.refresh_token, {
+    res.cookie('rt_token', ret_token.tokens.refresh_token, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',

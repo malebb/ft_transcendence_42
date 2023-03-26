@@ -15,6 +15,7 @@ export enum HTTP_METHOD{
 
 export const axiosMain = axios.create({
   baseURL,
+  withCredentials: true
 });
 
 export const axiosPrivate = axios.create({
@@ -44,7 +45,7 @@ export async function getJWTfromRt(setToken: React.Dispatch<React.SetStateAction
         },
       }
     );
-    setToken(new_jwt.data);
+    setToken(new_jwt.data.tokens);
     // Cookies.set('rt_token', new_jwt.data.rt_token);
     console.log('data = ' + JSON.stringify(new_jwt.data));
   }
@@ -69,8 +70,8 @@ export async function axiosToken(token: TokensInterface, setToken: React.Dispatc
         },
       }
     );
-    localStorage.setItem("tokens", JSON.stringify(new_jwt.data));
-    setToken(new_jwt.data);
+    // localStorage.setItem("tokens", JSON.stringify(new_jwt.data));
+    setToken(new_jwt.data.tokens);
     return axios.create({
       baseURL,
       headers: { Authorization: `Bearer ${new_jwt.data.access_token}` },
@@ -89,8 +90,8 @@ export async function axiosToken(token: TokensInterface, setToken: React.Dispatc
         },
       }
     );
-    localStorage.setItem("tokens", JSON.stringify(new_jwt.data));
-    setToken(new_jwt.data);
+    // localStorage.setItem("tokens", JSON.stringify(new_jwt.data));
+    setToken(new_jwt.data.tokens);
     return axios.create({
       baseURL,
       headers: { Authorization: `Bearer ${new_jwt.data.access_token}` },
@@ -126,24 +127,23 @@ export async function axiosToken(token: TokensInterface, setToken: React.Dispatc
 // 
 // }
 //TODO check AxiosInstance
-  export async function axiosAuthReq<Type>(token : TokensInterface, setToken: React.Dispatch<React.SetStateAction<TokensInterface | undefined>> ,method: number, path: string, headers: AxiosHeaders, body: Object, setErrorMsg: Dispatch<SetStateAction<string>>, setData : Dispatch<SetStateAction<Type>>) : Promise<Type | undefined>{
+  export async function axiosAuthReq<Type>(method: number, path: string, headers: AxiosHeaders, body: Object, setErrorMsg: Dispatch<SetStateAction<string>>, setData : Dispatch<SetStateAction<Type>>) : Promise<Type | undefined>{
     try{
-      const AxiosInstance = await axiosToken(token, setToken);  
       if (method === HTTP_METHOD.POST)
       {
-        const response : AxiosResponse = await AxiosInstance.post(path, body,{headers: headers});
+        const response : AxiosResponse = await axiosPrivate.post(path, body,{headers: headers});
         setData(response.data);
         return response.data;
       }
       else if (method === HTTP_METHOD.GET)
       {
-        const response : AxiosResponse = await AxiosInstance.get(path,{headers: headers});
+        const response : AxiosResponse = await axiosPrivate.get(path,{headers: headers});
         setData(response.data);
         return response.data;
       }
       else if (method === HTTP_METHOD.PATCH)
       {
-        const response : AxiosResponse = await AxiosInstance.post(path, body,{headers: headers});
+        const response : AxiosResponse = await axiosPrivate.post(path, body,{headers: headers});
         setData(response.data);
         return response.data;
       }
@@ -162,7 +162,6 @@ export async function axiosToken(token: TokensInterface, setToken: React.Dispatc
         setErrorMsg(err.message);
       }
     }
-    // return {} as Type;
   }
     
     // axiosAuthReq<UserType | undefined>(HTTP_METHOD.GET,

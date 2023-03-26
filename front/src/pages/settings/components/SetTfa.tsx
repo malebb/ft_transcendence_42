@@ -1,13 +1,15 @@
 import React, { useContext, useEffect } from "react";
 import { useState } from "react";
-import { axiosMain, axiosToken } from "src/api/axios";
+import { axiosMain, axiosPrivate, axiosToken } from "src/api/axios";
 import axios, { AxiosResponse } from "axios";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import AuthContext from "src/context/TokenContext";
+import { useSnackbar } from "notistack";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const SetTfa = () => {
+  const snackBar = useSnackbar();
   const {token, setToken} = useContext(AuthContext);
   const [TfaQrcode, setTfaQrcode] = useState("");
   const [boolQrcode, setboolQrcode] = useState<boolean>(false);
@@ -30,7 +32,7 @@ const SetTfa = () => {
     const createQrCode = async () => {
       setTfaQrcode(
         (
-          await (await axiosToken(token!, setToken)).get("/auth/create2FA")
+          await axiosPrivate.get("/auth/create2FA")
         ).data
         //qrcode.toDataURL(secret.otpauth_url,{type: "image/jpeg"}/*, function(err: any, data: any){
         /*console.log(err);
@@ -47,8 +49,9 @@ const SetTfa = () => {
 
   const handleCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try{
     const verif = (
-      await (await axiosToken(token!, setToken)).post(
+      await axiosPrivate.post(
         "/auth/verify2FA",
         { code: code },
       )
@@ -59,28 +62,30 @@ const SetTfa = () => {
       token: code,
     }) */
     if (verif === true) {
-      const check = (
-        await (await axiosToken(token!, setToken)).get("/auth/set2FA", {
-          headers: { Authorization: "Bearer " + getJWT() },
-          //withCredentials: true
-        })
-      ).data;
-      navigate("/user");
+        await axiosPrivate.get("/auth/set2FA");
+        navigate("/user");
     } else setBadAttempt(true);
     console.log("verif code =======" + verif);
-    //setVerified(verif);
-  };
-
-  const getJWT = () => {
-    const jwt = JSON.parse(localStorage.getItem("tokens") || "{}");
-    return jwt["access_token"];
+  }
+  catch(err: any)
+  {
+    return (
+    <>
+    {snackBar.enqueueSnackbar('Oops something went wrong', {
+      variant: "error",
+      anchorOrigin: {vertical: "bottom", horizontal: "right"}
+    })}
+  <Navigate to='/user' />
+</>
+    )
+  }
   };
 
   return (
     <>
       <div>SetTfa</div>
       {badAttempt ? <div>Attempt failed</div> : <></>}
-      <img src={TfaQrcode} />
+      <img alt="2FA_QRCode" src={TfaQrcode} />
       <form onSubmit={handleCodeSubmit}>
         <label htmlFor="avatar">2FA:</label>
         <input

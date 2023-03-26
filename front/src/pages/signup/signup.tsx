@@ -90,16 +90,17 @@ const Signup = () => {
       const response: AxiosResponse = await axiosMain.post(
         SIGNUP_PATH,
         { email: email, username: user, password: pwd },
-        {
-          headers: { "Content-Type": "application/json" },
-          //withCredentials: true
-        }
+        { withCredentials: true,  headers: {
+          "Access-Control-Allow-Origin": "localhost:3000",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+          "Content-Type": "application/json"
+        }}
       );
       console.log(response.data);
       setSuccess(true);
       // setToken(response.data.token);
-      localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
-      localStorage.setItem("id", JSON.stringify(response.data.userId));
+      // localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
+      // localStorage.setItem("id", JSON.stringify(response.data.userId));
       setUsername(response.data.username!);
       setUserId(response.data.id);
       setToken(response.data.tokens!)

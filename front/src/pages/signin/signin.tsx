@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import "../../styles/signin.css";
 import { useRef, useState, useEffect } from "react";
 import {
@@ -17,6 +17,7 @@ import { useSnackbar } from "notistack";
 import Headers from "src/components/Headers";
 import "../../styles/VerifTfa.css";
 import { ResponseInterface } from "src/interfaces/Sign";
+import AuthContext from "../../context/TokenContext";
 
 const EMAIL_REGEX = /^[a-z0-9-_@.]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%&*^()-_=]).{8,24}$/;
@@ -41,9 +42,10 @@ interface SignInterface {
 }
 
 const Signin = () => {
-  const { token = "", setToken = () => {} } =
-    React.useContext(TokenContext) ?? [];
+  // const { token = "", setToken = () => {} } =
+  //   React.useContext(TokenContext) ?? [];
 
+  const context = useContext(AuthContext);
   const userRef = useRef<HTMLInputElement>(null);
   const errRef = useRef<HTMLParagraphElement>(null);
 
@@ -122,32 +124,33 @@ const Signin = () => {
       const response: AxiosResponse = await axiosMain.post<SignInterface>(
         SIGNIN_PATH,
         { email: email, password: pwd },
-        {
-          headers: { "Content-Type": "application/json" },
-          //withCredentials: true
-        }
+        { withCredentials: true,  headers: {
+          "Access-Control-Allow-Origin": "localhost:3000",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+          "Content-Type": "application/json"
+        }}
       );
       console.log(response.data);
       setSuccess(true);
-      setToken(response.data.token);
+      // setToken(response.data.token);
       setIsTfa(response.data.isTfa);
       setName(response.data.username);
       console.log("tfa === " + JSON.stringify(response.data));
       console.log("tfa ==" + response.data.isTfa);
       if (response.data.isTfa === false)
       {
-      localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
-      localStorage.setItem("id", JSON.stringify(response.data.userId));
-      setUsername(response.data.username!);
-      setUserId(response.data.id);
-      setToken(response.data.tokens!)
+      // localStoVrage.setItem("tokens", JSON.stringify(response.data.tokens));
+      // localStorage.setItem("id", JSON.stringify(response.data.userId));
+      context.setUsername(response.data.username!);
+      context.setUserId(response.data.id);
+      context.setToken(response.data.tokens!)
       }
       else {
         setResp((prev) => ({...prev, id: response.data.userId}))
+        setResp((prev) => ({...prev, username: response.data.username}))
         setResp((prev) => ({...prev, tokens: response.data.tokens}))
       }
       console.log(response.data.access_token);
-      console.log(token);
       // if (response.data.isTfa === false) navigate("/");
       // else navigate("/2faverif");
     } catch (err: any) {
@@ -164,11 +167,11 @@ const Signin = () => {
   useEffect(() => {
     if (TfaSuccess)
     {
-      localStorage.setItem("tokens", JSON.stringify(resp.tokens));
-      localStorage.setItem("id", JSON.stringify(resp.id));
-      setUsername(resp.username!);
-      setUserId(resp.id);
-      setToken(resp.tokens!)
+      // locaVlStorage.setItem("tokens", JSON.stringify(resp.tokens));
+      // localStorage.setItem("id", JSON.stringify(resp.id));
+      context.setUsername(resp.username!);
+      context.setUserId(resp.id);
+      context.setToken(resp.tokens!)
     }
 
   }, [TfaSuccess])

@@ -1,15 +1,17 @@
 import { AxiosResponse } from 'axios';
 import React, { useContext, useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom';
-import { axiosToken } from 'src/api/axios';
 import Loading from '../Loading';
 import { useSnackbar } from 'notistack';
+import useAxiosPrivate from 'src/hooks/usePrivate';
+import Cookies from 'js-cookie';
 import AuthContext from 'src/context/TokenContext';
 
 const LOGOUT_PATH = 'auth/logout'
 
 const Logout = () => {
-  const {token, setToken} = useContext(AuthContext);
+  const axiosPrivate = useAxiosPrivate();
+  const context = useContext(AuthContext);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [errMsg, setErrMsg] = useState<string>();
     
@@ -17,16 +19,19 @@ const Logout = () => {
     
     const logout = async() => {
         try {
-        const response : AxiosResponse = await (await axiosToken(token!, setToken)).post(LOGOUT_PATH);
+        const response : AxiosResponse = await axiosPrivate.post(LOGOUT_PATH);
         console.log(response);
+        context.setToken(undefined);
+        context.setUserId(undefined);
+        context.setUsername(undefined);
         }catch(err : any)
         {
             setErrMsg("Oops something went wrong !");
         }
-        localStorage.clear();
         setIsLoading(false);
     }
 
+    console.log(errMsg);
     useEffect(() => {
         logout();
     }, []);
@@ -34,7 +39,7 @@ const Logout = () => {
         return <Loading/>
   return errMsg ?
     <>
-    {snackBar.enqueueSnackbar('Oops something went wrong', {
+    {snackBar.enqueueSnackbar('Oops something went wrong during logout', {
       variant: "error",
       anchorOrigin: {vertical: "bottom", horizontal: "right"}
     })}

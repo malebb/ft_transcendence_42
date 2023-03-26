@@ -1,9 +1,6 @@
 import {
   Controller,
   Get,
-  UseGuards,
-  Req,
-  Patch,
   Body,
   Post,
   UseInterceptors,
@@ -11,20 +8,16 @@ import {
   Param,
   Res,
 } from '@nestjs/common';
-import { JwtGuard } from '../auth/guard';
 import { GetUser, Public } from '../auth/decorator';
 import { User } from '@prisma/client';
 import { EditUserDto } from './dto';
 import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { fileURLToPath } from 'url';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { extname, join } from 'path';
 import { imageFileFilter } from './user.upload.utils';
-import { FormDataRequest } from 'nestjs-form-data';
-import { stringify } from 'querystring';
-import { Friend, NeutralUser } from './types';
+import { NeutralUser } from './types';
 
 export const storage = {
   storage: diskStorage({
@@ -62,10 +55,8 @@ export class UserController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', storage))
-  uploadImage(@UploadedFile() file, @GetUser() user: User): Object {
-    const ret_user = this.userService.uploadPicture(user.id, file.path);
-
-    return ret_user;
+  uploadImage(@UploadedFile() file, @GetUser() user: User): Promise<User> {
+    return this.userService.uploadPicture(user.id, file.path);
   }
 
   @Get('get-all-user')
@@ -75,7 +66,7 @@ export class UserController {
 
   @Public()
   @Get('profile-image/:imagename')
-  findProfileImage(@Param('imagename') imagename, @Res() res): Object {
+  findProfileImage(@Param('imagename') imagename, @Res() res): Response {
     return res.sendFile(
       join(process.cwd(), 'uploads/profileimages/' + imagename),
     );
@@ -89,19 +80,8 @@ export class UserController {
     @GetUser() user: User,
     @Body() dto: EditUserDto,
   ) {
-    //    console.log("file = " + file);
-    let ret_pic;
-    let ret_login;
-    console.log('PROFILE PATCH DTO = ' + JSON.stringify(dto.login));
-    if (file !== undefined)
-      ret_pic = this.userService.uploadPicture(user.id, file.path);
-    if (dto.login !== undefined) {
-      ret_login = this.userService.editUsername(user.id, dto);
-      // if (ret_login == null) return 1;
-    }
-    //this.userService.editUser(user.id, dto);
-    //if (ret_pic == null) return 2;
-    //return 0;
+    if (file !== undefined) this.userService.uploadPicture(user.id, file.path);
+    if (dto.login !== undefined) this.userService.editUsername(user.id, dto);
   }
 
   @Get('send-friend-request/:userid')

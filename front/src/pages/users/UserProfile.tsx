@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { AxiosResponse, AxiosInstance, AxiosHeaders } from "axios";
 import axios from "axios";
-import { getToken, axiosMain, axiosToken, axiosAuthReq, HTTP_METHOD } from "../../api/axios";
+import { getToken, axiosMain, axiosToken, axiosAuthReq, HTTP_METHOD, axiosPrivate } from "../../api/axios";
 import "../../styles/UserProfile.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
@@ -47,9 +47,9 @@ interface i_renderProfile {
 }
 
 const UserProfile = () => {
-  const { userId } = useParams();
+  const { paramUserId } = useParams();
 
-  const { token , setToken } = useContext(AuthContext);
+  const { token , setToken, userId } = useContext(AuthContext);
   const [renderProfile, setRenderProfile] = useState<i_renderProfile>();
   const [user, setUser] = useState<NeutralUser>();
   const [picture, setPicture] = useState("");
@@ -69,7 +69,7 @@ const UserProfile = () => {
     "Are you sure you want to remove this person from your friends list? This action is final and you will not be able to recover it.";
   const popupContentRemoveWait =
     "Are you sure you want to remove this person from your waiting list? This action is final and you will not be able to recover it.";
-  const userSessionId = JSON.parse(localStorage.getItem("id")!);
+  // const userSessionId = userId!;
 
   const handleUnfriendClick = (): void => {
     setPopupContent(popupContentRemoveFriend);
@@ -82,15 +82,13 @@ const UserProfile = () => {
 
   const AddFriendReq = async (): Promise<string> => {
     // e.preventDefault();
-    /*const response: AxiosResponse = await axiosMain.get(ADD_FRIEND_PATH + userId, {
+    /*const response: AxiosResponse = await axiosMain.get(ADD_FRIEND_PATH + paramUserId, {
             headers:{
                 'Authorization': 'Bearer ' +  token
             }
         })*/
     try {
-      const response: AxiosResponse = await (
-        await axiosToken(token!, setToken)
-      ).get(ADD_FRIEND_PATH + userId);
+      const response: AxiosResponse = await axiosPrivate.get(ADD_FRIEND_PATH + paramUserId);
       return response.data;
     } catch (err: any) {
       console.log("error getme");
@@ -113,8 +111,8 @@ const UserProfile = () => {
   // const getUserProfile = async () => {
   //   try {
   //     const token = getToken();
-  //     const response: AxiosResponse = await axiosToken(token!, setToken).get(
-  //       "users/profile/" + userId,
+  //     const response: AxiosResponse = axiosPrivate).get(
+  //       "users/profile/" + paramUserId,
   //       {
   //         headers: {
   //           Authorization: "Bearer " + token["access_token"],
@@ -138,7 +136,7 @@ const UserProfile = () => {
   // const checkIsFriend = async (id: number) => {
   //   try {
   //     const token = getToken();
-  //     const response: AxiosResponse = await axiosToken(token!, setToken).get(
+  //     const response: AxiosResponse = axiosPrivate).get(
   //       GET_STATUS_PATH + id.toString(),
   //       {
   //         headers: {
@@ -162,25 +160,23 @@ const UserProfile = () => {
 //TODO change axiosAuthToken
   useEffect(() => {
     const treatData = async () => {
-      const profile = await axiosAuthReq(token!, setToken, HTTP_METHOD.GET, GET_USER_PROFILE + userId, {} as AxiosHeaders, {}, setErrMsg, setUser);
+      const profile = await axiosAuthReq(HTTP_METHOD.GET, GET_USER_PROFILE + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setUser);
       if (profile === undefined) return ;
       if (profile !== undefined){
         if (validURL(profile.profilePicture)) setPicture(profile.profilePicture);
         else
           setPicture(GET_PROFILE_PICTURE + profile.profilePicture.split("/")[2]);
         console.log(picture);
-        await axiosAuthReq(token!, setToken, HTTP_METHOD.GET, GET_STATUS_PATH + userId, {} as AxiosHeaders, {}, setErrMsg, setFriendStatus);
+        await axiosAuthReq(HTTP_METHOD.GET, GET_STATUS_PATH + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setFriendStatus);
       }
     };
     treatData();
-  }, [userId]);
+  }, [paramUserId]);
 
   const deleteRequest = async (confirmed: boolean): Promise<void> => {
     if (confirmed) {
       try {
-        const sendingReq: AxiosResponse = await (
-          await axiosToken(token!, setToken)
-        ).get("users/destroy-friend-request-by-userid/" + userId);
+        const sendingReq: AxiosResponse = await axiosPrivate.get("users/destroy-friend-request-by-userid/" + paramUserId);
         console.log(JSON.stringify(sendingReq.data));
         setFriendStatus("");
         setShowConfirmation(false);
@@ -202,9 +198,7 @@ const UserProfile = () => {
   };
   const refuseRequest = async () => {
     try {
-      const sendingReq: AxiosResponse = await (
-        await axiosToken(token!, setToken)
-      ).get("users/decline-friend-request-by-userid/" + userId);
+      const sendingReq: AxiosResponse = await axiosPrivate.get("users/decline-friend-request-by-userid/" + paramUserId);
       console.log(JSON.stringify(sendingReq.data));
       setFriendStatus("declined");
       return sendingReq.data;
@@ -222,9 +216,7 @@ const UserProfile = () => {
   };
   const acceptRequest = async () => {
     try {
-      const sendingReq: AxiosResponse = await (
-        await axiosToken(token!, setToken)
-      ).get("users/accept-friend-request-by-userid/" + userId);
+      const sendingReq: AxiosResponse = await axiosPrivate.get("users/accept-friend-request-by-userid/" + paramUserId);
       console.log(JSON.stringify(sendingReq.data));
       setFriendStatus("accepted");
       return sendingReq.data;
@@ -242,9 +234,7 @@ const UserProfile = () => {
   };
   const getReqSendingStatus = async (): Promise<string> => {
     try {
-      const sendingReq: AxiosResponse = await (
-        await axiosToken(token!, setToken)
-      ).get(CHECK_SENDER_PATH + userId);
+      const sendingReq: AxiosResponse = await axiosPrivate.get(CHECK_SENDER_PATH + paramUserId);
       return sendingReq.data;
     } catch (err: any) {
       console.log("error getme");
@@ -285,10 +275,10 @@ const UserProfile = () => {
       let profileUser: NeutralUser;
       let myProfile: NeutralUser;
 
-      axiosInstance.current = await axiosToken(token!, setToken);
+      axiosInstance.current = axiosPrivate;
       friendList = (await axiosInstance.current.get("/users/friend-list")).data;
       profileUser = (
-        await axiosInstance.current.get("/users/profile/" + userId)
+        await axiosInstance.current.get("/users/profile/" + paramUserId)
       ).data;
       myProfile = (await axiosInstance.current.get("/users/me")).data;
       if (profileUser.username === myProfile.username) setIsFriend(true);
@@ -383,8 +373,7 @@ const UserProfile = () => {
                 </button>
               </div>
             )}
-            {/* <button disabled>Pending</button>} */}
-            {friendStatus === "" && userId != userSessionId ? (
+            {friendStatus === "" && paramUserId !== userId?.toString() ? (
               <button className="profileButtonAddFriend" onClick={AddFriend}>
                 Add friend +
               </button>

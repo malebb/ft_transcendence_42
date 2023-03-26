@@ -1,7 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useRef, useState, useEffect, useContext } from "react";
 import { AxiosInstance, AxiosResponse } from "axios";
-import { axiosToken } from "../../../api/axios";
 import StatsData from "../../../interfaces/StatsData";
 import {
   AchievementsData,
@@ -13,13 +12,13 @@ import {
   levelSteps,
 } from "ft_transcendence";
 import "../../../styles/Achievements.css";
-import AuthContext from "src/context/TokenContext";
+import useAxiosPrivate from "src/hooks/usePrivate";
 
 const Achievements = () =>
 {
-	const { token , setToken } = useContext(AuthContext);
+	const axiosPrivate = useAxiosPrivate();
 	const axiosInstance = useRef<AxiosInstance | null>(null);
-    const { userId } = useParams();
+    const { paramUserId } = useParams();
 	const [stats, setStats] = useState<StatsData | null>(null);
 	const winAchievements  = useRef<string[]>([]);
 	const levelAchievements  = useRef<string[]>([]);
@@ -119,9 +118,9 @@ const Achievements = () =>
 		{
 			try
 			{
-				axiosInstance.current = await axiosToken(token!, setToken);
-				const user: AxiosResponse = (await axiosInstance.current.get('users/profile/' + userId));
-				axiosInstance.current = await axiosToken(token!, setToken);
+				axiosInstance.current = axiosPrivate;
+				const user: AxiosResponse = (await axiosInstance.current.get('users/profile/' + paramUserId));
+				axiosInstance.current = axiosPrivate;
 				const stats: AxiosResponse = await axiosInstance.current.get('/stats/' + user.data.id);
 				setStats(stats.data);
 			}
@@ -132,7 +131,7 @@ const Achievements = () =>
 		}
 		initAchievements();
 
-	}, [userId]);
+	}, [paramUserId]);
 	return (
 		<div>
 			<h2 id="achievementsTitle">Achievements</h2>

@@ -1,7 +1,6 @@
 import { Ball, Player } from "ft_transcendence";
 import { io, Socket } from "socket.io-client";
 import { useState, useRef, useEffect, useContext } from "react";
-import { axiosToken } from "../../api/axios";
 import { AxiosInstance, AxiosResponse } from "axios";
 import Game from "../../interfaces/Game";
 import { Link, useParams } from "react-router-dom";
@@ -10,12 +9,12 @@ import "../../styles/Games.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
 import { trimUsername } from "src/utils/trim";
-import AuthContext from "src/context/TokenContext";
+import useAxiosPrivate from "src/hooks/usePrivate";
 
 const Games = () =>
 {
 
-	const { token , setToken } = useContext(AuthContext);
+	const axiosPrivate = useAxiosPrivate();
 	const ctx = useRef<CanvasRenderingContext2D | null>(null);
 	const [gamesList, setGamesList] = useState<Game[]>([]);
 	const { gameId } = useParams();
@@ -194,7 +193,7 @@ const Games = () =>
 					});
 				}
 				else {
-					axiosInstance.current = await axiosToken(token!, setToken);
+					axiosInstance.current = await axiosPrivate;
 					const games: AxiosResponse = await axiosInstance.current.get('/game');
 					setGamesList(games.data);
 				}

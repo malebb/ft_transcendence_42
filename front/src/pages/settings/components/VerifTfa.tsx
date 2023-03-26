@@ -3,10 +3,13 @@ import { useState, useEffect } from "react";
 import { axiosMain, axiosToken } from "src/api/axios";
 import axios, { AxiosResponse } from "axios";
 import { useNavigate } from "react-router-dom";
+import useAxiosPrivate from "src/hooks/usePrivate";
+import { useSnackbar } from "notistack";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAction<boolean>>, userId: number}) => {
+  const axiosPrivate = useAxiosPrivate();
   const [TfaQrcode, setTfaQrcode] = useState("");
   const [boolQrcode, setboolQrcode] = useState<boolean>(false);
 
@@ -22,6 +25,7 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
   const reftextInput5 = useRef<HTMLInputElement>(null);
   const reftextInput6 = useRef<HTMLInputElement>(null);
 
+  const snackBar = useSnackbar();
   const navigate = useNavigate();
   // useEffect(() => {
   //   const result = CODE_REGEX.test(code);
@@ -39,6 +43,7 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
 
   const handleCodeSubmit = async (e: any) => {
     e.preventDefault();
+    try{
     let code: string = "";
     code += e.target.n1.value; 
     code += e.target.n2.value; 
@@ -48,13 +53,9 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
     code += e.target.n6.value; 
       
     const verif = (
-      await axiosMain.post(
+      await axiosPrivate.post(
         "/auth/verify2FA",
         { code: code, userId: userId },
-        {
-          headers: { Authorization: "Bearer " + getJWT() },
-          //withCredentials: true
-        }
       )
     ).data;
     console.log("verif code =======" + verif);
@@ -66,14 +67,19 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
     if (verif === true) {
       setTfaSuccess(true);
     } else setBadAttempt(true);
+  }catch(err)
+  {
+    return (
+    <>
+    {snackBar.enqueueSnackbar('Oops something went wrong', {
+      variant: "error",
+      anchorOrigin: {vertical: "bottom", horizontal: "right"}
+    })}
+</>)
+  }
     //setVerified(verif);
   };
 
-  const getJWT = () => {
-    const jwt = JSON.parse(localStorage.getItem("tokens") || "{}");
-    console.log("totokens=" + JSON.stringify(jwt));
-    return jwt["access_token"];
-  };
   const handleNextInput = (e : React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     console.log("ID atual: " + e.target.id);

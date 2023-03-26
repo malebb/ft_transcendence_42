@@ -15,6 +15,7 @@ import style from '../styles/canvas.module.css';
 // import { trimUsername } from '../utils/trim';
 import { trimUsername } from "src/utils/trim";
 import AuthContext from "src/context/TokenContext";
+import useAxiosPrivate from "src/hooks/usePrivate";
 
 interface CheckboxData
 {
@@ -26,6 +27,7 @@ interface CheckboxData
 export default function Canvas()
 {
 
+	const axiosPrivate = useAxiosPrivate();
 	const { token , setToken }				= useContext(AuthContext);
 	const canvasRef							= useRef(document.createElement("canvas"));
 	const size								= useRef({width: 700, height: 450});
@@ -291,7 +293,7 @@ export default function Canvas()
 
 			try
 			{
-				axiosInstance.current = await axiosToken(token!, setToken);
+				axiosInstance.current = axiosPrivate;
 				const user: AxiosResponse = await axiosInstance.current!.get('/users/me');
 				map.current = draw.current!.initGameMap(user.data.map);
 				map.current!.onload = function()
@@ -334,7 +336,7 @@ export default function Canvas()
 		{
 			try
 			{
-				axiosInstance.current = await axiosToken(token!, setToken);
+				axiosInstance.current = axiosPrivate;
 				await axiosInstance.current!.delete('/challenge/' + challengeId);
 				window.location.href = "http://localhost:3000/";
 			}
@@ -349,9 +351,9 @@ export default function Canvas()
 			try
 			{
 				let cancelLink: Function[];
-				axiosInstance.current = await axiosToken(token!, setToken);
+				axiosInstance.current = axiosPrivate;
 				let challenge: AxiosResponse = await axiosInstance.current!.get('/challenge/' + challengeId);
-				axiosInstance.current = await axiosToken(token!, setToken);
+				axiosInstance.current = axiosPrivate;
 				let user: AxiosResponse = await axiosInstance.current!.get('/users/me');
 				let background: HTMLImageElement = draw.current!.initOutGameBackground();
 
@@ -404,7 +406,7 @@ export default function Canvas()
 				{
 					draw.current!.outGameBackground(background);
 					draw.current!.matchmaking();
-					axiosInstance.current = await axiosToken(token!, setToken);
+					axiosInstance.current = axiosPrivate;
 					const user: AxiosResponse = await axiosInstance.current!.get('/users/me');
 
 					let cancelZone = draw.current!.text("cancel", size.current.width / 2, size.current.height / 1.3, 20, FONT_COLOR, CANVAS_FONT);
@@ -443,7 +445,7 @@ export default function Canvas()
 			try
 			{
 				draw.current!.skins = [];
-				axiosInstance.current = await axiosToken(token!, setToken);
+				axiosInstance.current = axiosPrivate;
 				await axiosInstance.current!.post('/users/', {skin: name});
 				menu();
 			}
@@ -477,7 +479,7 @@ export default function Canvas()
 		{
 			try
 			{
-				axiosInstance.current = await axiosToken(token!, setToken);
+				axiosInstance.current = axiosPrivate;
 				axiosInstance.current!.post('/users/', {map: name});
 				menu();
 			}
@@ -588,7 +590,7 @@ export default function Canvas()
 		{
 			try
 			{
-				axiosInstance.current = await axiosToken(token!, setToken);
+				axiosInstance.current = axiosPrivate;
 				let challenge: AxiosResponse = await axiosInstance.current!.get('/challenge/' + challengeId);
 
 				if (challenge.data === '')
@@ -596,7 +598,7 @@ export default function Canvas()
 					setIsChallenger(false);
 					return ;
 				}
-				axiosInstance.current = await axiosToken(token!, setToken);
+				axiosInstance.current = axiosPrivate;
 				let user: AxiosResponse = await axiosInstance.current!.get('/users/me');
 
 				if (user.data.id !== challenge.data.sender.id &&

@@ -228,7 +228,7 @@ export class AuthService {
     });
   }
 
-  async refreshToken(userId: number, rt: string) {
+  async refreshToken(userId: number, rt: string): Promise<SignInterface> {
     const user = await this.prismaService.user.findUnique({
       where: {
         id: userId,
@@ -246,7 +246,13 @@ export class AuthService {
 
     const tokens = await this.signToken(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
-    return tokens;
+    // return tokens;
+    return {
+      tokens: tokens,
+      isTfa: user.isTFA,
+      userId: user.id,
+      username: user.username,
+    };
   }
 
   verify(token: string): boolean | undefined {

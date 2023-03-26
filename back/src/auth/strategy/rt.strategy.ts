@@ -8,29 +8,48 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Request } from 'express';
+import { JwtStrategy } from './jwt.strategy';
+import { stringify } from 'flatted';
+import { Payload } from '@prisma/client/runtime';
+import { rTokenInterface } from '../interfaces';
 
 @Injectable()
 export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor(config: ConfigService, private prisma: PrismaService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
+        // RtStrategy.extractJWTFromCookie,
         (request: Request) => {
-          console.log(request?.cookies?.rt_token);
           return request?.cookies?.rt_token;
         },
       ]),
       secretOrKey: config.get('RT_SECRET'),
       //secretOrKey: process.env.RT_SECRET,
-      passReqToCallback: true,
+      // passReqToCallback: true,
     });
   }
-  async validate(payload: any) {
-    console.log(payload);
+
+  private static extractJWTFromCookie(req: Request): string | null {
+    //console.log(req);
+    if (req.cookies && req.cookies.rt_token) {
+      console.log('COOKIES ===== ' + req.cookies.rt_token);
+      return req.cookies.rt_token;
+    }
+    console.log('no cookie');
+    return null;
+  }
+  async validate(payload: rTokenInterface) {
+    console.log('payload == ' + stringify(payload));
     if (payload === null) {
+      console.log('validate failed payload == NULL');
       throw new UnauthorizedException();
     }
-    return {
-      payload,
-    };
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: payload.sub,
+      },
+    });
+    delete user.hash;
+    return user;
   }
 }

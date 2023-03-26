@@ -4,13 +4,59 @@ import { EditUserDto } from './dto';
 import * as fs from 'fs';
 import { Friend, NeutralUser } from './types';
 import { User } from '@prisma/client';
-import { throwError } from 'rxjs';
 
 const DEFAULT_IMG = 'uploads/profileimages/default_profile_picture.png';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
+
+  mapUserToFriend(user: User): Friend {
+    const id = user.id;
+    const createdAt = user.createdAt;
+    const id42 = user.id42;
+    const username = user.username;
+    const email = user.email;
+    const firstName = user.firstName;
+    const lastName = user.lastName;
+    const profilePicture = user.profilePicture;
+    const skin = user.skin;
+    const map = user.map;
+    return {
+      id,
+      createdAt,
+      id42,
+      username,
+      email,
+      firstName,
+      lastName,
+      profilePicture,
+      skin,
+      map,
+    };
+  }
+
+  mapUserToNeutralUser(user: User): NeutralUser {
+    const id = user.id;
+    const createdAt = user.createdAt;
+    const id42 = user.id42;
+    const username = user.username;
+    const profilePicture = user.profilePicture;
+    return { id, createdAt, id42, username, profilePicture };
+  }
+
+  mapArrayUserToNeutralUser(user: User[]): NeutralUser[] {
+    const ret = user.map(
+      ({ id, createdAt, id42, username, profilePicture }) => ({
+        id,
+        createdAt,
+        id42,
+        username,
+        profilePicture,
+      }),
+    );
+    return ret;
+  }
 
   async getUserProfile(userId: number): Promise<NeutralUser> {
     const user = await this.prisma.user.findUnique({
@@ -196,13 +242,13 @@ export class UserService {
   }
   async deleteFriendRequestByUserId(myId: number, userId: number) {
     if (myId == userId) return;
-    let ret = await this.prisma.friendRequest.deleteMany({
+    const ret = await this.prisma.friendRequest.deleteMany({
       where: {
         receiverId: myId,
         creatorId: userId,
       },
     });
-    let ret2 = await this.prisma.friendRequest.deleteMany({
+    const ret2 = await this.prisma.friendRequest.deleteMany({
       where: {
         creatorId: myId,
         receiverId: userId,
@@ -214,52 +260,9 @@ export class UserService {
       throw new HttpException('Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  mapArrayUserToNeutralUser(user: User[]): NeutralUser[] {
-    let ret = user.map(({ id, createdAt, id42, username, profilePicture }) => ({
-      id,
-      createdAt,
-      id42,
-      username,
-      profilePicture,
-    }));
-    return ret;
-  }
-
-  mapUserToFriend(user: User): Friend {
-    const id = user.id;
-    const createdAt = user.createdAt;
-    const id42 = user.id42;
-    const username = user.username;
-    const email = user.email;
-    const firstName = user.firstName;
-    const lastName = user.lastName;
-    const profilePicture = user.profilePicture;
-    const skin = user.skin;
-    const map = user.map;
-    return {
-      id,
-      createdAt,
-      id42,
-      username,
-      email,
-      firstName,
-      lastName,
-      profilePicture,
-      skin,
-      map,
-    };
-  }
-  mapUserToNeutralUser(user: User): NeutralUser {
-    const id = user.id;
-    const createdAt = user.createdAt;
-    const id42 = user.id42;
-    const username = user.username;
-    const profilePicture = user.profilePicture;
-    return { id, createdAt, id42, username, profilePicture };
-  }
   async getFriends(userId: number): Promise<Friend[]> {
-    let friendArray: Friend[] = [];
-    let crea_request = await this.prisma.friendRequest.findMany({
+    const friendArray: Friend[] = [];
+    const crea_request = await this.prisma.friendRequest.findMany({
       where: {
         creatorId: userId,
         status: 'accepted',
@@ -277,7 +280,7 @@ export class UserService {
         if (user) console.log(friendArray.push(this.mapUserToFriend(user)));
       }),
     );
-    let recv_request = await this.prisma.friendRequest.findMany({
+    const recv_request = await this.prisma.friendRequest.findMany({
       where: {
         receiverId: userId,
         status: 'accepted',
@@ -300,9 +303,9 @@ export class UserService {
   }
   async getRecvPendingRequest(userId: number): Promise<NeutralUser[]> {
     //TODO maybe create a particular mapping to remove email from not friend user
-    let waitingArray: NeutralUser[] = [];
+    const waitingArray: NeutralUser[] = [];
     console.log('momi');
-    let recv_request = await this.prisma.friendRequest.findMany({
+    const recv_request = await this.prisma.friendRequest.findMany({
       where: {
         receiverId: userId,
         status: 'pending',
@@ -326,8 +329,8 @@ export class UserService {
   }
   async getCreatedPendingRequest(userId: number): Promise<NeutralUser[]> {
     //TODO maybe create a particular mapping to remove email from not friend user
-    let pendingArray: NeutralUser[] = [];
-    let crea_request = await this.prisma.friendRequest.findMany({
+    const pendingArray: NeutralUser[] = [];
+    const crea_request = await this.prisma.friendRequest.findMany({
       where: {
         creatorId: userId,
         status: 'pending',

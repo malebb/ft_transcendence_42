@@ -12,8 +12,8 @@ import Loading from "../Loading";
 
 function Main() {
   
-  const {token, setToken, username, setUsername} = useContext(AuthContext);
-  const userSessionId = JSON.parse(localStorage.getItem("id")!);
+  const {token, setToken, username, setUsername, userId} = useContext(AuthContext);
+  const userSessionId = userId!;
 
   return (
     <div className="App">

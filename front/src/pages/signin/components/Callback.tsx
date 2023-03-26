@@ -43,8 +43,8 @@ const Callback = () => {
         console.log("response =+ " + JSON.stringify(response.data));
       if (response.data.isTfa === false)
       {
-        localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
-        localStorage.setItem("id", JSON.stringify(response.data.userId));
+        // localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
+        // localStorage.setItem("id", JSON.stringify(response.data.userId));
         setUsername(response.data.username!);
         setUserId(response.data.id);
         setToken(response.data.tokens!)
@@ -72,8 +72,8 @@ const Callback = () => {
   useEffect(() => {
     if (TfaSuccess)
     {
-      localStorage.setItem("tokens", JSON.stringify(resp.tokens));
-      localStorage.setItem("id", JSON.stringify(resp.id));
+      // localStorage.setItem("tokens", JSON.stringify(resp.tokens));
+      // localStorage.setItem("id", JSON.stringify(resp.id));
       setUsername(resp.username!);
       setUserId(resp.id);
       setToken(resp.tokens!)

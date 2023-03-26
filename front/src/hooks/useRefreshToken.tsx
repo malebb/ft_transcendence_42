@@ -1,15 +1,17 @@
 import axios from 'axios';
+import { axiosMain } from 'src/api/axios';
+import { SignInterface } from 'src/interfaces/Sign';
 import useAuth from './useAuth';
 
 const useRefreshToken = () => {
-    const { setToken} = useAuth();
+    const context = useAuth();
 
     const refresh = async () => {
-        const response = await axios.get('/refresh', {
-            withCredentials: true
-        });
-        setToken(response.data);
-        return response.data.accessToken;
+        const response = await axiosMain.post<SignInterface>('/auth/refresh');
+        context.setToken(response.data.tokens);
+        context.setUserId(response.data.userId);
+        context.setUsername(response.data.username);
+        return response.data.tokens.access_token;
     }
     return refresh;
 };

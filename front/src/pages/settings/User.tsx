@@ -1,30 +1,24 @@
 import React, { useContext } from "react";
 import { axiosMain, axiosAuthReq, HTTP_METHOD } from "../../api/axios";
-import axios, { AxiosHeaders, AxiosResponse } from "axios";
-import userEvent from "@testing-library/user-event";
-import { SemanticClassificationFormat, setSourceMapRange } from "typescript";
+import { AxiosHeaders, AxiosResponse } from "axios";
 import { useState, useEffect, useRef } from "react";
-import { Buffer } from "buffer";
 import { Switch } from "@mui/material";
 import '../../styles/User.css';
-import { faFileImage } from "@fortawesome/free-solid-svg-icons";
-import AddPhotoAlternateTwoToneIcon from '@mui/icons-material/AddPhotoAlternateTwoTone';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { SvgIcon } from "@mui/material";
 //var speakeasy = require('speakeasy');
 //var qrcode = require('qrcode');
 // import qrcode from 'qrcode';
 // import { createSecretKey } from 'crypto';
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Popup from "src/components/Popup";
 import Sidebar from "src/components/Sidebar";
 import Headers from "src/components/Headers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AuthContext from "src/context/TokenContext";
+import useAxiosPrivate from "src/hooks/usePrivate";
 //var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
-const USER_PATH = "users";
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_@.]{3,23}$/;
 const CODE_REGEX = /^[0-9]{6}$/;
 const PATCH_PATH = "/users/patchme";
@@ -96,18 +90,15 @@ console.log(qrcode_img);*/
         <img src="http://localhost:3333/users/profile-image/" alt='profile-picture'/>
         </form> */
 const User = () => {
-  const {token, setToken, username, setUsername} = useContext(AuthContext);
-  const [refresh, setRefresh] = useState("");
+  const axiosPrivate = useAxiosPrivate();
+  const {username} = useContext(AuthContext);
   const [user, setUser] = useState<UserType>();
   const [validUser, setValidUser] = useState<boolean>(false);
   const [picture, setPicture] = useState("");
-  const [resp, setResp] = useState<UserType>();
 
   const [image, setImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [TfaQrcode, setTfaQrcode] = useState("");
   const [isTFA, setIsTFA] = useState<boolean>(false);
-  const [boolQrcode, setboolQrcode] = useState<boolean>(false);
 
   const [code, setCode] = useState("");
   const [validCode, setValidCode] = useState<boolean>(false);
@@ -149,11 +140,6 @@ const User = () => {
     setValidCode(result);
   }, [code]);
 
-  const getJWT = () => {
-    const jwt = JSON.parse(localStorage.getItem("tokens") || "{}");
-    return jwt["access_token"];
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
@@ -172,13 +158,9 @@ const User = () => {
     //console.log("Form = " + formData.getAll("login"));
     try {
       // const response: AxiosResponse = await axiosAuthReq(HTTP_METHOD.POST, PATCH_PATH, formData, {} as AxiosHeaders, setErrMsg, set)
-      const response: AxiosResponse = await axiosMain.post(
+      const response: AxiosResponse = await axiosPrivate.post(
         PATCH_PATH,
         formData,
-        {
-          headers: { Authorization: "Bearer " + getJWT() },
-          //withCredentials: true
-        }
       );
       console.log(response.data);
     } catch (err: any) {
@@ -200,15 +182,7 @@ const User = () => {
     }
   };
 
-  const onCodeChange = (event: any) => {
-    setCode(event.target.value);
-  };
-
-
   const navigate = useNavigate();
-  const QrCodePage = () => {
-    navigate("/", { replace: true });
-  };
 
   useEffect(() => {
     setErrMsg("");
@@ -238,7 +212,7 @@ const User = () => {
   useEffect(() => {
     setValidUser(false);
     const getProfile = async () => {
-      const profile = await axiosAuthReq(token!, setToken, HTTP_METHOD.GET, GETME_PATH, {} as AxiosHeaders, {}, setErrMsg, setUser);
+      const profile = await axiosAuthReq(HTTP_METHOD.GET, GETME_PATH, {} as AxiosHeaders, {}, setErrMsg, setUser);
       if(profile !== undefined)
       {
         setValidUser(true);

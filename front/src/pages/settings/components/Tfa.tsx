@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { useState, useEffect } from "react";
-import { axiosMain, axiosToken } from "../../../api/axios";
+import { axiosMain, axiosPrivate, axiosToken } from "../../../api/axios";
 import axios, { AxiosResponse } from "axios";
 import AuthContext from "src/context/TokenContext";
 
@@ -22,21 +22,12 @@ const Tfa = () => {
     setCode(event.target.value);
   };
 
-  const getJWT = () => {
-    const jwt = JSON.parse(localStorage.getItem("tokens") || "{}");
-    return jwt["access_token"];
-  };
-
   const handleCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const verif = (
-      await (await axiosToken(token!, setToken)).post(
+      await axiosPrivate.post(
         "/auth/verify2FA",
         { code: code },
-        {
-          headers: { Authorization: "Bearer " + getJWT() },
-          //withCredentials: true
-        }
       )
     ).data;
     /*speakeasy.totp.verify({
