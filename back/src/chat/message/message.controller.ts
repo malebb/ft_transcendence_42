@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, ParseIntPipe} from '@nestjs/common';
 import { MessageService } from './message.service';
 import { Message } from 'ft_transcendence';
 import { GetUser } from '../../auth/decorator';
@@ -25,10 +25,11 @@ class MessageController {
 	}
 
 	@Get('/private/:roomId')
-	async getAllPrivateRoomMessagesByRoomId(@Param('roomId') roomDataString: string)
+	async getAllPrivateRoomMessagesByRoomId(@Param('roomId') roomDataString: string,
+										   @GetUser('id') userId: number)
 	{
 		const roomId = JSON.parse(roomDataString).id;
-		return (await this.messageService.getAllPrivateRoomMessagesByRoomId(roomId));
+		return (await this.messageService.getAllPrivateRoomMessagesByRoomId(roomId, userId));
 	}
 
 }

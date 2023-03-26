@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from '../user/user.service';
-//import { Friend } from '@prisma/client';
 import { User } from 'ft_transcendence';
+import { Friend } from '../../src/user/types/friend.type';
 
 @Injectable()
 export class StatsService {
@@ -172,10 +172,10 @@ export class StatsService {
 		})
 	}
 
-	isFriend(friends: User[], userId: number): boolean
+	isFriend(friends: Friend[], userId: number): boolean
 	{
 		let isFriend = false;
-		friends.forEach((friend: User) => {
+		friends.forEach((friend: Friend) => {
 			if (friend.id == userId)
 				isFriend = true;
 		});

@@ -20,7 +20,13 @@ class ChallengeController
 		return (await this.challengeService.createChallenge(challenge.receiverId, authorId, challenge.powerUpMode));
 	}
 
-	@Get('/:id')
+	@Get('myChallenges')
+	async getMyChallenges(@GetUser('id') userId: number)
+	{
+		return (await this.challengeService.getMyChallenges(userId));
+	}
+
+	@Get(':id')
 	async getChallenge(@Param('id', ParseIntPipe) challengeId: number,
 					   @GetUser('id') userId: number)
 	{

@@ -3,13 +3,12 @@ import { AxiosInstance, AxiosResponse } from "axios";
 import { axiosToken, getToken } from "src/api/axios";
 import { Link, useParams } from "react-router-dom";
 import { ChatRoom } from "ft_transcendence";
-import { User } from "ft_transcendence";
-import { Message } from "ft_transcendence";
 import { Socket, io } from "socket.io-client";
+import { User, Message, MessageType } from "ft_transcendence";
+import { formatRemainTime } from '../utils/Penalty';
 
 import "./message.style.css";
 import style from "../inputs/InputButton.module.css"
-import { formatRemainTime } from "../utils/Penalty";
 
 type MessagesProps = 
 {
@@ -118,6 +117,8 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
       room: currentRoom.current!,
       message: inputMessage,
       sendAt: dateTS,
+	  type: MessageType["STANDARD" as keyof typeof MessageType],
+	  challengeId: 0
     };
 
     socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);

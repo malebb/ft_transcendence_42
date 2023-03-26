@@ -140,7 +140,7 @@ const Signin = () => {
         setResp((prev) => ({...prev, id: response.data.userId}))
         setResp((prev) => ({...prev, tokens: response.data.tokens}))
       }
-	  socket.auth = {token:getToken().access_token}
+	  socket.auth = {token: getToken().access_token}
 	  socket.connect();
 	  console.log('my socket = ', socket);
     } catch (err: any) {

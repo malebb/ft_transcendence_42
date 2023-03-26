@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { axiosToken } from "src/api/axios";
 import { Socket, io } from "socket.io-client";
-import { Message, User } from "ft_transcendence";
-import { AxiosInstance } from "axios";
+import { Message, MessageType, User } from "ft_transcendence";
+import { AxiosInstance, AxiosResponse } from "axios";
 import { useParams } from "react-router-dom";
 
 import style from "../../../styles/private.message.module.css";
@@ -19,6 +19,7 @@ function PrivateMessages() {
   const [inputMessage, setInputMessage] = useState("");
   let newMessage: Message;
   const [initSocket, setInitSocket] = useState<boolean>(false);
+  const [challenges, setChallenges] = useState<AxiosResponse | null>(null);
 
   function closeMessage(): void {
     document.getElementById("myForm")!.style.display = "none";
@@ -51,17 +52,17 @@ function PrivateMessages() {
 
     const initPrivateChat = async () => {
       try {
-        await fetchData().catch(console.error);
-        socket.current = io("ws://localhost:3333/chat", {
-          transports: ["websocket"],
-          forceNew: true,
-          upgrade: false,
+      await fetchData().catch(console.error);
+      socket.current = io("ws://localhost:3333/chat", {
+        transports: ["websocket"],
+        forceNew: true,
+        upgrade: false,
+      });
+      socket.current!.on("connect", async () => {
+        socket.current?.emit("JOIN_PRIVATE_ROOM", {
+          senderId: currentUser.current!.id,
+          receiverId: friend.current!.id,
         });
-        socket.current!.on("connect", async () => {
-          socket.current?.emit("JOIN_PRIVATE_ROOM", {
-            sender: currentUser.current,
-            receiver: friend.current,
-          });
           const joinRoom = async (): Promise<object> => {
             return await new Promise(function (resolve) {
               socket.current!.on("GET_ROOM", async (data) => {
@@ -104,6 +105,20 @@ function PrivateMessages() {
     initPrivateChat().catch(console.error);
   }, [friendId.userId]);
 
+	useEffect(() => {
+		const fetchChallenge = async () =>
+		{
+			axiosInstance.current = await axiosToken();
+			await axiosInstance.current!.get("/challenge/myChallenges").then((response) => {
+			if (response.data)
+				setChallenges(response);
+      		}).catch((e) => {
+                console.log(e);
+        	});
+		}
+		fetchChallenge();
+	}, []);
+
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
     //React.FormEvent<HTMLFormElement>): void {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
@@ -118,14 +133,16 @@ function PrivateMessages() {
       user: currentUser.current!,
       message: inputMessage,
       sendAt: dateTS,
+	  type: MessageType["STANDARD" as keyof typeof MessageType],
+	  challengeId: 0
     };
 
 
     socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
       msg: newMessage,
       room: room.current,
-      sender: currentUser.current,
-      receiver: friend.current,
+      senderId: currentUser.current!.id,
+      receiverId: friend.current!.id,
     });
     setStateMessages([...stateMessages, newMessage]);
     (event.target as HTMLFormElement).reset();
@@ -139,6 +156,24 @@ function PrivateMessages() {
       ).slice(-2)}`;
     };
 
+	const goToInvitation = (challengeId: number) =>
+	{
+		window.location.href = 'http://localhost:3000/challenge/' + challengeId;
+	}
+
+	const isChallengeFinished = (challengeId: number): boolean =>
+	{
+		if (challenges && challenges.data)
+		{
+			for (let i = 0; i < challenges.data.length; ++i)
+			{
+				if (challenges.data[i].id === challengeId)
+					return (false);
+			}
+		}
+		return (true);
+	}
+
     const genMessage = (isCurrentUser: boolean, newMessage: Message) => {
       if (!isCurrentUser) {
         return (
@@ -146,6 +181,7 @@ function PrivateMessages() {
             <div className="chat-receiver">
               <span>{newMessage?.user?.username + " : "}</span>
               <span>{newMessage.message}</span>
+			  {newMessage.type === 'INVITATION' && !isChallengeFinished(newMessage.challengeId) ? <button className={style.invitationBtn} onClick={() => goToInvitation(newMessage.challengeId)}>join</button> : <></>}
             </div>
             <span className="date">{genDate(newMessage)}</span>
           </>

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Message, User } from 'ft_transcendence';
+import { Message } from 'ft_transcendence';
+import { MessageType } from '@prisma/client';
 import { ChatRoomService } from '../chatRoom/chatRoom.service';
 import { HttpStatus, HttpException } from '@nestjs/common';
 import PenaltyService from '../penalty/penalty.service';
@@ -34,61 +35,74 @@ export class MessageService {
   {}
 
   async createPrivateRoom(
-    sender: User,
-    receiver: User,
+    senderId: number,
+    receiverId: number,
   ) {
-    const privateMessage = await this.prisma.privateMessage.create({
-      data: {
-        sender: {
-          connect: {
-            id: sender.id,
-          },
-        },
-        receiver: {
-          connect: {
-            id: receiver.id,
-          },
-        },
-      },
-    });
-    const room = await this.prisma.privateMessage.update({
-      where: {
-        id: privateMessage.id,
-      },
-      data: {
-        name: String(privateMessage.id),
-      },
-    });
+   		let privateRoom = await this.checkIfPrivateConvExist(senderId, receiverId);
+    	if (privateRoom === null)
+		{
+  		  	privateRoom = await this.prisma.privateMessage.create({
+      		data: {
+        			sender: {
+    					connect: {
+            				id: senderId,
+         				},
+        			},
+        			receiver: {
+         				connect: {
+           					id: receiverId,
+    					},
+    				},
+				},
+			});
+	    	privateRoom = await this.prisma.privateMessage.update({
+    	  		where: {
+    				id: privateRoom.id,
+    			},
+     			 data: {
+					name: String(privateRoom.id),
+				},
+	    	});
+		}
 
-    return room;
-  }
+	return privateRoom;
+}
 
-  async updatePrivateConv(room: number, newMessage: Message, sender: User) {
-    const updateConv = await this.prisma.privateMessage.update({
-      where: {
-        id: room,
-      },
-      data: {
-        message: {
-          create: [
-            {
-              user: {
-                connect: {
-                  id: sender.id,
-                },
-              },
-              message: newMessage.message,
-              sendAt: new Date(),
-            },
-          ],
-        },
-      },
-      include: {
-        message: true,
-      },
-    });
+	async updatePrivateConv(room: number, newMessage: string, senderId: number, receiverId: number, type: MessageType, challengeId: number)
+	{
+		let privateRoom = await this.checkIfPrivateConvExist(senderId, receiverId);
 
-    return updateConv;
+		if (privateRoom)
+		{
+			const updateConv = await this.prisma.privateMessage.update({
+				where: {
+					id: room,
+				},
+				data: {
+					message: {
+						create: [
+							{
+								user: {
+									connect: {
+										id: senderId,
+									},
+								},
+								message: newMessage,
+								sendAt: new Date(),
+								type: type,
+								challengeId: challengeId,
+							},
+						],
+					},
+				},
+				include: {
+					message: true,
+				},
+			});
+			return updateConv;
+		}
+		else
+			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 
   async createMessage(newMessage: Message, roomName: string, userId: number)
@@ -175,26 +189,39 @@ export class MessageService {
     return messages;
   }
 
-  async getAllPrivateRoomMessagesByRoomId(roomId: number) {
-    const messages = await this.prisma.message.findMany({
-      where: {
-        privateMessage: {
-			id: roomId,
-		},
-      },
-      orderBy: {
-        sendAt: 'asc',
-      },
-      include: {
-        user: true,
-      },
-    });
+  async getAllPrivateRoomMessagesByRoomId(roomId: number, userId: number) {
+		const blocked  = await this.userService.getAllBlocked(userId);
 
-    return messages;
+    	const messages = await this.prisma.message.findMany({
+			where: {
+				privateMessage: {
+					id: roomId,
+				},
+			},
+			orderBy: {
+				sendAt: 'asc',
+			},
+			include: {
+				user: true,
+			},
+		});
+
+		for (let i = 0; i < blocked.length; ++i)
+		{
+			for (let j = 0; j < messages.length; ++j)
+			{
+				if (messages[j].user.id === blocked[i].id)
+				{
+					messages.splice(j, 1);
+					j--;
+				}
+			}
+		}
+		return messages;
   }
 
   async deleteAllMessagesByRoomName(roomName: string) {
-    const deleteMessages = await this.prisma.message.deleteMany({
+    await this.prisma.message.deleteMany({
       where: {
         room: {
           name: roomName,
@@ -205,27 +232,27 @@ export class MessageService {
     return roomName;
   }
 
-  async checkIfPrivateConvExist(user1: User, user2: User) {
+  async checkIfPrivateConvExist(userId1: number, userId2: number) {
     const conv = await this.prisma.privateMessage.findFirst({
       where: {
         OR: [
           {
             AND: {
               sender: {
-                id: user1.id,
+                id: userId1,
               },
               receiver: {
-                id: user2.id,
+                id: userId2,
               },
             },
           },
           {
             AND: {
               sender: {
-                id: user2.id,
+                id: userId2,
               },
               receiver: {
-                id: user1.id,
+                id: userId1,
               },
             },
           },

@@ -23,6 +23,7 @@ const Logout = () => {
       const response: AxiosResponse = await (
         await axiosToken()
       ).post(LOGOUT_PATH);
+	 // socket.emit('OFFLINE');
 	  socket.disconnect();
       console.log(42);
       console.log(response);
