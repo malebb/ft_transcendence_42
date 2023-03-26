@@ -43,8 +43,8 @@ export class MessageGateway
   server: Server;
 
   handleConnection(client: Socket) {
-    const sockets = this.server.sockets;
-    console.log(`Message Socket client with id: ${client.id} connected.`);
+    // const sockets = this.server.sockets;
+    // console.log(`Message Socket client with id: ${client.id} connected.`);
 
     //console.log(`Message Socket client with id: ${client.id} connected.`);
     // this.logger.log(`Message Socket client with id: ${client.id} connected.`);
@@ -98,8 +98,8 @@ export class MessageGateway
   afterInit(server: Server) {}
 
   handleDisconnect(client: Socket) {
-    const sockets = this.server.sockets;
-    console.log(`Disconnected id: ${client.id}.`);
+    // const sockets = this.server.sockets;
+    // console.log(`Disconnected id: ${client.id}.`);
   }
 }
 
