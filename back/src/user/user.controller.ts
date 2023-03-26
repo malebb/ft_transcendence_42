@@ -7,6 +7,11 @@ import {
   UploadedFile,
   Param,
   Res,
+  HttpException,
+  HttpStatus,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { GetUser, Public } from '../auth/decorator';
 import { User } from '@prisma/client';
@@ -19,6 +24,7 @@ import { extname, join } from 'path';
 import { imageFileFilter } from './user.upload.utils';
 import { NeutralUser } from './types';
 
+const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
 export const storage = {
   storage: diskStorage({
     destination: './uploads/profileimages',
@@ -76,12 +82,24 @@ export class UserController {
   // @FormDataRequest()
   @UseInterceptors(FileInterceptor('file', storage))
   PatchProfile(
-    @UploadedFile() file,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 100000 }),
+          new FileTypeValidator({ fileType: 'image/png' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
     @GetUser() user: User,
     @Body() dto: EditUserDto,
   ) {
     if (file !== undefined) this.userService.uploadPicture(user.id, file.path);
-    if (dto.login !== undefined) this.userService.editUsername(user.id, dto);
+    if (dto.login !== undefined) {
+      if (!USER_REGEX.test(dto.login))
+        throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
+      this.userService.editUsername(user.id, dto);
+    }
   }
 
   @Get('send-friend-request/:userid')

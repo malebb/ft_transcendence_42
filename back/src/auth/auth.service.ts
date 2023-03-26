@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthDto, SignupDto } from './dto';
 import * as argon from 'argon2';
@@ -22,6 +27,10 @@ const JWT_TOKEN_EXPIRE_TIME = 900;
 const GRANT_TYPE = 'authorization_code';
 const DEFAULT_IMG = 'uploads/profileimages/default_profile_picture.png';
 const REDIRECT_URI = 'http://localhost:3000/auth/signin/42login/callback';
+const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
+const PWD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%&*^()-_=]).{8,24}$/;
 
 @Injectable()
 export class AuthService {
@@ -37,6 +46,12 @@ export class AuthService {
   }
 
   async signup(dto: SignupDto): Promise<SignInterface> {
+    if (
+      !EMAIL_REGEX.test(dto.email) ||
+      !PWD_REGEX.test(dto.password) ||
+      !USER_REGEX.test(dto.username)
+    )
+      throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
     const hash = await argon.hash(dto.password);
     try {
       const user = await this.prismaService.user.create({
@@ -71,6 +86,8 @@ export class AuthService {
   }
 
   async signin(dto: AuthDto): Promise<SignInterface> {
+    if (!EMAIL_REGEX.test(dto.email) || !PWD_REGEX.test(dto.password))
+      throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
     const user = await this.prismaService.user.findUnique({
       where: {
         email: dto.email,
