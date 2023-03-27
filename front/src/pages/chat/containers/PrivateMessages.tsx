@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { axiosToken } from "src/api/axios";
+import { axiosToken, getToken } from "src/api/axios";
 import { Socket, io } from "socket.io-client";
 import { Message, MessageType, User } from "ft_transcendence";
 import { AxiosInstance, AxiosResponse } from "axios";
@@ -72,6 +72,9 @@ function PrivateMessages() {
         transports: ["websocket"],
         forceNew: true,
         upgrade: false,
+		auth: {
+			token: getToken().access_token
+		}
       });
       socket.current!.on("connect", async () => {
         socket.current?.emit("JOIN_PRIVATE_ROOM", {
