@@ -124,7 +124,6 @@ function PrivateMessages() {
   }, [friendId.userId]);
 
 	useEffect(() => {
-
 		fetchChallenge();
 	}, []);
 

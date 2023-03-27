@@ -44,7 +44,7 @@ export class MessageGateway
 
   handleConnection(client: Socket) {
     const sockets = this.server.sockets;
-    console.log(`Message Socket client with id: ${client.id} connected.`);
+//    console.log(`Message Socket client with id: ${client.id} connected.`);
 
     //console.log(`Message Socket client with id: ${client.id} connected.`);
     // this.logger.log(`Message Socket client with id: ${client.id} connected.`);
@@ -75,7 +75,6 @@ export class MessageGateway
   @SubscribeMessage('SEND_PRIVATE_ROOM_MESSAGE')
   async receivePrivateMessage(client: Socket, data)
   {
-	  console.log('data = ', data);
    await this.messageService.updatePrivateConv(data.room.id, data.msg.message, data.senderId, data.receiverId, data.msg.type, data.msg.challengeId);
 
     client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
@@ -95,7 +94,7 @@ export class MessageGateway
 
   handleDisconnect(client: Socket) {
     const sockets = this.server.sockets;
-    console.log(`Disconnected id: ${client.id}.`);
+//    console.log(`Disconnected id: ${client.id}.`);
   }
 }
 

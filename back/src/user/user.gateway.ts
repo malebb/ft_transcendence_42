@@ -1,17 +1,16 @@
 import {
 	SubscribeMessage,
 	WebSocketGateway,
-	OnGatewayInit,
 	WebSocketServer,
 	OnGatewayConnection,
 	OnGatewayDisconnect,
-	MessageBody,
-	ConnectedSocket,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { UserService } from './user.service';
 import { getIdFromToken, isAuthEmpty } from '../gatewayUtils/gatewayUtils';
 import { GetUser } from '../auth/decorator';
+import { UseGuards } from '@nestjs/common';
+import { WsGuard } from '../auth/guard/ws.guard';
 
 @WebSocketGateway({
 	namespace: '/user',
@@ -29,7 +28,6 @@ export class UserGateway
 	server: Server;
 
 	handleConnection(client: Socket) {
-		console.log("new connection")
 		if (isAuthEmpty(client))
 			return ;
 		const userId = getIdFromToken(client.handshake.auth.token);
@@ -37,6 +35,7 @@ export class UserGateway
 		this.server.emit('CHANGE_STATUS', {status: 'ONLINE', id: userId});
 	}
 
+	@UseGuards(WsGuard)
 	@SubscribeMessage('IN_GAME')
 	handleInGame(@GetUser() token: string)
 	{
@@ -45,6 +44,7 @@ export class UserGateway
 		this.server.emit('CHANGE_STATUS', {status: 'IN_GAME', id: userId});
 	}
 
+	@UseGuards(WsGuard)
 	@SubscribeMessage('ONLINE')
 	handleOnline(@GetUser() token: string)
 	{
@@ -53,6 +53,7 @@ export class UserGateway
 		this.server.emit('CHANGE_STATUS', {status: 'ONLINE', id: userId});
 	}
 
+	@UseGuards(WsGuard)
 	@SubscribeMessage('OFFLINE')
 	handleOffline(@GetUser() token: string)
 	{
