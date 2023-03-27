@@ -11,8 +11,9 @@ import { RoomStatus } from './utils/RoomStatus';
 import { User, PenaltyType, MessageType } from 'ft_transcendence';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
-import alertStyle from './alertBox.module.css';
+import alertStyle from '../../styles/alertBox.module.css';
 import { trimUsername } from '../../utils/trim';
+import { printInfosBox } from '../../utils/infosBox';
 import { Socket, io } from "socket.io-client";
 
 const ChatRoomBase = () => {
@@ -68,24 +69,6 @@ const ChatRoomBase = () => {
 				</svg>
 			</div>
 		)
-	}
-
-	const printInfosBox = (infos: string) =>
-	{
-		confirmAlert({
-			customUI: ({ onClose }) =>
-			{
-				return (
-					<div id={alertStyle.boxContainer} onClick={() => onClose()} style={{ width: 400 }}>
-						<h2>{infos}</h2>
-						<div id={alertStyle.alertBoxBtn}>
-							<p>Click to continue</p>
-						</div>
-					</div>
-				);
-			},
-			keyCodeForClose: [8, 32, 13]
-		});
 	}
 
 	const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) =>

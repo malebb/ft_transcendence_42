@@ -75,6 +75,7 @@ export class MessageGateway
   @SubscribeMessage('SEND_PRIVATE_ROOM_MESSAGE')
   async receivePrivateMessage(client: Socket, data)
   {
+	  console.log('data = ', data);
    await this.messageService.updatePrivateConv(data.room.id, data.msg.message, data.senderId, data.receiverId, data.msg.type, data.msg.challengeId);
 
     client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);

@@ -4,9 +4,14 @@ import { Socket, io } from "socket.io-client";
 import { Message, MessageType, User } from "ft_transcendence";
 import { AxiosInstance, AxiosResponse } from "axios";
 import { useParams } from "react-router-dom";
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
+import alertStyle from '../../../styles/alertBox.module.css';
 
 import style from "../../../styles/private.message.module.css";
 import "./message.style.css";
+import { trimUsername } from '../../../utils/trim';
+import { printInfosBox } from '../../../utils/infosBox';
 
 function PrivateMessages() {
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
@@ -218,6 +223,64 @@ function PrivateMessages() {
     );
   };
 
+	const createInvitation = async (member: User, powerUpMode: boolean) =>
+	{
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			const challengeResponse = await axiosInstance.current.post('/challenge/', { powerUpMode: powerUpMode, receiverId: member.id },
+			{
+				headers:
+				{
+					"Content-Type": "application/json"
+				}
+			});
+    		socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
+  		    msg: {user: currentUser.current, message: "Join me for a game !", sendAt: new Date(), type: "INVITATION", challengeId: challengeResponse.data},
+     		room: room.current,
+      		senderId: currentUser.current!.id,
+      				receiverId: member.id,
+					type: MessageType["INVITATION" as keyof typeof MessageType]
+    			});
+				socket.current!.disconnect();
+				window.location.href = 'http://localhost:3000/challenge/' + challengeResponse.data;
+		}
+		catch (error: any)
+		{
+			if (error.response.status === 403)
+			{
+				printInfosBox('You are already playing in another game');
+			}
+		}
+	}
+
+	const selectMode = () =>
+	{
+		confirmAlert({
+			customUI: ({ onClose }) =>
+			{
+				return (
+					<div id={alertStyle.boxContainer}>
+						<h1>Challenge {trimUsername(friend.current!.username, 15)}</h1>
+						<p>Select a pong mode</p>
+						<div id={alertStyle.alertBoxBtn}>
+							<button onClick={() =>
+							{
+								createInvitation(friend.current!, false);
+								onClose();
+							}}>normal</button>
+							<button onClick={() =>
+							{
+								createInvitation(friend.current!, true)
+								onClose();
+							}}>power-up</button>
+						</div>
+					</div>);
+			},
+			keyCodeForClose: [8, 32, 13],
+
+		});
+	}
   const DisplayMessages = () => {
     if (initSocket === true) return <GenMessages />;
     return <></>;
@@ -243,6 +306,10 @@ function PrivateMessages() {
             onChange={(event) => setInputMessage(event.target.value)}
           />
           <button type="submit">SEND</button>
+			<img className={style.challengeLogo} src="http://localhost:3000/images/challenge.png"
+				alt={"Challenge"} title="Challenge" 
+				width="20" height="22"
+				onClick={() => selectMode()} /> : <></>
         </form>
       </div>
     </div>
