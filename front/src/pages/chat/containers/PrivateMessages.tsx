@@ -48,7 +48,7 @@ function PrivateMessages() {
 		if (response.data)
 			setChallenges(response);
      		}).catch((e) => {
-               console.log(e);
+               console.log('error: ', e);
        	});
 	}
 
@@ -99,7 +99,7 @@ function PrivateMessages() {
                 setStateMessages(response.data);
               })
               .catch((e) => {
-                console.log(e);
+                console.log('error: ', e);
               });
           };
           getAllMessages()

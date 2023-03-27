@@ -12,7 +12,6 @@ function Main() {
   const userSessionId = JSON.parse(sessionStorage.getItem("id")!);
 
   const onClick = async () => {
-    console.log(getRefreshHeader());
     const new_jwt = await axios.post(
       "http://localhost:3333/auth/refresh",
       {},
@@ -22,7 +21,6 @@ function Main() {
         },
       }
     );
-    console.log(new_jwt.data);
   };
   return (
     <div className="App">

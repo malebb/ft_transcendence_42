@@ -10,8 +10,6 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
 
   // useEffect(() => {
   //   const result = CODE_REGEX.test(code);
-  //   console.log(result);
-  //   console.log(code);
   //   setValidCode(result);
   // }, [code]);
 
@@ -19,8 +17,6 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
   //   setCode(event.target.value);
   //   if (badAttempt) setBadAttempt(false);
   // };
-
-  console.log("userId verif =" + userId);
 
   const handleCodeSubmit = async (e: any) => {
     e.preventDefault();
@@ -42,7 +38,6 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
         }
       )
     ).data;
-    console.log("verif code =======" + verif);
     /*speakeasy.totp.verify({
       secret: secret.hex,
       encoding: 'hex',
@@ -56,14 +51,10 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
 
   const getJWT = () => {
     const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
-    console.log("totokens=" + JSON.stringify(jwt));
     return jwt["access_token"];
   };
   const handleNextInput = (e : React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-    console.log("ID atual: " + e.target.id);
-    console.log("length =" + Object.keys(e.target.value).length)
-    console.log("key =" + e.target.placeholder);
     if (Object.keys(e.target.value).length > 1)
     {
       if(e.target.value[0] !== e.target.placeholder)
@@ -75,7 +66,6 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
     {
     const fieldName = e.target.id.split('n')[1];
     const nextSibiling = document.getElementById(`n${parseInt(fieldName) + 1}`);
-    console.log(nextSibiling);
     if(nextSibiling !== null){
         nextSibiling.focus();
     }}

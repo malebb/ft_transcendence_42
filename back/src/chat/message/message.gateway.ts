@@ -33,8 +33,6 @@ import { WsGuard } from '../../auth/guard/ws.guard';
 export class MessageGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  private readonly logger = new Logger(MessageGateway.name);
-
   // va bind l'application MessageService
   constructor(private messageService: MessageService,
 			 private chatRoomService: ChatRoomService) {}
@@ -45,11 +43,6 @@ export class MessageGateway
 
   handleConnection(client: Socket) {
     const sockets = this.server.sockets;
-//    console.log(`Message Socket client with id: ${client.id} connected.`);
-
-    //console.log(`Message Socket client with id: ${client.id} connected.`);
-    // this.logger.log(`Message Socket client with id: ${client.id} connected.`);
-    // this.logger.debug(`Number of connected sockets: ${sockets.size}`);
   }
 
   @UseGuards(WsGuard)
@@ -97,7 +90,6 @@ export class MessageGateway
 
   handleDisconnect(client: Socket) {
     const sockets = this.server.sockets;
-//    console.log(`Disconnected id: ${client.id}.`);
   }
 }
 

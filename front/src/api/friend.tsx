@@ -6,10 +6,8 @@ export const deleteRequest = async (userId: number) => {
     const sendingReq: AxiosResponse = await (
       await axiosToken()
     ).get("users/destroy-friend-request-by-userid/" + userId);
-    console.log(JSON.stringify(sendingReq.data));
     return sendingReq.data;
   } catch (err: any) {
-    console.log("error getme");
     if (!err?.response) {
     } else if (err.response?.status === 403) {
     } else {
@@ -22,10 +20,8 @@ export const refuseRequest = async (userId: number) => {
     const sendingReq: AxiosResponse = await (
       await axiosToken()
     ).get("users/decline-friend-request-by-userid/" + userId);
-    console.log(JSON.stringify(sendingReq.data));
     return sendingReq.data;
   } catch (err: any) {
-    console.log("error getme");
     if (!err?.response) {
     } else if (err.response?.status === 403) {
     } else {
@@ -38,10 +34,8 @@ export const acceptRequest = async (userId: number) => {
     const sendingReq: AxiosResponse = await (
       await axiosToken()
     ).get("users/accept-friend-request-by-userid/" + userId);
-    console.log(JSON.stringify(sendingReq.data));
     return sendingReq.data;
   } catch (err: any) {
-    console.log("error getme");
     if (!err?.response) {
     } else if (err.response?.status === 403) {
     } else {

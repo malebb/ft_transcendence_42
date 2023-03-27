@@ -52,22 +52,16 @@ const Signup = () => {
   //TODO change userRef to user in the useeffect if not working
   useEffect(() => {
     const result = USER_REGEX.test(user);
-    console.log(result);
-    console.log(user);
     setValidName(result);
   }, [user]);
 
   useEffect(() => {
     const result = EMAIL_REGEX.test(email);
-    console.log(result);
-    console.log(email);
     setValidEmail(result);
   }, [email]);
 
   useEffect(() => {
     const result = PWD_REGEX.test(pwd);
-    console.log(result);
-    console.log(pwd);
     setValidPwd(result);
     const match = matchPwd === pwd;
     setValidMatch(match);
@@ -95,15 +89,12 @@ const Signup = () => {
           //withCredentials: true
         }
       );
-      console.log(response.data);
       setSuccess(true);
       // setToken(response.data.token);
       sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
       sessionStorage.setItem("id", JSON.stringify(response.data.userId));
 	  socket.auth = {token: getToken().access_token}
 	  socket.connect();
-      console.log(response.data.access_token);
-      //console.log(token);
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");

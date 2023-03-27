@@ -30,8 +30,6 @@ export class AuthController {
   @Public()
   @Post('signup')
   signup(@Body() dto: SignupDto, @Headers() headers): Promise<SignInterface> {
-    console.log(headers);
-    console.log(dto);
     return this.authService.signup(dto);
   }
 
@@ -39,7 +37,6 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('signin')
   signin(@Body() dto: AuthDto, @Headers() headers): Promise<SignInterface> {
-    console.log(headers);
     return this.authService.signin(dto);
   }
 
@@ -51,7 +48,6 @@ export class AuthController {
         if (req.headers.origin)
         {
             origin = req.headers.origin;
-            console.log("origin = " + origin);
             res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3333');
         }*/
     return this.authService.signin42(res);
@@ -65,11 +61,9 @@ export class AuthController {
         if (req.headers.origin)
         {
             origin = req.headers.origin;
-            console.log("origin = " + origin);
             res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3333');
             //res.setHeader("Access-Control-Allow-Origin", '*');
         }*/
-    console.log('code from dto = ' + dto.code);
     return this.authService.callback42(dto.code);
   }
 
@@ -86,15 +80,13 @@ export class AuthController {
     @GetUser('sub') userId: number,
     @GetUser('refreshToken') token, //refreshToken(@Req() req: Request)
   ) {
-    /*console.log(req);
+    /*
         let rToken;
-        console.log(user.id);
         if (req.get('authorization') && user.id)
         {
             rToken = req.get('authorization').replace('Bearer', '').trim();*/
     return this.authService.refreshToken(userId, token);
     /*}
-        console.log("aieeee");
         return ;*/
   }
 
@@ -105,9 +97,8 @@ export class AuthController {
   }
 
   @Get('create2FA')
-  create2FA(@GetUser() user) {
-    console.log(user);
-    return this.authService.create2FA(user.id);
+  create2FA(@GetUser('id') userId: number) {
+    return this.authService.create2FA(userId);
   }
   @Public()
   @Post('verify2FA')
@@ -116,11 +107,11 @@ export class AuthController {
   }
 
   @Get('set2FA')
-  set2FA(@GetUser() user) {
-    console.log(this.authService.set2FA(user.id));
+  set2FA(@GetUser('id') userId: number) {
+    this.authService.set2FA(userId);
   }
   @Get('unset2FA')
-  unset2FA(@GetUser() user) {
-    console.log(this.authService.unset2FA(user.id));
+  unset2FA(@GetUser('id') userId: number) {
+    this.authService.unset2FA(userId);
   }
 }

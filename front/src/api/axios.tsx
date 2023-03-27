@@ -23,7 +23,6 @@ export function getAuthorizationHeader() {
 }
 export function getRefreshHeader() {
   if (!getToken()) return null;
-  console.log(getToken().refresh_token);
   return `Bearer ${getToken().refresh_token}`;
 }
 
@@ -95,8 +94,6 @@ export async function axiosToken() {
     //     "http://localhost:3333/users/me",
     //     {} as AxiosHeaders, {},setErrMsg, setResp);
 
-    // console.log("errMSG == " + JSON.stringify(errMsg));
-    // console.log("Resp ==" + JSON.stringify(resp));
 
   export async function axiosReq<Type>(method: number, path: string, headers: AxiosHeaders, body: Object, setErrorMsg: Dispatch<SetStateAction<string>>, setData : Dispatch<SetStateAction<Type>>) : Promise<Type | undefined>{
     try{

@@ -41,9 +41,6 @@ const PrivateRoutes = () => {
     return <Loading />;
   }
 
-  console.log("err ==" + JSON.stringify(errMsg));
-  console.log("user ==" + JSON.stringify(data));
-
   return isAuth ? 
     <>
     {snackBar.enqueueSnackbar('Oops something went wrong', {

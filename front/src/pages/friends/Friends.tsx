@@ -73,21 +73,18 @@ const Friends = () => {
       await axiosToken()
     ).get(RECV_LIST_PATH);
     setRecvArray(response.data);
-    console.log(JSON.stringify(friendArray));
   };
   const getSendArray = async () => {
     const response: AxiosResponse = await (
       await axiosToken()
     ).get(SEND_LIST_PATH);
     setSendArray(response.data);
-    console.log(JSON.stringify(friendArray));
   };
   const getFriendArray = async () => {
     const response: AxiosResponse = await (
       await axiosToken()
     ).get(FRIEND_LIST_PATH);
     setFriendArray(response.data);
-    console.log(JSON.stringify(friendArray));
   };
 
   useEffect(() => {
@@ -117,7 +114,6 @@ const Friends = () => {
   ) => {
     if (confirmed) {
       const resp = deleteRequest(friendId);
-      console.log(JSON.stringify(resp));
       if (array === 0 && friendArray)
         setFriendArray(friendArray.filter((item) => item.id !== friendId));
       else if (array === 1 && sendArray)
@@ -144,7 +140,6 @@ const Friends = () => {
       for(var i = 0; i < otherSwitch.length ; i++)
           otherSwitch.item(i)!.className = "switch-label_item";
     e.target.classList.replace("switch-label_item","switch-label_selected");
-    console.log(parseInt(e.target.id.split('_')[1]));
     setRenderType(parseInt(e.target.id.split('_')[1]));
   }
 

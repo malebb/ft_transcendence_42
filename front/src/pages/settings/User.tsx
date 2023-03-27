@@ -35,10 +35,8 @@ if (secret.otpauth_url !== undefined)
   var qrcode_img = qrcode.toDataURL(secret.otpauth_url, function(err: any, data: any){
   if (err) return err;
 })
-console.log(qrcode_img);*/
 // const getPic = async (jwt: string) => {
 //   try {
-//     console.log("jwt = " + jwt);
 //     const response: AxiosResponse = await axios.get(
 //       "http://localhost:3333/users/profile-image/media_16ad2258cac6171d66942b13b8cd4839f0b6be6f3.pnge5ac4441-06e8-4956-9e34-0941006e7bf8.png",
 //       {
@@ -47,10 +45,8 @@ console.log(qrcode_img);*/
 //         },
 //       }
 //     );
-//     console.log("getPic = " + response.data);
 //     return response.data;
 //   } catch (err: any) {
-//     console.log("error getPic");
 //     return null;
 //   }
 // };
@@ -125,8 +121,6 @@ const User = () => {
 
   useEffect(() => {
     const result = CODE_REGEX.test(code);
-    console.log(result);
-    console.log(code);
     setValidCode(result);
   }, [code]);
 
@@ -139,7 +133,6 @@ const User = () => {
     e.preventDefault();
     const formData = new FormData();
     if (selectedFile !== null) {
-      console.log("good file");
       formData.append("file", selectedFile);
     }
     if (Login !== user?.username) {
@@ -150,7 +143,6 @@ const User = () => {
       }
       formData.append("login", Login);
     }
-    //console.log("Form = " + formData.getAll("login"));
     try {
       // const response: AxiosResponse = await axiosAuthReq(HTTP_METHOD.POST, PATCH_PATH, formData, {} as AxiosHeaders, setErrMsg, set)
       const response: AxiosResponse = await axiosMain.post(
@@ -161,7 +153,6 @@ const User = () => {
           //withCredentials: true
         }
       );
-      console.log(response.data);
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");
@@ -247,7 +238,6 @@ const User = () => {
     if (myRef.current)
       myRef.current.click();
   }
-  console.log(isTFA);
   return (
     <>
       <Sidebar />

@@ -717,7 +717,6 @@ const ChatRoomBase = () => {
 	{
 		if (roomStatus === 'JOINED')
 		{
-			console.log("JOINED");
 			return (
 				<>
 					{genTitle()}

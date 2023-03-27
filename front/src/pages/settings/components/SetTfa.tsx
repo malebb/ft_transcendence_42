@@ -16,8 +16,6 @@ const SetTfa = () => {
   const navigate = useNavigate();
   useEffect(() => {
     const result = CODE_REGEX.test(code);
-    console.log(result);
-    console.log(code);
     setValidCode(result);
   }, [code]);
 
@@ -31,8 +29,6 @@ const SetTfa = () => {
           })
         ).data
         //qrcode.toDataURL(secret.otpauth_url,{type: "image/jpeg"}/*, function(err: any, data: any){
-        /*console.log(err);
-    }*/
       );
     };
     createQrCode();
@@ -69,7 +65,6 @@ const SetTfa = () => {
       ).data;
       navigate("/user");
     } else setBadAttempt(true);
-    console.log("verif code =======" + verif);
     //setVerified(verif);
   };
 

@@ -252,7 +252,7 @@ function Rooms()
 			}
 			catch (error: any)
 			{
-				console.log("An error occured when joining the room: ", error);
+				console.log("error occured when joining the room: ", error);
 			}
 		}
 

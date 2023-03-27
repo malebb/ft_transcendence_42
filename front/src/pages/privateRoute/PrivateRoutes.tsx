@@ -40,9 +40,6 @@ const PrivateRoutes = () => {
     return <Loading />;
   }
 
-  console.log("err ==" + JSON.stringify(errMsg));
-  console.log("user ==" + JSON.stringify(data));
-
   if (errMsg === "")
   return isAuth ? <Outlet /> : <Navigate to="/signin" />;
   else

@@ -15,8 +15,6 @@ const DeleteTfa = () => {
   const navigate = useNavigate();
   useEffect(() => {
     const result = CODE_REGEX.test(code);
-    console.log(result);
-    console.log(code);
     setValidCode(result);
   }, [code]);
 
@@ -51,7 +49,6 @@ const DeleteTfa = () => {
       ).data;
       navigate("/user");
     } else setBadAttempt(true);
-    console.log("verif code =======" + verif);
     //setVerified(verif);
   };
 

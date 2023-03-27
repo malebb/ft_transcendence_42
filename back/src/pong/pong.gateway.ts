@@ -89,7 +89,6 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 
 	handleConnection(player: Socket)
 	{
-		console.log('Player ' + player.id + " join");
 		const id = this.checkCredentialsOnConnection(player);
 		if (!id)
 			return ;
@@ -118,7 +117,6 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 		const playerIndex = this.getIndexWithSocketId(player.id);
 		if (playerIndex !== -1)
 			this.playersConnected.splice(playerIndex, 1);
-		console.log('Player ' + player.id + " left");
 	}
 
 	isUserIdConnectedWithSocketId(userId: number, socketId: string)

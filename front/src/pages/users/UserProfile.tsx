@@ -169,7 +169,6 @@ const UserProfile = () => {
           setPicture(
             GET_PROFILE_PICTURE + profile.profilePicture.split("/")[2]
           );
-        console.log(picture);
         await axiosAuthReq(
           HTTP_METHOD.GET,
           GET_STATUS_PATH + userId,
@@ -189,7 +188,6 @@ const UserProfile = () => {
         const sendingReq: AxiosResponse = await (
           await axiosToken()
         ).get("users/destroy-friend-request-by-userid/" + userId);
-        console.log(JSON.stringify(sendingReq.data));
         setFriendStatus("");
         setShowConfirmation(false);
         //return sendingReq.data;
@@ -213,7 +211,6 @@ const UserProfile = () => {
       const sendingReq: AxiosResponse = await (
         await axiosToken()
       ).get("users/decline-friend-request-by-userid/" + userId);
-      console.log(JSON.stringify(sendingReq.data));
       setFriendStatus("declined");
       return sendingReq.data;
     } catch (err: any) {
@@ -233,7 +230,6 @@ const UserProfile = () => {
       const sendingReq: AxiosResponse = await (
         await axiosToken()
       ).get("users/accept-friend-request-by-userid/" + userId);
-      console.log(JSON.stringify(sendingReq.data));
       setFriendStatus("accepted");
       return sendingReq.data;
     } catch (err: any) {

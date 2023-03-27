@@ -30,13 +30,11 @@ const Callback = () => {
   const query = useQuery();
   useEffect(() => {
     const code = query.get("code") || "";
-    console.log("code = " + code);
     const callback42 = async () => {
       try {
         const response: AxiosResponse = await axiosMain.post<SignInterface>(CALLBACK_PATH, {
           code: code,
         });
-        console.log("response =+ " + JSON.stringify(response.data));
       if (response.data.isTfa === false)
       {
         sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
@@ -72,7 +70,6 @@ const Callback = () => {
     }
   }, [TfaSuccess])
 
-  console.log("resp.id = " + resp.id);
   if (isLoading) return <Loading />;
   return (
     <>

@@ -23,8 +23,6 @@ const Logout = () => {
    	   const response: AxiosResponse = await (
    	     await axiosToken() ).post(LOGOUT_PATH);
 		 	 socket.disconnect();
-	      	console.log(42);
-	      	console.log(response);
 	    }
 		catch (err: any) {
     	  setErrMsg("Oops something went wrong !");
