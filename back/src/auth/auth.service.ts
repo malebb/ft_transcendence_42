@@ -162,6 +162,9 @@ export class AuthService {
           profilePicture: getprofile.data.image.versions.small,
           id42: id42,
           username: getprofile.data['login'] || '',
+          stats: {
+          	create: {},
+        },
         },
       });
     }

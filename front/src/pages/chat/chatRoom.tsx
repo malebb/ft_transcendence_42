@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import MessagesContainer from "./containers/Message";
 import { useEffect, useRef, useState } from 'react';
-import { axiosToken } from '../../api/axios';
+import { axiosToken, getToken } from '../../api/axios';
 import { AxiosInstance, AxiosResponse } from 'axios';
 import style from "./ChatRoom.module.css"
 import Headers from 'src/components/Headers';
@@ -392,6 +392,9 @@ const ChatRoomBase = () => {
         		transports: ["websocket"],
      			forceNew: true,
         		upgrade: false,
+				auth: {
+					token: getToken().access_token
+				}
       		});
       		socket.current!.on("connect", async () =>
 			{
