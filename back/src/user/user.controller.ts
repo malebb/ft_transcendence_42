@@ -72,7 +72,7 @@ export class UserController {
 
   @Public()
   @Get('profile-image/:imagename')
-  findProfileImage(@Param('imagename') imagename, @Res() res): Response {
+  findProfileImage(@Param('imagename') imagename, @Res() res) {
     return res.sendFile(
       join(process.cwd(), 'uploads/profileimages/' + imagename),
     );
@@ -82,19 +82,24 @@ export class UserController {
   // @FormDataRequest()
   @UseInterceptors(FileInterceptor('file', storage))
   PatchProfile(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 100000 }),
-          new FileTypeValidator({ fileType: 'image/png' }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
     @GetUser() user: User,
-    @Body() dto: EditUserDto,
+    @UploadedFile(
+      // new ParseFilePipe({
+      //   validators: [
+      //     new MaxFileSizeValidator({ maxSize: 100000 }),
+      //     new FileTypeValidator({ fileType: 'image/png' }),
+      //   ],
+      // }),
+    )
+    file?,
+    @Body() dto?: EditUserDto,
   ) {
-    if (file !== undefined) this.userService.uploadPicture(user.id, file.path);
+    console.log(file);
+    console.log(dto.login);
+    if (file !== undefined) {
+      console.log(file.path);
+      this.userService.uploadPicture(user.id, file.path);
+    }
     if (dto.login !== undefined) {
       if (!USER_REGEX.test(dto.login))
         throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);

@@ -37,8 +37,9 @@ const Callback = () => {
         const response: AxiosResponse = await axiosMain.post<SignInterface>(CALLBACK_PATH, {
           code: code,
         }, { withCredentials: true,  headers: {
-          "Access-Control-Allow-Origin": "localhost:3000",
-          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+          // "Access-Control-Allow-Origin": "*",
+          // "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+          "Content-Type": "application/json"
         }});
         console.log("response =+ " + JSON.stringify(response.data));
       if (response.data.isTfa === false)
@@ -46,7 +47,7 @@ const Callback = () => {
         // localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
         // localStorage.setItem("id", JSON.stringify(response.data.userId));
         setUsername(response.data.username!);
-        setUserId(response.data.id);
+        setUserId(response.data.userId);
         setToken(response.data.tokens!)
       }
       else {

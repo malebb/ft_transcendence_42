@@ -125,8 +125,8 @@ const Signin = () => {
         SIGNIN_PATH,
         { email: email, password: pwd },
         { withCredentials: true,  headers: {
-          "Access-Control-Allow-Origin": "localhost:3000",
-          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+          // "Access-Control-Allow-Origin": "http://localhost:3000",
+          // "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
           "Content-Type": "application/json"
         }}
       );
@@ -142,7 +142,7 @@ const Signin = () => {
       // localStoVrage.setItem("tokens", JSON.stringify(response.data.tokens));
       // localStorage.setItem("id", JSON.stringify(response.data.userId));
       context.setUsername(response.data.username!);
-      context.setUserId(response.data.id);
+      context.setUserId(response.data.userId!);
       context.setToken(response.data.tokens!)
       }
       else {

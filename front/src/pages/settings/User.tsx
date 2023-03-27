@@ -145,6 +145,7 @@ const User = () => {
     const formData = new FormData();
     if (selectedFile !== null) {
       console.log("good file");
+      console.log(selectedFile)
       formData.append("file", selectedFile);
     }
     if (Login !== user?.username) {
@@ -158,9 +159,10 @@ const User = () => {
     //console.log("Form = " + formData.getAll("login"));
     try {
       // const response: AxiosResponse = await axiosAuthReq(HTTP_METHOD.POST, PATCH_PATH, formData, {} as AxiosHeaders, setErrMsg, set)
+      console.log('formData == ' + JSON.stringify(formData.get('file')));
       const response: AxiosResponse = await axiosPrivate.post(
         PATCH_PATH,
-        formData,
+        {selectedFile, Login},
       );
       console.log(response.data);
     } catch (err: any) {

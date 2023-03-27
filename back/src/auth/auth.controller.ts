@@ -9,6 +9,7 @@ import {
   Get,
   UseGuards,
   Res,
+  HttpException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -72,15 +73,23 @@ export class AuthController {
             res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3333');
             //res.setHeader("Access-Control-Allow-Origin", '*');
         }*/
-    const token: SignInterface = await this.authService.callback42(dto.code);
-    res.cookie('rt_token', token.tokens.refresh_token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-    });
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Origin', 'localhost:3000');
-    return res.send(token);
+    try {
+      const token: SignInterface = await this.authService.callback42(dto.code);
+      res.cookie('rt_token', token.tokens.refresh_token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+      });
+      // res.header('Access-Control-Allow-Credentials', 'true');
+      // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+      return res.send(token);
+    } catch (err) {
+      console.log('callback err = ' + err);
+      throw new HttpException(
+        'Error Connecting wih 42 api',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Post('logout')
@@ -89,8 +98,8 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const ret = this.authService.logout(userId);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Origin', 'localhost:3000');
+    // res.header('Access-Control-Allow-Credentials', 'true');
+    // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.clearCookie('rt_token');
     return res.send(ret);
   }
@@ -125,8 +134,8 @@ export class AuthController {
       secure: true,
       sameSite: 'none',
     });
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Origin', 'localhost:3000');
+    // res.header('Access-Control-Allow-Credentials', 'true');
+    // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     return res.send(ret_token);
     /*}
         console.log("aieeee");

@@ -91,7 +91,7 @@ const Signup = () => {
         SIGNUP_PATH,
         { email: email, username: user, password: pwd },
         { withCredentials: true,  headers: {
-          "Access-Control-Allow-Origin": "localhost:3000",
+          "Access-Control-Allow-Origin": "http://localhost:3000",
           "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
           "Content-Type": "application/json"
         }}
@@ -102,9 +102,9 @@ const Signup = () => {
       // localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
       // localStorage.setItem("id", JSON.stringify(response.data.userId));
       setUsername(response.data.username!);
-      setUserId(response.data.id);
+      setUserId(response.data.userId!);
       setToken(response.data.tokens!)
-      console.log(response.data.access_token);
+      console.log('resp data = ' + JSON.stringify(response.data));
       //console.log(token);
     } catch (err: any) {
       if (!err?.response) {
