@@ -1,5 +1,4 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
 import { Link } from "react-router-dom";
 import {
   faUser,
@@ -8,9 +7,7 @@ import {
   faCommentDots,
   faGears,
   faGamepad,
-  faTrophy,
   faRightFromBracket,
-  faChain,
 } from "@fortawesome/free-solid-svg-icons";
 import {} from "@fortawesome/free-solid-svg-icons";
 import "../styles/Sidebar.css";

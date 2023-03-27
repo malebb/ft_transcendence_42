@@ -1,20 +1,16 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { axiosMain, axiosToken } from "src/api/axios";
-import axios, { AxiosResponse } from "axios";
+import { axiosMain } from "src/api/axios";
 import { useNavigate } from "react-router-dom";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const DeleteTfa = () => {
-  const [TfaQrcode, setTfaQrcode] = useState("");
-  const [boolQrcode, setboolQrcode] = useState<boolean>(false);
 
   const [badAttempt, setBadAttempt] = useState<boolean>(false);
 
   const [code, setCode] = useState("");
   const [validCode, setValidCode] = useState<boolean>(false);
-  const [verified, setVerified] = useState<boolean>(false);
 
   const navigate = useNavigate();
   useEffect(() => {

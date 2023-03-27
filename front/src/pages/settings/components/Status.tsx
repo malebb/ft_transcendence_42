@@ -60,7 +60,7 @@ function Status({ id }: { id: string }) {
 			});
 		}
 		initSocket();
-	}, [id, userStatus]);
+	}, [id, userStatus, socket, userId.userId]);
 
   const GenStatus = () => {
     switch (userStatus)

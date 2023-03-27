@@ -1,5 +1,4 @@
 import { User, PenaltyType } from 'ft_transcendence';
-import { AxiosResponse } from 'axios';
 
 export interface Penalty
 {

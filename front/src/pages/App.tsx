@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import "../styles/App.css";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "../context/TokenContext";
@@ -7,7 +6,6 @@ import Signin from "./signin/signin";
 import Signup from "./signup/signup";
 import SetTfa from "./settings/components/SetTfa";
 import DeleteTfa from "./settings/components/DeleteTfa";
-import VerifTfa from "./settings/components/VerifTfa";
 import User from "./settings/User";
 import History from "./history/History";
 import Friends from "./friends/Friends";

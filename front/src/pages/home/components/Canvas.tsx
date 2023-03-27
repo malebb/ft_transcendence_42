@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useContext } from "react";
+import { useRef, useEffect, useState, useContext, useCallback } from "react";
 import Draw from "../../../classes/Draw";
 import { io, Socket } from "socket.io-client";
 import { Ball, Room, Player, PlayerData, User } from "ft_transcendence";
@@ -42,13 +42,13 @@ export default function Canvas()
 	const [isChallenger, setIsChallenger]	= useState(true);
 	const statusSocket = useContext(SocketContext);
 
-	function powerUpEnabled()
+	const powerUpEnabled = useCallback (() =>
 	{
 		return ((position.current === "left" && leftPlayer.current!.speedPowerUp) ||
 		(position.current === "right" && rightPlayer.current!.speedPowerUp))
-	}
+	}, []);
 
-	async function powerUp(e: KeyboardEvent)
+	const powerUp = useCallback(async (e: KeyboardEvent) =>
 	{
 		if (keyPressed.current)
 			return;
@@ -58,14 +58,14 @@ export default function Canvas()
 			socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
 			keyPressed.current = true;
 		}
-	}
+	}, [powerUpEnabled]);
 
 	function notifyKeyReleased()
 	{
 		keyPressed.current = false;
 	}
 
-	function stopGame()
+	const stopGame = useCallback(() =>
 	{
 		statusSocket.emit('ONLINE');
 		window.cancelAnimationFrame(animationFrameId.current)
@@ -73,7 +73,7 @@ export default function Canvas()
 		document!.removeEventListener('keypress', powerUp);
 		document!.removeEventListener('keyup', notifyKeyReleased);
 		socket.current!.disconnect();
-	}
+	}, [statusSocket, powerUp]);
 
 	useEffect(() =>
 	{
@@ -722,13 +722,13 @@ export default function Canvas()
 			statusSocket.emit('ONLINE');
 		}
 
-	}, [challengeId]);
+	}, [challengeId, statusSocket, powerUp, stopGame]);
 
 	useEffect(() => {
 		if (socket.current != null)
 			stopGame();
 		statusSocket.emit('ONLINE');
-	}, []);
+	}, [statusSocket, stopGame]);
 
 	const challengeTitle = () =>
 	{

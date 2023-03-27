@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import MessagesContainer from "./containers/Message";
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { axiosToken, getToken } from '../../api/axios';
 import { AxiosInstance, AxiosResponse } from 'axios';
 import style from "./ChatRoom.module.css"
@@ -26,6 +26,7 @@ const ChatRoomBase = () => {
 	const regexPassword = useRef(/^[0-9]*$/);
 	const [isCurrentUserOwner, setIsCurrentUserOwner] = useState<boolean>(false);
 	const socket = useRef<Socket | null>(null);
+	const roomStatusInterval = useRef<ReturnType<typeof setInterval>>();
 
 	// members list data :
 	const [membersMuted, setMembersMuted] = useState<User[]>([]);
@@ -34,11 +35,104 @@ const ChatRoomBase = () => {
 	const [admins, setAdmins] = useState<User[]>([]);
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 
+	const updateRoomStatus = useCallback(async () =>
+	{
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			const room = await axiosInstance.current.get('/chatRoom/publicInfos/' + roomName);
+			if (room.data)
+			{
+				axiosInstance.current = await axiosToken();
+				const ban: AxiosResponse = await axiosInstance.current.get('/chatRoom/myBan/' + roomName);
+				if (ban.data.penalties.length)
+					setRoomStatus(RoomStatus["BANNED" as keyof typeof RoomStatus]);
+				else
+				{
+					axiosInstance.current = await axiosToken();
+					const member = await axiosInstance.current.get('/chatRoom/member/' + roomName);
+					if (!member.data.length)
+					{
+						setRoomStatus(RoomStatus["NOT_JOINED" as keyof typeof RoomStatus])
+					}
+					else
+					{
+						setRoomStatus(RoomStatus["JOINED" as keyof typeof RoomStatus])
+					}
+				}
+			}
+			else
+				setRoomStatus(RoomStatus["NOT_EXIST" as keyof typeof RoomStatus])
+
+		}
+		catch (error: any)
+		{
+			console.log('error (update room status): ', error);
+		}
+	}, [roomName]);
+
+	const updateMembersData = useCallback(async () =>
+	{
+		try
+		{
+			axiosInstance.current = await axiosToken();
+			const room = await axiosInstance.current.get('/chatRoom/publicInfos/' + roomName);
+			axiosInstance.current = await axiosToken();
+			const user = await axiosInstance.current.get('/users/me');
+			axiosInstance.current = await axiosToken();
+			const userMuted: AxiosResponse = await axiosInstance.current.get('/chatRoom/mutedMembers/' + roomName);
+
+			setOwner(room.data.owner);
+			if (user.data.id === room.data.owner.id)
+			{	
+				initPasswordInfo(room);
+				setIsCurrentUserOwner(true);
+			}
+			else
+				setIsCurrentUserOwner(false);
+
+			setAdmins(room.data.admins);
+			setMembers(room.data.members);
+			setCurrentUser(user.data);
+			setMembersMuted(userMuted.data);
+			updateRoomStatus();
+		}
+		catch (error: any)
+		{
+			if (error.response.status === 403)
+				updateRoomStatus();
+			else
+				console.log('error (update members list data) :', error);
+		}
+	}, [updateRoomStatus, roomName]);
 
 	useEffect(() => 
 	{
-		updateRoomStatus();
-	}, []);
+		const handleRoomStatus = async () =>
+		{
+			await updateRoomStatus();
+			roomStatusInterval.current = setInterval(async () => {
+				try
+				{
+					axiosInstance.current = await axiosToken();
+					const response: AxiosResponse = await axiosInstance.current.get('/chatRoom/member/' + roomName);
+					if (!response.data.length)
+					{
+						clearInterval(roomStatusInterval.current!);
+						await updateRoomStatus();
+					}
+				}
+				catch (error: any)
+				{
+					console.log('error: ', error);
+				}
+			}, 2000)
+		}
+		handleRoomStatus();
+		return () => {
+				clearInterval(roomStatusInterval.current!);
+		}
+	}, [updateRoomStatus, roomName]);
 
 	useEffect(() =>
 	{
@@ -57,7 +151,7 @@ const ChatRoomBase = () => {
 			}
 		}
 		checkIfOwner();
-	}, [roomName]);
+	}, [roomName, updateMembersData]);
 
 	const genTitle = () =>
 	{
@@ -197,41 +291,6 @@ const ChatRoomBase = () => {
 		return (member!.id === currentUser!.id)
 	}
 
-	const updateRoomStatus = async () =>
-	{
-		try
-		{
-			axiosInstance.current = await axiosToken();
-			const room = await axiosInstance.current.get('/chatRoom/publicInfos/' + roomName);
-			if (room.data)
-			{
-				axiosInstance.current = await axiosToken();
-				const ban: AxiosResponse = await axiosInstance.current.get('/chatRoom/myBan/' + roomName);
-				if (ban.data.penalties.length)
-					setRoomStatus(RoomStatus["BANNED" as keyof typeof RoomStatus]);
-				else
-				{
-					axiosInstance.current = await axiosToken();
-					const member = await axiosInstance.current.get('/chatRoom/member/' + roomName);
-					if (!member.data.length)
-					{
-						setRoomStatus(RoomStatus["NOT_JOINED" as keyof typeof RoomStatus])
-					}
-					else
-					{
-						setRoomStatus(RoomStatus["JOINED" as keyof typeof RoomStatus])
-					}
-				}
-			}
-			else
-				setRoomStatus(RoomStatus["NOT_EXIST" as keyof typeof RoomStatus])
-
-		}
-		catch (error: any)
-		{
-			console.log('error (update room status): ', error);
-		}
-	}
 	const initPasswordInfo = (room: AxiosResponse) =>
 	{
 		if (room.data.accessibility === 'PROTECTED' ||
@@ -244,40 +303,6 @@ const ChatRoomBase = () => {
 		{
 			setPasswordInfo("Add a password : ");
 			setBtnValue("set");
-		}
-	}
-	const updateMembersData = async () =>
-	{
-		try
-		{
-			axiosInstance.current = await axiosToken();
-			const room = await axiosInstance.current.get('/chatRoom/publicInfos/' + roomName);
-			axiosInstance.current = await axiosToken();
-			const user = await axiosInstance.current.get('/users/me');
-			axiosInstance.current = await axiosToken();
-			const userMuted: AxiosResponse = await axiosInstance.current.get('/chatRoom/mutedMembers/' + roomName);
-
-			setOwner(room.data.owner);
-			if (user.data.id === room.data.owner.id)
-			{	
-				initPasswordInfo(room);
-				setIsCurrentUserOwner(true);
-			}
-			else
-				setIsCurrentUserOwner(false);
-
-			setAdmins(room.data.admins);
-			setMembers(room.data.members);
-			setCurrentUser(user.data);
-			setMembersMuted(userMuted.data);
-			updateRoomStatus();
-		}
-		catch (error: any)
-		{
-			if (error.response.status === 403)
-				updateRoomStatus();
-			else
-				console.log('error (update members list data) :', error);
 		}
 	}
 
@@ -692,6 +717,7 @@ const ChatRoomBase = () => {
 	{
 		if (roomStatus === 'JOINED')
 		{
+			console.log("JOINED");
 			return (
 				<>
 					{genTitle()}
@@ -703,7 +729,7 @@ const ChatRoomBase = () => {
 						</div>
 					</div>
 					<div className={style.chat}>
-						<MessagesContainer updateRoomStatus={updateRoomStatus}/>
+						<MessagesContainer />
 					</div>
 				</>
 			);

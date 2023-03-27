@@ -1,11 +1,10 @@
 
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import {Axios, AxiosHeaders} from "axios";
+import { AxiosHeaders } from "axios";
 import { AxiosResponse } from "axios";
-import { axiosAuthReq, axiosMain, axiosToken, HTTP_METHOD } from "../../api/axios";
+import { axiosAuthReq, axiosToken, HTTP_METHOD } from "../../api/axios";
 import Loading from "../Loading";
-import { Snackbar } from "@mui/material";
 import { useSnackbar } from "notistack";
 
 const AUTH_VERIF_PATH = "/auth/verify";

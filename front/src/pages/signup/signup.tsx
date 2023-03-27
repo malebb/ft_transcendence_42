@@ -3,12 +3,11 @@ import { useRef, useState, useEffect, useContext } from "react";
 import {
   faCheck,
   faTimes,
-  faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { axiosMain } from "../../api/axios";
 import { Link, Navigate } from "react-router-dom";
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import { useSnackbar } from "notistack";
 import '../../styles/signup.css'
 import Headers from "src/components/Headers";

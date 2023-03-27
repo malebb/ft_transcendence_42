@@ -1,29 +1,17 @@
 import React from "react";
 import { axiosMain, axiosAuthReq, HTTP_METHOD } from "../../api/axios";
-import axios, { AxiosHeaders, AxiosResponse } from "axios";
-import userEvent from "@testing-library/user-event";
-import { SemanticClassificationFormat, setSourceMapRange } from "typescript";
+import { AxiosHeaders, AxiosResponse } from "axios";
 import { useState, useEffect, useRef } from "react";
-import { Buffer } from "buffer";
 import { Switch } from "@mui/material";
 import '../../styles/User.css';
-import { faFileImage } from "@fortawesome/free-solid-svg-icons";
-import AddPhotoAlternateTwoToneIcon from '@mui/icons-material/AddPhotoAlternateTwoTone';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { SvgIcon } from "@mui/material";
-//var speakeasy = require('speakeasy');
-//var qrcode = require('qrcode');
-// import qrcode from 'qrcode';
-// import { createSecretKey } from 'crypto';
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Popup from "src/components/Popup";
 import Sidebar from "src/components/Sidebar";
 import Headers from "src/components/Headers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-//var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
-const USER_PATH = "users";
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_@.]{3,23}$/;
 const CODE_REGEX = /^[0-9]{6}$/;
 const PATCH_PATH = "/users/patchme";
@@ -95,7 +83,6 @@ console.log(qrcode_img);*/
         <img src="http://localhost:3333/users/profile-image/" alt='profile-picture'/>
         </form> */
 const User = () => {
-  const [refresh, setRefresh] = useState("");
   const [user, setUser] = useState<UserType>();
   const [validUser, setValidUser] = useState<boolean>(false);
   const [picture, setPicture] = useState("");
@@ -103,16 +90,12 @@ const User = () => {
 
   const [image, setImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [TfaQrcode, setTfaQrcode] = useState("");
   const [isTFA, setIsTFA] = useState<boolean>(false);
-  const [boolQrcode, setboolQrcode] = useState<boolean>(false);
 
   const [code, setCode] = useState("");
   const [validCode, setValidCode] = useState<boolean>(false);
-  const [verified, setVerified] = useState<boolean>(false);
   const [modelDisplay, setModelDisplay] = useState<boolean>(false);
   const [modelContent, setModelContent] = useState<string>("");
-  const [handleConfirm, setHandleConfirm] = useState<() => void>();
   const [pathConfirm, setPathConfirm] = useState<string>("");
 
   const [Login, setLogin] = useState("");

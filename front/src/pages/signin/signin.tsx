@@ -4,7 +4,6 @@ import { useRef, useState, useEffect, useContext } from "react";
 import {
   faCheck,
   faTimes,
-  faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { axiosMain } from "../../api/axios";
@@ -12,7 +11,6 @@ import { Link, Navigate } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import TokenContext from "../../context/TokenContext";
 import VerifTfa from "../settings/components/VerifTfa";
-import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import Headers from "src/components/Headers";
 import "../../styles/VerifTfa.css";
@@ -68,7 +66,6 @@ const Signin = () => {
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const navigate = useNavigate();
   const snackBar = useSnackbar();
   const socket = useContext(SocketContext);
 

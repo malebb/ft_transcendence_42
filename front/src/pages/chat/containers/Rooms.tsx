@@ -6,7 +6,7 @@ import { axiosToken } from '../../../api/axios';
 import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
 import { ChatRoomFilter } from '../utils/ChatRoomFilter';
-import { Penalty, formatRemainTime } from '../utils/Penalty';
+import { formatRemainTime } from '../utils/Penalty';
 import { trimUsername } from '../../../utils/trim';
 
 function Rooms()

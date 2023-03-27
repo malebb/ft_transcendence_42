@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { AxiosResponse, AxiosInstance, AxiosHeaders } from "axios";
-import axios from "axios";
 import {
   getToken,
   axiosMain,
@@ -46,17 +45,9 @@ function validURL(str: string) {
   return !!pattern.test(str);
 }
 
-interface i_renderProfile {
-  user: NeutralUser;
-  picture: string;
-  friendStatus: string;
-  isFriend: boolean;
-}
-
 const UserProfile = () => {
   const { userId } = useParams();
 
-  const [renderProfile, setRenderProfile] = useState<i_renderProfile>();
   const [user, setUser] = useState<NeutralUser>();
   const [picture, setPicture] = useState("");
   const [friendStatus, setFriendStatus] = useState<string>("");
@@ -87,12 +78,6 @@ const UserProfile = () => {
   };
 
   const AddFriendReq = async (): Promise<string> => {
-    // e.preventDefault();
-    /*const response: AxiosResponse = await axiosMain.get(ADD_FRIEND_PATH + userId, {
-            headers:{
-                'Authorization': 'Bearer ' +  token
-            }
-        })*/
     try {
       const response: AxiosResponse = await (
         await axiosToken()
@@ -409,7 +394,7 @@ const UserProfile = () => {
               </div>
             )}
             {/* <button disabled>Pending</button>} */}
-            {friendStatus === "" && userId != userSessionId ? (
+            {friendStatus === "" && userId !== userSessionId ? (
               <button className="profileButtonAddFriend" onClick={AddFriend}>
                 Add friend +
               </button>
