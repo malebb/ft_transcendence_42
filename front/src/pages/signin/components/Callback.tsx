@@ -21,6 +21,7 @@ const Callback = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isTfa, setIsTfa] = useState<boolean>(false);
   const [TfaSuccess, setTfaSuccess] = useState<boolean>(false);
+  const [TfaDone, setTfaDone] = useState<boolean>(false);
   const [resp, setResp] = useState<ResponseInterface>({
     tokens: undefined,
     id: undefined,
@@ -76,8 +77,9 @@ const Callback = () => {
       // localStorage.setItem("tokens", JSON.stringify(resp.tokens));
       // localStorage.setItem("id", JSON.stringify(resp.id));
       setUsername(resp.username!);
-      setUserId(resp.id);
-      setToken(resp.tokens!)
+      setUserId(resp.id!);
+      setToken(resp.tokens!);
+      setTfaDone(true);
     }
   }, [TfaSuccess])
 
@@ -97,7 +99,7 @@ const Callback = () => {
       ) : (
         <main>
           {(isTfa && resp.id !== undefined) && <VerifTfa setTfaSuccess={setTfaSuccess} userId={resp.id} />}
-          {(TfaSuccess || !isTfa) && (
+          {(TfaDone || !isTfa) && (
             <>
               {snackBar.enqueueSnackbar("Hello, " + username, {
                 variant: "success",

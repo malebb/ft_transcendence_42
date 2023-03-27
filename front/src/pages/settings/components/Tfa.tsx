@@ -7,7 +7,7 @@ import AuthContext from "src/context/TokenContext";
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const Tfa = () => {
-  const {token, setToken} = useContext(AuthContext);
+  const {token, setToken, userId} = useContext(AuthContext);
   const [code, setCode] = useState("");
   const [validCode, setValidCode] = useState<boolean>(false);
 
@@ -24,10 +24,11 @@ const Tfa = () => {
 
   const handleCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("here");
     const verif = (
       await axiosPrivate.post(
         "/auth/verify2FA",
-        { code: code },
+        { code: code, userId: userId },
       )
     ).data;
     /*speakeasy.totp.verify({

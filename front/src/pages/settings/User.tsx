@@ -143,6 +143,8 @@ const User = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
+    if (selectedFile === undefined)
+      console.log("selectedFile is undef");
     if (selectedFile !== null) {
       console.log("good file");
       console.log(selectedFile)
@@ -162,7 +164,8 @@ const User = () => {
       console.log('formData == ' + JSON.stringify(formData.get('file')));
       const response: AxiosResponse = await axiosPrivate.post(
         PATCH_PATH,
-        {selectedFile, Login},
+        formData,
+        {headers: {"Content-Type": "multipart/form-data"}}
       );
       console.log(response.data);
     } catch (err: any) {

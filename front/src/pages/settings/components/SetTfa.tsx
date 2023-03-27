@@ -1,16 +1,16 @@
 import React, { useContext, useEffect } from "react";
 import { useState } from "react";
-import { axiosMain, axiosPrivate, axiosToken } from "src/api/axios";
-import axios, { AxiosResponse } from "axios";
 import { Navigate, useNavigate } from "react-router-dom";
 import AuthContext from "src/context/TokenContext";
 import { useSnackbar } from "notistack";
+import useAxiosPrivate from "src/hooks/usePrivate";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const SetTfa = () => {
   const snackBar = useSnackbar();
-  const {token, setToken} = useContext(AuthContext);
+  const axiosPrivate = useAxiosPrivate();
+  const {token, setToken, userId} = useContext(AuthContext);
   const [TfaQrcode, setTfaQrcode] = useState("");
   const [boolQrcode, setboolQrcode] = useState<boolean>(false);
 
@@ -53,7 +53,7 @@ const SetTfa = () => {
     const verif = (
       await axiosPrivate.post(
         "/auth/verify2FA",
-        { code: code },
+        { code: code, userId: userId },
       )
     ).data;
     /*speakeasy.totp.verify({

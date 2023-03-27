@@ -12,6 +12,8 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
   const axiosPrivate = useAxiosPrivate();
   const [TfaQrcode, setTfaQrcode] = useState("");
   const [boolQrcode, setboolQrcode] = useState<boolean>(false);
+  const [sendButton, setSendButton] = useState<boolean>(false);
+  const [arrayCode, setArrayCode] = useState<number[]>();
 
   const [badAttempt, setBadAttempt] = useState<boolean>(false);
 
@@ -80,6 +82,19 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
     //setVerified(verif);
   };
 
+  const checkValueSet = (e : any) : boolean => {
+    for(let i = 1; i <= 6; i++)
+    {
+    const nextSibiling = document.getElementById(`n${i}`)?.ariaValueNow;
+    console.log("sibling value =" + nextSibiling);
+      // if (e.target.n1.value < '0' && e.target.n1.value > '9') 
+      //   return false;
+      // if (e.target.n2.value < '0' && e.target.n2.value > '9') 
+      //   return false;
+    }
+    return true;
+  }
+
   const handleNextInput = (e : React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     console.log("ID atual: " + e.target.id);
@@ -129,7 +144,7 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
 	<input type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n5" name="n5"/>
 	<input type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n6" name="n6"/>
 
-	<button className="submit" itemType="button" tabIndex={1}  id="n7" disabled></button>
+	<button className="submit" itemType="button" tabIndex={1}  id="n7"></button>
 
 	<span className="indicator"></span>
 

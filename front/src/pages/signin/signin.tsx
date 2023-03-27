@@ -66,6 +66,7 @@ const Signin = () => {
 
   const [isTfa, setIsTfa] = useState<boolean>(false);
   const [TfaSuccess, setTfaSuccess] = useState<boolean>(false);
+  const [TfaDone, setTfaDone] = useState<boolean>(false);
 
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
@@ -131,7 +132,6 @@ const Signin = () => {
         }}
       );
       console.log(response.data);
-      setSuccess(true);
       // setToken(response.data.token);
       setIsTfa(response.data.isTfa);
       setName(response.data.username);
@@ -163,6 +163,7 @@ const Signin = () => {
       }
       //errRef.current.focus();
     }
+      setSuccess(true);
   };
   useEffect(() => {
     if (TfaSuccess)
@@ -172,6 +173,7 @@ const Signin = () => {
       context.setUsername(resp.username!);
       context.setUserId(resp.id);
       context.setToken(resp.tokens!)
+      setTfaDone(true);
     }
 
   }, [TfaSuccess])
@@ -203,8 +205,8 @@ button img{position: relative;
     <>
       <style>{CSS}</style>
       <Headers/>
-      {success ? (
-        <section>
+      {(success)? (
+        <main>
           {(isTfa && resp.id !== undefined)&& <VerifTfa setTfaSuccess={setTfaSuccess} userId={resp.id}/>}
           {(TfaSuccess || !isTfa) &&(
             <>
@@ -215,7 +217,7 @@ button img{position: relative;
               <Navigate to={"/"}/>
             </>
           )}
-        </section>
+        </main>
       ) : (
         <section className="sign-section">
           <p

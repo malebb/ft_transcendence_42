@@ -91,7 +91,7 @@ export class UserController {
       //   ],
       // }),
     )
-    file?,
+    file?: Express.Multer.File,
     @Body() dto?: EditUserDto,
   ) {
     console.log(file);

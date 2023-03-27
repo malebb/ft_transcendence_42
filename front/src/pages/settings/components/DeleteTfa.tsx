@@ -1,15 +1,17 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useState, useEffect } from "react";
 import { axiosMain, axiosToken } from "src/api/axios";
 import axios, { AxiosResponse } from "axios";
 import { Navigate, useNavigate } from "react-router-dom";
 import useAxiosPrivate from "src/hooks/usePrivate";
 import { useSnackbar } from "notistack";
+import AuthContext from "src/context/TokenContext";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const DeleteTfa = () => {
   const axiosPrivate = useAxiosPrivate();
+  const { userId } = useContext(AuthContext);
   const [TfaQrcode, setTfaQrcode] = useState("");
   const [boolQrcode, setboolQrcode] = useState<boolean>(false);
 
@@ -39,7 +41,7 @@ const DeleteTfa = () => {
     const verif = (
       await axiosPrivate.post(
         "/auth/verify2FA",
-        { code: code },
+        { code: code, userId: userId},
       )
     ).data;
     /*speakeasy.totp.verify({
