@@ -2,7 +2,6 @@ import { AxiosResponse } from "axios";
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { axiosMain } from "src/api/axios";
 import { SignInterface, TokensInterface } from "src/interfaces/Sign";
-import SocketContext from "./SocketContext";
 
 type AuthContextType = {
   token: TokensInterface | undefined | null;

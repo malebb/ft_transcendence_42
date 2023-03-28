@@ -28,6 +28,7 @@ export class UserGateway
 	server: Server;
 
 	handleConnection(client: Socket) {
+		console.log('SOCKET = ', client);
 		if (isAuthEmpty(client))
 			return ;
 		const userId = getIdFromToken(client.handshake.auth.token);
