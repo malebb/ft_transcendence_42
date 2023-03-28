@@ -1,11 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { useState } from "react";
-import { axiosMain } from "src/api/axios";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import AuthContext from "src/context/TokenContext";
+import { useSnackbar } from "notistack";
+import useAxiosPrivate from "src/hooks/usePrivate";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const SetTfa = () => {
+  const snackBar = useSnackbar();
+  const axiosPrivate = useAxiosPrivate();
+  const {token, setToken, userId} = useContext(AuthContext);
   const [TfaQrcode, setTfaQrcode] = useState("");
 
   const [badAttempt, setBadAttempt] = useState<boolean>(false);
@@ -25,10 +30,7 @@ const SetTfa = () => {
     const createQrCode = async () => {
       setTfaQrcode(
         (
-          await axiosMain.get("/auth/create2FA", {
-            headers: { Authorization: "Bearer " + getJWT() },
-            //withCredentials: true
-          })
+          await axiosPrivate.get("/auth/create2FA")
         ).data
         //qrcode.toDataURL(secret.otpauth_url,{type: "image/jpeg"}/*, function(err: any, data: any){
         /*console.log(err);
@@ -45,14 +47,11 @@ const SetTfa = () => {
 
   const handleCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try{
     const verif = (
-      await axiosMain.post(
+      await axiosPrivate.post(
         "/auth/verify2FA",
-        { code: code },
-        {
-          headers: { Authorization: "Bearer " + getJWT() },
-          //withCredentials: true
-        }
+        { code: code, userId: userId },
       )
     ).data;
     /*speakeasy.totp.verify({
@@ -61,28 +60,30 @@ const SetTfa = () => {
       token: code,
     }) */
     if (verif === true) {
-      const check = (
-        await axiosMain.get("/auth/set2FA", {
-          headers: { Authorization: "Bearer " + getJWT() },
-          //withCredentials: true
-        })
-      ).data;
-      navigate("/user");
+        await axiosPrivate.get("/auth/set2FA");
+        navigate("/user");
     } else setBadAttempt(true);
     console.log("verif code =======" + verif);
-    //setVerified(verif);
-  };
-
-  const getJWT = () => {
-    const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
-    return jwt["access_token"];
+  }
+  catch(err: any)
+  {
+    return (
+    <>
+    {snackBar.enqueueSnackbar('Oops something went wrong', {
+      variant: "error",
+      anchorOrigin: {vertical: "bottom", horizontal: "right"}
+    })}
+  <Navigate to='/user' />
+</>
+    )
+  }
   };
 
   return (
     <>
       <div>SetTfa</div>
       {badAttempt ? <div>Attempt failed</div> : <></>}
-      <img src={TfaQrcode} />
+      <img alt="2FA_QRCode" src={TfaQrcode} />
       <form onSubmit={handleCodeSubmit}>
         <label htmlFor="avatar">2FA:</label>
         <input

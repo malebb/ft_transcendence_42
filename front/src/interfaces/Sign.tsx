@@ -7,6 +7,7 @@ export interface TokensInterface{
 export interface ResponseInterface{
   tokens: TokensInterface | undefined,
   id: number | undefined,
+  username: string | undefined,
 }
 
 export interface SignInterface {

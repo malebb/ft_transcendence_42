@@ -1,13 +1,34 @@
-import React, { Dispatch, SetStateAction } from "react";
-import { useState } from "react";
-import { axiosMain } from "src/api/axios";
+import React, { Dispatch, SetStateAction, useRef } from "react";
+import { useState, useEffect } from "react";
+import { axiosMain, axiosToken } from "src/api/axios";
+import axios, { AxiosResponse } from "axios";
+import { useNavigate } from "react-router-dom";
+import useAxiosPrivate from "src/hooks/usePrivate";
+import { useSnackbar } from "notistack";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAction<boolean>>, userId: number}) => {
+  const axiosPrivate = useAxiosPrivate();
+  const [TfaQrcode, setTfaQrcode] = useState("");
+  const [boolQrcode, setboolQrcode] = useState<boolean>(false);
+  const [sendButton, setSendButton] = useState<boolean>(false);
+  const [arrayCode, setArrayCode] = useState<number[]>();
 
   const [badAttempt, setBadAttempt] = useState<boolean>(false);
 
+  const [validCode, setValidCode] = useState<boolean>(false);
+  const [verified, setVerified] = useState<boolean>(false);
+
+  const reftextInput1 = useRef<HTMLInputElement>(null);
+  const reftextInput2 = useRef<HTMLInputElement>(null);
+  const reftextInput3 = useRef<HTMLInputElement>(null);
+  const reftextInput4 = useRef<HTMLInputElement>(null);
+  const reftextInput5 = useRef<HTMLInputElement>(null);
+  const reftextInput6 = useRef<HTMLInputElement>(null);
+
+  const snackBar = useSnackbar();
+  const navigate = useNavigate();
   // useEffect(() => {
   //   const result = CODE_REGEX.test(code);
   //   console.log(result);
@@ -24,6 +45,7 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
 
   const handleCodeSubmit = async (e: any) => {
     e.preventDefault();
+    try{
     let code: string = "";
     code += e.target.n1.value; 
     code += e.target.n2.value; 
@@ -33,13 +55,9 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
     code += e.target.n6.value; 
       
     const verif = (
-      await axiosMain.post(
+      await axiosPrivate.post(
         "/auth/verify2FA",
         { code: code, userId: userId },
-        {
-          headers: { Authorization: "Bearer " + getJWT() },
-          //withCredentials: true
-        }
       )
     ).data;
     console.log("verif code =======" + verif);
@@ -51,14 +69,32 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
     if (verif === true) {
       setTfaSuccess(true);
     } else setBadAttempt(true);
+  }catch(err)
+  {
+    return (
+    <>
+    {snackBar.enqueueSnackbar('Oops something went wrong', {
+      variant: "error",
+      anchorOrigin: {vertical: "bottom", horizontal: "right"}
+    })}
+</>)
+  }
     //setVerified(verif);
   };
 
-  const getJWT = () => {
-    const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
-    console.log("totokens=" + JSON.stringify(jwt));
-    return jwt["access_token"];
-  };
+  const checkValueSet = (e : any) : boolean => {
+    for(let i = 1; i <= 6; i++)
+    {
+    const nextSibiling = document.getElementById(`n${i}`)?.ariaValueNow;
+    console.log("sibling value =" + nextSibiling);
+      // if (e.target.n1.value < '0' && e.target.n1.value > '9') 
+      //   return false;
+      // if (e.target.n2.value < '0' && e.target.n2.value > '9') 
+      //   return false;
+    }
+    return true;
+  }
+
   const handleNextInput = (e : React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     console.log("ID atual: " + e.target.id);
@@ -108,7 +144,7 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
 	<input type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n5" name="n5"/>
 	<input type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n6" name="n6"/>
 
-	<button className="submit" itemType="button" tabIndex={1}  id="n7" disabled></button>
+	<button className="submit" itemType="button" tabIndex={1}  id="n7"></button>
 
 	<span className="indicator"></span>
 

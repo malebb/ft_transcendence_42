@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AxiosInstance, AxiosResponse } from "axios";
 import { axiosToken, getToken } from "src/api/axios";
 import {  useParams } from "react-router-dom";
@@ -9,10 +9,14 @@ import { formatRemainTime } from '../utils/Penalty';
 
 import "./message.style.css";
 import style from "../inputs/InputButton.module.css"
-
+import useAxiosPrivate from "src/hooks/usePrivate";
+import AuthContext from "src/context/TokenContext";
 function MessagesContainer() { 
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
+
+  const axiosPrivate = useAxiosPrivate();
+  const {token} = useContext(AuthContext);
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const currentUser = useRef<User | null>(null);
@@ -37,18 +41,18 @@ function MessagesContainer() {
     // declare the async data fetching function
     const fetchData = async () => {
       // get the data from the api
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = axiosPrivate;
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = axiosPrivate;
       await axiosInstance
         .current!.get("/chatRoom/publicInfos/" + roomId.roomName)
         .then((response) => {
           currentRoom.current = response.data;
           socket.current?.emit("JOIN_ROOM", currentRoom.current);
         });
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = await axiosPrivate;
       await axiosInstance
         .current!.get("/message/" + currentRoom.current?.name)
         .then((response) => {
@@ -68,7 +72,7 @@ function MessagesContainer() {
       forceNew: true,
       upgrade: false,
 	  auth: {
-			token: getToken().access_token
+			token: token!.access_token,
 	  }
     });
 

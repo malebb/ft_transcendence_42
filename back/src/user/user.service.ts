@@ -12,6 +12,90 @@ const DEFAULT_IMG = 'uploads/profileimages/default_profile_picture.png';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
+  mapArrayUserToNeutralUser(user: User[]): NeutralUser[] {
+    const ret = user.map(
+      ({ id, createdAt, id42, username, profilePicture, status }) => ({
+        id,
+        createdAt,
+        id42,
+        username,
+        profilePicture,
+        status,
+      }),
+    );
+    return ret;
+  }
+
+  mapUserToFriend(user: User): Friend {
+    const id = user.id;
+    const createdAt = user.createdAt;
+    const id42 = user.id42;
+    const username = user.username;
+    const email = user.email;
+    const firstName = user.firstName;
+    const lastName = user.lastName;
+    const profilePicture = user.profilePicture;
+    const skin = user.skin;
+    const map = user.map;
+    return {
+      id,
+      createdAt,
+      id42,
+      username,
+      email,
+      firstName,
+      lastName,
+      profilePicture,
+      skin,
+      map,
+    };
+  }
+  mapUserToNeutralUser(user: User): NeutralUser {
+    const id = user.id;
+    const createdAt = user.createdAt;
+    const id42 = user.id42;
+    const username = user.username;
+    const profilePicture = user.profilePicture;
+    const status = user.status;
+    return { id, createdAt, id42, username, profilePicture, status };
+  }
+  async getFriends(userId: number): Promise<Friend[]> {
+    const friendArray: Friend[] = [];
+    const crea_request = await this.prisma.friendRequest.findMany({
+      where: {
+        creatorId: userId,
+        status: 'accepted',
+      },
+    });
+    await Promise.all(
+      crea_request.map(async (req) => {
+        const user = await this.prisma.user.findUnique({
+          where: {
+            id: req.receiverId,
+          },
+        });
+        if (user) friendArray.push(this.mapUserToFriend(user));
+      }),
+    );
+    const recv_request = await this.prisma.friendRequest.findMany({
+      where: {
+        receiverId: userId,
+        status: 'accepted',
+      },
+    });
+    await Promise.all(
+      recv_request.map(async (req) => {
+        const user = await this.prisma.user.findUnique({
+          where: {
+            id: req.creatorId,
+          },
+        });
+        if (user) friendArray.push(this.mapUserToFriend(user));
+      }),
+    );
+    return friendArray;
+  }
+
   async getUserProfile(userId: number): Promise<NeutralUser> {
     const user = await this.prisma.user.findUnique({
       where: {
@@ -206,13 +290,13 @@ export class UserService {
   }
   async deleteFriendRequestByUserId(myId: number, userId: number) {
     if (myId == userId) return;
-    let ret = await this.prisma.friendRequest.deleteMany({
+    const ret = await this.prisma.friendRequest.deleteMany({
       where: {
         receiverId: myId,
         creatorId: userId,
       },
     });
-    let ret2 = await this.prisma.friendRequest.deleteMany({
+    const ret2 = await this.prisma.friendRequest.deleteMany({
       where: {
         creatorId: myId,
         receiverId: userId,
@@ -224,91 +308,10 @@ export class UserService {
       throw new HttpException('Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  mapArrayUserToNeutralUser(user: User[]): NeutralUser[] {
-    let ret = user.map(({ id, createdAt, id42, username, profilePicture, status }) => ({
-      id,
-      createdAt,
-      id42,
-      username,
-      profilePicture,
-      status,
-    }));
-    return ret;
-  }
-
-  mapUserToFriend(user: User): Friend {
-    const id = user.id;
-    const createdAt = user.createdAt;
-    const id42 = user.id42;
-    const username = user.username;
-    const email = user.email;
-    const firstName = user.firstName;
-    const lastName = user.lastName;
-    const profilePicture = user.profilePicture;
-    const skin = user.skin;
-    const map = user.map;
-    return {
-      id,
-      createdAt,
-      id42,
-      username,
-      email,
-      firstName,
-      lastName,
-      profilePicture,
-      skin,
-      map,
-    };
-  }
-  mapUserToNeutralUser(user: User): NeutralUser {
-    const id = user.id;
-    const createdAt = user.createdAt;
-    const id42 = user.id42;
-    const username = user.username;
-    const profilePicture = user.profilePicture;
-    const status = user.status;
-    return { id, createdAt, id42, username, profilePicture, status };
-  }
-  async getFriends(userId: number): Promise<Friend[]> {
-    let friendArray: Friend[] = [];
-    let crea_request = await this.prisma.friendRequest.findMany({
-      where: {
-        creatorId: userId,
-        status: 'accepted',
-      },
-    });
-    await Promise.all(
-      crea_request.map(async (req) => {
-        const user = await this.prisma.user.findUnique({
-          where: {
-            id: req.receiverId,
-          },
-        });
-        if (user) friendArray.push(this.mapUserToFriend(user));
-      }),
-    );
-    let recv_request = await this.prisma.friendRequest.findMany({
-      where: {
-        receiverId: userId,
-        status: 'accepted',
-      },
-    });
-    await Promise.all(
-      recv_request.map(async (req) => {
-        const user = await this.prisma.user.findUnique({
-          where: {
-            id: req.creatorId,
-          },
-        });
-        if (user) friendArray.push(this.mapUserToFriend(user));
-      }),
-    );
-    return friendArray;
-  }
   async getRecvPendingRequest(userId: number): Promise<NeutralUser[]> {
     //TODO maybe create a particular mapping to remove email from not friend user
-    let waitingArray: NeutralUser[] = [];
-    let recv_request = await this.prisma.friendRequest.findMany({
+    const waitingArray: NeutralUser[] = [];
+    const recv_request = await this.prisma.friendRequest.findMany({
       where: {
         receiverId: userId,
         status: 'pending',
@@ -321,16 +324,15 @@ export class UserService {
             id: req.creatorId,
           },
         });
-        if (user)
-          waitingArray.push(this.mapUserToNeutralUser(user));
+        if (user) waitingArray.push(this.mapUserToNeutralUser(user));
       }),
     );
     return waitingArray;
   }
   async getCreatedPendingRequest(userId: number): Promise<NeutralUser[]> {
     //TODO maybe create a particular mapping to remove email from not friend user
-    let pendingArray: NeutralUser[] = [];
-    let crea_request = await this.prisma.friendRequest.findMany({
+    const pendingArray: NeutralUser[] = [];
+    const crea_request = await this.prisma.friendRequest.findMany({
       where: {
         creatorId: userId,
         status: 'pending',
@@ -343,8 +345,7 @@ export class UserService {
             id: req.receiverId,
           },
         });
-        if (user)
-          pendingArray.push(this.mapUserToNeutralUser(user));
+        if (user) pendingArray.push(this.mapUserToNeutralUser(user));
       }),
     );
     return pendingArray;
@@ -376,78 +377,68 @@ export class UserService {
     return ret;
   }
 
-	async block(idToBlock: number, userId: number)
-	{
-		if (idToBlock !== userId)
-		{
-			await this.prisma.user.update({
-				where: {
-					id: userId
-				},
-				data: {
-					blockedByYou: {
-						connect: {
-							id: idToBlock
-						}
-					}
-				}
-			});
-		}
-		else
-			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+  async block(idToBlock: number, userId: number) {
+    if (idToBlock !== userId) {
+      await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          blockedByYou: {
+            connect: {
+              id: idToBlock,
+            },
+          },
+        },
+      });
+    } else throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 
-	async unblock(idToBlock: number, userId: number)
-	{
-		if (idToBlock !== userId)
-		{
-			await this.prisma.user.update({
-				where: {
-					id: userId
-				},
-				data: {
-					blockedByYou: {
-						disconnect: {
-							id: idToBlock
-						}
-					}
-				}
-			});
-		}
-		else
-			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+  async unblock(idToBlock: number, userId: number) {
+    if (idToBlock !== userId) {
+      await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          blockedByYou: {
+            disconnect: {
+              id: idToBlock,
+            },
+          },
+        },
+      });
+    } else throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 
-	async getBlocked(idBlocked: number, userId: number)
-	{
-		const blocked = await this.prisma.user.findUnique({
-			where: {
-				id: userId
-			},
-			select: {
-				blockedByYou: {
-					where: {
-						id: idBlocked
-					},
-					select: {id: true}
-				}
-			}
-		});
-		return (blocked.blockedByYou);
-	}
+  async getBlocked(idBlocked: number, userId: number) {
+    const blocked = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        blockedByYou: {
+          where: {
+            id: idBlocked,
+          },
+          select: { id: true },
+        },
+      },
+    });
+    return blocked.blockedByYou;
+  }
 
-	async getAllBlocked(userId: number)
-	{
-		const blocked = await this.prisma.user.findUnique({
-			where: {
-				id: userId
-			},
-			select: {
-				blockedByYou: {
-					select: {id: true}
-				}
-			}
-		});
-		return (blocked.blockedByYou);
+  async getAllBlocked(userId: number) {
+    const blocked = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        blockedByYou: {
+          select: { id: true },
+        },
+      },
+    });
+    return blocked.blockedByYou;
   }
 }

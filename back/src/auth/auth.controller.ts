@@ -9,19 +9,20 @@ import {
   Get,
   UseGuards,
   Res,
+  HttpException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthDto, TFADto, SignupDto } from './dto';
 import { Tokens } from './types';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { JwtGuard, RtGuard } from './guard';
 import { GetUser, Public } from './decorator';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
 import { CallbackDto } from './dto/callback.dto';
 import { User } from '@prisma/client';
 import { SignInterface } from './interfaces';
+import { parse, stringify } from 'flatted';
 
 @Controller('auth')
 export class AuthController {
@@ -46,7 +47,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Get('signin/42login')
-  signin42(@Res() res: Response) {
+  signin42(@Res({ passthrough: true }) res: Response) {
     /* let origin;
         if (req.headers.origin)
         {
@@ -60,7 +61,10 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('signin/42login/callback')
-  callback42(@Body() dto: CallbackDto): Promise<SignInterface> {
+  async callback42(
+    @Body() dto: CallbackDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     /*let origin;
         if (req.headers.origin)
         {
@@ -69,22 +73,45 @@ export class AuthController {
             res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3333');
             //res.setHeader("Access-Control-Allow-Origin", '*');
         }*/
-    console.log('code from dto = ' + dto.code);
-    return this.authService.callback42(dto.code);
+    try {
+      const token: SignInterface = await this.authService.callback42(dto.code);
+      res.cookie('rt_token', token.tokens.refresh_token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+      });
+      // res.header('Access-Control-Allow-Credentials', 'true');
+      // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+      return res.send(token);
+    } catch (err) {
+      console.log('callback err = ' + err);
+      throw new HttpException(
+        'Error Connecting wih 42 api',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Post('logout')
-  logout(@GetUser('sub') userId: number) {
-    return this.authService.logout(userId);
+  logout(
+    @GetUser('sub') userId: number,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const ret = this.authService.logout(userId);
+    // res.header('Access-Control-Allow-Credentials', 'true');
+    // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.clearCookie('rt_token');
+    return res.send(ret);
   }
 
   @Public()
   @UseGuards(RtGuard)
   @Post('refresh')
   //refreshToken(@GetUser() user: User, @Req() req: Request)
-  refreshToken(
-    @GetUser('sub') userId: number,
-    @GetUser('refreshToken') token, //refreshToken(@Req() req: Request)
+  async refreshToken(
+    @GetUser('id') userId: number,
+    @Req() req: Request, //refreshToken(@Req() req: Request)
+    @Res({ passthrough: true }) res: Response,
   ) {
     /*console.log(req);
         let rToken;
@@ -92,7 +119,24 @@ export class AuthController {
         if (req.get('authorization') && user.id)
         {
             rToken = req.get('authorization').replace('Bearer', '').trim();*/
-    return this.authService.refreshToken(userId, token);
+    console.log(
+      'REF TOK = ' +
+        stringify(req.user) +
+        '=============================================================================================================',
+    );
+    console.log('userid = ' + userId);
+    const ret_token: SignInterface = await this.authService.refreshToken(
+      userId,
+      req.cookies['rt_token'],
+    );
+    res.cookie('rt_token', ret_token.tokens.refresh_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+    // res.header('Access-Control-Allow-Credentials', 'true');
+    // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    return res.send(ret_token);
     /*}
         console.log("aieeee");
         return ;*/

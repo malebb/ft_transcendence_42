@@ -15,17 +15,17 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   id42      String?  @unique
-  username  String  @unique
+  username  String   @unique
   status    Activity @default(OFFLINE)
-  email  String  @unique
-  hash   String
-  hashRt String?
+  email     String   @unique
+  hash      String
+  hashRt    String?
 
   TFA            String?
   isTFA          Boolean @default(false)
   firstName      String?
   lastName       String?
-  profilePicture String?
+  profilePicture String
 
   skin String @default("white")
   map  String @default("basic")
@@ -52,16 +52,16 @@ model User {
   penaltiesAuthor Penalty[] @relation(name: "PenaltiesAuthor")
   penaltiesTarget Penalty[] @relation(name: "PenaltiesTarget")
 
-  blockedByYou				User[] @relation(name: "Blocked")
-  blockedYou				User[] @relation(name: "Blocked")
+  blockedByYou User[] @relation(name: "Blocked")
+  blockedYou   User[] @relation(name: "Blocked")
 
   @@map("users")
 }
 
 enum Activity {
-	ONLINE
-	OFFLINE
-	IN_GAME
+  ONLINE
+  OFFLINE
+  IN_GAME
 }
 
 model Challenge {
@@ -96,13 +96,13 @@ model Message {
   sendAt           DateTime        @default(now())
   privateMessage   PrivateMessage? @relation(fields: [privateMessageId], references: [id])
   privateMessageId Int?
-  challengeId		Int? 
-  type				MessageType @default(STANDARD)
+  challengeId      Int?
+  type             MessageType     @default(STANDARD)
 }
 
 enum MessageType {
-	STANDARD
-	INVITATION
+  STANDARD
+  INVITATION
 }
 
 model PrivateMessage {
@@ -133,7 +133,6 @@ model Penalty {
   targetId      Int
   type          PenaltyType
   durationInMin Int
-
 }
 
 enum PenaltyType {

@@ -1,13 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { AxiosResponse, AxiosInstance, AxiosHeaders } from "axios";
-import {
-  getToken,
-  axiosMain,
-  axiosToken,
-  axiosAuthReq,
-  HTTP_METHOD,
-} from "../../api/axios";
+import axios from "axios";
+import { getToken, axiosMain, axiosToken, axiosAuthReq, HTTP_METHOD, axiosPrivate } from "../../api/axios";
 import "../../styles/UserProfile.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
@@ -16,6 +11,7 @@ import Achievements from "./components/Achievements";
 import BlockButton from './components/BlockButton';
 import { FriendType } from "../friends/Friends";
 import Popup from "../../components/Popup";
+import AuthContext from "src/context/TokenContext";
 import Status from "../settings/components/Status";
 
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
@@ -46,8 +42,10 @@ function validURL(str: string) {
 }
 
 const UserProfile = () => {
-  const { userId } = useParams();
+  const { paramUserId } = useParams();
 
+  const { token , setToken, userId } = useContext(AuthContext);
+  const [renderProfile, setRenderProfile] = useState<i_renderProfile>();
   const [user, setUser] = useState<NeutralUser>();
   const [picture, setPicture] = useState("");
   const [friendStatus, setFriendStatus] = useState<string>("");
@@ -66,7 +64,7 @@ const UserProfile = () => {
     "Are you sure you want to remove this person from your friends list? This action is final and you will not be able to recover it.";
   const popupContentRemoveWait =
     "Are you sure you want to remove this person from your waiting list? This action is final and you will not be able to recover it.";
-  const userSessionId = JSON.parse(sessionStorage.getItem("id")!);
+  // const userSessionId = userId!;
 
   const handleUnfriendClick = (): void => {
     setPopupContent(popupContentRemoveFriend);
@@ -78,10 +76,14 @@ const UserProfile = () => {
   };
 
   const AddFriendReq = async (): Promise<string> => {
+    // e.preventDefault();
+    /*const response: AxiosResponse = await axiosMain.get(ADD_FRIEND_PATH + paramUserId, {
+            headers:{
+                'Authorization': 'Bearer ' +  token
+            }
+        })*/
     try {
-      const response: AxiosResponse = await (
-        await axiosToken()
-      ).get(ADD_FRIEND_PATH + userId);
+      const response: AxiosResponse = await axiosPrivate.get(ADD_FRIEND_PATH + paramUserId);
       return response.data;
     } catch (err: any) {
       console.log("error getme");
@@ -101,94 +103,77 @@ const UserProfile = () => {
     setFriendStatus(newstatus);
   };
 
-  const getUserProfile = async () => {
-    try {
-      const token = getToken();
-      const response: AxiosResponse = await axiosMain.get(
-        "users/profile/" + userId,
-        {
-          headers: {
-            Authorization: "Bearer " + token["access_token"],
-          },
-        }
-      );
-      return response.data;
-    } catch (err: any) {
-      console.log("error getme");
-      if (!err?.response) {
-        setErrMsg("No Server Response");
-      } else if (err.response?.status === 403) {
-        setErrMsg("Invalid Credentials");
-      } else {
-        setErrMsg("Unauthorized");
-      }
-      return {} as NeutralUser;
-    }
-  };
+  // const getUserProfile = async () => {
+  //   try {
+  //     const token = getToken();
+  //     const response: AxiosResponse = axiosPrivate).get(
+  //       "users/profile/" + paramUserId,
+  //       {
+  //         headers: {
+  //           Authorization: "Bearer " + token["access_token"],
+  //         },
+  //       }
+  //     );
+  //     return response.data;
+  //   } catch (err: any) {
+  //     console.log("error getme");
+  //     if (!err?.response) {
+  //       setErrMsg("No Server Response");
+  //     } else if (err.response?.status === 403) {
+  //       setErrMsg("Invalid Credentials");
+  //     } else {
+  //       setErrMsg("Unauthorized");
+  //     }
+  //     return {} as NeutralUser;
+  //   }
+  // };
 
-  const checkIsFriend = async (id: number) => {
-    try {
-      const token = getToken();
-      const response: AxiosResponse = await axiosMain.get(
-        GET_STATUS_PATH + id.toString(),
-        {
-          headers: {
-            Authorization: "Bearer " + token["access_token"],
-          },
-        }
-      );
-      return response.data;
-    } catch (err: any) {
-      console.log("error getme");
-      if (!err?.response) {
-        setErrMsg("No Server Response");
-      } else if (err.response?.status === 403) {
-        setErrMsg("Invalid Credentials");
-      } else {
-        setErrMsg("Unauthorized");
-      }
-      return "" as string;
-    }
-  };
-
+  // const checkIsFriend = async (id: number) => {
+  //   try {
+  //     const token = getToken();
+  //     const response: AxiosResponse = axiosPrivate).get(
+  //       GET_STATUS_PATH + id.toString(),
+  //       {
+  //         headers: {
+  //           Authorization: "Bearer " + token["access_token"],
+  //         },
+  //       }
+  //     );
+  //     return response.data;
+  //   } catch (err: any) {
+  //     console.log("error getme");
+  //     if (!err?.response) {
+  //       setErrMsg("No Server Response");
+  //     } else if (err.response?.status === 403) {
+  //       setErrMsg("Invalid Credentials");
+  //     } else {
+  //       setErrMsg("Unauthorized");
+  //     }
+  //     return "" as string;
+  //   }
+  // };
+//TODO change axiosAuthToken
   useEffect(() => {
     const treatData = async () => {
-      const profile = await axiosAuthReq(
-        HTTP_METHOD.GET,
-        GET_USER_PROFILE + userId,
-        {} as AxiosHeaders,
-        {},
-        setErrMsg,
-        setUser
-      );
-      if (profile === undefined) return;
-      if (profile !== undefined) {
-        if (validURL(profile.profilePicture))
-          setPicture(profile.profilePicture);
+      const profile = await axiosAuthReq(HTTP_METHOD.GET, GET_USER_PROFILE + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setUser);
+      if (profile === undefined) return ;
+      if (profile !== undefined){
+        if (validURL(profile.profilePicture)) setPicture(profile.profilePicture);
         else
           setPicture(
             GET_PROFILE_PICTURE + profile.profilePicture.split("/")[2]
           );
         console.log(picture);
-        await axiosAuthReq(
-          HTTP_METHOD.GET,
-          GET_STATUS_PATH + userId,
-          {} as AxiosHeaders,
-          {},
-          setErrMsg,
-          setFriendStatus
-        );
+        await axiosAuthReq(HTTP_METHOD.GET, GET_STATUS_PATH + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setFriendStatus);
       }
     };
     treatData();
-  }, [userId]);
+  }, [paramUserId]);
 
   const deleteRequest = async (confirmed: boolean): Promise<void> => {
     if (confirmed) {
       try {
-        const sendingReq: AxiosResponse = await (
-          await axiosToken()
-        ).get("users/destroy-friend-request-by-userid/" + userId);
+        const sendingReq: AxiosResponse = await axiosPrivate.get("users/destroy-friend-request-by-userid/" + paramUserId);
         console.log(JSON.stringify(sendingReq.data));
         setFriendStatus("");
         setShowConfirmation(false);
@@ -210,9 +195,7 @@ const UserProfile = () => {
   };
   const refuseRequest = async () => {
     try {
-      const sendingReq: AxiosResponse = await (
-        await axiosToken()
-      ).get("users/decline-friend-request-by-userid/" + userId);
+      const sendingReq: AxiosResponse = await axiosPrivate.get("users/decline-friend-request-by-userid/" + paramUserId);
       console.log(JSON.stringify(sendingReq.data));
       setFriendStatus("declined");
       return sendingReq.data;
@@ -230,9 +213,7 @@ const UserProfile = () => {
   };
   const acceptRequest = async () => {
     try {
-      const sendingReq: AxiosResponse = await (
-        await axiosToken()
-      ).get("users/accept-friend-request-by-userid/" + userId);
+      const sendingReq: AxiosResponse = await axiosPrivate.get("users/accept-friend-request-by-userid/" + paramUserId);
       console.log(JSON.stringify(sendingReq.data));
       setFriendStatus("accepted");
       return sendingReq.data;
@@ -250,9 +231,7 @@ const UserProfile = () => {
   };
   const getReqSendingStatus = async (): Promise<string> => {
     try {
-      const sendingReq: AxiosResponse = await (
-        await axiosToken()
-      ).get(CHECK_SENDER_PATH + userId);
+      const sendingReq: AxiosResponse = await axiosPrivate.get(CHECK_SENDER_PATH + paramUserId);
       return sendingReq.data;
     } catch (err: any) {
       console.log("error getme");
@@ -293,10 +272,10 @@ const UserProfile = () => {
       let profileUser: NeutralUser;
       let myProfile: NeutralUser;
 
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = axiosPrivate;
       friendList = (await axiosInstance.current.get("/users/friend-list")).data;
       profileUser = (
-        await axiosInstance.current.get("/users/profile/" + userId)
+        await axiosInstance.current.get("/users/profile/" + paramUserId)
       ).data;
       myProfile = (await axiosInstance.current.get("/users/me")).data;
       if (profileUser.id === myProfile.id) setIsFriend(true);
@@ -325,7 +304,7 @@ const UserProfile = () => {
           {/* </div> */}
           <div id="divprofileName" className="divprofileName">
             <p className="profileName">{user?.username?.slice(0, 15)}</p>
-            <Status id={userId!} />
+            <Status id={paramUserId!} />
           </div>
           <Popup
             apparent={showConfirmation}
@@ -393,8 +372,7 @@ const UserProfile = () => {
                 </button>
               </div>
             )}
-            {/* <button disabled>Pending</button>} */}
-            {friendStatus === "" && userId !== userSessionId ? (
+            {friendStatus === "" && paramUserId !== userId?.toString() ? (
               <button className="profileButtonAddFriend" onClick={AddFriend}>
                 Add friend +
               </button>
@@ -403,7 +381,7 @@ const UserProfile = () => {
             )}
           </div>
 
-		{(Number(userId) !== userSessionId) ? <BlockButton userIdToBlock={Number(userId)}/>: <></>}
+		{(paramUserId !== userId?.toString()) ? <BlockButton userIdToBlock={Number(paramUserId)}/>: <></>}
 		  </div>
         </div>
         <br />

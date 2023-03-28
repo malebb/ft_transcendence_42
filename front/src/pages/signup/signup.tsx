@@ -13,10 +13,11 @@ import '../../styles/signup.css'
 import Headers from "src/components/Headers";
 import { SocketContext } from '../../context/SocketContext';
 import { getToken } from '../../api/axios';
+import AuthContext from "src/context/TokenContext";
 
 const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,24}$/;
+const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%&*^()-_=]).{8,24}$/;
 const SIGNUP_PATH = "/auth/signup";
 
 const Signup = () => {
@@ -24,6 +25,7 @@ const Signup = () => {
   const emailRef = useRef<HTMLInputElement>(null);
   const errRef = useRef<HTMLParagraphElement>(null);
 
+  const {token, setToken, username, setUsername, userId, setUserId} = useContext(AuthContext);
   const [user, setUser] = useState("");
   const [validName, setValidName] = useState(false);
   const [userFocus, setUserFocus] = useState(false);
@@ -90,19 +92,23 @@ const Signup = () => {
       const response: AxiosResponse = await axiosMain.post(
         SIGNUP_PATH,
         { email: email, username: user, password: pwd },
-        {
-          headers: { "Content-Type": "application/json" },
-          //withCredentials: true
-        }
+        { withCredentials: true,  headers: {
+          "Access-Control-Allow-Origin": "http://localhost:3000",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+          "Content-Type": "application/json"
+        }}
       );
       console.log(response.data);
       setSuccess(true);
       // setToken(response.data.token);
-      sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
-      sessionStorage.setItem("id", JSON.stringify(response.data.userId));
-	  socket.auth = {token: getToken().access_token}
+      // localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
+      // localStorage.setItem("id", JSON.stringify(response.data.userId));
+      setUsername(response.data.username!);
+      setUserId(response.data.userId!);
+      setToken(response.data.tokens!)
+      socket.auth = {token: response.data.tokens!.access_token}
 	  socket.connect();
-      console.log(response.data.access_token);
+      console.log('resp data = ' + JSON.stringify(response.data));
       //console.log(token);
     } catch (err: any) {
       if (!err?.response) {

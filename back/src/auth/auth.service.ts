@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthDto, SignupDto } from './dto';
 import * as argon from 'argon2';
@@ -22,6 +27,10 @@ const JWT_TOKEN_EXPIRE_TIME = 900;
 const GRANT_TYPE = 'authorization_code';
 const DEFAULT_IMG = 'uploads/profileimages/default_profile_picture.png';
 const REDIRECT_URI = 'http://localhost:3000/auth/signin/42login/callback';
+const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
+const PWD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%&*^()-_=]).{8,24}$/;
 
 @Injectable()
 export class AuthService {
@@ -37,6 +46,12 @@ export class AuthService {
   }
 
   async signup(dto: SignupDto): Promise<SignInterface> {
+    if (
+      !EMAIL_REGEX.test(dto.email) ||
+      !PWD_REGEX.test(dto.password) ||
+      !USER_REGEX.test(dto.username)
+    )
+      throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
     const hash = await argon.hash(dto.password);
     try {
       const user = await this.prismaService.user.create({
@@ -71,6 +86,8 @@ export class AuthService {
   }
 
   async signin(dto: AuthDto): Promise<SignInterface> {
+    if (!EMAIL_REGEX.test(dto.email) || !PWD_REGEX.test(dto.password))
+      throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
     const user = await this.prismaService.user.findUnique({
       where: {
         email: dto.email,
@@ -177,6 +194,7 @@ export class AuthService {
       userId: user.id,
       username: user.username,
     };
+
     //console.log("data = " + JSON.stringify(response.data));
     return response.data;
   }
@@ -230,25 +248,31 @@ export class AuthService {
     });
   }
 
-  async refreshToken(userId: number, rt: string) {
+  async refreshToken(userId: number, rt: string): Promise<SignInterface> {
     const user = await this.prismaService.user.findUnique({
       where: {
         id: userId,
       },
     });
     if (!user || !user.hashRt) {
-      console.log('!user');
+      console.log('!rtuser');
       throw new ForbiddenException('Incorrect User');
     }
     const rtMatches = await argon.verify(user.hashRt, rt);
     if (!rtMatches) {
-      console.log('!user');
+      console.log('!rtmatches');
       throw new ForbiddenException('ACESS DENIED');
     }
 
     const tokens = await this.signToken(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
-    return tokens;
+    // return tokens;
+    return {
+      tokens: tokens,
+      isTfa: user.isTFA,
+      userId: user.id,
+      username: user.username,
+    };
   }
 
   verify(token: string): boolean | undefined {

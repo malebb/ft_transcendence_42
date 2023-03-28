@@ -1,4 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import {
   faUser,
@@ -11,13 +12,15 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import {} from "@fortawesome/free-solid-svg-icons";
 import "../styles/Sidebar.css";
+import AuthContext from "src/context/TokenContext";
 
 const Sidebar = () => {
-  const userSessionId = JSON.parse(sessionStorage.getItem("id")!);
+  const context = useContext(AuthContext)
+  const userSessionId = (context.userId!);
 
   return (
     <>
-      {!(sessionStorage.getItem("tokens")) ? (
+      {!(context.token) ? (
         <></>
       ) : (
         <nav className="Sidebar">

@@ -14,11 +14,12 @@ import VerifTfa from "../settings/components/VerifTfa";
 import { useSnackbar } from "notistack";
 import Headers from "src/components/Headers";
 import "../../styles/VerifTfa.css";
+import { ResponseInterface } from "src/interfaces/Sign";
 import { SocketContext } from '../../context/SocketContext';
-import { getToken } from '../../api/axios';
+import AuthContext from "../../context/TokenContext";
 
 const EMAIL_REGEX = /^[a-z0-9-_@.]{3,23}$/;
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,24}$/;
+const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%&*^()-_=]).{8,24}$/;
 const SIGNIN_PATH = "/auth/signin";
 
 interface TokensInterface{
@@ -27,10 +28,10 @@ interface TokensInterface{
     expireIn: number,
     refresh_token: string,
   }
-interface ResponseInterface{
-  tokens: TokensInterface | undefined,
-  id: number | undefined,
-}
+// interface ResponseInterface{
+//   tokens: TokensInterface | undefined,
+//   id: number | undefined,
+// }
 
 interface SignInterface {
   tokens: TokensInterface;
@@ -40,15 +41,17 @@ interface SignInterface {
 }
 
 const Signin = () => {
-  const { token = "", setToken = () => {} } =
-    React.useContext(TokenContext) ?? [];
+  // const { token = "", setToken = () => {} } =
+  //   React.useContext(TokenContext) ?? [];
 
+  const context = useContext(AuthContext);
   const userRef = useRef<HTMLInputElement>(null);
   const errRef = useRef<HTMLParagraphElement>(null);
 
   const [resp, setResp] = useState<ResponseInterface>({
     tokens: undefined,
     id: undefined,
+    username: undefined,
   });
   const [email, setEmail] = useState("");
   const [validEmail, setValidEmail] = useState(false);
@@ -62,6 +65,7 @@ const Signin = () => {
 
   const [isTfa, setIsTfa] = useState<boolean>(false);
   const [TfaSuccess, setTfaSuccess] = useState<boolean>(false);
+  const [TfaDone, setTfaDone] = useState<boolean>(false);
 
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
@@ -103,6 +107,11 @@ const Signin = () => {
   // );
   // }*/
 
+  const handle42Button = (e : any) => {
+    window.location.href =
+        "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code";
+    }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const v1 = EMAIL_REGEX.test(email);
@@ -115,31 +124,35 @@ const Signin = () => {
       const response: AxiosResponse = await axiosMain.post<SignInterface>(
         SIGNIN_PATH,
         { email: email, password: pwd },
-        {
-          headers: { "Content-Type": "application/json" },
-          //withCredentials: true
-        }
+        { withCredentials: true,  headers: {
+          // "Access-Control-Allow-Origin": "http://localhost:3000",
+          // "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+          "Content-Type": "application/json"
+        }}
       );
-
-//	  console.log('socket = ', socket);
-      setSuccess(true);
-      setToken(response.data.token);
+      console.log(response.data);
+      // setToken(response.data.token);
       setIsTfa(response.data.isTfa);
       setName(response.data.username);
       console.log("tfa === " + JSON.stringify(response.data));
       console.log("tfa ==" + response.data.isTfa);
       if (response.data.isTfa === false)
       {
-      sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
-      sessionStorage.setItem("id", JSON.stringify(response.data.userId));
+      // localStoVrage.setItem("tokens", JSON.stringify(response.data.tokens));
+      // localStorage.setItem("id", JSON.stringify(response.data.userId));
+      context.setUsername(response.data.username!);
+      context.setUserId(response.data.userId!);
+      context.setToken(response.data.tokens!)
+      socket.auth = {token: response.data.tokens!.access_token}
+      socket.connect();
+      console.log('my socket = ', socket);
       }
       else {
         setResp((prev) => ({...prev, id: response.data.userId}))
+        setResp((prev) => ({...prev, username: response.data.username}))
         setResp((prev) => ({...prev, tokens: response.data.tokens}))
       }
-	  socket.auth = {token: getToken().access_token}
-	  socket.connect();
-	  console.log('my socket = ', socket);
+
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");
@@ -150,12 +163,20 @@ const Signin = () => {
       }
       //errRef.current.focus();
     }
+      setSuccess(true);
   };
   useEffect(() => {
     if (TfaSuccess)
     {
-      sessionStorage.setItem("tokens", JSON.stringify(resp.tokens));
-      sessionStorage.setItem("id", JSON.stringify(resp.id));
+      // locaVlStorage.setItem("tokens", JSON.stringify(resp.tokens));
+      // localStorage.setItem("id", JSON.stringify(resp.id));
+      context.setUsername(resp.username!);
+      context.setUserId(resp.id);
+      context.setToken(resp.tokens!)
+      socket.auth = {token: resp.tokens!.access_token}
+      socket.connect();
+      setTfaDone(true);
+      console.log('my socket = ', socket);
     }
 
   }, [TfaSuccess])
@@ -187,8 +208,8 @@ button img{position: relative;
     <>
       <style>{CSS}</style>
       <Headers/>
-      {success ? (
-        <section>
+      {(success)? (
+        <main>
           {(isTfa && resp.id !== undefined)&& <VerifTfa setTfaSuccess={setTfaSuccess} userId={resp.id}/>}
           {(TfaSuccess || !isTfa) &&(
             <>
@@ -199,7 +220,7 @@ button img{position: relative;
               <Navigate to={"/"}/>
             </>
           )}
-        </section>
+        </main>
       ) : (
         <section className="sign-section">
           <p
@@ -265,10 +286,7 @@ button img{position: relative;
             <button
               className="btn btn-transparent"
               type="button"
-              onClick={() =>
-                (window.location.href =
-                  "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code")
-              }
+              onClick={handle42Button}
             >
               <img
                 alt="42_logo"
@@ -291,3 +309,11 @@ button img{position: relative;
 };
 
 export default Signin;
+function setUsername(arg0: any) {
+  throw new Error("Function not implemented.");
+}
+
+function setUserId(id: any) {
+  throw new Error("Function not implemented.");
+}
+

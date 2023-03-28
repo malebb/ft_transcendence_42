@@ -1,32 +1,33 @@
 import {
   Controller,
   Get,
-  UseGuards,
-  Req,
-  Patch,
   Body,
+  Patch,
   Post,
   UseInterceptors,
   UploadedFile,
   Param,
   Res,
+  HttpException,
+  HttpStatus,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
   ParseIntPipe,
 } from '@nestjs/common';
-import { JwtGuard } from '../auth/guard';
 import { GetUser, Public } from '../auth/decorator';
 import { User } from '@prisma/client';
 import { EditUserDto } from './dto';
 import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { fileURLToPath } from 'url';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { extname, join } from 'path';
 import { imageFileFilter } from './user.upload.utils';
-import { FormDataRequest } from 'nestjs-form-data';
-import { stringify } from 'querystring';
-import { Friend, NeutralUser } from './types';
+import { NeutralUser } from './types';
 
+const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
+const IMG_REGEX = /^(image\/)(?:png|jpg|jpeg|gif|png|svg)$/;
 export const storage = {
   storage: diskStorage({
     destination: './uploads/profileimages',
@@ -62,10 +63,8 @@ export class UserController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', storage))
-  uploadImage(@UploadedFile() file, @GetUser() user: User): Object {
-    const ret_user = this.userService.uploadPicture(user.id, file.path);
-
-    return ret_user;
+  uploadImage(@UploadedFile() file, @GetUser() user: User): Promise<User> {
+    return this.userService.uploadPicture(user.id, file.path);
   }
 
   @Get('get-all-user')
@@ -75,7 +74,7 @@ export class UserController {
 
   @Public()
   @Get('profile-image/:imagename')
-  findProfileImage(@Param('imagename') imagename, @Res() res): Object {
+  findProfileImage(@Param('imagename') imagename, @Res() res) {
     return res.sendFile(
       join(process.cwd(), 'uploads/profileimages/' + imagename),
     );
@@ -85,21 +84,28 @@ export class UserController {
   // @FormDataRequest()
   @UseInterceptors(FileInterceptor('file', storage))
   PatchProfile(
-    @UploadedFile() file,
     @GetUser() user: User,
-    @Body() dto: EditUserDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          // new MaxFileSizeValidator({ maxSize: 100000 }),
+          new FileTypeValidator({
+            fileType: IMG_REGEX,
+          }),
+        ],
+      }),
+    )
+    file?: Express.Multer.File,
+    @Body() dto?: EditUserDto,
   ) {
-    let ret_pic;
-    let ret_login;
-    if (file !== undefined)
-      ret_pic = this.userService.uploadPicture(user.id, file.path);
-    if (dto.login !== undefined) {
-      ret_login = this.userService.editUsername(user.id, dto);
-      // if (ret_login == null) return 1;
+    if (file !== undefined) {
+      this.userService.uploadPicture(user.id, file.path);
     }
-    //this.userService.editUser(user.id, dto);
-    //if (ret_pic == null) return 2;
-    //return 0;
+    if (dto.login !== undefined) {
+      if (!USER_REGEX.test(dto.login))
+        throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
+      this.userService.editUsername(user.id, dto);
+    }
   }
 
   @Get('send-friend-request/:userid')
@@ -176,20 +182,26 @@ export class UserController {
   }
 
   @Patch('block/:id')
-  async block(@Param('id', ParseIntPipe) idToBlock: number, @GetUser('id') userId: number)
-  {
-	  await this.userService.block(idToBlock, userId);
+  async block(
+    @Param('id', ParseIntPipe) idToBlock: number,
+    @GetUser('id') userId: number,
+  ) {
+    await this.userService.block(idToBlock, userId);
   }
 
   @Patch('unblock/:id')
-  async unblock(@Param('id', ParseIntPipe) idToBlock: number, @GetUser('id') userId: number)
-  {
-	  await this.userService.unblock(idToBlock, userId);
+  async unblock(
+    @Param('id', ParseIntPipe) idToBlock: number,
+    @GetUser('id') userId: number,
+  ) {
+    await this.userService.unblock(idToBlock, userId);
   }
 
   @Get('blocked/:id')
-  async getBlocked(@Param('id', ParseIntPipe) idBlocked: number, @GetUser('id') userId: number)
-  {
-	  return (await this.userService.getBlocked(idBlocked, userId));
+  async getBlocked(
+    @Param('id', ParseIntPipe) idBlocked: number,
+    @GetUser('id') userId: number,
+  ) {
+    return await this.userService.getBlocked(idBlocked, userId);
   }
 }

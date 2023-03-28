@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { axiosMain, axiosAuthReq, HTTP_METHOD } from "../../api/axios";
 import { AxiosHeaders, AxiosResponse } from "axios";
 import { useState, useEffect, useRef } from "react";
@@ -6,10 +6,17 @@ import { Switch } from "@mui/material";
 import '../../styles/User.css';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { SvgIcon } from "@mui/material";
+//var speakeasy = require('speakeasy');
+//var qrcode = require('qrcode');
+// import qrcode from 'qrcode';
+// import { createSecretKey } from 'crypto';
 import { useNavigate } from "react-router-dom";
 import Popup from "src/components/Popup";
 import Sidebar from "src/components/Sidebar";
 import Headers from "src/components/Headers";
+import AuthContext from "src/context/TokenContext";
+import useAxiosPrivate from "src/hooks/usePrivate";
+//var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_@.]{3,23}$/;
@@ -83,10 +90,11 @@ console.log(qrcode_img);*/
         <img src="http://localhost:3333/users/profile-image/" alt='profile-picture'/>
         </form> */
 const User = () => {
+  const axiosPrivate = useAxiosPrivate();
+  const {username} = useContext(AuthContext);
   const [user, setUser] = useState<UserType>();
   const [validUser, setValidUser] = useState<boolean>(false);
   const [picture, setPicture] = useState("");
-  const [resp, setResp] = useState<UserType>();
 
   const [image, setImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -130,16 +138,14 @@ const User = () => {
     setValidCode(result);
   }, [code]);
 
-  const getJWT = () => {
-    const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
-    return jwt["access_token"];
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
+    if (selectedFile === undefined)
+      console.log("selectedFile is undef");
     if (selectedFile !== null) {
       console.log("good file");
+      console.log(selectedFile)
       formData.append("file", selectedFile);
     }
     if (Login !== user?.username) {
@@ -153,13 +159,11 @@ const User = () => {
     //console.log("Form = " + formData.getAll("login"));
     try {
       // const response: AxiosResponse = await axiosAuthReq(HTTP_METHOD.POST, PATCH_PATH, formData, {} as AxiosHeaders, setErrMsg, set)
-      const response: AxiosResponse = await axiosMain.post(
+      console.log('formData == ' + JSON.stringify(formData.get('file')));
+      const response: AxiosResponse = await axiosPrivate.post(
         PATCH_PATH,
         formData,
-        {
-          headers: { Authorization: "Bearer " + getJWT() },
-          //withCredentials: true
-        }
+        {headers: {"Content-Type": "multipart/form-data"}}
       );
       console.log(response.data);
     } catch (err: any) {
@@ -181,15 +185,7 @@ const User = () => {
     }
   };
 
-  const onCodeChange = (event: any) => {
-    setCode(event.target.value);
-  };
-
-
   const navigate = useNavigate();
-  const QrCodePage = () => {
-    navigate("/", { replace: true });
-  };
 
   useEffect(() => {
     setErrMsg("");
