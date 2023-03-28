@@ -28,6 +28,9 @@ const Logout = () => {
           socket.disconnect();
             console.log(42);
             console.log(response);
+            context.setToken(undefined);
+            context.setUserId(undefined);
+            context.setUsername(undefined);
         }
       catch (err: any) {
           setErrMsg("Oops something went wrong !");

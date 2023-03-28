@@ -42,6 +42,7 @@ function validURL(str: string) {
 }
 
 const UserProfile = () => {
+  
   const { paramUserId } = useParams();
 
   const { token , setToken, userId } = useContext(AuthContext);
@@ -283,7 +284,7 @@ const UserProfile = () => {
       });
     };
     checkIfFriend();
-  }, []);
+  }, [paramUserId]);
 
   return (
     <div>

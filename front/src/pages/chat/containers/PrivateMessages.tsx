@@ -64,7 +64,7 @@ function PrivateMessages() {
       });
       axiosInstance.current = await axiosPrivate;
       await axiosInstance
-        .current!.get("/users/profile/" + friendId.userId)
+        .current!.get("/users/profile/" + friendId.paramUserId)
         .then((response) => {
           friend.current = response.data;
         });

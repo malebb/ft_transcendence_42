@@ -146,6 +146,7 @@ const Signin = () => {
         setResp((prev) => ({...prev, username: response.data.username}))
         setResp((prev) => ({...prev, tokens: response.data.tokens}))
       }
+      setSuccess(true);
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");
@@ -156,7 +157,6 @@ const Signin = () => {
       }
       //errRef.current.focus();
     }
-      setSuccess(true);
   };
   useEffect(() => {
     if (TfaSuccess)

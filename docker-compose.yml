@@ -9,6 +9,8 @@ services:
     container_name: front-end
     ports:
       - 3000:3000
+    # volumes:
+    #   - front_volume:/app/
   back:
     build:
       context: ./
@@ -21,6 +23,8 @@ services:
       - postgres
     environment:
       - .env
+    # volumes:
+    #   - back_volume:/app/
     # networks:
     #   - intro_nest
   postgres:
@@ -46,3 +50,16 @@ services:
       #      - intro_nest
       # networks:
       #   intro_nest: bridge
+volumes:
+  back_volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/xaxa/trans/back
+      o: bind
+  front_volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/xaxa/trans/front
+      o: bind

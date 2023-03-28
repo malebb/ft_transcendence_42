@@ -30,15 +30,52 @@ export class AuthController {
 
   @Public()
   @Post('signup')
-  signup(@Body() dto: SignupDto, @Headers() headers): Promise<SignInterface> {
-    return this.authService.signup(dto);
+  async signup(
+    @Body() dto: SignupDto,
+    @Headers() headers,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // try {
+    const token: SignInterface = await this.authService.signup(dto);
+    res.cookie('rt_token', token.tokens.refresh_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+    // res.header('Access-Control-Allow-Credentials', 'true');
+    // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    return res.send(token);
+    // } catch (err) {
+    //   console.log('callback err = ' + err);
+    //   throw new HttpException('Error trying to signin', err.code);
+    // }
   }
 
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('signin')
-  signin(@Body() dto: AuthDto, @Headers() headers): Promise<SignInterface> {
-    return this.authService.signin(dto);
+  async signin(
+    @Body() dto: AuthDto,
+    @Headers() headers,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // try {
+    const token: SignInterface = await this.authService.signin(dto);
+    res.cookie('rt_token', token.tokens.refresh_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+    // res.header('Access-Control-Allow-Credentials', 'true');
+    // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    return res.send(token);
+    // } catch (err) {
+    // return err;
+    // }
+    // } catch (err) {
+    // console.log('callback err = ' + err);
+    // throw new HttpException('Error trying to signin', HttpStatus.BAD_REQUEST);
+    // }
   }
 
   @Public()

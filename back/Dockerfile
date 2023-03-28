@@ -14,7 +14,7 @@ COPY ../.env ./
 # CMD ["npm", "run", "start:dev"]
 RUN yarn install;
 RUN yarn add ../app-lib;
-RUN npx prisma generate
+# RUN npx prisma generate
 
-CMD ["yarn", "start:dev"]
+CMD ["./scripts/launch-prod-docker.sh"]
 # CMD [ "tail", "-f", "/dev/null" ]
