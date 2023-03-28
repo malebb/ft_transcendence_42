@@ -28,7 +28,7 @@ CREATE TABLE "users" (
     "isTFA" BOOLEAN NOT NULL DEFAULT false,
     "firstName" TEXT,
     "lastName" TEXT,
-    "profilePicture" TEXT,
+    "profilePicture" TEXT NOT NULL,
     "skin" TEXT NOT NULL DEFAULT 'white',
     "map" TEXT NOT NULL DEFAULT 'basic',
 

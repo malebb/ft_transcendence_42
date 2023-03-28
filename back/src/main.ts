@@ -11,6 +11,9 @@ async function bootstrap() {
     cors: { credentials: true, origin: process.env.FRONT_URL },
   });
 
+  console.log('ah');
+  console.log('URL = ', process.env.FRONT_URL);
+  console.log('be');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   // app.enableCors({
   //   origin: process.env.FRONT_URL,
