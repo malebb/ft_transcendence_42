@@ -23,7 +23,6 @@ const Achievements = () =>
 	const levelAchievements  = useRef<string[]>([]);
 	const defeatAchievements  = useRef<string[]>([]);
 
-
 	function printStatus(achievement: AchievementsData)
 	{
 		const achievementDone = <img width="40px" src="http://localhost:3000/images/achievementDone.png" alt="achievementDone"/>

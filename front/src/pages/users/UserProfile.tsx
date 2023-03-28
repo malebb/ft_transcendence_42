@@ -285,23 +285,37 @@ const UserProfile = () => {
 
   useEffect(() => {
     const checkIfFriend = async () => {
-      let friendList: FriendType[] = [];
-      let profileUser: NeutralUser;
-      let myProfile: NeutralUser;
-
-      axiosInstance.current = await axiosToken();
-      friendList = (await axiosInstance.current.get("/users/friend-list")).data;
-      profileUser = (
-        await axiosInstance.current.get("/users/profile/" + userId)
-      ).data;
-      myProfile = (await axiosInstance.current.get("/users/me")).data;
-      if (profileUser.id === myProfile.id) setIsFriend(true);
-      friendList.forEach((friend) => {
-        if (friend.id === profileUser.id) setIsFriend(true);
-      });
+		try
+		{
+			let friendList: FriendType[] = [];
+			let profileUser: NeutralUser;
+			let myProfile: NeutralUser;
+	
+			axiosInstance.current = await axiosToken();
+			friendList = (await axiosInstance.current.get("/users/friend-list")).data;
+			axiosInstance.current = await axiosToken();
+   			myProfile = (await axiosInstance.current.get("/users/me")).data;
+   			if (Number(userId) === myProfile.id)
+			{
+		 		setIsFriend(true);
+				return ;
+			}
+			friendList.forEach((friend) => {
+	        if (friend.id === profileUser.id)
+			{
+				setIsFriend(true);
+				return ;
+			}
+   	   		});
+			setIsFriend(false);
+		}
+		catch (error: any)
+		{
+			console.log('error: ', error);
+		}
     };
     checkIfFriend();
-  }, []);
+  }, [userId]);
 
   return (
     <div>
