@@ -13,6 +13,7 @@ import { GetUser } from '../../auth/decorator';
 // necessaires pour les messages des utilisateurs
 import { MessageService } from './message.service';
 import { ChatRoomService } from '../chatRoom/chatRoom.service';
+import { UserService } from '../../user/user.service';
 // interfaces :
 import { ChatRoom, Message } from 'ft_transcendence';
 import { Logger, Body } from '@nestjs/common';
@@ -35,7 +36,8 @@ export class MessageGateway
 {
   // va bind l'application MessageService
   constructor(private messageService: MessageService,
-			 private chatRoomService: ChatRoomService) {}
+			 private chatRoomService: ChatRoomService,
+			 private userService: UserService) {}
 
   // creation d'une instance server
   @WebSocketServer()
@@ -73,8 +75,9 @@ export class MessageGateway
   async receivePrivateMessage(client: Socket, data)
   {
    await this.messageService.updatePrivateConv(data.room.id, data.msg.message, data.senderId, data.receiverId, data.msg.type, data.msg.challengeId);
-
-    client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
+   	const blocked = await this.userService.getBlocked(data.senderId, data.receiverId);
+	if (!blocked.length)
+	    client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
   }
 
   @UseGuards(WsGuard)
