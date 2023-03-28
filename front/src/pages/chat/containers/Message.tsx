@@ -22,9 +22,9 @@ function MessagesContainer() {
   const socket = useRef<Socket | null>(null);
   let newMessage: Message;
   let [muteTimeLeft, setMuteTimeLeft] = useState<string>("");
-  const [initSocket, setInitSocket] = useState<boolean>(false);
+  const [isMute, setIsMute] = useState<boolean>(false);
 
-  const ScrollToBottom = () => {
+  const scrollToBottom = () => {
     // fait defiler la page vers le bas : utilise scrollview
     // pour defiler jusqu'a la fin de la div
     document.getElementById("chatContainer")?.scrollTo({
@@ -58,7 +58,7 @@ function MessagesContainer() {
   }, [roomId]);
 
   useEffect(() => {
-    ScrollToBottom();
+    scrollToBottom();
   }, [stateMessages]);
 
   useEffect(() => {
@@ -82,11 +82,15 @@ function MessagesContainer() {
         if (!blocked.data.length) {
           if (message.user.id !== currentUser.current?.id)
             setStateMessages((stateMessages) => [...stateMessages, message]);
-          if (message.user.id === currentUser.current!.id)
+          if (message.user.id === currentUser.current!.id) {
             setMuteTimeLeft("");
+            setIsMute(false);
+          }
         }
       });
       socket.current!.on("MUTE", (mute) => {
+        setIsMute(true);
+        console.log(isMute);
         setMuteTimeLeft(
           "You are muted (" + formatRemainTime(mute.penalties) + ")"
         );
@@ -99,6 +103,12 @@ function MessagesContainer() {
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    console.log(isMute);
+    // socket.current!.on("MUTE", (mute) => {
+    //   setIsMute(true);
+    // });
+    // if (isMute === true)
+    //   return;
 
     event.preventDefault();
     if (!inputMessage?.length) return;
@@ -113,10 +123,8 @@ function MessagesContainer() {
       challengeId: 0,
     };
 
-    if (muteTimeLeft == "") {
-      socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
-      setStateMessages([...stateMessages, newMessage]);
-    }
+    socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
+    setStateMessages([...stateMessages, newMessage]);
     setInputMessage("");
   }
 
@@ -169,11 +177,9 @@ function MessagesContainer() {
             currentUser.current!.username === message?.user?.username;
 
           return (
-            <>
-              <div key={index + 1} className="chat-wrapper">
-                {genMessage(isCurrentUser, message)}
-              </div>
-            </>
+            <div key={index} className="chat-wrapper">
+              {genMessage(isCurrentUser, message)}
+            </div>
           );
         })}
       </>
@@ -183,7 +189,7 @@ function MessagesContainer() {
   return (
     <>
       <div className="chatPage">
-        <div id="content">
+        <div id="content" className="chatRoomContent">
           <div id="chatContainer">
             <GenMessages />
           </div>
@@ -221,5 +227,8 @@ export default MessagesContainer;
   car l'état précédent est conservé dans la closure
   de la fonction de mise à jour (useEffect)
   Prend donc l'etat precedent, au lieu du tableau et retourne le nouveau
+
+  prop key:
+  https://stackoverflow.com/questions/28329382/understanding-unique-keys-for-array-children-in-react-js/43892905#43892905
 
 */
