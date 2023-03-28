@@ -13,8 +13,6 @@ const Tfa = () => {
 
   useEffect(() => {
     const result = CODE_REGEX.test(code);
-    console.log(result);
-    console.log(code);
     setValidCode(result);
   }, [code]);
 
@@ -36,7 +34,6 @@ const Tfa = () => {
       encoding: 'hex',
       token: code,
     }) */
-    console.log("verif code =======" + verif);
     //setVerified(verif);
   };
   return (

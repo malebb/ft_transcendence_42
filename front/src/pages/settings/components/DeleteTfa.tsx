@@ -24,8 +24,6 @@ const DeleteTfa = () => {
   const navigate = useNavigate();
   useEffect(() => {
     const result = CODE_REGEX.test(code);
-    console.log(result);
-    console.log(code);
     setValidCode(result);
   }, [code]);
 

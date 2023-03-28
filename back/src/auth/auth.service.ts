@@ -67,7 +67,6 @@ export class AuthService {
       });
       const tokens = await this.signToken(user.id, user.email);
       this.updateRtHash(user.id, tokens.refresh_token);
-      console.log(tokens);
       return {
         tokens: tokens,
         isTfa: user.isTFA,
@@ -94,12 +93,10 @@ export class AuthService {
       },
     });
     if (!user) {
-      console.log('!user');
       throw new ForbiddenException('Credentials incorrect');
     }
     const pwMatches = await argon.verify(user.hash, dto.password);
     if (!pwMatches) {
-      console.log('!pwmatch');
       throw new ForbiddenException('Credentials incorrect');
     }
     const tokens = await this.signToken(user.id, user.email);
@@ -125,10 +122,7 @@ export class AuthService {
     {
         const client_id = this.config.get('OAUTH_CLIENT_UID');
         const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
-        console.log("get inside get42QT = " + client_id + " | " + client_secret); 
         const response: AxiosResponse = await axios.post('https://api.intra.42.fr/oauth/token', {grant_type: GRANT_TYPE,client_id: client_id, client_secret: client_secret, code: code, redirect_uri: REDIRECT_URI},);
-        console.log("after axios inside get42QT"); 
-        console.log(response.data);
         return response;
     }*/
 
@@ -137,7 +131,6 @@ export class AuthService {
     //const response : AxiosResponse = await this.get42AT(code);
     const client_id = this.config.get('OAUTH_CLIENT_UID');
     const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
-    console.log('get inside get42QT = ' + client_id + ' | ' + client_secret);
     const response: AxiosResponse = await axios.post(
       'https://api.intra.42.fr/oauth/token',
       {
@@ -148,9 +141,6 @@ export class AuthService {
         redirect_uri: REDIRECT_URI,
       },
     );
-    console.log('after axios inside get42QT');
-    console.log(response.status);
-    console.log(response.data);
     //if(response.status !== 200)//TODO protect depending on response status
 
     const getprofile: AxiosResponse = await axios.get(
@@ -159,18 +149,14 @@ export class AuthService {
         headers: { Authorization: 'Bearer ' + response.data['access_token'] },
       },
     );
-    console.log('getme =' + JSON.stringify(getprofile.data));
     const id42 = JSON.stringify(getprofile.data['id']) || '';
     const pic42 = getprofile.data.image.versions.small;
-    console.log(pic42);
-    console.log(pic42);
 
     let user = await this.prismaService.user.findUnique({
       where: {
         id42: id42,
       },
     });
-    console.log('USER = ' + JSON.stringify(user));
     if (!user) {
       user = await this.prismaService.user.create({
         data: {
@@ -187,7 +173,6 @@ export class AuthService {
     }
     const tokens = await this.signToken(user.id, user.email);
     this.updateRtHash(user.id, tokens.refresh_token);
-    console.log('tokens ==' + JSON.stringify(tokens));
     return {
       tokens: tokens,
       isTfa: user.isTFA,
@@ -255,12 +240,10 @@ export class AuthService {
       },
     });
     if (!user || !user.hashRt) {
-      console.log('!rtuser');
       throw new ForbiddenException('Incorrect User');
     }
     const rtMatches = await argon.verify(user.hashRt, rt);
     if (!rtMatches) {
-      console.log('!rtmatches');
       throw new ForbiddenException('ACESS DENIED');
     }
 
@@ -279,11 +262,9 @@ export class AuthService {
     try {
       const secret = this.config.get('JWT_SECRET');
       const jet = this.jwt.verify(token, { secret: secret });
-      //console.log(jet);
       if (jet) return true;
       else return false;
     } catch (err: any) {
-      console.log(err);
     }
   }
 
@@ -291,9 +272,6 @@ export class AuthService {
     const secret = speakeasy.generateSecret({
       name: 'transcendence',
     });
-    console.log(secret);
-    console.log(secret.base32);
-    console.log(userId);
     const user = await this.prismaService.user.update({
       where: {
         id: userId,
@@ -302,7 +280,6 @@ export class AuthService {
         TFA: secret.base32,
       },
     });
-    console.log(JSON.stringify(user));
     return qrcode.toDataURL(secret.otpauth_url, { type: 'image/jpeg' });
   }
 

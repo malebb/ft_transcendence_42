@@ -185,7 +185,6 @@ const Friends = () => {
       for(var i = 0; i < otherSwitch.length ; i++)
           otherSwitch.item(i)!.className = "switch-label_item";
     e.target.classList.replace("switch-label_item","switch-label_selected");
-    console.log(parseInt(e.target.id.split('_')[1]));
     setRenderType(parseInt(e.target.id.split('_')[1]));
   }
 

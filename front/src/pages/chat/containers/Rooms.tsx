@@ -108,9 +108,8 @@ function Rooms()
 			try
 			{
 				event.preventDefault();
-				//@ts-ignore
-   			 	const form = new FormData(event.target);
- 				const roomName = form.get("roomName")!.toString().trim();
+				const roomName = name;
+
 				if (!checkPassword())
 					return ;
 				if (!checkName(roomName))
@@ -121,7 +120,7 @@ function Rooms()
 				axiosInstance.current = await axiosPrivate;
 				await axiosInstance.current!.post('/chatRoom/',
 				{
-					name: form.get("roomName")!.toString().trim(),
+					name: roomName,
 					accessibility: Accessibility[roomAccessibility as keyof typeof Accessibility],
 					password: roomAccessibility === 'PROTECTED' ? password : ''
 				}, {headers: {'Content-Type': 'application/json'}});
@@ -254,7 +253,7 @@ function Rooms()
 			}
 			catch (error: any)
 			{
-				console.log("An error occured when joining the room: ", error);
+				console.log("error occured when joining the room: ", error);
 			}
 		}
 

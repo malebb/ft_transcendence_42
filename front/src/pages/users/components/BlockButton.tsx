@@ -39,6 +39,7 @@ const BlockButton = (props: BlockButtonProps) =>
 			else
 				axiosInstance.current = await axiosInstance.current.patch('/users/unblock/' + props.userIdToBlock);
 			await updateBlockStatus();
+			window.location.reload();
 		}
 		catch (error: any)
 		{

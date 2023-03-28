@@ -54,22 +54,16 @@ const Signup = () => {
   //TODO change userRef to user in the useeffect if not working
   useEffect(() => {
     const result = USER_REGEX.test(user);
-    console.log(result);
-    console.log(user);
     setValidName(result);
   }, [user]);
 
   useEffect(() => {
     const result = EMAIL_REGEX.test(email);
-    console.log(result);
-    console.log(email);
     setValidEmail(result);
   }, [email]);
 
   useEffect(() => {
     const result = PWD_REGEX.test(pwd);
-    console.log(result);
-    console.log(pwd);
     setValidPwd(result);
     const match = matchPwd === pwd;
     setValidMatch(match);
@@ -98,7 +92,6 @@ const Signup = () => {
           "Content-Type": "application/json"
         }}
       );
-      console.log(response.data);
       setSuccess(true);
       // setToken(response.data.token);
       // localStorage.setItem("tokens", JSON.stringify(response.data.tokens));

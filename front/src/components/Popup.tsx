@@ -14,9 +14,6 @@ const Popup = ({
   handleTrue: any;
   handleFalse: any;
 }) => {
-  console.log(title);
-  console.log(content);
-
   return (
     <Dialog
       open={apparent}

@@ -80,15 +80,11 @@ const Signin = () => {
   //TODO change userRef to user in the useeffect if not working
   useEffect(() => {
     const result = EMAIL_REGEX.test(email);
-    console.log(result);
-    console.log(email);
     setValidEmail(result);
   }, [email]);
 
   useEffect(() => {
     const result = PWD_REGEX.test(pwd);
-    console.log(result);
-    console.log(pwd);
     setValidPwd(result);
   }, [pwd]);
 
@@ -134,8 +130,6 @@ const Signin = () => {
       // setToken(response.data.token);
       setIsTfa(response.data.isTfa);
       setName(response.data.username);
-      console.log("tfa === " + JSON.stringify(response.data));
-      console.log("tfa ==" + response.data.isTfa);
       if (response.data.isTfa === false)
       {
       // localStoVrage.setItem("tokens", JSON.stringify(response.data.tokens));
@@ -152,7 +146,6 @@ const Signin = () => {
         setResp((prev) => ({...prev, username: response.data.username}))
         setResp((prev) => ({...prev, tokens: response.data.tokens}))
       }
-
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");

@@ -34,8 +34,7 @@ export function getToken() {
 
 export function getRefreshHeader() {
   if (!getToken()) return null;
-  console.log('cookie = ' + getToken());
-  return `Bearer ${getToken()}`;
+  return `Bearer ${getToken().refresh_token}`;
 }
 
 export async function getJWTfromRt(setToken: React.Dispatch<React.SetStateAction<TokensInterface | undefined>>): Promise<boolean> {
@@ -172,8 +171,6 @@ export async function axiosToken(token: TokensInterface, setToken: React.Dispatc
     //     "http://localhost:3333/users/me",
     //     {} as AxiosHeaders, {},setErrMsg, setResp);
 
-    // console.log("errMSG == " + JSON.stringify(errMsg));
-    // console.log("Resp ==" + JSON.stringify(resp));
 
   export async function axiosReq<Type>(method: number, path: string, headers: AxiosHeaders, body: Object, setErrorMsg: Dispatch<SetStateAction<string>>, setData : Dispatch<SetStateAction<Type>>) : Promise<Type | undefined>{
     try{

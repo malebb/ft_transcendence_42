@@ -4,14 +4,14 @@ import { Socket, io } from "socket.io-client";
 import { Message, MessageType, User } from "ft_transcendence";
 import { AxiosInstance, AxiosResponse } from "axios";
 import { useParams } from "react-router-dom";
-import { confirmAlert } from 'react-confirm-alert';
-import 'react-confirm-alert/src/react-confirm-alert.css';
-import alertStyle from '../../../styles/alertBox.module.css';
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
+import alertStyle from "../../../styles/alertBox.module.css";
 
 import style from "../../../styles/private.message.module.css";
 import "./message.style.css";
-import { trimUsername } from '../../../utils/trim';
-import { printInfosBox } from '../../../utils/infosBox';
+import { trimUsername } from "../../../utils/trim";
+import { printInfosBox } from "../../../utils/infosBox";
 
 function PrivateMessages() {
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
@@ -48,7 +48,7 @@ function PrivateMessages() {
 		if (response.data)
 			setChallenges(response);
      		}).catch((e) => {
-               console.log(e);
+               console.log('error: ', e);
        	});
 	}
 
@@ -67,20 +67,20 @@ function PrivateMessages() {
     };
     const initPrivateChat = async () => {
       try {
-      await fetchData().catch(console.error);
-      socket.current = io("ws://localhost:3333/chat", {
-        transports: ["websocket"],
-        forceNew: true,
-        upgrade: false,
-		auth: {
-			token: getToken().access_token
-		}
-      });
-      socket.current!.on("connect", async () => {
-        socket.current?.emit("JOIN_PRIVATE_ROOM", {
-          senderId: currentUser.current!.id,
-          receiverId: friend.current!.id,
+        await fetchData().catch(console.error);
+        socket.current = io("ws://localhost:3333/chat", {
+          transports: ["websocket"],
+          forceNew: true,
+          upgrade: false,
+          auth: {
+            token: getToken().access_token,
+          },
         });
+        socket.current!.on("connect", async () => {
+          socket.current?.emit("JOIN_PRIVATE_ROOM", {
+            senderId: currentUser.current!.id,
+            receiverId: friend.current!.id,
+          });
           const joinRoom = async (): Promise<object> => {
             return await new Promise(function (resolve) {
               socket.current!.on("GET_ROOM", async (data) => {
@@ -99,7 +99,7 @@ function PrivateMessages() {
                 setStateMessages(response.data);
               })
               .catch((e) => {
-                console.log(e);
+                console.log('error: ', e);
               });
           };
           getAllMessages()
@@ -110,9 +110,7 @@ function PrivateMessages() {
             "RECEIVE_PRIVATE_ROOM_MESSAGE",
             async function (message: Message) {
               setStateMessages((stateMessages) => [...stateMessages, message]);
-			  if (message.type === 'INVITATION')
-			  	fetchChallenge();
-			  	
+              if (message.type === "INVITATION") fetchChallenge();
             }
           );
         });
@@ -126,28 +124,23 @@ function PrivateMessages() {
     initPrivateChat().catch(console.error);
   }, [friendId.userId]);
 
-	useEffect(() => {
-		fetchChallenge();
-	}, []);
+  useEffect(() => {
+    fetchChallenge();
+  }, []);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    //React.FormEvent<HTMLFormElement>): void {
-    // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
-    // Prevent the browser from reloading the page
-    event.preventDefault();
 
+    event.preventDefault();
     if (!inputMessage?.length) return;
 
-    // ! a la fin = signifie que la variable et non nulle et non non-definie
     const dateTS = new Date();
     newMessage = {
       user: currentUser.current!,
       message: inputMessage,
       sendAt: dateTS,
-	  type: MessageType["STANDARD" as keyof typeof MessageType],
-	  challengeId: 0
+      type: MessageType["STANDARD" as keyof typeof MessageType],
+      challengeId: 0,
     };
-
 
     socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
       msg: newMessage,
@@ -167,23 +160,18 @@ function PrivateMessages() {
       ).slice(-2)}`;
     };
 
-	const goToInvitation = (challengeId: number) =>
-	{
-		window.location.href = 'http://localhost:3000/challenge/' + challengeId;
-	}
+    const goToInvitation = (challengeId: number) => {
+      window.location.href = "http://localhost:3000/challenge/" + challengeId;
+    };
 
-	const isChallengeFinished = (challengeId: number): boolean =>
-	{
-		if (challenges && challenges.data)
-		{
-			for (let i = 0; i < challenges.data.length; ++i)
-			{
-				if (challenges.data[i].id === challengeId)
-					return (false);
-			}
-		}
-		return (true);
-	}
+    const isChallengeFinished = (challengeId: number): boolean => {
+      if (challenges && challenges.data) {
+        for (let i = 0; i < challenges.data.length; ++i) {
+          if (challenges.data[i].id === challengeId) return false;
+        }
+      }
+      return true;
+    };
 
     const genMessage = (isCurrentUser: boolean, newMessage: Message) => {
       if (!isCurrentUser) {
@@ -192,7 +180,17 @@ function PrivateMessages() {
             <div className="chat-receiver">
               <span>{newMessage?.user?.username + " : "}</span>
               <span>{newMessage.message}</span>
-			  {newMessage.type === 'INVITATION' && !isChallengeFinished(newMessage.challengeId) ? <button className={style.invitationBtn} onClick={() => goToInvitation(newMessage.challengeId)}>join</button> : <></>}
+              {newMessage.type === "INVITATION" &&
+              !isChallengeFinished(newMessage.challengeId) ? (
+                <button
+                  className={style.invitationBtn}
+                  onClick={() => goToInvitation(newMessage.challengeId)}
+                >
+                  join
+                </button>
+              ) : (
+                <></>
+              )}
             </div>
             <span className="date">{genDate(newMessage)}</span>
           </>
@@ -225,64 +223,72 @@ function PrivateMessages() {
     );
   };
 
-	const createInvitation = async (member: User, powerUpMode: boolean) =>
-	{
-		try
-		{
-			axiosInstance.current = await axiosToken();
-			const challengeResponse = await axiosInstance.current.post('/challenge/', { powerUpMode: powerUpMode, receiverId: member.id },
-			{
-				headers:
-				{
-					"Content-Type": "application/json"
-				}
-			});
-    		socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
-  		    msg: {user: currentUser.current, message: "Join me for a game !", sendAt: new Date(), type: "INVITATION", challengeId: challengeResponse.data},
-     		room: room.current,
-      		senderId: currentUser.current!.id,
-      				receiverId: member.id,
-					type: MessageType["INVITATION" as keyof typeof MessageType]
-    			});
-				socket.current!.disconnect();
-				window.location.href = 'http://localhost:3000/challenge/' + challengeResponse.data;
-		}
-		catch (error: any)
-		{
-			if (error.response.status === 403)
-			{
-				printInfosBox('You are already playing in another game');
-			}
-		}
-	}
+  const createInvitation = async (member: User, powerUpMode: boolean) => {
+    try {
+      axiosInstance.current = await axiosToken();
+      const challengeResponse = await axiosInstance.current.post(
+        "/challenge/",
+        { powerUpMode: powerUpMode, receiverId: member.id },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
+        msg: {
+          user: currentUser.current,
+          message: "Join me for a game !",
+          sendAt: new Date(),
+          type: "INVITATION",
+          challengeId: challengeResponse.data,
+        },
+        room: room.current,
+        senderId: currentUser.current!.id,
+        receiverId: member.id,
+        type: MessageType["INVITATION" as keyof typeof MessageType],
+      });
+      socket.current!.disconnect();
+      window.location.href =
+        "http://localhost:3000/challenge/" + challengeResponse.data;
+    } catch (error: any) {
+      if (error.response.status === 403) {
+        printInfosBox("You are already playing in another game");
+      }
+    }
+  };
 
-	const selectMode = () =>
-	{
-		confirmAlert({
-			customUI: ({ onClose }) =>
-			{
-				return (
-					<div id={alertStyle.boxContainer}>
-						<h1>Challenge {trimUsername(friend.current!.username, 15)}</h1>
-						<p>Select a pong mode</p>
-						<div id={alertStyle.alertBoxBtn}>
-							<button onClick={() =>
-							{
-								createInvitation(friend.current!, false);
-								onClose();
-							}}>normal</button>
-							<button onClick={() =>
-							{
-								createInvitation(friend.current!, true)
-								onClose();
-							}}>power-up</button>
-						</div>
-					</div>);
-			},
-			keyCodeForClose: [8, 32, 13],
-
-		});
-	}
+  const selectMode = () => {
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        return (
+          <div id={alertStyle.boxContainer}>
+            <h1>Challenge {trimUsername(friend.current!.username, 15)}</h1>
+            <p>Select a pong mode</p>
+            <div id={alertStyle.alertBoxBtn}>
+              <button
+                onClick={() => {
+                  createInvitation(friend.current!, false);
+                  onClose();
+                }}
+              >
+                normal
+              </button>
+              <button
+                onClick={() => {
+                  createInvitation(friend.current!, true);
+                  onClose();
+                }}
+              >
+                power-up
+              </button>
+            </div>
+          </div>
+        );
+      },
+      keyCodeForClose: [8, 32, 13],
+    });
+  };
   const DisplayMessages = () => {
     if (initSocket === true) return <GenMessages />;
     return <></>;
@@ -291,11 +297,11 @@ function PrivateMessages() {
   return (
     <div>
       <div className={style.chatpopup} id="myForm">
-		<button 
-			type="button"
-			className={style.close}
-			onClick={closeMessage}>
-			</button>
+        <button
+          type="button"
+          className={style.close}
+          onClick={closeMessage}
+        ></button>
         <div className={style.formcontainer} id="chatContainer">
           <DisplayMessages />
         </div>
@@ -308,10 +314,16 @@ function PrivateMessages() {
             onChange={(event) => setInputMessage(event.target.value)}
           />
           <button type="submit">SEND</button>
-			<img className={style.challengeLogo} src="http://localhost:3000/images/challenge.png"
-				alt={"Challenge"} title="Challenge" 
-				width="20" height="22"
-				onClick={() => selectMode()} /> : <></>
+          <img
+            className={style.challengeLogo}
+            src="http://localhost:3000/images/challenge.png"
+            alt={"Challenge"}
+            title="Challenge"
+            width="20"
+            height="22"
+            onClick={() => selectMode()}
+          />{" "}
+          : <></>
         </form>
       </div>
     </div>
