@@ -25,7 +25,7 @@ export const SocketProvider = ({ children, token }: { children: any, token: Toke
 		
 		reconnectSocketOnRefresh();
 	
-	}, [])
+	}, [token])
   
 	 return (
 	   <SocketContext.Provider

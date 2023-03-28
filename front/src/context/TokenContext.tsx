@@ -34,7 +34,6 @@ export const AuthProvider = ({ children }: { children: any }) => {
     const checkRTCookie = async() => {
       try{
       const response : AxiosResponse = await axiosMain.post<SignInterface>(REFRESH_PATH);
-      console.log('App checkAuth == ' + JSON.stringify(response.data))
       // setUsername(response.data.username!);
       // setUserId(response.data.id);
       setToken(response.data.tokens)

@@ -39,9 +39,8 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
     return null;
   }
   async validate(payload: rTokenInterface) {
-    console.log('payload == ' + stringify(payload));
     if (payload === null) {
-      console.log('validate failed payload == NULL');
+      console.log('error: validate failed payload == NULL');
       throw new UnauthorizedException();
     }
     const user = await this.prisma.user.findUnique({

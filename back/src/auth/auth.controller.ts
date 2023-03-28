@@ -119,7 +119,7 @@ export class AuthController {
       return token;
       return res.send(token);
     } catch (err) {
-      console.log('callback err = ' + err);
+      console.log('error (callback) = ' + err);
       throw new HttpException(
         'Error Connecting with 42 api',
         HttpStatus.BAD_REQUEST,
@@ -154,12 +154,6 @@ export class AuthController {
         if (req.get('authorization') && user.id)
         {
             rToken = req.get('authorization').replace('Bearer', '').trim();*/
-    console.log(
-      'REF TOK = ' +
-        stringify(req.user) +
-        '=============================================================================================================',
-    );
-    console.log('userid = ' + userId);
     const ret_token: SignInterface = await this.authService.refreshToken(
       userId,
       req.cookies['rt_token'],
@@ -169,7 +163,6 @@ export class AuthController {
       secure: true,
       sameSite: 'none',
     });
-    console.log('useridu = ' + userId);
     // res.header('Access-Control-Allow-Credentials', 'true');
     // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     return ret_token;
