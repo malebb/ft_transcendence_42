@@ -617,7 +617,7 @@ export default function Canvas()
 			setIsChallenger(false);
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
-		if (getToken() == null)
+		if (token === null || token === undefined)
 		{
 			signInToPlay();
 			return (false);

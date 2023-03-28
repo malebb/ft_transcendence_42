@@ -25,6 +25,7 @@ import { imageFileFilter } from './user.upload.utils';
 import { NeutralUser } from './types';
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
+const IMG_REGEX = /^(image\/)(?:png|jpg|jpeg|gif|png|svg)$/;
 export const storage = {
   storage: diskStorage({
     destination: './uploads/profileimages',
@@ -84,12 +85,14 @@ export class UserController {
   PatchProfile(
     @GetUser() user: User,
     @UploadedFile(
-      // new ParseFilePipe({
-      //   validators: [
-      //     new MaxFileSizeValidator({ maxSize: 100000 }),
-      //     new FileTypeValidator({ fileType: 'image/png' }),
-      //   ],
-      // }),
+      new ParseFilePipe({
+        validators: [
+          // new MaxFileSizeValidator({ maxSize: 100000 }),
+          new FileTypeValidator({
+            fileType: IMG_REGEX,
+          }),
+        ],
+      }),
     )
     file?: Express.Multer.File,
     @Body() dto?: EditUserDto,

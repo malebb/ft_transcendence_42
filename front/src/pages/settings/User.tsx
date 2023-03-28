@@ -322,7 +322,6 @@ const User = () => {
           </div>
           <button className="del-acc-User fit-content">Delete Account</button>
           </section>
-          {username}
         </main>
       ) : (
         <main></main>

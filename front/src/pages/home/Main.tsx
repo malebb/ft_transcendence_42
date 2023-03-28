@@ -29,9 +29,6 @@ function Main() {
         ) : (
           <>
           <Canvas />
-          <p tabIndex={99}>{username}</p>
-          {token?.access_token}
-          <p>id = {userId}</p>
           </>
         )}
         
