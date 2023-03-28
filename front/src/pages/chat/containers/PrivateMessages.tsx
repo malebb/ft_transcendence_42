@@ -132,14 +132,10 @@ function PrivateMessages() {
   }, []);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    //React.FormEvent<HTMLFormElement>): void {
-    // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
-    // Prevent the browser from reloading the page
-    event.preventDefault();
 
+    event.preventDefault();
     if (!inputMessage?.length) return;
 
-    // ! a la fin = signifie que la variable et non nulle et non non-definie
     const dateTS = new Date();
     newMessage = {
       user: currentUser.current!,

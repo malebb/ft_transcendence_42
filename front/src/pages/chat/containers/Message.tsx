@@ -22,6 +22,7 @@ function MessagesContainer() {
   const socket = useRef<Socket | null>(null);
   let newMessage: Message;
   let [muteTimeLeft, setMuteTimeLeft] = useState<string>("");
+  const [initSocket, setInitSocket] = useState<boolean>(false);
 
   const ScrollToBottom = () => {
     // fait defiler la page vers le bas : utilise scrollview
@@ -83,7 +84,8 @@ function MessagesContainer() {
         if (!blocked.data.length) {
           if (message.user.id !== currentUser.current?.id)
             setStateMessages((stateMessages) => [...stateMessages, message]);
-          if (message.user.id === currentUser.current!.id) setMuteTimeLeft("");
+          if (message.user.id === currentUser.current!.id)
+            setMuteTimeLeft("");
         }
       });
       socket.current!.on("MUTE", (mute) => {
@@ -99,13 +101,10 @@ function MessagesContainer() {
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
-    // Prevent the browser from reloading the page
-    event.preventDefault();
 
+    event.preventDefault();
     if (!inputMessage?.length) return;
 
-    // ! a la fin = signifie que la variable et non nulle et non non-definie
     const dateTS = new Date();
     newMessage = {
       user: currentUser.current!,
@@ -116,8 +115,10 @@ function MessagesContainer() {
       challengeId: 0,
     };
 
-    socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
-    setStateMessages([...stateMessages, newMessage]);
+    if (muteTimeLeft == "") {
+      socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
+      setStateMessages([...stateMessages, newMessage]);
+    }
     setInputMessage("");
   }
 
@@ -133,7 +134,7 @@ function MessagesContainer() {
       if (!isCurrentUser) {
         return (
           <>
-            ={" "}
+            {" "}
             <div className="chat-receiver">
               {/* <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username}</Link> : </span> */}
               {/* <span>{newMessage.message}</span> */}
@@ -209,6 +210,12 @@ export default MessagesContainer;
 
 /*
 
+  ! a la fin = signifie que la variable et non nulle et non non-definie
+
+  https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
+  Prevent the browser from reloading the page
+  event.preventDefault();
+
   setStateMessages((stateMessages) => [...stateMessages, message]);
   ->
   pourquoi (stateMessages) avant ?
@@ -216,6 +223,5 @@ export default MessagesContainer;
   car l'état précédent est conservé dans la closure
   de la fonction de mise à jour (useEffect)
   Prend donc l'etat precedent, au lieu du tableau et retourne le nouveau
-
 
 */

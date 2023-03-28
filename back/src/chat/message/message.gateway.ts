@@ -71,7 +71,7 @@ export class MessageGateway
 	{
 		const mute = await this.chatRoomService.myMute(message!.room!.name, id);
 		if (mute.penalties.length)
-	   		client.emit('MUTE', mute);
+	   	client.emit('MUTE', mute);
 	}
   }
 
