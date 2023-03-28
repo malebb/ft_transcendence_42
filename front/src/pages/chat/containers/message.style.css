@@ -42,14 +42,14 @@
 	margin-bottom: 1em;
 	padding: 8px;
 	margin-right: 2px;
-	margin-left: 2px;
+	margin-left: 8px;
 	margin-top: 2px;
-
 	display: flex;
 	flex-direction: column;
 	row-gap: 1em;
 	 overflow-y: scroll;
 	 width: auto;
+	 /* min-height: 50vh; */
 }
 
 .date {
@@ -118,7 +118,7 @@
 	margin-left: 15px;
 }
 
-/* link ???? */
+/* link */
 a:link {
 	color: white;
 	text-decoration: none;

@@ -22,7 +22,10 @@ function Status({ id }: { id: string }) {
 
   function openMessage(): void {
     document.getElementById("myForm")!.style.display = "block";
+	const chatContainer = document.getElementById('chatContainer');
+	chatContainer!.scrollTop = chatContainer!.scrollHeight;
   }
+
   useEffect(() => {
     const fetchData = async () => {
       axiosInstance.current = await axiosToken();

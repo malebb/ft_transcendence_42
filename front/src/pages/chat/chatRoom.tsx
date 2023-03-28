@@ -660,7 +660,9 @@ const ChatRoomBase = () => {
 									!== member.id ? style.member :
 									style.currentMember} key={member.id}>
 									<div id={style.nameAndRole}>
-										{trimUsername(member.username, 16)}
+										<a className={style.link_user} href={"/user/" + member.id} >
+											{trimUsername(member.username, 16)}
+										</a>
 										{printRole(member)}
 									</div>
 									<div id={style.memberActions}>

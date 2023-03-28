@@ -5,7 +5,7 @@ const HeadersTitle = () => {
   return (
     <div className="HeadersTitle">
       <Link className="Header-Link" to="/">
-        <h1 className="Header-Title">TranscendEnce</h1>
+        <h1 className="Header-Title">Transcendence</h1>
       </Link>
     </div>
   );
