@@ -221,18 +221,20 @@ const Friends = () => {
                             deleteRequestWrap(friend.id, list, false)
                           }
           />
+                  <div className="container-user">
                     <Link className="link-user" to={"/user/" + friend.id}>
                       {
                         <img
                         alt="profile_picture"
                           id="profilePicture"
-                          className="profilePicture"
+                          className="profilePicture-small"
                           src={handleSrcFriend(friend)}
                         />
                       }
-                      {friend.username}
+                      <p>{friend.username}</p>
                     </Link>
                     <button className="profileButtonCancel" onClick={handleUnfriendClick}>Unfriend</button>
+                  </div>
                     {/* {showConfirmation && (
                       <div>
                         <p>

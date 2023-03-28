@@ -44,7 +44,8 @@ export class AuthController {
     });
     // res.header('Access-Control-Allow-Credentials', 'true');
     // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-    return res.send(token);
+    // res.send(token);
+    return token;
     // } catch (err) {
     //   console.log('callback err = ' + err);
     //   throw new HttpException('Error trying to signin', err.code);
@@ -68,7 +69,8 @@ export class AuthController {
     });
     // res.header('Access-Control-Allow-Credentials', 'true');
     // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-    return res.send(token);
+    return token;
+    res.send(token);
     // } catch (err) {
     // return err;
     // }
@@ -114,6 +116,7 @@ export class AuthController {
       });
       // res.header('Access-Control-Allow-Credentials', 'true');
       // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+      return token;
       return res.send(token);
     } catch (err) {
       console.log('callback err = ' + err);
@@ -133,7 +136,8 @@ export class AuthController {
     // res.header('Access-Control-Allow-Credentials', 'true');
     // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.clearCookie('rt_token');
-    return res.send(ret);
+    // res.send(ret);
+    return ret;
   }
 
   @Public()
@@ -165,8 +169,10 @@ export class AuthController {
       secure: true,
       sameSite: 'none',
     });
+    console.log('useridu = ' + userId);
     // res.header('Access-Control-Allow-Credentials', 'true');
     // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    return ret_token;
     return res.send(ret_token);
     /*}
         return ;*/
