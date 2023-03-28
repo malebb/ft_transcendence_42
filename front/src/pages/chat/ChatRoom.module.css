@@ -61,7 +61,7 @@
 
 #chatDataSection
 {
-	height: 70px;
+	/* height: 70px; */
 	width: 50%;
 	display: flex;
 }
