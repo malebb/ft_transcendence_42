@@ -30,7 +30,6 @@ export const AuthProvider = ({ children }: { children: any }) => {
   const [token, setToken] = useState<TokensInterface>();
   const [username, setUsername] = useState<string>();
   const [userId, setUserId] = useState<number>();
-  const socket = useContext(SocketContext);
 
   useEffect(() => {
     const checkRTCookie = async() => {

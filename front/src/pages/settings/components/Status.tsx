@@ -14,7 +14,7 @@ import useAxiosPrivate from "src/hooks/usePrivate";
 
 function Status({ id }: { id: string }) {
 	const axiosPrivate = useAxiosPrivate();
-  const userId = useParams();
+  const { paramUserId } = useParams();
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const [userStatus, setUserStatus] = useState<Activity>(Activity["OFFLINE" as keyof typeof Activity]);
   const currentUser = useRef<boolean>(false);
@@ -31,19 +31,19 @@ function Status({ id }: { id: string }) {
     const fetchData = async () => {
       axiosInstance.current = await axiosPrivate;
       await axiosInstance
-        .current!.get("/users/profile/" + userId.userId)
+        .current!.get("/users/profile/" + paramUserId)
         .then((response) => {
           setUserStatus(response.data.status);
         });
       axiosInstance.current = await axiosPrivate;
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current =
-          response.data.id === Number(userId.userId) ? true : false;
+          response.data.id === Number(paramUserId) ? true : false;
       });
     };
 
     fetchData().catch(console.error);
-  }, [id, userId.userId]);
+  }, [id, paramUserId]);
 
 	useEffect(() => {
 		const initSocket = async () =>
@@ -54,7 +54,7 @@ function Status({ id }: { id: string }) {
 				{
 					clearTimeout(statusTimeout.current);
 					statusTimeout.current = setTimeout(async () => {
-	    				await axiosInstance.current!.get("/users/profile/" + userId.userId).then((response) =>
+	    				await axiosInstance.current!.get("/users/profile/" + paramUserId).then((response) =>
 						{
 							if (response.data.status !== userStatus)
 								setUserStatus(response.data.status);
@@ -64,7 +64,7 @@ function Status({ id }: { id: string }) {
 			});
 		}
 		initSocket();
-	}, [id, userStatus, socket, userId.userId]);
+	}, [id, userStatus, socket, paramUserId]);
 
   const GenStatus = () => {
     switch (userStatus)
