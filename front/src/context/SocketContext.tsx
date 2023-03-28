@@ -1,6 +1,10 @@
 import React from "react";
 import { io, Socket } from "socket.io-client";
 import { getToken } from '../api/axios';
+import { useContext } from "react";
+import AuthContext from "./TokenContext";
+import useAuth from "src/hooks/useAuth";
+import { TokensInterface } from "src/interfaces/Sign";
 
 export const socket: Socket = io(`ws://localhost:3333/user`,
 {
@@ -9,15 +13,16 @@ export const socket: Socket = io(`ws://localhost:3333/user`,
 	autoConnect: false,
 });
 
+
 export const SocketContext = React.createContext<Socket>(socket);
 
 export default SocketContext;
 
-const reconnectSocketOnRefresh = () =>
+const reconnectSocketOnRefresh = (token: TokensInterface) =>
 {
-	if (getToken() !== null)
+	if (token !== null && token !== undefined)
 	{
-		socket.auth = {token: getToken().access_token}
+		socket.auth = {token: token.access_token}
 		socket.connect();
 	}
 }

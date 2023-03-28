@@ -8,16 +8,10 @@ import { User, Message, MessageType } from "ft_transcendence";
 import { formatRemainTime } from "../utils/Penalty";
 
 import "./message.style.css";
-<<<<<<< HEAD
 import style from "../inputs/InputButton.module.css"
 import useAxiosPrivate from "src/hooks/usePrivate";
 import AuthContext from "src/context/TokenContext";
 function MessagesContainer() { 
-=======
-import style from "../inputs/InputButton.module.css";
-
-function MessagesContainer() {
->>>>>>> 90f92c0f3143486494b3579aa345b7faa1389308
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
 
@@ -52,20 +46,14 @@ function MessagesContainer() {
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-<<<<<<< HEAD
       axiosInstance.current = axiosPrivate;
-=======
->>>>>>> 90f92c0f3143486494b3579aa345b7faa1389308
       await axiosInstance
         .current!.get("/chatRoom/publicInfos/" + roomId.roomName)
         .then((response) => {
           currentRoom.current = response.data;
           socket.current?.emit("JOIN_ROOM", currentRoom.current);
         });
-<<<<<<< HEAD
       axiosInstance.current = await axiosPrivate;
-=======
->>>>>>> 90f92c0f3143486494b3579aa345b7faa1389308
       await axiosInstance
         .current!.get("/message/" + currentRoom.current?.name)
         .then((response) => {
@@ -84,15 +72,9 @@ function MessagesContainer() {
       transports: ["websocket"],
       forceNew: true,
       upgrade: false,
-<<<<<<< HEAD
 	  auth: {
 			token: token!.access_token,
 	  }
-=======
-      auth: {
-        token: getToken().access_token,
-      },
->>>>>>> 90f92c0f3143486494b3579aa345b7faa1389308
     });
 
     socket.current.on("connect", async () => {

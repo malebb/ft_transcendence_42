@@ -166,8 +166,8 @@ export class AuthService {
           id42: id42,
           username: getprofile.data['login'] || '',
           stats: {
-          	create: {},
-        },
+            create: {},
+          },
         },
       });
     }
@@ -264,8 +264,7 @@ export class AuthService {
       const jet = this.jwt.verify(token, { secret: secret });
       if (jet) return true;
       else return false;
-    } catch (err: any) {
-    }
+    } catch (err: any) {}
   }
 
   async create2FA(userId: number) {

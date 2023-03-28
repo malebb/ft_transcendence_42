@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useContext } from "react";
-import { axiosToken } from "src/api/axios";
 import { AxiosInstance } from "axios";
 import { useParams } from "react-router-dom";
 import PrivateMessages from "../../chat/containers/PrivateMessages";
@@ -8,11 +7,13 @@ import styleStatus from "../../../styles/status.module.css";
 import styleMessage from "../../../styles/private.message.module.css";
 import { SocketContext } from '../../../context/SocketContext';
 import { Activity } from 'ft_transcendence';
+import useAxiosPrivate from "src/hooks/usePrivate";
 
 // https://stackoverflow.com/questions/58315741/how-to-check-online-user-in-nodejs-socketio
 //! ERROR: render offline une fraction de seconde quand refresh
 
 function Status({ id }: { id: string }) {
+	const axiosPrivate = useAxiosPrivate();
   const userId = useParams();
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const [userStatus, setUserStatus] = useState<Activity>(Activity["OFFLINE" as keyof typeof Activity]);
@@ -28,13 +29,13 @@ function Status({ id }: { id: string }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = await axiosPrivate;
       await axiosInstance
         .current!.get("/users/profile/" + userId.userId)
         .then((response) => {
           setUserStatus(response.data.status);
         });
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = await axiosPrivate;
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current =
           response.data.id === Number(userId.userId) ? true : false;

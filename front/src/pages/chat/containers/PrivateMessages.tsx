@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { axiosToken, getToken } from "src/api/axios";
 import { Socket, io } from "socket.io-client";
 import { Message, MessageType, User } from "ft_transcendence";
@@ -12,8 +12,12 @@ import style from "../../../styles/private.message.module.css";
 import "./message.style.css";
 import { trimUsername } from "../../../utils/trim";
 import { printInfosBox } from "../../../utils/infosBox";
+import useAxiosPrivate from "src/hooks/usePrivate";
+import AuthContext from "src/context/TokenContext";
 
 function PrivateMessages() {
+  const { token } = useContext(AuthContext);
+  const axiosPrivate = useAxiosPrivate();
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const currentUser = useRef<User | null>(null);
   const friend = useRef<User | null>(null);
@@ -43,7 +47,7 @@ function PrivateMessages() {
 
 	const fetchChallenge = async () =>
 	{
-		axiosInstance.current = await axiosToken();
+		axiosInstance.current = await axiosPrivate;
 		await axiosInstance.current!.get("/challenge/myChallenges").then((response) => {
 		if (response.data)
 			setChallenges(response);
@@ -54,11 +58,11 @@ function PrivateMessages() {
 
   useEffect(() => {
     const fetchData = async () => {
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = await axiosPrivate;
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = await axiosPrivate;
       await axiosInstance
         .current!.get("/users/profile/" + friendId.userId)
         .then((response) => {
@@ -73,7 +77,7 @@ function PrivateMessages() {
           forceNew: true,
           upgrade: false,
           auth: {
-            token: getToken().access_token,
+            token: token!.access_token,
           },
         });
         socket.current!.on("connect", async () => {
@@ -92,7 +96,7 @@ function PrivateMessages() {
           joinRoom().then(function (data) {
             room.current = data;
           const getAllMessages = async () => {
-            axiosInstance.current = await axiosToken();
+            axiosInstance.current = await axiosPrivate;
             await axiosInstance
             .current!.get("/message/private/" + JSON.stringify(room.current))
             .then((response) => {
@@ -225,7 +229,7 @@ function PrivateMessages() {
 
   const createInvitation = async (member: User, powerUpMode: boolean) => {
     try {
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = await axiosPrivate;
       const challengeResponse = await axiosInstance.current.post(
         "/challenge/",
         { powerUpMode: powerUpMode, receiverId: member.id },

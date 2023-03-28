@@ -1,7 +1,8 @@
 import { AxiosResponse } from "axios";
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import { axiosMain } from "src/api/axios";
 import { SignInterface, TokensInterface } from "src/interfaces/Sign";
+import SocketContext from "./SocketContext";
 
 type AuthContextType = {
   token: TokensInterface | undefined | null;
@@ -29,6 +30,7 @@ export const AuthProvider = ({ children }: { children: any }) => {
   const [token, setToken] = useState<TokensInterface>();
   const [username, setUsername] = useState<string>();
   const [userId, setUserId] = useState<number>();
+  const socket = useContext(SocketContext);
 
   useEffect(() => {
     const checkRTCookie = async() => {

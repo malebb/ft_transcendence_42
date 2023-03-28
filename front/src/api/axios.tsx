@@ -4,6 +4,7 @@ import AuthContext from "src/context/TokenContext";
 import { TokensInterface } from "src/interfaces/Sign";
 import Cookies from 'js-cookie';
 
+
 const baseURL = "http://localhost:3333";
 
 
@@ -34,7 +35,7 @@ export function getToken() {
 
 export function getRefreshHeader() {
   if (!getToken()) return null;
-  return `Bearer ${getToken().refresh_token}`;
+  return `Bearer refresh_token`;
 }
 
 export async function getJWTfromRt(setToken: React.Dispatch<React.SetStateAction<TokensInterface | undefined>>): Promise<boolean> {
