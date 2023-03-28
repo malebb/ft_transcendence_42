@@ -1,28 +1,13 @@
-import React, { Dispatch, SetStateAction, useRef } from "react";
-import { useState, useEffect } from "react";
-import { axiosMain, axiosToken } from "src/api/axios";
-import axios, { AxiosResponse } from "axios";
-import { useNavigate } from "react-router-dom";
+import React, { Dispatch, SetStateAction } from "react";
+import { useState } from "react";
+import { axiosMain } from "src/api/axios";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAction<boolean>>, userId: number}) => {
-  const [TfaQrcode, setTfaQrcode] = useState("");
-  const [boolQrcode, setboolQrcode] = useState<boolean>(false);
 
   const [badAttempt, setBadAttempt] = useState<boolean>(false);
 
-  const [validCode, setValidCode] = useState<boolean>(false);
-  const [verified, setVerified] = useState<boolean>(false);
-
-  const reftextInput1 = useRef<HTMLInputElement>(null);
-  const reftextInput2 = useRef<HTMLInputElement>(null);
-  const reftextInput3 = useRef<HTMLInputElement>(null);
-  const reftextInput4 = useRef<HTMLInputElement>(null);
-  const reftextInput5 = useRef<HTMLInputElement>(null);
-  const reftextInput6 = useRef<HTMLInputElement>(null);
-
-  const navigate = useNavigate();
   // useEffect(() => {
   //   const result = CODE_REGEX.test(code);
   //   console.log(result);

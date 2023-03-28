@@ -19,6 +19,8 @@ export class WsGuard implements CanActivate {
     canActivate(
         context: any
     ): boolean {
+			if (!Object.keys(context.args[0].handshake.auth).length || context.args[0].handshake.auth.token === undefined)
+				return (false);
 			verify(context.args[0].handshake.auth.token, this.config.get('JWT_SECRET'));
 			const decoded: JwtDecoded = jwt_decode(context.args[0].handshake.auth.token);
 			const id = decoded.sub;

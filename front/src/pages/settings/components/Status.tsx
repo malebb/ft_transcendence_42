@@ -18,11 +18,11 @@ function Status({ id }: { id: string }) {
   const [userStatus, setUserStatus] = useState<Activity>(Activity["OFFLINE" as keyof typeof Activity]);
   const currentUser = useRef<boolean>(false);
   const socket = useContext(SocketContext);
+  const statusTimeout =  useRef<ReturnType<typeof setTimeout>>();
 
   function openMessage(): void {
     document.getElementById("myForm")!.style.display = "block";
   }
-
   useEffect(() => {
     const fetchData = async () => {
       axiosInstance.current = await axiosToken();
@@ -47,11 +47,20 @@ function Status({ id }: { id: string }) {
 			socket.on('CHANGE_STATUS', (data) =>
 			{
 				if (data.id === Number(id))
-					setUserStatus(data.status);
+				{
+					clearTimeout(statusTimeout.current);
+					statusTimeout.current = setTimeout(async () => {
+	    				await axiosInstance.current!.get("/users/profile/" + userId.userId).then((response) =>
+						{
+							if (response.data.status !== userStatus)
+								setUserStatus(response.data.status);
+    					});
+					}, 5000)
+				}
 			});
 		}
 		initSocket();
-	}, [id]);
+	}, [id, userStatus, socket, userId.userId]);
 
   const GenStatus = () => {
     switch (userStatus)

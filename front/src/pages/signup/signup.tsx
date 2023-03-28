@@ -1,17 +1,18 @@
 import React from "react";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import {
   faCheck,
   faTimes,
-  faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { axiosMain } from "../../api/axios";
 import { Link, Navigate } from "react-router-dom";
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import { useSnackbar } from "notistack";
 import '../../styles/signup.css'
 import Headers from "src/components/Headers";
+import { SocketContext } from '../../context/SocketContext';
+import { getToken } from '../../api/axios';
 
 const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
@@ -41,6 +42,7 @@ const Signup = () => {
 
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
+  const socket = useContext(SocketContext);
 
   const snackBar = useSnackbar();
   useEffect(() => {
@@ -98,6 +100,8 @@ const Signup = () => {
       // setToken(response.data.token);
       sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
       sessionStorage.setItem("id", JSON.stringify(response.data.userId));
+	  socket.auth = {token: getToken().access_token}
+	  socket.connect();
       console.log(response.data.access_token);
       //console.log(token);
     } catch (err: any) {

@@ -1,7 +1,6 @@
 import {
   SubscribeMessage,
   WebSocketGateway,
-  OnGatewayInit,
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -18,6 +17,8 @@ import { ChatRoomService } from '../chatRoom/chatRoom.service';
 import { ChatRoom, Message } from 'ft_transcendence';
 import { Logger, Body } from '@nestjs/common';
 import { getIdFromToken } from '../../gatewayUtils/gatewayUtils';
+import { UseGuards } from '@nestjs/common';
+import { WsGuard } from '../../auth/guard/ws.guard';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -30,7 +31,7 @@ import { getIdFromToken } from '../../gatewayUtils/gatewayUtils';
 // permettent de connaitre l'etat de l'application
 // ou de faire des operations grace aux hooks
 export class MessageGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayConnection, OnGatewayDisconnect
 {
   private readonly logger = new Logger(MessageGateway.name);
 
@@ -51,12 +52,13 @@ export class MessageGateway
     // this.logger.debug(`Number of connected sockets: ${sockets.size}`);
   }
 
+  @UseGuards(WsGuard)
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
     client.join(String(room?.name));
   }
 
-
+  @UseGuards(WsGuard)
   @SubscribeMessage('SEND_ROOM_MESSAGE')
   async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token) {
 	const id = getIdFromToken(token);
@@ -73,29 +75,25 @@ export class MessageGateway
 	}
   }
 
+  @UseGuards(WsGuard)
   @SubscribeMessage('SEND_PRIVATE_ROOM_MESSAGE')
-  async receivePrivateMessage(client: Socket, data) {
-    await this.messageService.updatePrivateConv(data.room.id, data.msg, data.sender);
+  async receivePrivateMessage(client: Socket, data)
+  {
+   await this.messageService.updatePrivateConv(data.room.id, data.msg.message, data.senderId, data.receiverId, data.msg.type, data.msg.challengeId);
+
     client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
   }
 
+  @UseGuards(WsGuard)
   @SubscribeMessage('JOIN_PRIVATE_ROOM')
   async joinPrivateRoom(client: Socket, data) {
-    let privateRoom = await this.messageService.checkIfPrivateConvExist(
-      data.sender,
-      data.receiver,
-    );
-    if (privateRoom === null) {
-      privateRoom = await this.messageService.createPrivateRoom(
-        data.sender,
-        data.receiver,
+      const privateRoom = await this.messageService.createPrivateRoom(
+        data.senderId,
+        data.receiverId,
       );
-    }
     client.join(privateRoom.name);
     client.emit("GET_ROOM", privateRoom);
   }
-
-  afterInit(server: Server) {}
 
   handleDisconnect(client: Socket) {
     // const sockets = this.server.sockets;

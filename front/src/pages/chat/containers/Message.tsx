@@ -1,22 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { AxiosInstance, AxiosResponse } from "axios";
 import { axiosToken, getToken } from "src/api/axios";
-import { Link, useParams } from "react-router-dom";
+import {  useParams } from "react-router-dom";
 import { ChatRoom } from "ft_transcendence";
-import { User } from "ft_transcendence";
-import { Message } from "ft_transcendence";
 import { Socket, io } from "socket.io-client";
+import { User, Message, MessageType } from "ft_transcendence";
+import { formatRemainTime } from '../utils/Penalty';
 
 import "./message.style.css";
 import style from "../inputs/InputButton.module.css"
-import { formatRemainTime } from "../utils/Penalty";
 
-type MessagesProps = 
-{
-	updateRoomStatus: () => void;
-}
-
-function MessagesContainer({updateRoomStatus}: MessagesProps) { 
+function MessagesContainer() { 
   // declaration d'une variable d'etat
   // useState = hook d'etat (pour une variable)
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
@@ -90,19 +84,17 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
        			setStateMessages((stateMessages) => [...stateMessages, message]);
 			if (message.user.id === currentUser.current!.id)
 	  			setMuteTimeLeft('');
-			updateRoomStatus();
 		}
       });
       socket.current!.on("MUTE", (mute) => {
 	  	setMuteTimeLeft('You are muted (' + formatRemainTime(mute.penalties) + ')');
-		updateRoomStatus();
       });
 
       return () => {
         socket.current?.disconnect();
       };
     });
-  }, [updateRoomStatus]);
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     // https://beta.reactjs.org/reference/react-dom/components/input#reading-the-input-values-when-submitting-a-form
@@ -118,6 +110,8 @@ function MessagesContainer({updateRoomStatus}: MessagesProps) {
       room: currentRoom.current!,
       message: inputMessage,
       sendAt: dateTS,
+	  type: MessageType["STANDARD" as keyof typeof MessageType],
+	  challengeId: 0
     };
 
     socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);

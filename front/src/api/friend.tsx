@@ -1,4 +1,3 @@
-import axios from "axios";
 import { axiosToken } from "./axios";
 import { AxiosResponse } from "axios";
 

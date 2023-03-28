@@ -7,4 +7,11 @@ export interface Message
 	message: string;
 	sendAt: Date;
 	room?: ChatRoom;
+	type: MessageType;
+	challengeId: number;
+}
+
+export enum MessageType {
+	STANDARD = "STANDARD",
+	INVITATION = "INVITATION"
 }

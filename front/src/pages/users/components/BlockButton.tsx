@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { AxiosInstance, AxiosResponse } from 'axios';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { AxiosInstance } from 'axios';
 import { axiosToken } from '../../../api/axios';
 import '../../../styles/BlockButton.css';
 
@@ -13,7 +13,8 @@ const BlockButton = (props: BlockButtonProps) =>
 	const [blocked, setBlocked] = useState<boolean>(false);
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 
-	const updateBlockStatus = async () =>
+
+	const updateBlockStatus = useCallback(async () =>
 	{
 		axiosInstance.current = await axiosToken()
 		const userBlockedResponse = await axiosInstance.current.get('/users/blocked/' + props.userIdToBlock);
@@ -21,12 +22,12 @@ const BlockButton = (props: BlockButtonProps) =>
 			setBlocked(true);
 		else
 			setBlocked(false);
-	}
+	}, [props.userIdToBlock]);
 
 	useEffect(() =>
 	{
 		updateBlockStatus();
-	}, [])
+	}, [updateBlockStatus])
 
 	const handleBlock = async () =>
 	{

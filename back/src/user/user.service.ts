@@ -35,7 +35,6 @@ export class UserService {
     return user;
   }
   async setUserOnLineOffline(userId: number, newStatus: Activity) {
-	console.log(newStatus);
     const user = await this.prisma.user.update({
       where: {
         id: userId,

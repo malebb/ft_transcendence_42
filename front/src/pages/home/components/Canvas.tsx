@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useContext } from "react";
+import { useRef, useEffect, useState, useContext, useCallback } from "react";
 import Draw from "../../../classes/Draw";
 import { io, Socket } from "socket.io-client";
 import { Ball, Room, Player, PlayerData, User } from "ft_transcendence";
@@ -42,41 +42,41 @@ export default function Canvas()
 	const [isChallenger, setIsChallenger]	= useState(true);
 	const statusSocket = useContext(SocketContext);
 
+	const powerUpEnabled = useCallback (() =>
+	{
+		return ((position.current === "left" && leftPlayer.current!.speedPowerUp) ||
+		(position.current === "right" && rightPlayer.current!.speedPowerUp))
+	}, []);
+
+	const powerUp = useCallback(async (e: KeyboardEvent) =>
+	{
+		if (keyPressed.current)
+			return;
+		if (e.key === ' ' && powerUpEnabled())
+		{
+			await axiosToken();
+			socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
+			keyPressed.current = true;
+		}
+	}, [powerUpEnabled]);
+
+	function notifyKeyReleased()
+	{
+		keyPressed.current = false;
+	}
+
+	const stopGame = useCallback(() =>
+	{
+		statusSocket.emit('ONLINE');
+		window.cancelAnimationFrame(animationFrameId.current)
+		kd.current.stop();
+		document!.removeEventListener('keypress', powerUp);
+		document!.removeEventListener('keyup', notifyKeyReleased);
+		socket.current!.disconnect();
+	}, [statusSocket, powerUp]);
+
 	useEffect(() =>
 	{
-		function powerUpEnabled()
-		{
-			return ((position.current === "left" && leftPlayer.current!.speedPowerUp) ||
-			(position.current === "right" && rightPlayer.current!.speedPowerUp))
-		}
-
-		async function powerUp(e: KeyboardEvent)
-		{
-			if (keyPressed.current)
-				return;
-			if (e.key === ' ' && powerUpEnabled())
-			{
-				await axiosToken();
-				socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
-				keyPressed.current = true;
-			}
-		}
-
-		function notifyKeyReleased()
-		{
-			keyPressed.current = false;
-		}
-
-		function stopGame()
-		{
-			statusSocket.emit('ONLINE');
-			window.cancelAnimationFrame(animationFrameId.current)
-			kd.current.stop();
-			document!.removeEventListener('keypress', powerUp);
-			document!.removeEventListener('keyup', notifyKeyReleased);
-			socket.current!.disconnect();
-		}
-
 		const pong = async () => 
 		{
 			function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
@@ -716,12 +716,19 @@ export default function Canvas()
 		
 		pong();
 		return () =>
-		{ 
+		{
 			if (socket.current != null)
 				stopGame();
+			statusSocket.emit('ONLINE');
 		}
 
-	}, [challengeId]);
+	}, [challengeId, statusSocket, powerUp, stopGame]);
+
+	useEffect(() => {
+		if (socket.current != null)
+			stopGame();
+		statusSocket.emit('ONLINE');
+	}, [statusSocket, stopGame]);
 
 	const challengeTitle = () =>
 	{

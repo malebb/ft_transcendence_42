@@ -2,11 +2,14 @@ import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Challenge, Game } from '@prisma/client';
 import { GameService } from '../game/game.service';
+import { MessageService } from '../chat/message/message.service';
+import { User } from 'ft_transcendence';
 
 @Injectable()
 export class ChallengeService {
-    constructor(private prisma: PrismaService,
-			   private gameService: GameService) {}
+    constructor(private readonly prisma: PrismaService,
+			   private readonly gameService: GameService,
+			   private readonly messageService: MessageService) {}
 
 	isAlreadyInGame(challenges: Challenge[], games: Game[], userId: number): boolean
 	{
@@ -24,7 +27,7 @@ export class ChallengeService {
 		return (false);
 	}
 
-	async createChallenge(receiverId: number, senderId: number, powerUpMode: boolean)
+	async createChallenge(receiverId:  number, senderId: number, powerUpMode: boolean)
 	{
 		const challenges = await this.getChallenges();
 		const games = await this.gameService.getGames();
@@ -100,6 +103,32 @@ export class ChallengeService {
 			include: {
 				sender: true,
 				receiver: true
+			}
+		});
+		return (challenges);
+	}
+
+	async getMyChallenges(userId: number)
+	{
+		const challenges = await this.prisma.challenge.findMany({
+			where: {
+				OR: [
+					{ sender: { id: userId }},
+					{ receiver: { id: userId }}
+				]
+			},
+			select: {
+				id: true,
+				sender: {
+					select: {
+						id: true, username: true
+					}
+				},
+				receiver: {
+					select: {
+						id: true, username: true
+					}
+				}
 			}
 		});
 		return (challenges);

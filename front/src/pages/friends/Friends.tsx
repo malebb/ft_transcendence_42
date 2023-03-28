@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { AxiosResponse } from "axios";
-import axios from "axios";
-import { getToken, axiosMain, axiosToken } from "../../api/axios";
+import { axiosToken } from "../../api/axios";
 import { Link } from "react-router-dom";
 import { acceptRequest, deleteRequest, refuseRequest } from "src/api/friend";
 import Popup from "src/components/Popup";
@@ -119,9 +118,9 @@ const Friends = () => {
     if (confirmed) {
       const resp = deleteRequest(friendId);
       console.log(JSON.stringify(resp));
-      if (array == 0 && friendArray)
+      if (array === 0 && friendArray)
         setFriendArray(friendArray.filter((item) => item.id !== friendId));
-      else if (array == 1 && sendArray)
+      else if (array === 1 && sendArray)
         setSendArray(sendArray.filter((item) => item.id !== friendId));
     }
     setShowConfirmation(false);
