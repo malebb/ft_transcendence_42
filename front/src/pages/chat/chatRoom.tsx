@@ -16,10 +16,12 @@ import { trimUsername } from '../../utils/trim';
 import useAxiosPrivate from 'src/hooks/usePrivate';
 import { printInfosBox } from '../../utils/infosBox';
 import { Socket, io } from "socket.io-client";
+import AuthContext from 'src/context/TokenContext';
 const ChatRoomBase = () =>
 {
 
 	const axiosPrivate = useAxiosPrivate();
+	const { token } = useContext(AuthContext);
 	const { roomName } = useParams();
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 	const [roomStatus, setRoomStatus] = useState<RoomStatus | null>(null);
@@ -455,7 +457,7 @@ const ChatRoomBase = () =>
      			forceNew: true,
         		upgrade: false,
 				auth: {
-					token: getToken().access_token
+					token: token!.access_token
 				}
       		});
       		socket.current!.on("connect", async () =>
