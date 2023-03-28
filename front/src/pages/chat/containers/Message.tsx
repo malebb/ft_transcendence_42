@@ -42,14 +42,12 @@ function MessagesContainer() {
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-      axiosInstance.current = await axiosToken();
       await axiosInstance
         .current!.get("/chatRoom/publicInfos/" + roomId.roomName)
         .then((response) => {
           currentRoom.current = response.data;
           socket.current?.emit("JOIN_ROOM", currentRoom.current);
         });
-      axiosInstance.current = await axiosToken();
       await axiosInstance
         .current!.get("/message/" + currentRoom.current?.name)
         .then((response) => {

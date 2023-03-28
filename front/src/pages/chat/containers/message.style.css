@@ -20,8 +20,7 @@
     overflow: scroll;
 	display: flex;
 	flex-direction: column;
-	height: calc(60vh);
-	/* height: calc(65vh - 100px); */
+	height: calc(65vh - 100px);
 	overflow: hidden;
 }
 
@@ -37,7 +36,7 @@
 }
 
   #chatContainer {
-	/* height: 75%; */
+	height: 75%;
 	background-color: var(--cinco);
 	border-radius: 12px;
 	margin-bottom: 1em;
@@ -50,7 +49,7 @@
 	row-gap: 1em;
 	 overflow-y: scroll;
 	 width: auto;
-	 min-height: 50vh;
+	 /* min-height: 50vh; */
 }
 
 .date {
