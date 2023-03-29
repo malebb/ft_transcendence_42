@@ -22,11 +22,8 @@ function MessagesContainer() {
   const socket = useRef<Socket | null>(null);
   let newMessage: Message;
   let [muteTimeLeft, setMuteTimeLeft] = useState<string>("");
-  const [isMute, setIsMute] = useState<boolean>(false);
 
   const scrollToBottom = () => {
-    // fait defiler la page vers le bas : utilise scrollview
-    // pour defiler jusqu'a la fin de la div
     document.getElementById("chatContainer")?.scrollTo({
       top: document.getElementById("chatContainer")?.scrollHeight,
       behavior: "smooth",
@@ -52,14 +49,11 @@ function MessagesContainer() {
         .current!.get("/message/" + currentRoom.current?.name)
         .then((response) => {
           setStateMessages(response.data);
+          scrollToBottom();
         });
     };
     fetchData().catch(console.error);
   }, [roomId]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [stateMessages]);
 
   useEffect(() => {
     socket.current = io("ws://localhost:3333/chat", {
@@ -75,22 +69,17 @@ function MessagesContainer() {
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-      socket.current!.on("ROOM_MESSAGE", async (message: Message) => {
+      await socket.current!.on("ROOM_MESSAGE", async (message: Message) => {
         const blocked: AxiosResponse = await axiosInstance.current!.get(
           "/users/blocked/" + message.user.id
         );
         if (!blocked.data.length) {
-          if (message.user.id !== currentUser.current?.id)
-            setStateMessages((stateMessages) => [...stateMessages, message]);
-          if (message.user.id === currentUser.current!.id) {
+          setStateMessages((stateMessages) => [...stateMessages, message]);
+          if (message.user.id === currentUser.current!.id)
             setMuteTimeLeft("");
-            setIsMute(false);
-          }
         }
       });
-      socket.current!.on("MUTE", (mute) => {
-        setIsMute(true);
-        console.log(isMute);
+      await socket.current!.on("MUTE", async (mute) => {
         setMuteTimeLeft(
           "You are muted (" + formatRemainTime(mute.penalties) + ")"
         );
@@ -100,17 +89,18 @@ function MessagesContainer() {
         socket.current?.disconnect();
       };
     });
+
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    console.log(isMute);
-    // socket.current!.on("MUTE", (mute) => {
-    //   setIsMute(true);
-    // });
-    // if (isMute === true)
-    //   return;
 
     event.preventDefault();
+
+    if (muteTimeLeft != "") {
+      setInputMessage("");
+        return;
+    }
+
     if (!inputMessage?.length) return;
 
     const dateTS = new Date();
@@ -123,10 +113,13 @@ function MessagesContainer() {
       challengeId: 0,
     };
 
-    socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
-    setStateMessages([...stateMessages, newMessage]);
+    await socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
     setInputMessage("");
   }
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [stateMessages]);
 
   const GenMessages = () => {
     const genDate = (date: Message): string => {
@@ -195,7 +188,7 @@ function MessagesContainer() {
           </div>
           <p className="muteMsg">{muteTimeLeft}</p>
           <form onSubmit={handleSubmit} className={style.sendInput}>
-            <input
+              <input
               name="messageInput"
               placeholder="Tell us what you are thinking"
               autoComplete="off"
@@ -230,5 +223,8 @@ export default MessagesContainer;
 
   prop key:
   https://stackoverflow.com/questions/28329382/understanding-unique-keys-for-array-children-in-react-js/43892905#43892905
+
+  useState render first time :
+  https://stackoverflow.com/questions/54069253/the-usestate-set-method-is-not-reflecting-a-change-immediately
 
 */

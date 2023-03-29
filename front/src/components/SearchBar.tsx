@@ -81,7 +81,7 @@ function SearchBar() {
         <ul className={(results.length === 0) ? "hiden" : "Nav-Result"}>
           {results.map((item, index) => (
             <Link className="list-profile" tabIndex={0} id={'searchbar_n' + index.toString()} onKeyDown={handleArrow} to={"/user/" + item.id} key={item.id}>
-              <li className="link-profile"  key={item.id}>{item.username}
+              <li className="link-profile" key={item.id}>{item.username}
             </li></Link>
           ))}
         </ul>

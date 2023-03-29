@@ -62,15 +62,18 @@ export class MessageGateway
   @SubscribeMessage('SEND_ROOM_MESSAGE')
   async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token) {
 	const id = getIdFromToken(token);
+  const mute1 = await this.chatRoomService.myMute(message!.room!.name, id);
+  if (mute1.penalties.length)
+    client.emit('MUTE', mute1);
 	try
 	{
-    	await this.messageService.createMessage(message, message?.room?.name, id);
-    	this.server.to(message.room?.name).emit('ROOM_MESSAGE', message);
+    await this.messageService.createMessage(message, message?.room?.name, id);
+    this.server.to(message.room?.name).emit('ROOM_MESSAGE', message);
 	}
 	catch (error: any)
 	{
-		const mute = await this.chatRoomService.myMute(message!.room!.name, id);
-		if (mute.penalties.length)
+    const mute = await this.chatRoomService.myMute(message!.room!.name, id);
+    if (mute.penalties.length)
 	   	client.emit('MUTE', mute);
 	}
   }

@@ -13,7 +13,17 @@ import "./message.style.css";
 import { trimUsername } from "../../../utils/trim";
 import { printInfosBox } from "../../../utils/infosBox";
 
-function PrivateMessages() {
+type PrivateMessagesProps =
+{
+	userId: number;
+  userName: string;
+}
+
+
+function PrivateMessages({ id }: { id: string }) {
+
+  console.log("Private Message = ", {id});
+
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const currentUser = useRef<User | null>(null);
   const friend = useRef<User | null>(null);
@@ -22,9 +32,10 @@ function PrivateMessages() {
   const socket = useRef<Socket | null>(null);
   const friendId = useParams();
   const [inputMessage, setInputMessage] = useState("");
-  let newMessage: Message;
   const [initSocket, setInitSocket] = useState<boolean>(false);
   const [challenges, setChallenges] = useState<AxiosResponse | null>(null);
+  let newMessage: Message;
+  const containerRef = useRef(null);
 
   function closeMessage(): void {
     document.getElementById("myForm")!.style.display = "none";
@@ -125,7 +136,7 @@ function PrivateMessages() {
       };
     };
     initPrivateChat().catch(console.error);
-  }, [friendId.userId]);
+  }, [friendId.userId, id]);
 
   useEffect(() => {
     fetchChallenge();

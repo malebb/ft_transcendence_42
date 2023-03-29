@@ -47,12 +47,15 @@
 	padding: 8px;
 	margin-right: 2px;
 	margin-left: 2px;
+	/*margin-left: 10px; pour le chatroom*/
 	margin-top: 2px;
+	margin-bottom:13px;
 	display: flex;
 	flex-direction: column;
 	row-gap: 1em;
 	 overflow-y: scroll;
 	 width: auto;
+	/* margin-left: 2px; -> que pour chatroom */
 	 /* min-height: 50vh; */
 }
 
