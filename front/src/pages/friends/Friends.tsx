@@ -11,6 +11,7 @@ import { GET_PROFILE_PICTURE, validURL } from "src/api/utils";
 import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";
 import { setEmitFlags } from "typescript";
+import Status from '../settings/components/Status';
 
 const FRIEND_LIST_PATH = "/users/friend-list";
 const RECV_LIST_PATH = "/users/recv-request";
@@ -195,6 +196,9 @@ const Friends = () => {
     getRecvArray();
     getSendArray();
   }, []);
+
+
+
   return (
     <>
       <Headers />
@@ -231,7 +235,8 @@ const Friends = () => {
                           src={handleSrcFriend(friend)}
                         />
                       }
-                      <p>{friend.username}</p>
+					  <Status id={friend.id}/>
+                      <p className="friendUsername">{friend.username}</p>
                     </Link>
                     <button className="profileButtonCancel" onClick={handleUnfriendClick}>Unfriend</button>
                   </div>

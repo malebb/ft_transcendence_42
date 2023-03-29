@@ -1,60 +1,85 @@
 import { useEffect, useRef, useState, useContext } from "react";
 import { AxiosInstance } from "axios";
-import { useParams } from "react-router-dom";
-import PrivateMessages from "../../chat/containers/PrivateMessages";
 
+import { AxiosResponse } from "axios";
 import styleStatus from "../../../styles/status.module.css";
 import styleMessage from "../../../styles/private.message.module.css";
 import { SocketContext } from '../../../context/SocketContext';
 import { Activity } from 'ft_transcendence';
 import useAxiosPrivate from "src/hooks/usePrivate";
+import { FriendType } from "../../friends/Friends";
 
-// https://stackoverflow.com/questions/58315741/how-to-check-online-user-in-nodejs-socketio
-//! ERROR: render offline une fraction de seconde quand refresh
-
-function Status({ id }: { id: string }) {
+function Status({ id }: { id: number }) {
 	const axiosPrivate = useAxiosPrivate();
-  const { paramUserId } = useParams();
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const [userStatus, setUserStatus] = useState<Activity>(Activity["OFFLINE" as keyof typeof Activity]);
   const currentUser = useRef<boolean>(false);
   const socket = useContext(SocketContext);
   const statusTimeout =  useRef<ReturnType<typeof setTimeout>>();
+  const [isFriend, setIsFriend] = useState<boolean>(false);
 
-  function openMessage(): void {
-    document.getElementById("myForm")!.style.display = "block";
-	const chatContainer = document.getElementById('chatContainer');
-	chatContainer!.scrollTop = chatContainer!.scrollHeight;
-  }
+
+	useEffect(() =>
+	{
+    	const checkIfFriend = async () => {
+			try
+			{
+
+				axiosInstance.current = axiosPrivate;
+				const friendList: AxiosResponse = await axiosInstance.current.get("/users/friend-list");
+				const currentUser: AxiosResponse = await axiosInstance.current.get("/users/me");
+				let isFriendFound = false;
+				if (currentUser.data.id === id)
+				{
+					setIsFriend(true);
+					return ;
+				}
+				friendList.data.forEach((friend: FriendType) => {
+			        if (friend.id === id)
+					{
+						setIsFriend(true);
+						isFriendFound = true;
+						return ;
+					}
+	   	   		});
+				if (!isFriendFound)
+					setIsFriend(false);
+			}
+			catch (error: any)
+			{
+				console.log('error: ', error);
+			}
+		};
+    	checkIfFriend();
+	}, [id]);
 
   useEffect(() => {
     const fetchData = async () => {
-      axiosInstance.current = await axiosPrivate;
+      axiosInstance.current = axiosPrivate;
       await axiosInstance
-        .current!.get("/users/profile/" + paramUserId)
+        .current!.get("/users/profile/" + id)
         .then((response) => {
           setUserStatus(response.data.status);
         });
-      axiosInstance.current = await axiosPrivate;
+      axiosInstance.current = axiosPrivate;
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current =
-          response.data.id === Number(paramUserId) ? true : false;
+          response.data.id === id ? true : false;
       });
     };
-
     fetchData().catch(console.error);
-  }, [id, paramUserId]);
+  }, [id]);
 
 	useEffect(() => {
 		const initSocket = async () =>
 		{
 			socket.on('CHANGE_STATUS', (data) =>
 			{
-				if (data.id === Number(id))
+				if (data.id === id)
 				{
 					clearTimeout(statusTimeout.current);
 					statusTimeout.current = setTimeout(async () => {
-	    				await axiosInstance.current!.get("/users/profile/" + paramUserId).then((response) =>
+	    				await axiosInstance.current!.get("/users/profile/" + id).then((response) =>
 						{
 							if (response.data.status !== userStatus)
 								setUserStatus(response.data.status);
@@ -64,52 +89,35 @@ function Status({ id }: { id: string }) {
 			});
 		}
 		initSocket();
-	}, [id, userStatus, socket, paramUserId]);
+	}, [id, userStatus, socket]);
 
   const GenStatus = () => {
-    switch (userStatus)
+
+	if (isFriend)
 	{
-		case 'ONLINE':
+		switch (userStatus)
+		{
+			case 'ONLINE':
+				  return (
+					  <>
+						  <div className={styleStatus.online_indicator}>
+							  <span className={styleStatus.online_blink}></span>
+						  </div> Online</>);
+			case 'OFFLINE':
+				return (
+					<>
+   	     				<div className={styleStatus.offline_indicator}></div>
+        				<div className={styleStatus.text}>Offline</div>
+				</>);
 
-	      if (!currentUser.current) {
-			  return (
-				  <>
-					  <div className={styleStatus.online_indicator}>
-						  <span className={styleStatus.online_blink}></span>
-					  </div>
-					  <button className={styleMessage.openbutton} onClick={openMessage}>
-					  Online
-					  </button>
-					  <div className={styleStatus.pop_up}>
-						  <div className={styleStatus.arrow_down}></div>
-						  <p>Click here & let's chat !</p>
-					  </div>
-					  <PrivateMessages />
-				  </>);
-		}
-			return (
-				  <>
-				  <div className={styleStatus.online_indicator}>
-				 	 <span className={styleStatus.online_blink}></span>
-				  </div>
-				  <div className={styleStatus.text}>Online</div>
-				  </>
-				 );
-
-	case 'OFFLINE':
-		return (
-			<>
-   	     		<div className={styleStatus.offline_indicator}></div>
-        		<div className={styleStatus.text}>Offline</div>
-			</>);
-
-	case 'IN_GAME':
-	return (
-			<>
-   	     		<div className={styleStatus.in_game_indicator}></div>
-        		<div className={styleStatus.text}>In Game</div>
-			</>);
-    }
+			case 'IN_GAME':
+				return (
+					<>
+   	   		  			<div className={styleStatus.in_game_indicator}></div>
+						<div className={styleStatus.text}>In Game</div>
+					</>);
+    	}
+	}
 	return (<></>);
   };
 

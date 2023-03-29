@@ -11,6 +11,8 @@ import { getIdFromToken, isAuthEmpty } from '../gatewayUtils/gatewayUtils';
 import { GetUser } from '../auth/decorator';
 import { UseGuards } from '@nestjs/common';
 import { WsGuard } from '../auth/guard/ws.guard';
+import { Activity } from '@prisma/client';
+import { Friend } from './types/friend.type';
 
 @WebSocketGateway({
 	namespace: '/user',
@@ -23,16 +25,37 @@ export class UserGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {
 
 	constructor(private userService: UserService) { }
+	
+	clients: Socket[] = [];
 
 	@WebSocketServer()
 	server: Server;
 
+	async emitStatusToFriends(clientId: number, newStatus: Activity)
+	{
+		const friends: Friend[] = await this.userService.getFriends(clientId);
+		for (let i = 0; i < this.clients.length; ++i)
+		{
+			for (let j = 0; j < friends.length; ++j)
+			{
+				if (friends[j].id === getIdFromToken(this.clients[i].handshake.auth.token))
+				{
+					this.clients[i].emit('CHANGE_STATUS', {status: newStatus, id: clientId});
+					break ;
+				}
+			}
+			if (clientId  === getIdFromToken(this.clients[i].handshake.auth.token))
+				this.clients[i].emit('CHANGE_STATUS', {status: newStatus, id: clientId});
+		}
+	}
+
 	handleConnection(client: Socket) {
 		if (isAuthEmpty(client))
 			return ;
+		this.clients.push(client);
 		const userId = getIdFromToken(client.handshake.auth.token);
 		this.userService.setUserOnLineOffline(userId, "ONLINE");
-		this.server.emit('CHANGE_STATUS', {status: 'ONLINE', id: userId});
+		this.emitStatusToFriends(userId, 'ONLINE');
 	}
 
 	@UseGuards(WsGuard)
@@ -42,6 +65,7 @@ export class UserGateway
 		const userId = getIdFromToken(token);
 		this.userService.setUserOnLineOffline(userId, "IN_GAME");
 		this.server.emit('CHANGE_STATUS', {status: 'IN_GAME', id: userId});
+		this.emitStatusToFriends(userId, 'IN_GAME');
 	}
 
 	@UseGuards(WsGuard)
@@ -50,7 +74,7 @@ export class UserGateway
 	{
 		const userId = getIdFromToken(token);
 		this.userService.setUserOnLineOffline(userId, "ONLINE");
-		this.server.emit('CHANGE_STATUS', {status: 'ONLINE', id: userId});
+		this.emitStatusToFriends(userId, 'ONLINE');
 	}
 
 	@UseGuards(WsGuard)
@@ -58,6 +82,8 @@ export class UserGateway
 	handleOffline(@GetUser() token: string)
 	{
 		const userId = getIdFromToken(token);
+		this.userService.setUserOnLineOffline(userId, "OFFLINE");
+		this.emitStatusToFriends(userId, 'OFFLINE');
 	}
 
 	handleDisconnect(client: Socket) {
@@ -65,6 +91,14 @@ export class UserGateway
 			return ;
 		const userId = getIdFromToken(client.handshake.auth.token);
 		this.userService.setUserOnLineOffline(userId, "OFFLINE");
-		this.server.emit('CHANGE_STATUS', {status: 'OFFLINE', id: userId});
+		this.emitStatusToFriends(userId, 'OFFLINE');
+		for (let i = 0; i < this.clients.length; ++i)
+		{
+			if (this.clients[i].id === client.id)
+			{
+				this.clients.splice(i, 1);
+				break ;
+			}
+		}
 	}
 }

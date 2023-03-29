@@ -130,7 +130,7 @@ function PrivateMessages() {
 
   useEffect(() => {
     fetchChallenge();
-  }, []);
+  }, [friendId.userId]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
 
