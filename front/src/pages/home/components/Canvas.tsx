@@ -281,7 +281,6 @@ export default function Canvas()
 
 			kd.current.UP.down(async function()
 			{
-				await axiosPrivate;
 				socket.current!.emit("movePlayer", {roomId : room.current!.id, position: position.current, key: "UP"});
 			});
 
@@ -300,7 +299,7 @@ export default function Canvas()
 
 			try
 			{
-				axiosInstance.current = await axiosPrivate;
+				axiosInstance.current = axiosPrivate;
 				const user: AxiosResponse = await axiosInstance.current!.get('/users/me');
 				map.current = draw.current!.initGameMap(user.data.map);
 				map.current!.onload = function()
@@ -322,7 +321,6 @@ export default function Canvas()
 		{
 			return (new Promise(resolve => {
 				socket.current!.on(socket.current!.id, async (data) => {
-					await axiosPrivate;
 					socket.current!.emit('joinRoom', {roomId: JSON.parse(data).room.id})
 					resolve(data);
 				});
@@ -396,9 +394,9 @@ export default function Canvas()
 		{
 			try
 			{
-				axiosInstance.current = await axiosPrivate;
+				axiosInstance.current = axiosPrivate;
 				let user: AxiosResponse = await axiosInstance.current!.get('/users/me');
-				axiosInstance.current = await axiosPrivate;
+				axiosInstance.current = axiosPrivate;
 				const currentGames: AxiosResponse = await axiosInstance.current.get('/game/');
 
 				if (isPlayerAlreadyInGame(user.data, currentGames))
@@ -406,7 +404,7 @@ export default function Canvas()
 					alreadyInGame();
 					return ;
 				}
-				axiosInstance.current = await axiosPrivate;
+				axiosInstance.current = axiosPrivate;
 				let challenge: AxiosResponse = await axiosInstance.current!.get('/challenge/' + challengeId);
 				let cancelLink: Function[];
 				let background: HTMLImageElement = draw.current!.initOutGameBackground();
@@ -421,7 +419,7 @@ export default function Canvas()
 					let zones = [cancelZone];
 					let playerData: PlayerData = {userId: user.data.id, id: "", username: user.data.username, skin: user.data.skin, powerUpMode: challenge.data.powerUpMode};
 					let gamePossible = true;
-					axiosInstance.current = await axiosPrivate;
+					axiosInstance.current = axiosPrivate;
 					socket.current = io(`ws://localhost:3333/pong`,
 					{
 						transports: ["websocket"],
@@ -659,11 +657,6 @@ export default function Canvas()
 			animationFrameId.current = window.requestAnimationFrame(render)
 		}
 
-		function redirectSignInPage()
-		{
-			navigate.current('/signin', { replace: true});
-		}
-
 		function signInToPlay()
 		{
 			let background: HTMLImageElement = draw.current!.initOutGameBackground();
@@ -680,7 +673,7 @@ export default function Canvas()
 		{
 			try
 			{
-				axiosInstance.current = await axiosPrivate;
+				axiosInstance.current = axiosPrivate;
 				await axiosInstance.current!.get('/challenge/' + challengeId);
 			}
 			catch (error: any)
@@ -735,6 +728,19 @@ export default function Canvas()
 		return (isChallenger ? <h4 id={style.challengeTitle}>Challenge</h4> : <></>);
 	}
 
+	const displayControls = () =>
+	{
+		return (token ? 
+				<div id={style.controlsContainer}>
+					<h4>Controls</h4>
+					<ul id="controls">
+						<li>Move up : <span>UP ARROW</span></li>
+						<li>Move down : <span>DOWN ARROW</span></li>
+						<li>Use power up : <span>SPACE</span></li>
+					</ul>
+				</div> : <></>);
+	}
+
 	const displayCanvas = () =>
 	{
 		if (challengeId === undefined || isChallenger)
@@ -743,14 +749,7 @@ export default function Canvas()
 			<>
 				{challengeTitle()}
 				<center><canvas id="canvas" style={{marginTop: 10}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>
-				<div id={style.controlsContainer}>
-					<h4>Controls</h4>
-					<ul id="controls">
-						<li>Move up : <span>UP ARROW</span></li>
-						<li>Move down : <span>DOWN ARROW</span></li>
-						<li>Use power up : <span>SPACE</span></li>
-					</ul>
-				</div>
+				{displayControls()}
 			</>
 			);
 		}
