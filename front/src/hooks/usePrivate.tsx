@@ -11,7 +11,6 @@ const useAxiosPrivate = () => {
 
         const requestIntercept = axiosPrivate.interceptors.request.use(
             (config) => {
-                console.log('access token === ' + token?.access_token);
                 if (!config.headers['Authorization']) {
                     config.headers['Authorization'] = `Bearer ${token?.access_token}`;
                 }
