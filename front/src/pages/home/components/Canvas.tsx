@@ -16,7 +16,7 @@ import style from 'src/styles/canvas.module.css';
 import { trimUsername } from "src/utils/trim";
 import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";
-import SocketContext from "src/context/SocketContext";
+import { SocketContext } from "src/context/SocketContext";
 
 interface CheckboxData
 {

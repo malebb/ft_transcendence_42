@@ -119,7 +119,7 @@ export class AuthController {
       return token;
       return res.send(token);
     } catch (err) {
-      console.log('callback err = ' + err);
+      console.log('error (callback) = ' + err);
       throw new HttpException(
         'Error Connecting with 42 api',
         HttpStatus.BAD_REQUEST,

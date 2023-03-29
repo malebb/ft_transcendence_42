@@ -25,9 +25,8 @@ import Cookies from "js-cookie";
 import Loading from "./Loading";
 import { AxiosError, AxiosResponse } from "axios";
 import TokenContext from "../context/TokenContext";
-import { SignInterface } from "src/interfaces/Sign";
+import { SocketProvider } from '../context/SocketContext';
 
-const REFRESH_PATH = 'auth/refresh'
 /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
       //   const useBeforeRender = (callback: any, deps: any) => {
@@ -44,7 +43,7 @@ const REFRESH_PATH = 'auth/refresh'
 
 function App() {
 
-  const {token, setToken, setUserId, setUsername} = useContext(AuthContext);
+  const {token} = useContext(AuthContext);
   // const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // useEffect(() => {
@@ -93,8 +92,6 @@ function App() {
   //   // setIsLoading(false);
   // }, [])
 
-  console.log('tok == ' + token?.access_token)
-
   // if (token?.access_token === undefined)
   //   return (<>
   //     {"tok == " + token?.access_token}
@@ -102,6 +99,7 @@ function App() {
   //   </>)
   return (
     // <AuthProvider>
+	<SocketProvider token={token}>
       <SnackbarProvider maxSnack={4}>
       <BrowserRouter>
         <Routes>
@@ -129,6 +127,7 @@ function App() {
           <Route element={<NotFound />}/>
         </Routes>
       </BrowserRouter></SnackbarProvider>
+	  </SocketProvider>
     // {/* // </AuthProvider> */}
   );
 }

@@ -28,7 +28,7 @@ const PrivateRoutes = () => {
           catch (err: any)
           {
             setErrMsg(err.response);
-            console.log(err.response);
+            console.log('error: ', err.response);
           }
       setIsChecking(false);
     };

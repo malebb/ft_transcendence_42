@@ -51,7 +51,6 @@ export async function getJWTfromRt(setToken: React.Dispatch<React.SetStateAction
     );
     setToken(new_jwt.data.tokens);
     // Cookies.set('rt_token', new_jwt.data.rt_token);
-    console.log('data = ' + JSON.stringify(new_jwt.data));
   }
   catch(err: any)
   {
@@ -62,7 +61,6 @@ export async function getJWTfromRt(setToken: React.Dispatch<React.SetStateAction
 
 export async function axiosToken(token: TokensInterface, setToken: React.Dispatch<React.SetStateAction<TokensInterface | undefined>> ) {
   const date = new Date();
-  console.log(JSON.stringify(token));
   if(token === undefined)
   {
     const new_jwt: AxiosResponse = await axiosMain.post(

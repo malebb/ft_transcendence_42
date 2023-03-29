@@ -3,7 +3,6 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import { axiosMain } from "src/api/axios";
 import useRefreshToken from "src/hooks/useRefreshToken";
 import { SignInterface, TokensInterface } from "src/interfaces/Sign";
-import SocketContext from "./SocketContext";
 
 type AuthContextType = {
   token: TokensInterface | undefined | null;
@@ -42,7 +41,6 @@ export const AuthProvider = ({ children }: { children: any }) => {
       try{
         // await refresh();
       const response : AxiosResponse = await axiosMain.post<SignInterface>(REFRESH_PATH);
-      console.log('App checkAuth == ' + JSON.stringify(response.data))
       // setUsername(response.data.username!);
       // setUserId(response.data.id);
       setToken(response.data.tokens)
