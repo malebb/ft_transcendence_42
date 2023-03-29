@@ -133,4 +133,9 @@ export class ChallengeService {
 		});
 		return (challenges);
 	}
+
+	async removeAllChallenge()
+	{
+		await this.prisma.challenge.deleteMany({})
+	}
 }
