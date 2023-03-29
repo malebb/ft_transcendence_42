@@ -46,11 +46,8 @@ const Callback = () => {
           // "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"
           "Content-Type": "application/json"
         }});
-        console.log("response =+ " + JSON.stringify(response.data));
       if (response.data.isTfa === false)
       {
-        // localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
-        // localStorage.setItem("id", JSON.stringify(response.data.userId));
         setUsername(response.data.username!);
         setUserId(response.data.userId);
         setToken(response.data.tokens!)

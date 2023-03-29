@@ -25,19 +25,21 @@ import Cookies from "js-cookie";
 import Loading from "./Loading";
 import { AxiosError, AxiosResponse } from "axios";
 import TokenContext from "../context/TokenContext";
+import { SignInterface } from "src/interfaces/Sign";
 
+const REFRESH_PATH = 'auth/refresh'
 /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
-        const useBeforeRender = (callback: any, deps: any) => {
-          const [isRun, setIsRun] = useState(false);
+      //   const useBeforeRender = (callback: any, deps: any) => {
+      //     const [isRun, setIsRun] = useState(false);
       
-          if (!isRun) {
-              callback();
-              setIsRun(true);
-          }
+      //     if (!isRun) {
+      //         callback();
+      //         setIsRun(true);
+      //     }
       
-          useEffect(() => () => setIsRun(false), deps);
-      };
+      //     useEffect(() => () => setIsRun(false), deps);
+      // };
 // const REFRESH_PATH = 'auth/refresh'
 
 function App() {
@@ -45,6 +47,34 @@ function App() {
   const {token, setToken, setUserId, setUsername} = useContext(AuthContext);
   // const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // useEffect(() => {
+  //   let isMount = true;
+  //   const controller = new AbortController();
+
+  //   const checkRTCookie = async() => {
+  //     try{
+  //     const response : AxiosResponse = await axiosMain.post<SignInterface>(REFRESH_PATH, { signal: controller.signal});
+  //     console.log('App checkAuth == ' + JSON.stringify(response.data))
+  //     // setUsername(response.data.username!);
+  //     // setUserId(response.data.id);
+  //     if (isMount)
+  //     {
+  //     setToken(response.data.tokens)
+  //     setUsername(response.data.username)
+  //     setUserId(response.data.userId)
+  //     }
+  //     }catch(err: any)
+  //     {
+  //       console.log(err)
+  //     }
+  //   }
+    
+  //   checkRTCookie();
+  //   return () => {
+  //     isMount = false;
+  //     controller.abort();
+  //   } 
+  // }, [])
   // useEffect(() => {
   //   const checkRTCookie = async() => {
   //     try{

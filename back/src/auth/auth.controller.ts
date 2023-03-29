@@ -21,7 +21,7 @@ import { GetUser, Public } from './decorator';
 import { ConfigService } from '@nestjs/config';
 import { CallbackDto } from './dto/callback.dto';
 import { User } from '@prisma/client';
-import { SignInterface } from './interfaces';
+import { RefreshInterface, SignInterface } from './interfaces';
 import { parse, stringify } from 'flatted';
 
 @Controller('auth')
@@ -154,22 +154,16 @@ export class AuthController {
         if (req.get('authorization') && user.id)
         {
             rToken = req.get('authorization').replace('Bearer', '').trim();*/
-    console.log(
-      'REF TOK = ' +
-        stringify(req.user) +
-        '=============================================================================================================',
-    );
-    console.log('userid = ' + userId);
-    const ret_token: SignInterface = await this.authService.refreshToken(
+    const ret_token: RefreshInterface = await this.authService.refreshToken(
       userId,
       req.cookies['rt_token'],
     );
-    res.cookie('rt_token', ret_token.tokens.refresh_token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-    });
-    console.log('useridu = ' + userId);
+    // res.cookie('rt_token', ret_token.tokens.refresh_token, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: 'none',
+    // });
+    // console.log(ret_token.tokens.refresh_token);
     // res.header('Access-Control-Allow-Credentials', 'true');
     // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     return ret_token;

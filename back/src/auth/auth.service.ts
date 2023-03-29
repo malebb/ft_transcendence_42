@@ -19,7 +19,7 @@ import * as qrcode from 'qrcode';
 import { connected } from 'process';
 import { Response } from 'express';
 import axios, { AxiosResponse } from 'axios';
-import { SignInterface } from './interfaces';
+import { RefreshInterface, SignInterface } from './interfaces';
 
 //require('oauth2');
 
@@ -218,6 +218,28 @@ export class AuthService {
       expireIn: JWT_TOKEN_EXPIRE_TIME,
     };
   }
+  async signTokenRefresh(userId: number, email: string) {
+    const payload = {
+      sub: userId,
+      email,
+    };
+    const secret = this.config.get('JWT_SECRET');
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: JWT_TOKEN_EXPIRE_TIME,
+      secret: secret,
+    });
+    // const rtsecret = this.config.get('RT_SECRET');
+    // const rToken = await this.jwt.signAsync(payload, {
+    //   expiresIn: '15d',
+    //   secret: rtsecret,
+    // });
+    return {
+      access_token: token,
+      // refresh_token: rToken,
+      crea_time: new Date(),
+      expireIn: JWT_TOKEN_EXPIRE_TIME,
+    };
+  }
 
   async logout(userId: number) {
     await this.prismaService.user.updateMany({
@@ -233,7 +255,7 @@ export class AuthService {
     });
   }
 
-  async refreshToken(userId: number, rt: string): Promise<SignInterface> {
+  async refreshToken(userId: number, rt: string): Promise<RefreshInterface> {
     const user = await this.prismaService.user.findUnique({
       where: {
         id: userId,
@@ -247,8 +269,8 @@ export class AuthService {
       throw new ForbiddenException('ACESS DENIED');
     }
 
-    const tokens = await this.signToken(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refresh_token);
+    const tokens = await this.signTokenRefresh(user.id, user.email);
+    // await this.updateRtHash(user.id, tokens.refresh_token);
     // return tokens;
     return {
       tokens: tokens,
