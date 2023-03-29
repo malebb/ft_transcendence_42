@@ -48,7 +48,7 @@ const Signup = () => {
 
   const snackBar = useSnackbar();
   useEffect(() => {
-    // userRef.current.focus();
+    emailRef.current!.focus();
   }, []);
 
   //TODO change userRef to user in the useeffect if not working
@@ -87,31 +87,24 @@ const Signup = () => {
         SIGNUP_PATH,
         { email: email, username: user, password: pwd },
         { withCredentials: true,  headers: {
-          // "Access-Control-Allow-Origin": "http://localhost:3000",
-          // "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
           "Content-Type": "application/json"
         }}
       );
       setSuccess(true);
-      // setToken(response.data.token);
-      // localStorage.setItem("tokens", JSON.stringify(response.data.tokens));
-      // localStorage.setItem("id", JSON.stringify(response.data.userId));
       setUsername(response.data.username!);
       setUserId(response.data.userId!);
       setToken(response.data.tokens!)
       socket.auth = {token: response.data.tokens!.access_token}
 	  socket.connect();
-      console.log('resp data = ' + JSON.stringify(response.data));
-      //console.log(token);
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");
       } else if (err.response?.status === 403) {
-        setErrMsg("Username Taken");
+        setErrMsg(err.response?.data?.message);
       } else {
         setErrMsg("Registration Failed");
       }
-      //errRef.current.focus();
+      errRef.current!.focus();
     }
   };
 

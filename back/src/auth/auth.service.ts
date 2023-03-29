@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   HttpException,
   HttpStatus,
@@ -20,6 +21,7 @@ import { connected } from 'process';
 import { Response } from 'express';
 import axios, { AxiosResponse } from 'axios';
 import { RefreshInterface, SignInterface } from './interfaces';
+import { CallbackDto } from './dto/callback.dto';
 
 //require('oauth2');
 
@@ -51,7 +53,7 @@ export class AuthService {
       !PWD_REGEX.test(dto.password) ||
       !USER_REGEX.test(dto.username)
     )
-      throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
+      throw new ForbiddenException('Invalid Input');
     const hash = await argon.hash(dto.password);
     try {
       const user = await this.prismaService.user.create({
@@ -74,19 +76,18 @@ export class AuthService {
         username: user.username,
       };
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code == 'P2002') {
-          throw new ForbiddenException('Credentials taken');
-        }
+      console.log(error.meta.target);
+      if (error.code == 'P2002') {
+        throw new ForbiddenException(error.meta.target + ' Already Taken');
       }
-      throw error;
+      throw new BadRequestException('Error signing up');
     }
     //return (this.prismaService.)
   }
 
   async signin(dto: AuthDto): Promise<SignInterface> {
     if (!EMAIL_REGEX.test(dto.email) || !PWD_REGEX.test(dto.password))
-      throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
+      throw new ForbiddenException('Invalid Input');
     const user = await this.prismaService.user.findUnique({
       where: {
         email: dto.email,
@@ -125,120 +126,128 @@ export class AuthService {
         const response: AxiosResponse = await axios.post('https://api.intra.42.fr/oauth/token', {grant_type: GRANT_TYPE,client_id: client_id, client_secret: client_secret, code: code, redirect_uri: REDIRECT_URI},);
         return response;
     }*/
-
-  async callback42(code): Promise<SignInterface> {
+  // TODO SECURE
+  async callback42(code: CallbackDto): Promise<SignInterface> {
     //TODO may change || "" by so;ething more accurate
     //const response : AxiosResponse = await this.get42AT(code);
-    const client_id = this.config.get('OAUTH_CLIENT_UID');
-    const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
-    const response: AxiosResponse = await axios.post(
-      'https://api.intra.42.fr/oauth/token',
-      {
-        grant_type: GRANT_TYPE,
-        client_id: client_id,
-        client_secret: client_secret,
-        code: code,
-        redirect_uri: REDIRECT_URI,
-      },
-    );
-    //if(response.status !== 200)//TODO protect depending on response status
+    try {
+      const client_id = this.config.get('OAUTH_CLIENT_UID');
+      const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
+      const response: AxiosResponse = await axios.post(
+        'https://api.intra.42.fr/oauth/token',
+        {
+          grant_type: GRANT_TYPE,
+          client_id: client_id,
+          client_secret: client_secret,
+          code: code.code,
+          redirect_uri: REDIRECT_URI,
+        },
+      );
+      //if(response.status !== 200)//TODO protect depending on response status
 
-    const getprofile: AxiosResponse = await axios.get(
-      'https://api.intra.42.fr/v2/me',
-      {
-        headers: { Authorization: 'Bearer ' + response.data['access_token'] },
-      },
-    );
-    const id42 = JSON.stringify(getprofile.data['id']) || '';
-    const pic42 = getprofile.data.image.versions.small;
+      const getprofile: AxiosResponse = await axios.get(
+        'https://api.intra.42.fr/v2/me',
+        {
+          headers: { Authorization: 'Bearer ' + response.data['access_token'] },
+        },
+      );
+      const id42 = JSON.stringify(getprofile.data['id']);
 
-    let user = await this.prismaService.user.findUnique({
-      where: {
-        id42: id42,
-      },
-    });
-    if (!user) {
-      user = await this.prismaService.user.create({
-        data: {
-          email: getprofile.data['email'] || '',
-          hash: '',
-          profilePicture: getprofile.data.image.versions.small,
+      let user = await this.prismaService.user.findUnique({
+        where: {
           id42: id42,
-          username: getprofile.data['login'] || '',
-          stats: {
-            create: {},
-          },
         },
       });
+      if (!user) {
+        user = await this.prismaService.user.create({
+          data: {
+            email: getprofile.data['email'],
+            hash: '',
+            profilePicture: getprofile.data.image.versions.small,
+            id42: id42,
+            username: getprofile.data['login'],
+            stats: {
+              create: {},
+            },
+          },
+        });
+      }
+      const tokens = await this.signToken(user.id, user.email);
+      this.updateRtHash(user.id, tokens.refresh_token);
+      return {
+        tokens: tokens,
+        isTfa: user.isTFA,
+        userId: user.id,
+        username: user.username,
+      };
+    } catch (error) {
+      console.log();
     }
-    const tokens = await this.signToken(user.id, user.email);
-    this.updateRtHash(user.id, tokens.refresh_token);
-    return {
-      tokens: tokens,
-      isTfa: user.isTFA,
-      userId: user.id,
-      username: user.username,
-    };
-
-    //console.log("data = " + JSON.stringify(response.data));
-    return response.data;
   }
 
   async updateRtHash(userId: number, refreshToken: string) {
-    const rthash = await argon.hash(refreshToken);
-    await this.prismaService.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        hashRt: rthash,
-      },
-    });
+    try {
+      const rthash = await argon.hash(refreshToken);
+      await this.prismaService.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          hashRt: rthash,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException('Trouble updating database');
+    }
   }
 
   async signToken(userId: number, email: string) {
-    const payload = {
-      sub: userId,
-      email,
-    };
-    const secret = this.config.get('JWT_SECRET');
-    const token = await this.jwt.signAsync(payload, {
-      expiresIn: JWT_TOKEN_EXPIRE_TIME,
-      secret: secret,
-    });
-    const rtsecret = this.config.get('RT_SECRET');
-    const rToken = await this.jwt.signAsync(payload, {
-      expiresIn: '15d',
-      secret: rtsecret,
-    });
-    return {
-      access_token: token,
-      refresh_token: rToken,
-      crea_time: new Date(),
-      expireIn: JWT_TOKEN_EXPIRE_TIME,
-    };
+    try {
+      const payload = {
+        sub: userId,
+        email,
+      };
+      const secret = this.config.get('JWT_SECRET');
+      const token = await this.jwt.signAsync(payload, {
+        expiresIn: JWT_TOKEN_EXPIRE_TIME,
+        secret: secret,
+      });
+      const rtsecret = this.config.get('RT_SECRET');
+      const rToken = await this.jwt.signAsync(payload, {
+        expiresIn: '15d',
+        secret: rtsecret,
+      });
+      return {
+        access_token: token,
+        refresh_token: rToken,
+        crea_time: new Date(),
+        expireIn: JWT_TOKEN_EXPIRE_TIME,
+      };
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
   async signTokenRefresh(userId: number, email: string) {
-    const payload = {
-      sub: userId,
-      email,
-    };
-    const secret = this.config.get('JWT_SECRET');
-    const token = await this.jwt.signAsync(payload, {
-      expiresIn: JWT_TOKEN_EXPIRE_TIME,
-      secret: secret,
-    });
-    // const rtsecret = this.config.get('RT_SECRET');
-    // const rToken = await this.jwt.signAsync(payload, {
-    //   expiresIn: '15d',
-    //   secret: rtsecret,
-    // });
-    return {
-      access_token: token,
-      // refresh_token: rToken,
-      crea_time: new Date(),
-      expireIn: JWT_TOKEN_EXPIRE_TIME,
-    };
+    try {
+      const payload = {
+        sub: userId,
+        email,
+      };
+      const secret = this.config.get('JWT_SECRET');
+      const token = await this.jwt.signAsync(payload, {
+        expiresIn: JWT_TOKEN_EXPIRE_TIME,
+        secret: secret,
+      });
+      return {
+        access_token: token,
+        crea_time: new Date(),
+        expireIn: JWT_TOKEN_EXPIRE_TIME,
+      };
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   async logout(userId: number) {
@@ -286,7 +295,9 @@ export class AuthService {
       const jet = this.jwt.verify(token, { secret: secret });
       if (jet) return true;
       else return false;
-    } catch (err: any) {}
+    } catch (err: any) {
+      throw err;
+    }
   }
 
   async create2FA(userId: number) {

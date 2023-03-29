@@ -1,32 +1,36 @@
-/* :root {
+:root {
     font-size: calc(10px + 1vmin);
-    --primary: #73f;
+    --primary: #6281f7;
     --primary-2: #37f;
     --softGrey: #9a97a8;
     --softTint: rgba(0, 0, 0, 0.2);
     --bounce: 0.3s cubic-bezier(0.3, -0.1, 0.5, 1.4);
     --ease: 0.2s cubic-bezier(0.3, 0.1, 0.3, 1);
 }
-*, *::before, *::after {
+/* *, *::before, *::after {
     margin: 0;
     padding: 0;
     color: inherit;
     list-style-type: none;
     box-sizing: border-box;
     font-family: sans-serif;
+} */
+
+.tfa_qrcode {
+    border-radius: 25px;
 }
-body {
+.tfa_container {
     min-height: 100vh;
     display: grid;
     overflow: hidden;
     place-items: center;
     color: var(--softGrey);
 }
-input[type="checkbox"] {
+.tfa_checkbox {
     position: absolute;
     opacity: 0.001;
 }
-form {
+.tfa-form {
     --size: 3rem;
     --space: 1rem;
     padding-left: var(--space);
@@ -37,11 +41,27 @@ form {
     box-shadow: 0 1em 2em var(--softTint);
     transition: var(--bounce);
 }
-form:focus-within {
+.tfa-form:focus-within {
     transform: scale(0.94);
     box-shadow: 0 1em 1em var(--softTint);
 }
-form input[type="number"] {
+
+@keyframes horizontal-shaking {
+ 0% { transform: translateX(0) }
+ 25% { transform: translateX(5px) }
+ 50% { transform: translateX(-5px) }
+ 75% { transform: translateX(5px) }
+ 100% { transform: translateX(0) }
+}
+
+.bad_attempt{
+    animation: horizontal-shaking 0.4s ease-out infinite;
+    border-style: solid;
+    border-color: #9a3535;
+    /* transition: border 0.6s linear; */
+
+}
+form .tfa-number-input {
     appearance: none;
     -webkit-appearance: none;
     heght: 100%;
@@ -136,4 +156,4 @@ form .indicator {
     to {
         background-position-x: 60%;
    }
-} */
+}

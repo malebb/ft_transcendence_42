@@ -74,7 +74,7 @@ const Signin = () => {
   const socket = useContext(SocketContext);
 
   useEffect(() => {
-    // userRef.current.focus();
+    userRef.current!.focus();
   }, []);
 
   //TODO change userRef to user in the useeffect if not working
@@ -155,7 +155,7 @@ const Signin = () => {
       } else {
         setErrMsg("Registration Failed");
       }
-      //errRef.current.focus();
+      errRef.current!.focus();
     }
   };
   useEffect(() => {

@@ -32,24 +32,17 @@ export class AuthController {
   @Post('signup')
   async signup(
     @Body() dto: SignupDto,
-    @Headers() headers,
     @Res({ passthrough: true }) res: Response,
   ) {
-    // try {
     const token: SignInterface = await this.authService.signup(dto);
     res.cookie('rt_token', token.tokens.refresh_token, {
       httpOnly: true,
+      path: '/',
+      maxAge: 14 * 24 * 60 * 60 * 1000,
       secure: true,
       sameSite: 'none',
     });
-    // res.header('Access-Control-Allow-Credentials', 'true');
-    // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-    // res.send(token);
     return token;
-    // } catch (err) {
-    //   console.log('callback err = ' + err);
-    //   throw new HttpException('Error trying to signin', err.code);
-    // }
   }
 
   @Public()
@@ -57,39 +50,23 @@ export class AuthController {
   @Post('signin')
   async signin(
     @Body() dto: AuthDto,
-    @Headers() headers,
     @Res({ passthrough: true }) res: Response,
   ) {
-    // try {
     const token: SignInterface = await this.authService.signin(dto);
     res.cookie('rt_token', token.tokens.refresh_token, {
       httpOnly: true,
+      path: '/',
+      maxAge: 14 * 24 * 60 * 60 * 1000,
       secure: true,
       sameSite: 'none',
     });
-    // res.header('Access-Control-Allow-Credentials', 'true');
-    // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     return token;
-    res.send(token);
-    // } catch (err) {
-    // return err;
-    // }
-    // } catch (err) {
-    // console.log('callback err = ' + err);
-    // throw new HttpException('Error trying to signin', HttpStatus.BAD_REQUEST);
-    // }
   }
 
   @Public()
   @HttpCode(HttpStatus.OK)
   @Get('signin/42login')
   signin42(@Res({ passthrough: true }) res: Response) {
-    /* let origin;
-        if (req.headers.origin)
-        {
-            origin = req.headers.origin;
-            res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3333');
-        }*/
     return this.authService.signin42(res);
   }
 
@@ -100,26 +77,17 @@ export class AuthController {
     @Body() dto: CallbackDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    /*let origin;
-        if (req.headers.origin)
-        {
-            origin = req.headers.origin;
-            res.setHeader("Access-Control-Allow-Origin", 'http://localhost:3333');
-            //res.setHeader("Access-Control-Allow-Origin", '*');
-        }*/
     try {
-      const token: SignInterface = await this.authService.callback42(dto.code);
+      const token: SignInterface = await this.authService.callback42(dto);
       res.cookie('rt_token', token.tokens.refresh_token, {
         httpOnly: true,
+        path: '/',
+        maxAge: 14 * 24 * 60 * 60 * 1000,
         secure: true,
         sameSite: 'none',
       });
-      // res.header('Access-Control-Allow-Credentials', 'true');
-      // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
       return token;
-      return res.send(token);
     } catch (err) {
-      console.log('error (callback) = ' + err);
       throw new HttpException(
         'Error Connecting with 42 api',
         HttpStatus.BAD_REQUEST,
@@ -133,43 +101,18 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const ret = this.authService.logout(userId);
-    // res.header('Access-Control-Allow-Credentials', 'true');
-    // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.clearCookie('rt_token');
-    // res.send(ret);
     return ret;
   }
 
   @Public()
   @UseGuards(RtGuard)
   @Post('refresh')
-  //refreshToken(@GetUser() user: User, @Req() req: Request)
   async refreshToken(
     @GetUser('id') userId: number,
     @Req() req: Request, //refreshToken(@Req() req: Request)
-    @Res({ passthrough: true }) res: Response,
   ) {
-    /*
-        let rToken;
-        if (req.get('authorization') && user.id)
-        {
-            rToken = req.get('authorization').replace('Bearer', '').trim();*/
-    const ret_token: RefreshInterface = await this.authService.refreshToken(
-      userId,
-      req.cookies['rt_token'],
-    );
-    // res.cookie('rt_token', ret_token.tokens.refresh_token, {
-    //   httpOnly: true,
-    //   secure: true,
-    //   sameSite: 'none',
-    // });
-    // console.log(ret_token.tokens.refresh_token);
-    // res.header('Access-Control-Allow-Credentials', 'true');
-    // res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-    return ret_token;
-    return res.send(ret_token);
-    /*}
-        return ;*/
+    return await this.authService.refreshToken(userId, req.cookies['rt_token']);
   }
 
   @Get('verify')
