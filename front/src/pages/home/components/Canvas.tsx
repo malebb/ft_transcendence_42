@@ -1,18 +1,12 @@
 import { useRef, useEffect, useState, useContext, useCallback } from "react";
-// import Draw from "../classes/Draw";
 import Draw from "src/classes/Draw";
 import { io, Socket } from "socket.io-client";
 import { Ball, Room, Player, PlayerData, User } from "ft_transcendence";
-// import LinkZone from "../interfaces/LinkZone";
 import LinkZone from "src/interfaces/LinkZone";
-// import { axiosToken(token!, setToken), getToken } from '../api/axios';
-import { axiosToken, getToken } from "src/api/axios";
 import { AxiosInstance, AxiosResponse } from 'axios';
 import { useParams, useNavigate, Link} from 'react-router-dom';
-// import { CANVAS_FONT, FONT_COLOR } from '../classes/Draw';
 import { CANVAS_FONT, FONT_COLOR } from "src/classes/Draw";
 import style from 'src/styles/canvas.module.css';
-// import { trimUsername } from '../utils/trim';
 import { trimUsername } from "src/utils/trim";
 import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";

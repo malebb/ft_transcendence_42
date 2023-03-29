@@ -20,12 +20,8 @@ import { SnackbarProvider } from "notistack";
 import NotAuthRoutes from "./privateRoute/NotAuthRoutes";
 import NotFound from "./error/NotFound";
 import Logout from "./logout/Logout";
-import { axiosMain, getJWTfromRt } from "src/api/axios";
-import Cookies from "js-cookie";
-import Loading from "./Loading";
-import { AxiosError, AxiosResponse } from "axios";
-import TokenContext from "../context/TokenContext";
 import { SocketProvider } from '../context/SocketContext';
+import Canvas from './home/components/Canvas';
 
 /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
@@ -115,6 +111,7 @@ function App() {
             <Route path="/user" element={<User />} />
             <Route path="/history" element={<History />} />
             <Route path="/friends" element={<Friends />} />
+            <Route path="/challenge/:challengeId" element={<Canvas />} />
             <Route path="/games/:gameId?" element={<Games />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/chat/room/:roomName" element={<ChatRoomBase />} />
