@@ -63,7 +63,6 @@ export default function Canvas()
 			return;
 		if (e.key === ' ' && powerUpEnabled())
 		{
-			await axiosPrivate;
 			socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
 			keyPressed.current = true;
 		}
@@ -90,20 +89,20 @@ export default function Canvas()
 		{
 			function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
 			{
-			var canvas = document.getElementById('canvas');
-			var clickZone = canvas!.getBoundingClientRect();
-
-			if (e.clientX - clickZone.left >= textZone.posX &&
-				e.clientX - clickZone.left <= textZone.posX + textZone.width)
-			{
-				if (e.clientY - clickZone.top >= textZone.posY &&
-				e.clientY - clickZone.top <= textZone.posY + textZone.height)
+				var canvas = document.getElementById('canvas');
+				var clickZone = canvas!.getBoundingClientRect();
+	
+				if (e.clientX - clickZone.left >= textZone.posX &&
+					e.clientX - clickZone.left <= textZone.posX + textZone.width)
 				{
-					return (true);
+					if (e.clientY - clickZone.top >= textZone.posY &&
+					e.clientY - clickZone.top <= textZone.posY + textZone.height)
+					{
+						return (true);
+					}
 				}
+				return (false);
 			}
-			return (false);
-		}
 
 		function addLink(textZone : LinkZone, linkAction : Function, zones : LinkZone[], data : any) : Function []
 		{
@@ -490,7 +489,7 @@ export default function Canvas()
 			{
 				try
 				{
-					axiosInstance.current = await axiosPrivate;
+					axiosInstance.current = axiosPrivate;
 					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
 					draw.current!.outGameBackground(background);
 					draw.current!.matchmaking();
@@ -500,7 +499,7 @@ export default function Canvas()
 						let zones = [cancelZone];
 					let playerData: PlayerData = {userId: user.data.id, id: "", username: user.data.username, skin: user.data.skin, powerUpMode: powerUpMode.current};
 					let alreadyInQueue = false;
-					axiosInstance.current = await axiosPrivate;
+					axiosInstance.current = axiosPrivate;
 					socket.current = io(`ws://localhost:3333/pong`,
 					{
 						transports: ["websocket"],
@@ -544,7 +543,7 @@ export default function Canvas()
 			try
 			{
 				draw.current!.skins = [];
-				axiosInstance.current = await axiosPrivate;
+				axiosInstance.current = axiosPrivate;
 				await axiosInstance.current!.patch('/pong/skin', "skin=" +  name);
 				menu();
 			}
@@ -678,10 +677,8 @@ export default function Canvas()
 			background.onload = function()
 			{
 				draw.current!.outGameBackground(background);
-				let signInZone : LinkZone = draw.current!.signInToPlay();
-				let zones = [signInZone];
+				draw.current!.signInToPlay();
 
-				addLink(signInZone, redirectSignInPage, zones, 0);
 			}
 		}
 
@@ -704,23 +701,24 @@ export default function Canvas()
 			setIsChallenger(false);
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
-		if (token! == null)
+		let googleFont = draw.current!.initFont();
+		document.fonts.add(googleFont);
+		googleFont.load().then(() =>
 		{
-			signInToPlay();
-			return (false);
-		}
-		else
-		{
-			let googleFont = draw.current!.initFont();
-			document.fonts.add(googleFont);
-			googleFont.load().then(() => {
+			if (!token)
+			{
+				signInToPlay();
+				return (false);
+			}
+			else
+			{
 				if (challengeId ===  undefined)
 					menu();
 				else
 					initChallenge();
-			});
-			return (true);
-		}
+				return (true);
+			}
+		});
 		}
 		
 		pong();
@@ -730,8 +728,7 @@ export default function Canvas()
 				stopGame();
 			statusSocket.emit('ONLINE');
 		}
-
-	}, [challengeId, statusSocket, powerUp, stopGame]);
+	}, [challengeId, statusSocket, powerUp, stopGame, token]);
 
 	useEffect(() => {
 		if (socket.current != null)
