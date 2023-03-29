@@ -1,8 +1,16 @@
+import {
+  IsAlphanumeric,
+  IsEmail,
+  isNotEmpty,
+  IsNotEmpty,
+  isString,
+  IsString,
+  Length,
+} from 'class-validator';
 
-import { IsEmail, isNotEmpty, IsNotEmpty, isString, IsString } from 'class-validator';
-
-export class CallbackDto{
-    
-    @IsNotEmpty()
-    code: string;
+export class CallbackDto {
+  @Length(64)
+  @IsAlphanumeric()
+  @IsNotEmpty()
+  code: string;
 }

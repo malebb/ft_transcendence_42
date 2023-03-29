@@ -27,14 +27,36 @@ const DeleteTfa = () => {
     setValidCode(result);
   }, [code]);
 
-  const onCodeChange = (event: any) => {
-    setCode(event.target.value);
-    if (badAttempt) setBadAttempt(false);
-  };
+  // const onCodeChange = (event: any) => {
+  //   setCode(event.target.value);
+  //   if (badAttempt) setBadAttempt(false);
+  // };
 
-  const handleCodeSubmit = async (e: React.FormEvent) => {
+  function timeout(delay: number) {
+    return new Promise( res => setTimeout(res, delay) );
+}
+  useEffect(() => {
+    async function checkBadAttempt()
+    {
+    if(badAttempt)
+    {
+      await timeout(700);
+      setBadAttempt(false);
+    }}
+
+    checkBadAttempt();
+  }, [badAttempt])
+
+  const handleCodeSubmit = async (e: any) => {
     e.preventDefault();
     try{
+    let code: string = "";
+    code += e.target.n1.value; 
+    code += e.target.n2.value; 
+    code += e.target.n3.value; 
+    code += e.target.n4.value; 
+    code += e.target.n5.value; 
+    code += e.target.n6.value; 
     const verif = (
       await axiosPrivate.post(
         "/auth/verify2FA",
@@ -50,7 +72,6 @@ const DeleteTfa = () => {
         await axiosPrivate.get("/auth/unset2FA");
         navigate("/user");
     } else setBadAttempt(true);
-    console.log("verif code =======" + verif);
   }
   catch(err: any)
   {
@@ -66,19 +87,46 @@ const DeleteTfa = () => {
   }
   };
 
+  const handleNextInput = (e : React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    if (Object.keys(e.target.value).length > 1)
+    {
+      if(e.target.value[0] !== e.target.placeholder)
+      (e.target.value = e.target.value[0]);
+      else
+      (e.target.value = e.target.value[1]);
+    }
+    if (e.target.value !== "")
+    {
+    const fieldName = e.target.id.split('n')[1];
+    const nextSibiling = document.getElementById(`n${parseInt(fieldName) + 1}`);
+    if(nextSibiling !== null){
+        nextSibiling.focus();
+    }}
+    e.target.placeholder = e.target.value;
+    // setCode(code + e.target.value);
+  };
+
   return (
     <>
-      <div>DeleteTfa</div>
-      {badAttempt ? <div>Attempt failed</div> : <></>}
-      <form onSubmit={handleCodeSubmit}>
-        <label htmlFor="avatar">2FA:</label>
-        <input
-          type="text"
-          placeholder="Enter the 6 figures code"
-          onChange={onCodeChange}
-        />
-        <button disabled={!validCode ? true : false}>Activate 2FA</button>
-      </form>
+    <div className="tfa_container">
+        <input className="tfa_checkbox" id="submitted" type="checkbox" tabIndex={-1}/>
+
+<form className={badAttempt? "tfa-form bad_attempt" : "tfa-form"} onSubmit={handleCodeSubmit}>
+
+	<input className="tfa-number-input" type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n1" name="n1" autoFocus/>
+	<input className="tfa-number-input" type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n2" name="n2"/>
+	<input className="tfa-number-input" type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n3" name="n3"/>
+	<input className="tfa-number-input" type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n4" name="n4"/>
+	<input className="tfa-number-input" type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n5" name="n5"/>
+	<input className="tfa-number-input" type="number" onChange={(e) => { handleNextInput(e) }} min="0" max="9" maxLength={1} placeholder=" " id="n6" name="n6"/>
+
+	<button className="submit" itemType="button" tabIndex={1}  id="n7"></button>
+
+	<span className="indicator"></span>
+
+</form>
+    </div>
     </>
   );
 };

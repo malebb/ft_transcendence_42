@@ -27,7 +27,7 @@ import { imageFileFilter } from './user.upload.utils';
 import { NeutralUser } from './types';
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
-const IMG_REGEX = /^(image\/)(?:png|jpg|jpeg|gif|png|svg)$/;
+const IMG_REGEX = /^(image\/)(?:png|jpg|jpeg|gif|webp)$/;
 export const storage = {
   storage: diskStorage({
     destination: './uploads/profileimages',
@@ -39,6 +39,7 @@ export const storage = {
     },
   }),
   fileFilter: imageFileFilter,
+  limits: { fileSize: 1000000 },
 };
 //TODO everybody can accept and decline other user pendingrequest BIG PROBLEM
 // @UseGuards(JwtGuard)
@@ -52,20 +53,20 @@ export class UserController {
   }
 
   @Get('profile/:userid')
-  getUserProfile(@Param('userid') userid: string) {
-    return this.userService.getUserProfile(parseInt(userid));
+  getUserProfile(@Param('userid', ParseIntPipe) userid: number) {
+    return this.userService.getUserProfile(userid);
   }
 
-  @Post()
-  editUser(@GetUser() user: User, @Body() dto: EditUserDto) {
-    return this.userService.editUser(user.id, dto);
-  }
+  // @Post()
+  // editUser(@GetUser() user: User, @Body() dto: EditUserDto) {
+  //   return this.userService.editUser(user.id, dto);
+  // }
 
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('file', storage))
-  uploadImage(@UploadedFile() file, @GetUser() user: User): Promise<User> {
-    return this.userService.uploadPicture(user.id, file.path);
-  }
+  // @Post('upload')
+  // @UseInterceptors(FileInterceptor('file', storage))
+  // uploadImage(@UploadedFile() file, @GetUser() user: User): Promise<User> {
+  //   return this.userService.uploadPicture(user.id, file.path);
+  // }
 
   @Get('get-all-user')
   getAllUser(): Promise<NeutralUser[]> {
@@ -74,7 +75,7 @@ export class UserController {
 
   @Public()
   @Get('profile-image/:imagename')
-  findProfileImage(@Param('imagename') imagename, @Res() res) {
+  findProfileImage(@Param('imagename') imagename: string, @Res() res) {
     return res.sendFile(
       join(process.cwd(), 'uploads/profileimages/' + imagename),
     );
@@ -85,16 +86,7 @@ export class UserController {
   @UseInterceptors(FileInterceptor('file', storage))
   PatchProfile(
     @GetUser() user: User,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          // new MaxFileSizeValidator({ maxSize: 100000 }),
-          new FileTypeValidator({
-            fileType: IMG_REGEX,
-          }),
-        ],
-      }),
-    )
+    @UploadedFile()
     file?: Express.Multer.File,
     @Body() dto?: EditUserDto,
   ) {
@@ -102,8 +94,8 @@ export class UserController {
       this.userService.uploadPicture(user.id, file.path);
     }
     if (dto.login !== undefined) {
-      if (!USER_REGEX.test(dto.login))
-        throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
+      // if (!USER_REGEX.test(dto.login))
+      //   throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
       this.userService.editUsername(user.id, dto);
     }
   }
@@ -111,48 +103,46 @@ export class UserController {
   @Get('send-friend-request/:userid')
   createFriendRequest(
     @GetUser('id') creatorId: number,
-    @Param('userid') receiverId,
+    @Param('userid', ParseIntPipe) receiverId: number,
   ): Promise<string> {
-    return this.userService.createFriendRequest(
-      creatorId,
-      parseInt(receiverId),
-    );
+    return this.userService.createFriendRequest(creatorId, receiverId);
   }
 
   @Get('accept-friend-request-by-userid/:userid')
   acceptFriendRequestByUserId(
     @GetUser('id') myId: number,
-    @Param('userid') userid,
+    @Param('userid', ParseIntPipe) userid: number,
   ) {
-    return this.userService.acceptFriendRequestByUserId(myId, parseInt(userid));
+    return this.userService.acceptFriendRequestByUserId(myId, userid);
   }
 
   @Get('accept-friend-request-by-reqid/:friendrequestid')
-  acceptFriendRequestByReqId(@Param('friendrequestid') requestid) {
-    return this.userService.acceptFriendRequestByReqId(parseInt(requestid));
+  acceptFriendRequestByReqId(
+    @Param('friendrequestid', ParseIntPipe) requestid: number,
+  ) {
+    return this.userService.acceptFriendRequestByReqId(requestid);
   }
 
   @Get('decline-friend-request/:friendrequestid')
-  declineFriendRequestByReqId(@Param('friendrequestid') requestid) {
-    return this.userService.declineFriendRequest(parseInt(requestid));
+  declineFriendRequestByReqId(
+    @Param('friendrequestid', ParseIntPipe) requestid: number,
+  ) {
+    return this.userService.declineFriendRequest(requestid);
   }
   @Get('decline-friend-request-by-userid/:userid')
   declineFriendRequestByUserId(
     @GetUser('id') myId: number,
-    @Param('userid') userid,
+    @Param('userid', ParseIntPipe) userid: number,
   ) {
-    return this.userService.declineFriendRequestByUserId(
-      myId,
-      parseInt(userid),
-    );
+    return this.userService.declineFriendRequestByUserId(myId, userid);
   }
 
   @Get('destroy-friend-request-by-userid/:userid')
   deleteFriendRequestByUserId(
     @GetUser('id') myId: number,
-    @Param('userid') userid,
+    @Param('userid', ParseIntPipe) userid: number,
   ) {
-    return this.userService.deleteFriendRequestByUserId(myId, parseInt(userid));
+    return this.userService.deleteFriendRequestByUserId(myId, userid);
   }
   @Get('friend-list')
   getFriendList(@GetUser('id') userId: number) {
