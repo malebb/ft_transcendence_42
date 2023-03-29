@@ -36,7 +36,6 @@ export const AuthProvider = ({ children }: { children: any }) => {
   useEffect(() => {
 
     const checkRTCookie = async() => {
-      console.log('count  == ' + count);
       setCount(count + 1);
       try{
         // await refresh();

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { AxiosResponse, AxiosInstance, AxiosHeaders } from "axios";
-import axios from "axios";
-import { getToken, axiosMain, axiosToken, axiosAuthReq, HTTP_METHOD, axiosPrivate } from "../../api/axios";
+import { axiosAuthReq, HTTP_METHOD, axiosPrivate } from "../../api/axios";
 import "../../styles/UserProfile.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
@@ -13,6 +12,8 @@ import { FriendType } from "../friends/Friends";
 import Popup from "../../components/Popup";
 import AuthContext from "src/context/TokenContext";
 import Status from "../settings/components/Status";
+import PrivateMessages from "../chat/containers/PrivateMessages";
+import { User } from 'ft_transcendence';
 
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
 const GET_USER_PROFILE = "users/profile/";
@@ -163,7 +164,6 @@ const UserProfile = () => {
           setPicture(
             GET_PROFILE_PICTURE + profile.profilePicture.split("/")[2]
           );
-        console.log(picture);
         await axiosAuthReq(HTTP_METHOD.GET, GET_STATUS_PATH + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setFriendStatus);
       }
     };
@@ -174,7 +174,6 @@ const UserProfile = () => {
     if (confirmed) {
       try {
         const sendingReq: AxiosResponse = await axiosPrivate.get("users/destroy-friend-request-by-userid/" + paramUserId);
-        console.log(JSON.stringify(sendingReq.data));
         setFriendStatus("");
         setShowConfirmation(false);
         //return sendingReq.data;
@@ -268,23 +267,76 @@ const UserProfile = () => {
 
   useEffect(() => {
     const checkIfFriend = async () => {
-      let friendList: FriendType[] = [];
-      let profileUser: NeutralUser;
-      let myProfile: NeutralUser;
-
-      axiosInstance.current = axiosPrivate;
-      friendList = (await axiosInstance.current.get("/users/friend-list")).data;
-      profileUser = (
-        await axiosInstance.current.get("/users/profile/" + paramUserId)
-      ).data;
-      myProfile = (await axiosInstance.current.get("/users/me")).data;
-      if (profileUser.id === myProfile.id) setIsFriend(true);
-      friendList.forEach((friend) => {
-        if (friend.id === profileUser.id) setIsFriend(true);
-      });
+		try
+		{
+			let friendList: FriendType[] = [];
+			let myProfile: NeutralUser;
+	
+			axiosInstance.current = axiosPrivate;
+			friendList = (await axiosInstance.current.get("/users/friend-list")).data;
+   			myProfile = (await axiosInstance.current.get("/users/me")).data;
+   			if (Number(paramUserId) === myProfile.id)
+			{
+		 		setIsFriend(true);
+				return ;
+			}
+			friendList.forEach((friend) => {
+	        if (friend.id === Number(paramUserId))
+			{
+				setIsFriend(true);
+				return ;
+			}
+   	   		});
+			setIsFriend(false);
+		}
+		catch (error: any)
+		{
+			console.log('error: ', error);
+		}
     };
     checkIfFriend();
   }, [paramUserId]);
+
+  function openMessage(): void {
+    document.getElementById("myForm")!.style.display = "block";
+	const chatContainer = document.getElementById('chatContainer');
+	chatContainer!.scrollTop = chatContainer!.scrollHeight;
+  }
+
+	function MessageSection()
+	{
+  		const [currentUser, setCurrentUser] = useState<User | null>();
+
+		useEffect(() => {
+			const initCurrentUser = async () =>
+			{
+				try
+				{
+				axiosInstance.current = axiosPrivate;
+				const response: AxiosResponse = await axiosInstance.current.get('/users/me');
+				setCurrentUser(response.data);
+				}
+				catch (error: any) { console.log('error: ', error)}
+			}
+			initCurrentUser();
+		}, [paramUserId]);
+
+		if (currentUser && currentUser.id !== Number(paramUserId))
+		{
+		 return (
+		 <>
+			 <img className="openMsgbutton" onClick={openMessage} src="http://localhost:3000/images/msgLogo.png"/>
+				 <div className="pop_up">
+					 <div className="arrow_down"></div>
+		 			<p>Click here & let's chat !</p>
+				</div>
+		  		<PrivateMessages />
+		  </>
+		  );
+		}
+		else
+			return (<></>);
+	}
 
   return (
     <div>
@@ -301,10 +353,11 @@ const UserProfile = () => {
             src={picture}
             alt="profile_picture"
           />
-          {/* </div> */}
-          <div id="divprofileName" className="divprofileName">
-            <p className="profileName">{user?.username?.slice(0, 15)}</p>
-            <Status id={paramUserId!} />
+		  <div id="divprofileName" className="divprofileName">
+		 	 <p className="profileName">{user?.username?.slice(0, 15)}</p>
+
+			 <Status id={Number(paramUserId)} />
+			 <MessageSection />
           </div>
           <Popup
             apparent={showConfirmation}

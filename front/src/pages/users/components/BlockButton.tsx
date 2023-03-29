@@ -17,7 +17,7 @@ const BlockButton = (props: BlockButtonProps) =>
 
 	const updateBlockStatus = useCallback(async () =>
 	{
-		axiosInstance.current = await axiosPrivate
+		axiosInstance.current = axiosPrivate
 		const userBlockedResponse = await axiosInstance.current.get('/users/blocked/' + props.userIdToBlock);
 		if (userBlockedResponse.data.length)
 			setBlocked(true);
@@ -34,7 +34,7 @@ const BlockButton = (props: BlockButtonProps) =>
 	{
 		try
 		{
-			axiosInstance.current = await axiosPrivate
+			axiosInstance.current = axiosPrivate
 			if (!blocked)
 				axiosInstance.current = await axiosInstance.current.patch('/users/block/' + props.userIdToBlock);
 			else

@@ -85,6 +85,11 @@ function Rooms()
 				setNameInfo('Only numbers or letters');
 				document.getElementById('nameInfo')!.style.color = 'red';
 			}
+			else if (!/[A-Za-z]+/.test(roomName))
+			{
+				setNameInfo('Minimum one letter');
+				document.getElementById('nameInfo')!.style.color = 'red';
+			}
 			else
 				return (true);
 			return (false);
@@ -114,10 +119,10 @@ function Rooms()
 					return ;
 				if (!checkName(roomName))
 					return ;
-				axiosInstance.current = await axiosPrivate;
+				axiosInstance.current = axiosPrivate;
 				if (!isNameAvailable(roomName, await axiosInstance.current!.get('/chatRoom/publicInfos/' + roomName)))
 					return ;
-				axiosInstance.current = await axiosPrivate;
+				axiosInstance.current = axiosPrivate;
 				await axiosInstance.current!.post('/chatRoom/',
 				{
 					name: roomName,
@@ -247,8 +252,9 @@ function Rooms()
 		{
 			try
 			{
-				axiosInstance.current = await axiosPrivate;
-				await axiosInstance.current.patch('/chatRoom/joinRoom/' + roomName, "password=" + roomPassword);
+				axiosInstance.current = axiosPrivate;
+				await axiosInstance.current.patch('/chatRoom/joinRoom/' + roomName, {password: roomPassword},
+				{headers: { "Content-type": "application/json"}});
 				enterRoom(roomName);
 			}
 			catch (error: any)
@@ -268,7 +274,7 @@ function Rooms()
 			e.preventDefault();
 			try
 			{
-				axiosInstance.current = await axiosPrivate;
+				axiosInstance.current = axiosPrivate;
 				const room: AxiosResponse = await axiosInstance.current.get('chatRoom/publicInfos/' + chatRoom.name);
 				if (room.data.accessibility === 'PROTECTED' ||
 				room.data.accessibility === 'PRIVATE_PROTECTED')
@@ -342,7 +348,7 @@ function Rooms()
 			{
 				try
 				{
-					axiosInstance.current = await axiosPrivate;
+					axiosInstance.current = axiosPrivate;
 					const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/publicInfos/' + newChatRoomSelected);
 					accessibilityAfterSelect.current = room.data.accessibility;
 					const ban: AxiosResponse = await axiosInstance.current.get('/chatRoom/myBan/' + newChatRoomSelected);
@@ -442,7 +448,7 @@ function Rooms()
 					let chatRooms: AxiosResponse;
 					if (chatRoomFilter === 'JOINED')
 					{
-						axiosInstance.current = await axiosPrivate;
+						axiosInstance.current = axiosPrivate;
 						chatRooms = await axiosInstance.current!.get('/chatRoom/joined/');
 					}
 					else

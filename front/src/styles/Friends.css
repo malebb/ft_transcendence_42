@@ -216,3 +216,8 @@ main {
   padding: 30px;
   width: calc(100% - 195px);
 }
+
+.friendUsername
+{
+	margin-left: 20px;
+}

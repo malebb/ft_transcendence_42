@@ -211,18 +211,6 @@ export class MessageService {
 		return messages;
   }
 
-  async deleteAllMessagesByRoomName(roomName: string) {
-    await this.prisma.message.deleteMany({
-      where: {
-        room: {
-          name: roomName,
-        },
-      },
-    });
-
-    return roomName;
-  }
-
   async checkIfPrivateConvExist(userId1: number, userId2: number) {
     const conv = await this.prisma.privateMessage.findFirst({
       where: {
