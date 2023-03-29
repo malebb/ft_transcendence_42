@@ -544,7 +544,7 @@ export default function Canvas()
 			{
 				draw.current!.skins = [];
 				axiosInstance.current = axiosPrivate;
-				await axiosInstance.current!.patch('/pong/skin', "skin=" +  name);
+				await axiosInstance.current!.patch('/pong/skin', {skin: name}, {headers: { "Content-type": "application/json"}});
 				menu();
 			}
 			catch (error: any)
@@ -577,8 +577,8 @@ export default function Canvas()
 		{
 			try
 			{
-				axiosInstance.current = await axiosPrivate;
-				axiosInstance.current!.patch('/pong/map', "map=" + name);
+				axiosInstance.current = axiosPrivate;
+				await axiosInstance.current!.patch('/pong/map', {map: name}, {headers: { "Content-type": "application/json"}});
 				menu();
 			}
 			catch (error: any)
