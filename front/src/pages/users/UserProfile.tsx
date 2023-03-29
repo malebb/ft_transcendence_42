@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { AxiosResponse, AxiosInstance, AxiosHeaders } from "axios";
-import axios from "axios";
-import { getToken, axiosMain, axiosToken, axiosAuthReq, HTTP_METHOD, axiosPrivate } from "../../api/axios";
+import { axiosAuthReq, HTTP_METHOD, axiosPrivate } from "../../api/axios";
 import "../../styles/UserProfile.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
@@ -268,20 +267,33 @@ const UserProfile = () => {
 
   useEffect(() => {
     const checkIfFriend = async () => {
-      let friendList: FriendType[] = [];
-      let profileUser: NeutralUser;
-      let myProfile: NeutralUser;
-
-      axiosInstance.current = axiosPrivate;
-      friendList = (await axiosInstance.current.get("/users/friend-list")).data;
-      profileUser = (
-        await axiosInstance.current.get("/users/profile/" + paramUserId)
-      ).data;
-      myProfile = (await axiosInstance.current.get("/users/me")).data;
-      if (profileUser.id === myProfile.id) setIsFriend(true);
-      friendList.forEach((friend) => {
-        if (friend.id === profileUser.id) setIsFriend(true);
-      });
+		try
+		{
+			let friendList: FriendType[] = [];
+			let profileUser: NeutralUser;
+			let myProfile: NeutralUser;
+	
+			axiosInstance.current = axiosPrivate;
+			friendList = (await axiosInstance.current.get("/users/friend-list")).data;
+   			myProfile = (await axiosInstance.current.get("/users/me")).data;
+   			if (Number(paramUserId) === myProfile.id)
+			{
+		 		setIsFriend(true);
+				return ;
+			}
+			friendList.forEach((friend) => {
+	        if (friend.id === profileUser.id)
+			{
+				setIsFriend(true);
+				return ;
+			}
+   	   		});
+			setIsFriend(false);
+		}
+		catch (error: any)
+		{
+			console.log('error: ', error);
+		}
     };
     checkIfFriend();
   }, [paramUserId]);

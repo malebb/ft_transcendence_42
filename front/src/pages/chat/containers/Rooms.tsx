@@ -85,6 +85,11 @@ function Rooms()
 				setNameInfo('Only numbers or letters');
 				document.getElementById('nameInfo')!.style.color = 'red';
 			}
+			else if (!/[A-Za-z]+/.test(roomName))
+			{
+				setNameInfo('Minimum one letter');
+				document.getElementById('nameInfo')!.style.color = 'red';
+			}
 			else
 				return (true);
 			return (false);
