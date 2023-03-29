@@ -21,7 +21,7 @@ import NotAuthRoutes from "./privateRoute/NotAuthRoutes";
 import NotFound from "./error/NotFound";
 import Logout from "./logout/Logout";
 import { SocketProvider } from '../context/SocketContext';
-import Canvas from './home/components/Canvas';
+import Challenge from './challenge/Challenge';
 
 /*<Route element={<PrivateRoutes /> } ></Route>
         </Route>*/
@@ -111,7 +111,7 @@ function App() {
             <Route path="/user" element={<User />} />
             <Route path="/history" element={<History />} />
             <Route path="/friends" element={<Friends />} />
-            <Route path="/challenge/:challengeId" element={<Canvas />} />
+            <Route path="/challenge/:challengeId" element={<Challenge />} />
             <Route path="/games/:gameId?" element={<Games />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/chat/room/:roomName" element={<ChatRoomBase />} />
