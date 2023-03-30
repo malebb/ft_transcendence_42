@@ -1,3 +1,21 @@
 .hiden {
   visibility: hidden;
 }
+
+.ft_button{
+  margin: 5px;
+  padding: 5px;
+  padding-left: 2px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: rgb(0, 0, 0);
+  border-radius: 8px;
+}
+.ft_button:hover{
+  border-color: rgb(30, 30, 30);
+}
+
+.signin_btn{
+  margin: 7px;
+  border-color: rgb(30, 30, 30);
+}

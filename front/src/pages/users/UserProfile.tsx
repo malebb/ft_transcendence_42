@@ -157,6 +157,7 @@ const UserProfile = () => {
   useEffect(() => {
     const treatData = async () => {
       const profile = await axiosAuthReq(HTTP_METHOD.GET, GET_USER_PROFILE + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setUser);
+      console.log(profile);
       if (profile === undefined) return ;
       if (profile !== undefined){
         if (validURL(profile.profilePicture)) setPicture(profile.profilePicture);

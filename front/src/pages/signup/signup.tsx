@@ -121,6 +121,7 @@ const Signup = () => {
       ) : (
         <>
         <Headers/>
+        <main>
         <section className="sign-section">
           <p
             ref={errRef}
@@ -259,7 +260,7 @@ const Signup = () => {
               <br />
             </p>
             <button
-              className="btn btn-transparent"
+              className="btn btn-transparent signin_btn"
               disabled={!validName || !validPwd || !validMatch ? true : false}
             >
               Sign up
@@ -267,11 +268,12 @@ const Signup = () => {
           </form>
           <div className="signup_div_signin">
             <p>Already have an account?</p>
-            <Link className="btn btn-transparent Signin-Link" to="/signin">
+            <Link className="Signup-Link" to="/signin">
               Sign in
             </Link>
           </div>
         </section>
+        </main>
         </>
       )}
     </>

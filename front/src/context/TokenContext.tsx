@@ -33,10 +33,9 @@ export const AuthProvider = ({ children }: { children: any }) => {
   const [count, setCount] = useState<number>(0);
 
   const refresh = useRefreshToken();
-  useEffect(() => {
 
-    const checkRTCookie = async() => {
-      setCount(count + 1);
+  const checkRTCookie = async() => {
+
       try{
         // await refresh();
       const response : AxiosResponse = await axiosMain.post<SignInterface>(REFRESH_PATH);
@@ -50,9 +49,15 @@ export const AuthProvider = ({ children }: { children: any }) => {
         console.log(err)
       }
     }
-    
+
+  useEffect(() => {
     checkRTCookie();
   }, [])
+
+  useEffect(() => {
+    const id = setInterval(checkRTCookie, 300000);
+    return () => clearInterval(id);
+}, []);
 
   return (
     <AuthContext.Provider

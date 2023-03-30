@@ -215,6 +215,7 @@ button img{position: relative;
           )}
         </main>
       ) : (
+        <main>
         <section className="sign-section">
           <p
             ref={errRef}
@@ -271,23 +272,26 @@ button img{position: relative;
               onBlur={() => setPwdFocus(false)}
             />
 
-            <button className="btn btn-transparent" disabled={!validEmail || !validPwd ? true : false}>
+            <button className="btn btn-transparent signin_btn" disabled={!validEmail || !validPwd ? true : false}>
               Sign in
             </button>
           </form>
           <div>
-            <button
+            {/* <button
               className="btn btn-transparent"
               type="button"
               onClick={handle42Button}
-            >
-              <img
+            > */}
+              <input type="image"
+                draggable='false'
+                className="ft_button"
+                onClick={handle42Button}
                 alt="42_logo"
                 src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg"
                 width="60"
               />
               {/* <a href='https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code'>LOGIN AS STUDENT</a> */}
-            </button>
+            {/* </button> */}
           </div>
           <div className="signup_div_signin">
             <p>Don't have an account?</p>
@@ -296,6 +300,7 @@ button img{position: relative;
             </Link>
           </div>
         </section>
+</main>
       )}
     </>
   );
