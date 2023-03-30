@@ -1,6 +1,8 @@
 import jwt_decode from "jwt-decode";
 import { Socket } from "socket.io";
+import { verify }  from 'jsonwebtoken';
 import { WsException } from '@nestjs/websockets';
+import { UserService } from '../user/user.service';
 
 type JwtDecoded = 
 {
@@ -23,4 +25,23 @@ export const isAuthEmpty = (client: Socket) =>
 	else
 		return (false);
 	return (true);
+}
+
+export const getIdIfValid = async (client: Socket, secret: string, userService: UserService) =>
+{
+	if (isAuthEmpty(client))
+		return (0);
+	try
+	{
+		verify(client.handshake.auth.token, secret);
+		const id = getIdFromToken(client.handshake.auth.token);
+		const user = await userService.getUserProfile(id);
+		if (user)
+			return (id)
+	}
+	catch (error: any)
+	{
+		client.emit('error', new WsException('Invalid credentials'));
+	}
+	return (0);
 }

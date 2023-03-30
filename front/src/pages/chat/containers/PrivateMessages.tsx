@@ -1,5 +1,4 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { axiosToken, getToken } from "src/api/axios";
 import { Socket, io } from "socket.io-client";
 import { Message, MessageType, User } from "ft_transcendence";
 import { AxiosInstance, AxiosResponse } from "axios";
@@ -47,7 +46,7 @@ function PrivateMessages() {
 
 	const fetchChallenge = async () =>
 	{
-		axiosInstance.current = await axiosPrivate;
+		axiosInstance.current = axiosPrivate;
 		await axiosInstance.current!.get("/challenge/myChallenges").then((response) => {
 		if (response.data)
 			setChallenges(response);
@@ -58,11 +57,11 @@ function PrivateMessages() {
 
   useEffect(() => {
     const fetchData = async () => {
-      axiosInstance.current = await axiosPrivate;
+      axiosInstance.current = axiosPrivate;
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-      axiosInstance.current = await axiosPrivate;
+      axiosInstance.current = axiosPrivate;
       await axiosInstance
         .current!.get("/users/profile/" + friendId.paramUserId)
         .then((response) => {
@@ -96,7 +95,7 @@ function PrivateMessages() {
           joinRoom().then(function (data) {
             room.current = data;
           const getAllMessages = async () => {
-            axiosInstance.current = await axiosPrivate;
+            axiosInstance.current = axiosPrivate;
             await axiosInstance
             .current!.get("/message/private/" + JSON.stringify(room.current))
             .then((response) => {
@@ -132,7 +131,7 @@ function PrivateMessages() {
     fetchChallenge();
   }, [friendId.userId]);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 
     event.preventDefault();
     if (!inputMessage?.length) return;
@@ -145,7 +144,6 @@ function PrivateMessages() {
       type: MessageType["STANDARD" as keyof typeof MessageType],
       challengeId: 0,
     };
-
     socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
       msg: newMessage,
       room: room.current,

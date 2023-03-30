@@ -20,6 +20,8 @@ import { Logger, Body } from '@nestjs/common';
 import { getIdFromToken } from '../../gatewayUtils/gatewayUtils';
 import { UseGuards } from '@nestjs/common';
 import { WsGuard } from '../../auth/guard/ws.guard';
+import { ConfigService } from '@nestjs/config';
+import { getIdIfValid } from '../../gatewayUtils/gatewayUtils';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -37,25 +39,29 @@ export class MessageGateway
   // va bind l'application MessageService
   constructor(private messageService: MessageService,
 			 private chatRoomService: ChatRoomService,
-			 private userService: UserService) {}
+			 private userService: UserService,
+			 private config: ConfigService) {}
 
   // creation d'une instance server
   @WebSocketServer()
   server: Server;
 
-  handleConnection(client: Socket) {
-    const sockets = this.server.sockets;
+  async handleConnection(client: Socket) {
+	  const id = await getIdIfValid(client, this.config.get('JWT_SECRET'), this.userService);
+	  if (!id)
+	  {
+		  client.disconnect();
+		  return ;
+	  }
   }
 
-  @UseGuards(WsGuard)
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
     client.join(String(room?.name));
   }
 
-  @UseGuards(WsGuard)
   @SubscribeMessage('SEND_ROOM_MESSAGE')
-  async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token) {
+  async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token: string) {
 	const id = getIdFromToken(token);
 	try
 	{
@@ -70,7 +76,6 @@ export class MessageGateway
 	}
   }
 
-  @UseGuards(WsGuard)
   @SubscribeMessage('SEND_PRIVATE_ROOM_MESSAGE')
   async receivePrivateMessage(client: Socket, data)
   {
@@ -80,7 +85,6 @@ export class MessageGateway
 	    client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
   }
 
-  @UseGuards(WsGuard)
   @SubscribeMessage('JOIN_PRIVATE_ROOM')
   async joinPrivateRoom(client: Socket, data) {
       const privateRoom = await this.messageService.createPrivateRoom(
@@ -92,7 +96,6 @@ export class MessageGateway
   }
 
   handleDisconnect(client: Socket) {
-    const sockets = this.server.sockets;
   }
 }
 

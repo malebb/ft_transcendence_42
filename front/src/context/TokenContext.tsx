@@ -54,11 +54,6 @@ export const AuthProvider = ({ children }: { children: any }) => {
     checkRTCookie();
   }, [])
 
-  useEffect(() => {
-    const id = setInterval(checkRTCookie, 300000);
-    return () => clearInterval(id);
-}, []);
-
   return (
     <AuthContext.Provider
       value={{
