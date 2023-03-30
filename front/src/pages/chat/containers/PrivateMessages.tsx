@@ -226,8 +226,9 @@ function PrivateMessages() {
   };
 
   const createInvitation = async (member: User, powerUpMode: boolean) => {
+  console.log('member = ', member);
     try {
-      axiosInstance.current = await axiosPrivate;
+      axiosInstance.current = axiosPrivate;
       const challengeResponse = await axiosInstance.current.post(
         "/challenge/",
         { powerUpMode: powerUpMode, receiverId: member.id },
@@ -237,6 +238,7 @@ function PrivateMessages() {
           },
         }
       );
+	  console.log('challenge response = ', challengeResponse);
       socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
         msg: {
           user: currentUser.current,
@@ -250,7 +252,6 @@ function PrivateMessages() {
         receiverId: member.id,
         type: MessageType["INVITATION" as keyof typeof MessageType],
       });
-      socket.current!.disconnect();
       window.location.href =
         "http://localhost:3000/challenge/" + challengeResponse.data;
     } catch (error: any) {

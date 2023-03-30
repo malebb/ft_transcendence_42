@@ -305,8 +305,7 @@ const ChatRoomBase = () =>
 	const initPasswordInfo = (room: AxiosResponse) =>
 	{
 		if (room.data.accessibility === 'PROTECTED' ||
-			(room.data.accessibility === 'PRIVATE'
-				&& room.data.password !== '')) {
+			room.data.accessibility === 'PRIVATE_PROTECTED') {
 			setPasswordInfo("Change the room password : ");
 			setBtnValue("Change");
 		}

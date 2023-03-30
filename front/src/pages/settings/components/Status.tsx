@@ -79,12 +79,14 @@ function Status({ id }: { id: number }) {
 				{
 					clearTimeout(statusTimeout.current);
 					statusTimeout.current = setTimeout(async () => {
+
+      					axiosInstance.current = axiosPrivate;
 	    				await axiosInstance.current!.get("/users/profile/" + id).then((response) =>
 						{
 							if (response.data.status !== userStatus)
 								setUserStatus(response.data.status);
     					});
-					}, 5000)
+					}, 1000)
 				}
 			});
 		}

@@ -9,8 +9,6 @@ import { Socket, Server } from 'socket.io';
 import { UserService } from './user.service';
 import { getIdFromToken, isAuthEmpty, getIdIfValid } from '../gatewayUtils/gatewayUtils';
 import { GetUser } from '../auth/decorator';
-import { UseGuards } from '@nestjs/common';
-import { WsGuard } from '../auth/guard/ws.guard';
 import { Activity } from '@prisma/client';
 import { Friend } from './types/friend.type';
 import { ConfigService } from '@nestjs/config';
@@ -63,7 +61,6 @@ export class UserGateway
 		this.emitStatusToFriends(id, 'ONLINE');
 	}
 
-	@UseGuards(WsGuard)
 	@SubscribeMessage('IN_GAME')
 	handleInGame(@GetUser() token: string)
 	{
@@ -73,7 +70,6 @@ export class UserGateway
 		this.emitStatusToFriends(userId, 'IN_GAME');
 	}
 
-	@UseGuards(WsGuard)
 	@SubscribeMessage('ONLINE')
 	handleOnline(@GetUser() token: string)
 	{
@@ -82,7 +78,6 @@ export class UserGateway
 		this.emitStatusToFriends(userId, 'ONLINE');
 	}
 
-	@UseGuards(WsGuard)
 	@SubscribeMessage('OFFLINE')
 	handleOffline(@GetUser() token: string)
 	{

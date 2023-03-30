@@ -1,6 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { AxiosInstance, AxiosResponse } from "axios";
-import { axiosToken, getToken } from "src/api/axios";
 import { useParams } from "react-router-dom";
 import { ChatRoom } from "ft_transcendence";
 import { Socket, io } from "socket.io-client";
@@ -26,7 +25,6 @@ function MessagesContainer() {
   const socket = useRef<Socket | null>(null);
   let newMessage: Message;
   let [muteTimeLeft, setMuteTimeLeft] = useState<string>("");
-  const [initSocket, setInitSocket] = useState<boolean>(false);
 
   const ScrollToBottom = () => {
     // fait defiler la page vers le bas : utilise scrollview
@@ -53,7 +51,7 @@ function MessagesContainer() {
           currentRoom.current = response.data;
           socket.current?.emit("JOIN_ROOM", currentRoom.current);
         });
-      axiosInstance.current = await axiosPrivate;
+      axiosInstance.current = axiosPrivate;
       await axiosInstance
         .current!.get("/message/" + currentRoom.current?.name)
         .then((response) => {
