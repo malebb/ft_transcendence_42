@@ -173,11 +173,9 @@ function MessagesContainer() {
             currentUser.current!.username === message?.user?.username;
 
           return (
-            <>
               <div key={index + 1} className="chat-wrapper">
                 {genMessage(isCurrentUser, message)}
               </div>
-            </>
           );
         })}
       </>
