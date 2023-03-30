@@ -94,6 +94,7 @@
 	row-gap: 1em;
 	color: white;
 	margin-left: 8px;
+	/* width: 100%; */
 }
 
 .chat-username > span:first-child {
@@ -105,7 +106,7 @@
 	display: flex;
 	align-items: center;
 	margin-left: auto;
-	
+	width: max-content;
 }
 
 .chatPage {
@@ -143,3 +144,18 @@ a:link {
 	text-decoration: none;
  }
 
+.textareaSender {
+	font: inherit;
+resize: none;
+  /* height: 20px; */
+  /* width: 100%; */
+  color: white;
+  background-color: transparent;
+  border: none;
+  /* align-items: center; */
+   /* overflow-y: hidden; */
+   display: flex;
+   align-items: center;
+   margin-left: auto;
+
+}

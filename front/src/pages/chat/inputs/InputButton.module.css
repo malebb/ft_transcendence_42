@@ -5,12 +5,12 @@
 	display: flex;
 	align-items: center;
 	margin-left: 8px;
-	/* margin-top: 12px; */
   }
   .sendInput > input {
 	border: 8px;
 	flex: 1;
 	font-size: 17px;
+	font: inherit;
   }
   .sendInput > input:focus-visible {
 	outline: none;
@@ -25,3 +25,16 @@
 	color: white;
 	cursor: pointer;
   }
+
+.textarea{
+font: inherit;
+resize: none;
+  height: 20px;
+  width: 100%;
+  border: none;
+  align-items: center;
+   overflow-y: hidden;
+  } 
+.textarea:focus {
+	outline: none;
+}

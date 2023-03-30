@@ -11,8 +11,6 @@ import "./message.style.css";
 import style from "../inputs/InputButton.module.css";
 
 function MessagesContainer() {
-  // declaration d'une variable d'etat
-  // useState = hook d'etat (pour une variable)
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const currentUser = useRef<User | null>(null);
@@ -30,9 +28,23 @@ function MessagesContainer() {
     });
   };
 
-  // https://devtrium.com/posts/async-functions-useeffect
+  function adjustTextareaHeight() {
+	const tx = document.getElementsByTagName("textarea");
+	function onInput(this: HTMLTextAreaElement) {
+		this.style.height = "0px";
+		this.style.height = (this.scrollHeight) + "px";
+	  }
+	for (let i = 0; i < tx.length; i++) {
+		if (tx[i].value == '') {
+		  tx[i].setAttribute("style", "height:" + 20 + "px;overflow-y:hidden;");
+		} else {
+		  tx[i].setAttribute("style", "height:" + (tx[i].scrollHeight) + "px;overflow-y:hidden;");
+		}
+		tx[i].addEventListener("input", onInput, false);
+	  }
+  }
+
   useEffect(() => {
-    // declare the async data fetching function
     const fetchData = async () => {
       // get the data from the api
       axiosInstance.current = await axiosToken();
@@ -117,7 +129,14 @@ function MessagesContainer() {
     setInputMessage("");
   }
 
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      handleSubmit(event as unknown as React.FormEvent<HTMLFormElement>);
+    }
+  }
+
   useEffect(() => {
+	adjustTextareaHeight();
     scrollToBottom();
   }, [stateMessages]);
 
@@ -155,8 +174,8 @@ function MessagesContainer() {
             <span className="date">{genDate(newMessage)}</span>
             <div className="chat-username">
               {/* <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username }</Link> : </span> */}
-              <span>{newMessage?.user?.username + " : "}</span>
-              <span>{newMessage.message}</span>
+              <span >{newMessage?.user?.username + " : "}</span>
+              <textarea className="textareaSender" defaultValue={newMessage.message}></textarea>
             </div>
           </div>
         </>
@@ -187,14 +206,16 @@ function MessagesContainer() {
             <GenMessages />
           </div>
           <p className="muteMsg">{muteTimeLeft}</p>
-          <form onSubmit={handleSubmit} className={style.sendInput}>
-              <input
+          <form id="myForm" onSubmit={handleSubmit} className={style.sendInput}>
+              <textarea
               name="messageInput"
               placeholder="Tell us what you are thinking"
               autoComplete="off"
               value={inputMessage}
               onChange={(event) => setInputMessage(event.target.value)}
-            />
+			  onKeyDown={handleKeyDown}
+			  className={style.textarea}
+            ></textarea>
             <button type="submit">SEND</button>
           </form>
         </div>
@@ -226,5 +247,15 @@ export default MessagesContainer;
 
   useState render first time :
   https://stackoverflow.com/questions/54069253/the-usestate-set-method-is-not-reflecting-a-change-immediately
+
+
+  shrink input text message
+  https://stackoverflow.com/questions/454202/creating-a-textarea-with-auto-resize
+
+  lien interessant pour les event input
+  https://devtrium.com/posts/react-typescript-events
+
+  async function :
+	https://devtrium.com/posts/async-functions-useeffect
 
 */

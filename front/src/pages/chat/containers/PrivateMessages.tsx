@@ -193,7 +193,7 @@ function PrivateMessages({ id }: { id: string }) {
           <>
             <div className="chat-receiver">
               <span>{newMessage?.user?.username + " : "}</span>
-              <span>{newMessage.message}</span>
+              <textarea >{newMessage.message}</textarea>
               {newMessage.type === "INVITATION" &&
               !isChallengeFinished(newMessage.challengeId) ? (
                 <button
@@ -323,10 +323,12 @@ function PrivateMessages({ id }: { id: string }) {
         <form id="myForm" onSubmit={handleSubmit} className={style.sendInput}>
           <input
             name="messageInput"
-            placeholder="Write here..."
+            // placeholder="Write here..."
             autoComplete="off"
             onChange={(event) => setInputMessage(event.target.value)}
-          />
+          >
+		  </input>
+
           <button type="submit">SEND</button>
           <img
             className={style.challengeLogo}
