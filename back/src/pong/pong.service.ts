@@ -44,7 +44,7 @@ export class PongService {
 		queue.push(player);
 	}
 
-	removeFromQueue(playerId: string) {
+	async removeFromQueue(playerId: string) {
 		for (let i = 0; i < this.queue.length; ++i) {
 			if (this.queue[i].id == playerId)
 				this.queue.splice(i, 1);
@@ -56,7 +56,7 @@ export class PongService {
 		for (let i = 0; i < this.challengers.length; ++i) {
 			if (this.challengers[i].challengerId == playerId) {
 				try {
-					this.challengeService.deleteChallenge(this.challengers[i].challengeId, this.challengers[i].challenger.userId);
+					await this.challengeService.deleteChallenge(this.challengers[i].challengeId, this.challengers[i].challenger.userId);
 				}
 				catch (error: any) {
 					console.log('error (delete challenge) :', error);
@@ -338,7 +338,7 @@ export class PongService {
 
 	async updateHistory(leftId: number, rightId: number,
 		leftScore: number, rightScore: number) {
-		this.historyService.addGamePlayed(leftId,
+		await this.historyService.addGamePlayed(leftId,
 			rightId, leftScore, rightScore);
 	}
 
