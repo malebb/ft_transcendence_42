@@ -62,8 +62,10 @@ export class UserGateway
 	}
 
 	@SubscribeMessage('IN_GAME')
-	handleInGame(@GetUser() token: string)
+	handleInGame(@GetUser() token: string | undefined)
 	{
+		if (token === undefined)
+			return ;
 		const userId = getIdFromToken(token);
 		this.userService.setUserOnLineOffline(userId, "IN_GAME");
 		this.server.emit('CHANGE_STATUS', {status: 'IN_GAME', id: userId});
@@ -71,16 +73,20 @@ export class UserGateway
 	}
 
 	@SubscribeMessage('ONLINE')
-	handleOnline(@GetUser() token: string)
+	handleOnline(@GetUser() token: string | undefined)
 	{
+		if (token === undefined)
+			return ;
 		const userId = getIdFromToken(token);
 		this.userService.setUserOnLineOffline(userId, "ONLINE");
 		this.emitStatusToFriends(userId, 'ONLINE');
 	}
 
 	@SubscribeMessage('OFFLINE')
-	handleOffline(@GetUser() token: string)
+	handleOffline(@GetUser() token: string | undefined)
 	{
+		if (token === undefined)
+			return ;
 		const userId = getIdFromToken(token);
 		this.userService.setUserOnLineOffline(userId, "OFFLINE");
 		this.emitStatusToFriends(userId, 'OFFLINE');

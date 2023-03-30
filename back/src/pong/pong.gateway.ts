@@ -14,7 +14,6 @@ import { Socket,
 import { Player } from "ft_transcendence"
 import { WsException } from '@nestjs/websockets';
 import jwt_decode from "jwt-decode";
-import { verify }  from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { getIdIfValid } from '../gatewayUtils/gatewayUtils';
 import { UserService } from '../user/user.service';
@@ -120,10 +119,13 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 		return (false);
 	}
 
-	checkCredentialsOnEvent(player: Socket, token: string)
+	checkCredentialsOnEvent(player: Socket, token: string | undefined)
 	{
 		if (token === undefined)
+		{
 			player.emit('error', new WsException('Invalid credentials'));
+			return (0);
+		}
 		try
 		{
 			const jwtDecoded: JwtDecoded = jwt_decode(token);
@@ -144,7 +146,7 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 
 
 	@SubscribeMessage('joinRoom')
-	joinRoom(@ConnectedSocket() player : Socket, @MessageBody() data: any, @GetUser() token: string)
+	joinRoom(@ConnectedSocket() player : Socket, @MessageBody() data: any, @GetUser() token: string | undefined)
 	{
 		const playerId: number = this.checkCredentialsOnEvent(player, token);
 		if (!playerId)
@@ -153,7 +155,7 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
     }
 
 	@SubscribeMessage('movePlayer')
-	movePlayer(@ConnectedSocket() player: Socket, @MessageBody() data : any, @GetUser() token: string)
+	movePlayer(@ConnectedSocket() player: Socket, @MessageBody() data : any, @GetUser() token: string | undefined)
 	{
 		const playerId: number = this.checkCredentialsOnEvent(player, token);
 		if (!playerId)
@@ -164,7 +166,7 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
   	}
 
 	@SubscribeMessage('speedPowerUp')
-	speedPowerUp(@ConnectedSocket() player: Socket, @MessageBody() data : any, @GetUser() token: string)
+	speedPowerUp(@ConnectedSocket() player: Socket, @MessageBody() data : any, @GetUser() token: string | undefined)
 	{
 		const playerId: number = this.checkCredentialsOnEvent(player, token);
 		if (!playerId)

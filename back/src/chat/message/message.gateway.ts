@@ -61,7 +61,9 @@ export class MessageGateway
   }
 
   @SubscribeMessage('SEND_ROOM_MESSAGE')
-  async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token: string) {
+  async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token: string | undefined) {
+	if (token === undefined)
+		return ;
 	const id = getIdFromToken(token);
 	try
 	{
