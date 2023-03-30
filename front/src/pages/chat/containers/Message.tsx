@@ -172,11 +172,13 @@ function MessagesContainer() {
         <>
           <div className="chat-sender">
             <span className="date">{genDate(newMessage)}</span>
-            <div className="chat-username">
+			  {/* <label className="textareaContainer"> */}
+            <div className="textareaContainer" >
               {/* <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username }</Link> : </span> */}
-              <span >{newMessage?.user?.username + " : "}</span>
-              <textarea className="textareaSender" defaultValue={newMessage.message}></textarea>
-            </div>
+              <span className="chatUsername" >{newMessage?.user?.username + " : "}</span>
+              <textarea rows={1} className="textareaSender" defaultValue={newMessage.message}></textarea>
+			</div>
+			  {/* </label> */}
           </div>
         </>
       );

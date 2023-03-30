@@ -84,20 +84,8 @@
 	align-items: center;
 }
 
-.chat-username {
-	background-color: #547EBE;
-	margin-right: 8px;
-	border-radius: 8px;
-	padding: 8px 16px;
-	color: white;
-	display: flex;
-	row-gap: 1em;
-	color: white;
-	margin-left: 8px;
-	/* width: 100%; */
-}
-
-.chat-username > span:first-child {
+.chatUsername{
+	font:inherit;
 	font-weight: bold;
 	margin-right: 4px;
 }
@@ -106,7 +94,6 @@
 	display: flex;
 	align-items: center;
 	margin-left: auto;
-	width: max-content;
 }
 
 .chatPage {
@@ -147,15 +134,20 @@ a:link {
 .textareaSender {
 	font: inherit;
 resize: none;
-  /* height: 20px; */
-  /* width: 100%; */
   color: white;
   background-color: transparent;
   border: none;
-  /* align-items: center; */
-   /* overflow-y: hidden; */
-   display: flex;
-   align-items: center;
-   margin-left: auto;
-
+  min-width: 10px;
+  max-width: none;
+}
+.textareaContainer
+{
+	background-color: #547EBE;
+	margin-right: 8px;
+	border-radius: 8px;
+	padding: 8px 16px;
+	color: white;
+	margin-left: 8px;
+	display: flex;
+	align-items: center;
 }
