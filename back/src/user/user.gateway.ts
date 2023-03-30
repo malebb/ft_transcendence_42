@@ -58,6 +58,7 @@ export class UserGateway
 		  client.disconnect();
 		  return ;
 	  }
+	  this.clients.push(client);
 		this.userService.setUserOnLineOffline(id, "ONLINE");
 		this.emitStatusToFriends(id, 'ONLINE');
 	}
