@@ -11,9 +11,6 @@ import style from "../inputs/InputButton.module.css"
 import useAxiosPrivate from "src/hooks/usePrivate";
 import AuthContext from "src/context/TokenContext";
 function MessagesContainer() { 
-  // declaration d'une variable d'etat
-  // useState = hook d'etat (pour une variable)
-
   const axiosPrivate = useAxiosPrivate();
   const {token} = useContext(AuthContext);
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
@@ -26,18 +23,33 @@ function MessagesContainer() {
   let newMessage: Message;
   let [muteTimeLeft, setMuteTimeLeft] = useState<string>("");
 
-  const ScrollToBottom = () => {
-    // fait defiler la page vers le bas : utilise scrollview
-    // pour defiler jusqu'a la fin de la div
+  const scrollToBottom = () => {
     document.getElementById("chatContainer")?.scrollTo({
       top: document.getElementById("chatContainer")?.scrollHeight,
       behavior: "smooth",
     });
   };
 
-  // https://devtrium.com/posts/async-functions-useeffect
+  function adjustTextareaHeight() {
+    const tx = document.getElementsByTagName("textarea");
+    function onInput(this: HTMLTextAreaElement) {
+      this.style.height = "0px";
+      this.style.height = this.scrollHeight + "px";
+    }
+    for (let i = 0; i < tx.length; i++) {
+      if (tx[i].value == "") {
+        tx[i].setAttribute("style", "height:" + 20 + "px;overflow-y:hidden;");
+      } else {
+        tx[i].setAttribute(
+          "style",
+          "height:" + tx[i].scrollHeight + "px;overflow-y:hidden;"
+        );
+      }
+      tx[i].addEventListener("input", onInput, false);
+    }
+  }
+
   useEffect(() => {
-    // declare the async data fetching function
     const fetchData = async () => {
       // get the data from the api
       axiosInstance.current = axiosPrivate;
@@ -56,14 +68,11 @@ function MessagesContainer() {
         .current!.get("/message/" + currentRoom.current?.name)
         .then((response) => {
           setStateMessages(response.data);
+          scrollToBottom();
         });
     };
     fetchData().catch(console.error);
   }, [roomId]);
-
-  useEffect(() => {
-    ScrollToBottom();
-  }, [stateMessages]);
 
   useEffect(() => {
     socket.current = io("ws://localhost:3333/chat", {
@@ -79,18 +88,16 @@ function MessagesContainer() {
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-      socket.current!.on("ROOM_MESSAGE", async (message: Message) => {
+      await socket.current!.on("ROOM_MESSAGE", async (message: Message) => {
         const blocked: AxiosResponse = await axiosInstance.current!.get(
           "/users/blocked/" + message.user.id
         );
         if (!blocked.data.length) {
-          if (message.user.id !== currentUser.current?.id)
-            setStateMessages((stateMessages) => [...stateMessages, message]);
-          if (message.user.id === currentUser.current!.id)
-            setMuteTimeLeft("");
+          setStateMessages((stateMessages) => [...stateMessages, message]);
+          if (message.user.id === currentUser.current!.id) setMuteTimeLeft("");
         }
       });
-      socket.current!.on("MUTE", (mute) => {
+      await socket.current!.on("MUTE", async (mute) => {
         setMuteTimeLeft(
           "You are muted (" + formatRemainTime(mute.penalties) + ")"
         );
@@ -103,8 +110,13 @@ function MessagesContainer() {
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-
     event.preventDefault();
+
+    if (muteTimeLeft != "") {
+      setInputMessage("");
+      return;
+    }
+
     if (!inputMessage?.length) return;
 
     const dateTS = new Date();
@@ -117,12 +129,20 @@ function MessagesContainer() {
       challengeId: 0,
     };
 
-    if (muteTimeLeft == "") {
-      socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
-      setStateMessages([...stateMessages, newMessage]);
-    }
+    await socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
     setInputMessage("");
   }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      handleSubmit(event as unknown as React.FormEvent<HTMLFormElement>);
+    }
+  }
+
+  useEffect(() => {
+    adjustTextareaHeight();
+    scrollToBottom();
+  }, [stateMessages]);
 
   const GenMessages = () => {
     const genDate = (date: Message): string => {
@@ -136,30 +156,27 @@ function MessagesContainer() {
       if (!isCurrentUser) {
         return (
           <>
-            {" "}
-            <div className="chat-receiver">
-              {/* <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username}</Link> : </span> */}
-              {/* <span>{newMessage.message}</span> */}
-              <span>
+            <div className="chat-container-receiver">
+              <div className="chat-text-container-receiver">
                 <a className="a" href={"/user/" + newMessage.user.id}>
-                  {" "}
                   {newMessage?.user?.username}
                 </a>
-              </span>
-              <span>{" : " + newMessage.message}</span>
+                <div className="dot">{":"}</div>
+                <p className="chat-text">{newMessage.message}</p>
+              </div>
+              <span className="date">{genDate(newMessage)}</span>
             </div>
-            <span className="date">{genDate(newMessage)}</span>
           </>
         );
       }
       return (
         <>
-          <div className="chat-sender">
+          <div className="chat-container-sender">
             <span className="date">{genDate(newMessage)}</span>
-            <div className="chat-username">
-              {/* <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username }</Link> : </span> */}
-              <span>{newMessage?.user?.username + " : "}</span>
-              <span>{newMessage.message}</span>
+            <div className="chat-text-container-sender">
+              <span className="chatUsername">{newMessage?.user?.username}</span>
+              <div className="dot">{":"}</div>
+              <p className="chat-text">{newMessage.message}</p>
             </div>
           </div>
         </>
@@ -185,19 +202,21 @@ function MessagesContainer() {
   return (
     <>
       <div className="chatPage">
-        <div id="content">
+        <div id="content" className="chatRoomContent">
           <div id="chatContainer">
             <GenMessages />
           </div>
           <p className="muteMsg">{muteTimeLeft}</p>
-          <form onSubmit={handleSubmit} className={style.sendInput}>
-            <input
+          <form id="myForm" onSubmit={handleSubmit} className={style.sendInput}>
+            <textarea
               name="messageInput"
               placeholder="Tell us what you are thinking"
               autoComplete="off"
               value={inputMessage}
               onChange={(event) => setInputMessage(event.target.value)}
-            />
+              onKeyDown={handleKeyDown}
+              className={style.textarea}
+            ></textarea>
             <button type="submit">SEND</button>
           </form>
         </div>
@@ -223,5 +242,21 @@ export default MessagesContainer;
   car l'état précédent est conservé dans la closure
   de la fonction de mise à jour (useEffect)
   Prend donc l'etat precedent, au lieu du tableau et retourne le nouveau
+
+  prop key:
+  https://stackoverflow.com/questions/28329382/understanding-unique-keys-for-array-children-in-react-js/43892905#43892905
+
+  useState render first time :
+  https://stackoverflow.com/questions/54069253/the-usestate-set-method-is-not-reflecting-a-change-immediately
+
+
+  shrink input text message
+  https://stackoverflow.com/questions/454202/creating-a-textarea-with-auto-resize
+
+  lien interessant pour les event input
+  https://devtrium.com/posts/react-typescript-events
+
+  async function :
+	https://devtrium.com/posts/async-functions-useeffect
 
 */
