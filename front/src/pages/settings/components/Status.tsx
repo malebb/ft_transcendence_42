@@ -3,7 +3,6 @@ import { AxiosInstance } from "axios";
 
 import { AxiosResponse } from "axios";
 import styleStatus from "../../../styles/status.module.css";
-import styleMessage from "../../../styles/private.message.module.css";
 import { SocketContext } from '../../../context/SocketContext';
 import { Activity } from 'ft_transcendence';
 import useAxiosPrivate from "src/hooks/usePrivate";
@@ -83,16 +82,20 @@ function Status({ id }: { id: number }) {
 					statusTimeout.current = setTimeout(async () => {
 
       					axiosInstance.current = axiosPrivate;
+						try {
 	    				await axiosInstance.current!.get("/users/profile/" + id).then((response) =>
 						{
 							if (response.data.status !== userStatus)
 								setUserStatus(response.data.status);
     					});
+					} catch (error) {
+						console.log(error);
+					}
 					}, 1000)
 				}
 			});
 		}
-		initSocket();
+		initSocket().catch(console.error);
 	}, [id, userStatus, socket]);
 
   const GenStatus = () => {

@@ -238,6 +238,8 @@ const User = () => {
     if (myRef.current)
       myRef.current.click();
   }
+
+
   return (
     <>
       <Sidebar />
@@ -251,62 +253,115 @@ const User = () => {
       />
       <h1>{errMsg}</h1>
       {validUser ? (
-        <>
-        <h1 className="settings-User">SETTINGS</h1>
-        <main className="grid-container-User">
-          <section className="section-modif-User">
-            <div className="profilePicture-User">
-            <img
-              src={image ? image : picture}
-              className="picture-User"
-              alt="profile_picture"
-            />
-                <button className="show button-changePicture reverse-btn btn-file" onClick={redirectClick}>
-                <SvgIcon component={UploadFileIcon}/>
+//         <>
+//         <h1 className="settings-User">SETTINGS</h1>
+//         <main className="grid-container-User">
+//           <section className="section-modif-User">
+//             <div className="profilePicture-User">
+//             <img
+//               src={image ? image : picture}
+//               className="picture-User"
+//               alt="profile_picture"
+//             />
+//                 <button className="show button-changePicture reverse-btn btn-file" onClick={redirectClick}>
+//                 <SvgIcon component={UploadFileIcon}/>
+// </button>
+// </div>
+//             <form className="form-User display-flex-column" onSubmit={handleSubmit}>
+//               <label className="hiden" htmlFor="avatar">
+//                 <p className="display-none">Choose a profile picture:</p>
+//                 <input
+//                   type="file"
+//                   onChange={onImageChange}
+//                   className="display-none"
+//                   id="avatar"
+//                   name="avatar"
+//                   ref={myRef}
+//                   accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+//                 />
+//               </label>
+//               <input
+//                 type={"text"}
+//                 className="name-field-User"
+//                 id="username"
+//                 value={Login}
+//                 autoComplete="off"
+//                 onChange={(e) => setLogin(e.target.value)}
+//                 required
+//               />
+//               <button className={validLogin? "save-btn-User btn-transparent fit-content save-btn-valid-User" : "save-btn-User btn-transparent fit-content save-btn-unvalid-User "} disabled={!validLogin ? true : false}>Save</button>
+//             </form>
+//           </section>
+//           <section className="section-settings-User">
+//             <div className="tfa-User">
+//             <label>Activate Google Authentificator 2FA</label>
+//             {/* <input type={'checkbox'} checked={isTFA} onChange={printQrCode}/> */}
+//             <Switch
+//               checked={isTFA}
+//               onChange={
+//                 isTFA
+//                   ? (e: any) =>
+//                       display2faModel(popupDeleteContent, "/2fadelete")
+//                   : (e: any) => navigate("/2factivate")
+//               }
+//             />
+//           </div>
+//           </section>
+//         </main>
+//         </>
+<>
+
+  <div className={styleSettings.marginContentsSetting}>
+	<div className={styleSettings.allContents}>
+<h1 className={styleSettings.title}>SETTINGS</h1>
+	<img
+	  src={image ? image : picture}
+	  className={styleSettings.picture}
+	  alt="profile_picture"
+	/>
+		<button className={styleSettings.changePicture} onClick={redirectClick}>
+		<SvgIcon component={UploadFileIcon}/>
 </button>
-</div>
-            <form className="form-User display-flex-column" onSubmit={handleSubmit}>
-              <label className="hiden" htmlFor="avatar">
-                <p className="display-none">Choose a profile picture:</p>
-                <input
-                  type="file"
-                  onChange={onImageChange}
-                  className="display-none"
-                  id="avatar"
-                  name="avatar"
-                  ref={myRef}
-                  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-                />
-              </label>
-              <input
-                type={"text"}
-                className="name-field-User"
-                id="username"
-                value={Login}
-                autoComplete="off"
-                onChange={(e) => setLogin(e.target.value)}
-                required
-              />
-              <button className={validLogin? "save-btn-User btn-transparent fit-content save-btn-valid-User" : "save-btn-User btn-transparent fit-content save-btn-unvalid-User "} disabled={!validLogin ? true : false}>Save</button>
-            </form>
-          </section>
-          <section className="section-settings-User">
-            <div className="tfa-User">
-            <label>Activate Google Authentificator 2FA</label>
-            {/* <input type={'checkbox'} checked={isTFA} onChange={printQrCode}/> */}
-            <Switch
-              checked={isTFA}
-              onChange={
-                isTFA
-                  ? (e: any) =>
-                      display2faModel(popupDeleteContent, "/2fadelete")
-                  : (e: any) => navigate("/2factivate")
-              }
-            />
-          </div>
-          </section>
-        </main>
-        </>
+	<form  onSubmit={handleSubmit}>
+	  <label  htmlFor="avatar">
+		<p >Choose a profile picture:</p>
+		<input
+		  type="file"
+		  onChange={onImageChange}
+		  className="display-none"
+		  id="avatar"
+		  name="avatar"
+		  ref={myRef}
+		  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+		/>
+	  </label>
+	  <input
+		type={"text"}
+		className="name-field-User"
+		id="username"
+		value={Login}
+		autoComplete="off"
+		onChange={(e) => setLogin(e.target.value)}
+		required
+	  />
+	  <button className={validLogin? "save-btn-User btn-transparent fit-content save-btn-valid-User" : "save-btn-User btn-transparent fit-content save-btn-unvalid-User "} disabled={!validLogin ? true : false}>Save</button>
+	</form>
+	<div >
+	<label>Activate Google Authentificator 2FA</label>
+	<Switch
+	  checked={isTFA}
+	  onChange={
+		isTFA
+		  ? (e: any) =>
+			  display2faModel(popupDeleteContent, "/2fadelete")
+		  : (e: any) => navigate("/2factivate")
+	  }
+	/>
+  </div>
+  </div>
+  </div>
+</>
+
       ) : (
         <main></main>
       )}

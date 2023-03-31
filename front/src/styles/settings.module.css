@@ -1,0 +1,71 @@
+.marginContentsSetting {
+	margin-left: 5rem;
+	margin-top: 6rem;
+}
+
+.allContents {
+	margin: auto;
+	padding: 10px;
+}
+
+.title {
+	font: inherit;
+	font-size: xx-large;
+	text-align: center;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	background-color: var(--seis);
+	border-radius: 12px;
+	padding: 8px;
+	margin-right: 200px;
+	margin-left: 200px;
+}
+ 
+.picture {
+	position: relative;
+	left: 35px;
+	width: 100px;
+	height: 100px;
+	border-radius: 50px;
+	object-position: center;
+	border-width: 2px;
+	vertical-align: middle;
+}
+
+.changePicture {
+	background-color: #3ba340;
+	width: -moz-fit-content;
+	width: fit-content;
+	padding: 8px 11px;
+	border-style: none;
+	border-radius: 40px;
+	margin: 0 auto;
+	position: relative;
+	left: 50px;
+	top: 4px;
+}
+
+.changePicture:hover {
+	box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+	opacity: 0.6;
+}
+
+.changePicture:active {
+	opacity: 0.3;
+}
+
+
+  .profilePicture-User {
+    grid-area: profilePicture-User;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1.5fr 0.5fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      " . "
+      "btn-file";
+    grid-area: profilePicture-User;
+    /* width: 10em; */
+    /* height: 10em; */
+  }
