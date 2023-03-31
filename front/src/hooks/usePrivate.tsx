@@ -2,17 +2,52 @@ import { axiosPrivate } from "../api/axios";
 import { useEffect } from "react";
 import useRefreshToken from "./useRefreshToken";
 import useAuth from "./useAuth";
+import { useNavigate } from "react-router-dom";
 
 const useAxiosPrivate = () => {
     const refresh = useRefreshToken();
-    const { token } = useAuth();
+    const context = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
+        function doesHttpOnlyCookieExist(cookiename: string) {
+            var d = new Date();
+            d.setTime(d.getTime() + (1000));
+            var expires = "expires=" + d.toUTCString();
+          
+            document.cookie = cookiename + "=new_value;path=/;" + expires;
+            return document.cookie.indexOf(cookiename + '=') === -1;
+        }
+        
+        if (!doesHttpOnlyCookieExist('rt_token'))
+        {
+            context.setToken(undefined);
+            context.setUserId(undefined);
+            context.setUsername(undefined);
+            navigate("/")
+        }}, []);
+    useEffect(() => {
+        // function doesHttpOnlyCookieExist(cookiename: string) {
+        //     var d = new Date();
+        //     d.setTime(d.getTime() + (1000));
+        //     var expires = "expires=" + d.toUTCString();
+          
+        //     document.cookie = cookiename + "=new_value;path=/;" + expires;
+        //     return document.cookie.indexOf(cookiename + '=') === -1;
+        // }
+        
+        // if (!doesHttpOnlyCookieExist('rt_token'))
+        // {
+        //     context.setToken(undefined);
+        //     context.setUserId(undefined);
+        //     context.setUsername(undefined);
+        //     navigate("/")
+        // }
 
         const requestIntercept = axiosPrivate.interceptors.request.use(
             (config) => {
                 if (!config.headers['Authorization']) {
-                    config.headers['Authorization'] = `Bearer ${token?.access_token}`;
+                    config.headers['Authorization'] = `Bearer ${context.token?.access_token}`;
                 }
                 return config;
             }, (error) => Promise.reject(error)
@@ -36,7 +71,7 @@ const useAxiosPrivate = () => {
             axiosPrivate.interceptors.request.eject(requestIntercept);
             axiosPrivate.interceptors.response.eject(responseIntercept);
         }
-    }, [token, refresh])
+    }, [context.token, refresh])
 
     return axiosPrivate;
 }
