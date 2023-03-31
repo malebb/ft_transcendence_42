@@ -44,7 +44,7 @@ export class PongService {
 		queue.push(player);
 	}
 
-	removeFromQueue(playerId: string) {
+	async removeFromQueue(playerId: string) {
 		for (let i = 0; i < this.queue.length; ++i) {
 			if (this.queue[i].id == playerId)
 				this.queue.splice(i, 1);
@@ -56,7 +56,7 @@ export class PongService {
 		for (let i = 0; i < this.challengers.length; ++i) {
 			if (this.challengers[i].challengerId == playerId) {
 				try {
-					this.challengeService.deleteChallenge(this.challengers[i].challengeId, this.challengers[i].challenger.userId);
+					await this.challengeService.deleteChallenge(this.challengers[i].challengeId, this.challengers[i].challenger.userId);
 				}
 				catch (error: any) {
 					console.log('error (delete challenge) :', error);
@@ -108,7 +108,7 @@ export class PongService {
 		else
 			this.challengers.push(challenger);
 		player.on("disconnecting", () => {
-			this.stopRoom(player);
+			this.stopRoom(player, playerData);
 		});
 	}
 
@@ -195,11 +195,11 @@ export class PongService {
 			this.runRoom(room.id, server);
 		}
 		player.on("disconnecting", () => {
-			this.stopRoom(player);
+			this.stopRoom(player, playerData);
 		});
 	}
 
-	stopRoom(player: Socket) {
+	stopRoom(player: Socket, playerData: PlayerData) {
 		let roomToLeave: string | undefined;
 
 		roomToLeave = Array.from(player.rooms)[1];
@@ -215,6 +215,26 @@ export class PongService {
 				}
 				player.to(roomToLeave).emit("opponentDisconnection");
 				this.rooms[roomToLeave].playerGoneCount++;
+				if (this.rooms[roomToLeave].leftPlayer.score !== this.scoreToWin
+				   && this.rooms[roomToLeave].rightPlayer.score !== this.scoreToWin)
+			   {
+					if (this.rooms[roomToLeave].leftPlayer.id === playerData.userId)
+					{
+						this.updateStats(this.rooms[roomToLeave].rightPlayer,
+							this.rooms[roomToLeave].leftPlayer,
+							this.rooms[roomToLeave].powerUpMode);
+					}
+					else
+					{
+						this.updateStats(this.rooms[roomToLeave].leftPlayer,
+							this.rooms[roomToLeave].rightPlayer,
+							this.rooms[roomToLeave].powerUpMode);
+					}
+					this.updateHistory(this.rooms[roomToLeave].leftPlayer.id,
+						this.rooms[roomToLeave].rightPlayer.id,
+						this.rooms[roomToLeave].leftPlayer.score,
+						this.rooms[roomToLeave].rightPlayer.score);
+			   }
 			}
 		}
 	}
@@ -318,7 +338,7 @@ export class PongService {
 
 	async updateHistory(leftId: number, rightId: number,
 		leftScore: number, rightScore: number) {
-		this.historyService.addGamePlayed(leftId,
+		await this.historyService.addGamePlayed(leftId,
 			rightId, leftScore, rightScore);
 	}
 

@@ -13,12 +13,15 @@ import { GetUser } from '../../auth/decorator';
 // necessaires pour les messages des utilisateurs
 import { MessageService } from './message.service';
 import { ChatRoomService } from '../chatRoom/chatRoom.service';
+import { UserService } from '../../user/user.service';
 // interfaces :
 import { ChatRoom, Message } from 'ft_transcendence';
 import { Logger, Body } from '@nestjs/common';
 import { getIdFromToken } from '../../gatewayUtils/gatewayUtils';
 import { UseGuards } from '@nestjs/common';
 import { WsGuard } from '../../auth/guard/ws.guard';
+import { ConfigService } from '@nestjs/config';
+import { getIdIfValid } from '../../gatewayUtils/gatewayUtils';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -33,34 +36,34 @@ import { WsGuard } from '../../auth/guard/ws.guard';
 export class MessageGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  private readonly logger = new Logger(MessageGateway.name);
-
   // va bind l'application MessageService
   constructor(private messageService: MessageService,
-			 private chatRoomService: ChatRoomService) {}
+			 private chatRoomService: ChatRoomService,
+			 private userService: UserService,
+			 private config: ConfigService) {}
 
   // creation d'une instance server
   @WebSocketServer()
   server: Server;
 
-  handleConnection(client: Socket) {
-    // const sockets = this.server.sockets;
-    // console.log(`Message Socket client with id: ${client.id} connected.`);
-
-    //console.log(`Message Socket client with id: ${client.id} connected.`);
-    // this.logger.log(`Message Socket client with id: ${client.id} connected.`);
-    // this.logger.debug(`Number of connected sockets: ${sockets.size}`);
+  async handleConnection(client: Socket) {
+	  const id = await getIdIfValid(client, this.config.get('JWT_SECRET'), this.userService);
+	  if (!id)
+	  {
+		  client.disconnect();
+		  return ;
+	  }
   }
 
-  @UseGuards(WsGuard)
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
     client.join(String(room?.name));
   }
 
-  @UseGuards(WsGuard)
   @SubscribeMessage('SEND_ROOM_MESSAGE')
-  async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token) {
+  async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token: string | undefined) {
+	if (token === undefined)
+		return ;
 	const id = getIdFromToken(token);
   const mute1 = await this.chatRoomService.myMute(message!.room!.name, id);
   if (mute1.penalties.length)
@@ -78,16 +81,15 @@ export class MessageGateway
 	}
   }
 
-  @UseGuards(WsGuard)
   @SubscribeMessage('SEND_PRIVATE_ROOM_MESSAGE')
   async receivePrivateMessage(client: Socket, data)
   {
    await this.messageService.updatePrivateConv(data.room.id, data.msg.message, data.senderId, data.receiverId, data.msg.type, data.msg.challengeId);
-
-    client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
+   	const blocked = await this.userService.getBlocked(data.senderId, data.receiverId);
+	if (!blocked.length)
+	    client.to(data.room?.name).emit("RECEIVE_PRIVATE_ROOM_MESSAGE", data.msg);
   }
 
-  @UseGuards(WsGuard)
   @SubscribeMessage('JOIN_PRIVATE_ROOM')
   async joinPrivateRoom(client: Socket, data) {
       const privateRoom = await this.messageService.createPrivateRoom(
@@ -99,8 +101,6 @@ export class MessageGateway
   }
 
   handleDisconnect(client: Socket) {
-    // const sockets = this.server.sockets;
-    // console.log(`Disconnected id: ${client.id}.`);
   }
 }
 

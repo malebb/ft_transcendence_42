@@ -11,7 +11,7 @@ export const GetUser = createParamDecorator(
 	    request = ctx.switchToWs();
 		if (!Object.keys(request.args[0].handshake.auth).length
 			|| request.args[0].handshake.auth.token === undefined)
-			return ('');
+			return (undefined);
 		return(request.args[0].handshake.auth.token);
 	}
 

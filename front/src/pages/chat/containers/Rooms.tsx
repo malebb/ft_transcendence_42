@@ -1,17 +1,19 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import InputButton from "../inputs/InputButton";
 import { accessibilitiesForCreation } from "../utils/RoomAccessibilities";
 import { AxiosInstance, AxiosResponse } from 'axios';
-import { axiosToken } from '../../../api/axios';
 import { ChatRoom, Accessibility } from 'ft_transcendence';
 import './rooms.style.css';
 import { ChatRoomFilter } from '../utils/ChatRoomFilter';
 import { formatRemainTime } from '../utils/Penalty';
 import { trimUsername } from '../../../utils/trim';
+import AuthContext from "src/context/TokenContext";
+import useAxiosPrivate from "src/hooks/usePrivate";
 
 function Rooms()
 {
 	const axiosInstance = useRef<AxiosInstance | null>(null);
+	const axiosPrivate = useAxiosPrivate();
 
 	const CreateRoom = () =>
 	{
@@ -83,6 +85,11 @@ function Rooms()
 				setNameInfo('Only numbers or letters');
 				document.getElementById('nameInfo')!.style.color = 'red';
 			}
+			else if (!/[A-Za-z]+/.test(roomName))
+			{
+				setNameInfo('Minimum one letter');
+				document.getElementById('nameInfo')!.style.color = 'red';
+			}
 			else
 				return (true);
 			return (false);
@@ -112,10 +119,10 @@ function Rooms()
 					return ;
 				if (!checkName(roomName))
 					return ;
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = axiosPrivate;
 				if (!isNameAvailable(roomName, await axiosInstance.current!.get('/chatRoom/publicInfos/' + roomName)))
 					return ;
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = axiosPrivate;
 				await axiosInstance.current!.post('/chatRoom/',
 				{
 					name: roomName,
@@ -245,13 +252,14 @@ function Rooms()
 		{
 			try
 			{
-				axiosInstance.current = await axiosToken();
-				await axiosInstance.current.patch('/chatRoom/joinRoom/' + roomName, "password=" + roomPassword);
+				axiosInstance.current = axiosPrivate;
+				await axiosInstance.current.patch('/chatRoom/joinRoom/' + roomName, {password: roomPassword},
+				{headers: { "Content-type": "application/json"}});
 				enterRoom(roomName);
 			}
 			catch (error: any)
 			{
-				console.log("An error occured when joining the room: ", error);
+				console.log("error occured when joining the room: ", error);
 			}
 		}
 
@@ -266,12 +274,12 @@ function Rooms()
 			e.preventDefault();
 			try
 			{
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = axiosPrivate;
 				const room: AxiosResponse = await axiosInstance.current.get('chatRoom/publicInfos/' + chatRoom.name);
 				if (room.data.accessibility === 'PROTECTED' ||
 				room.data.accessibility === 'PRIVATE_PROTECTED')
 				{
-					axiosInstance.current = await axiosToken();
+					axiosInstance.current = axiosPrivate;
 					await axiosInstance.current.post('/chatRoom/checkPassword/' + chatRoom.name,
 					{password: roomPassword}, { headers: {"Content-Type": "application/json"}});
 					joinRoom(chatRoom.name);
@@ -340,7 +348,7 @@ function Rooms()
 			{
 				try
 				{
-					axiosInstance.current = await axiosToken();
+					axiosInstance.current = axiosPrivate;
 					const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/publicInfos/' + newChatRoomSelected);
 					accessibilityAfterSelect.current = room.data.accessibility;
 					const ban: AxiosResponse = await axiosInstance.current.get('/chatRoom/myBan/' + newChatRoomSelected);
@@ -440,12 +448,12 @@ function Rooms()
 					let chatRooms: AxiosResponse;
 					if (chatRoomFilter === 'JOINED')
 					{
-						axiosInstance.current = await axiosToken();
+						axiosInstance.current = axiosPrivate;
 						chatRooms = await axiosInstance.current!.get('/chatRoom/joined/');
 					}
 					else
 					{
-						axiosInstance.current = await axiosToken();
+						axiosInstance.current = await axiosPrivate;
 						chatRooms = await axiosInstance.current!.get('/chatRoom/notJoined/');
 					}
 					setChatRoomsList(chatRooms.data);

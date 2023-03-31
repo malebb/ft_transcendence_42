@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { io, Socket } from "socket.io-client";
-import { getToken } from '../api/axios';
+import { TokensInterface } from "src/interfaces/Sign";
 
-export const socket: Socket = io(`ws://localhost:3333/user`,
+const socket: Socket = io(`ws://localhost:3333/user`,
 {
 	transports: ["websocket"],
 	forceNew: true,
@@ -11,15 +11,29 @@ export const socket: Socket = io(`ws://localhost:3333/user`,
 
 export const SocketContext = React.createContext<Socket>(socket);
 
-export default SocketContext;
+export const SocketProvider = ({ children, token }: { children: any, token: TokensInterface | undefined | null}) => {
 
-const reconnectSocketOnRefresh = () =>
-{
-	if (getToken() !== null)
-	{
-		socket.auth = {token: getToken().access_token}
-		socket.connect();
-	}
-}
+	useEffect(() => {
+		const reconnectSocketOnRefresh = () =>
+		{
+			if (token !== null && token !== undefined)
+			{
+				socket.auth = {token: token.access_token}
+				socket.connect();
+			}
+		}
+		
+		reconnectSocketOnRefresh();
+	
+	}, [token])
+  
+	 return (
+	   <SocketContext.Provider
+	 	value={socket}
+	   >
+	 	{children}
+	   </SocketContext.Provider>
+	 );
+	
+};
 
-reconnectSocketOnRefresh();

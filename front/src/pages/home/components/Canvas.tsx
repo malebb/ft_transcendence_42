@@ -1,15 +1,16 @@
 import { useRef, useEffect, useState, useContext, useCallback } from "react";
-import Draw from "../../../classes/Draw";
+import Draw from "src/classes/Draw";
 import { io, Socket } from "socket.io-client";
 import { Ball, Room, Player, PlayerData, User } from "ft_transcendence";
-import LinkZone from "../../../interfaces/LinkZone";
-import { axiosToken, getToken } from '../../../api/axios';
+import LinkZone from "src/interfaces/LinkZone";
 import { AxiosInstance, AxiosResponse } from 'axios';
 import { useParams, useNavigate, Link} from 'react-router-dom';
-import { CANVAS_FONT, FONT_COLOR } from '../../../classes/Draw';
-import style from '../../../styles/canvas.module.css';
-import { trimUsername } from '../../../utils/trim';
-import { SocketContext } from '../../../context/SocketContext';
+import { CANVAS_FONT, FONT_COLOR } from "src/classes/Draw";
+import style from 'src/styles/canvas.module.css';
+import { trimUsername } from "src/utils/trim";
+import AuthContext from "src/context/TokenContext";
+import useAxiosPrivate from "src/hooks/usePrivate";
+import { SocketContext } from "src/context/SocketContext";
 
 interface CheckboxData
 {
@@ -41,6 +42,8 @@ export default function Canvas()
 	const {challengeId}						= useParams()
 	const [isChallenger, setIsChallenger]	= useState(true);
 	const statusSocket = useContext(SocketContext);
+	const axiosPrivate = useAxiosPrivate();
+	const { token } = useContext(AuthContext);
 
 	const powerUpEnabled = useCallback (() =>
 	{
@@ -54,7 +57,6 @@ export default function Canvas()
 			return;
 		if (e.key === ' ' && powerUpEnabled())
 		{
-			await axiosToken();
 			socket.current!.emit("speedPowerUp", {roomId : room.current!.id, position: position.current});
 			keyPressed.current = true;
 		}
@@ -81,20 +83,20 @@ export default function Canvas()
 		{
 			function mouseOnZone(e : MouseEvent, textZone : LinkZone) : boolean
 			{
-			var canvas = document.getElementById('canvas');
-			var clickZone = canvas!.getBoundingClientRect();
-
-			if (e.clientX - clickZone.left >= textZone.posX &&
-				e.clientX - clickZone.left <= textZone.posX + textZone.width)
-			{
-				if (e.clientY - clickZone.top >= textZone.posY &&
-				e.clientY - clickZone.top <= textZone.posY + textZone.height)
+				var canvas = document.getElementById('canvas');
+				var clickZone = canvas!.getBoundingClientRect();
+	
+				if (e.clientX - clickZone.left >= textZone.posX &&
+					e.clientX - clickZone.left <= textZone.posX + textZone.width)
 				{
-					return (true);
+					if (e.clientY - clickZone.top >= textZone.posY &&
+					e.clientY - clickZone.top <= textZone.posY + textZone.height)
+					{
+						return (true);
+					}
 				}
+				return (false);
 			}
-			return (false);
-		}
 
 		function addLink(textZone : LinkZone, linkAction : Function, zones : LinkZone[], data : any) : Function []
 		{
@@ -279,7 +281,6 @@ export default function Canvas()
 
 			kd.current.UP.down(async function()
 			{
-				await axiosToken();
 				socket.current!.emit("movePlayer", {roomId : room.current!.id, position: position.current, key: "UP"});
 			});
 
@@ -298,7 +299,7 @@ export default function Canvas()
 
 			try
 			{
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = axiosPrivate;
 				const user: AxiosResponse = await axiosInstance.current!.get('/users/me');
 				map.current = draw.current!.initGameMap(user.data.map);
 				map.current!.onload = function()
@@ -320,7 +321,6 @@ export default function Canvas()
 		{
 			return (new Promise(resolve => {
 				socket.current!.on(socket.current!.id, async (data) => {
-					await axiosToken();
 					socket.current!.emit('joinRoom', {roomId: JSON.parse(data).room.id})
 					resolve(data);
 				});
@@ -394,9 +394,9 @@ export default function Canvas()
 		{
 			try
 			{
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = axiosPrivate;
 				let user: AxiosResponse = await axiosInstance.current!.get('/users/me');
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = axiosPrivate;
 				const currentGames: AxiosResponse = await axiosInstance.current.get('/game/');
 
 				if (isPlayerAlreadyInGame(user.data, currentGames))
@@ -404,7 +404,7 @@ export default function Canvas()
 					alreadyInGame();
 					return ;
 				}
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = axiosPrivate;
 				let challenge: AxiosResponse = await axiosInstance.current!.get('/challenge/' + challengeId);
 				let cancelLink: Function[];
 				let background: HTMLImageElement = draw.current!.initOutGameBackground();
@@ -419,7 +419,7 @@ export default function Canvas()
 					let zones = [cancelZone];
 					let playerData: PlayerData = {userId: user.data.id, id: "", username: user.data.username, skin: user.data.skin, powerUpMode: challenge.data.powerUpMode};
 					let gamePossible = true;
-					axiosInstance.current = await axiosToken();
+					axiosInstance.current = axiosPrivate;
 					socket.current = io(`ws://localhost:3333/pong`,
 					{
 						transports: ["websocket"],
@@ -430,7 +430,7 @@ export default function Canvas()
 									challengeId: challenge.data.id
 								},
 						auth: {
-							token: getToken().access_token
+							token: token!.access_token
 						},
 						forceNew: true
 					});
@@ -481,7 +481,7 @@ export default function Canvas()
 			{
 				try
 				{
-					axiosInstance.current = await axiosToken();
+					axiosInstance.current = axiosPrivate;
 					const user: AxiosResponse = await axiosInstance.current.get('/users/me');
 					draw.current!.outGameBackground(background);
 					draw.current!.matchmaking();
@@ -491,7 +491,7 @@ export default function Canvas()
 						let zones = [cancelZone];
 					let playerData: PlayerData = {userId: user.data.id, id: "", username: user.data.username, skin: user.data.skin, powerUpMode: powerUpMode.current};
 					let alreadyInQueue = false;
-					axiosInstance.current = await axiosToken();
+					axiosInstance.current = axiosPrivate;
 					socket.current = io(`ws://localhost:3333/pong`,
 					{
 						transports: ["websocket"],
@@ -501,7 +501,7 @@ export default function Canvas()
 									challenge: false
 								},
 						auth: {
-							token: getToken().access_token
+							token: token!.access_token
 						},
 						forceNew: true
 					});
@@ -535,8 +535,8 @@ export default function Canvas()
 			try
 			{
 				draw.current!.skins = [];
-				axiosInstance.current = await axiosToken();
-				await axiosInstance.current!.patch('/pong/skin', "skin=" +  name);
+				axiosInstance.current = axiosPrivate;
+				await axiosInstance.current!.patch('/pong/skin', {skin: name}, {headers: { "Content-type": "application/json"}});
 				menu();
 			}
 			catch (error: any)
@@ -569,8 +569,8 @@ export default function Canvas()
 		{
 			try
 			{
-				axiosInstance.current = await axiosToken();
-				axiosInstance.current!.patch('/pong/map', "map=" + name);
+				axiosInstance.current = axiosPrivate;
+				await axiosInstance.current!.patch('/pong/map', {map: name}, {headers: { "Content-type": "application/json"}});
 				menu();
 			}
 			catch (error: any)
@@ -657,11 +657,6 @@ export default function Canvas()
 			animationFrameId.current = window.requestAnimationFrame(render)
 		}
 
-		function redirectSignInPage()
-		{
-			navigate.current('/signin', { replace: true});
-		}
-
 		function signInToPlay()
 		{
 			let background: HTMLImageElement = draw.current!.initOutGameBackground();
@@ -669,10 +664,8 @@ export default function Canvas()
 			background.onload = function()
 			{
 				draw.current!.outGameBackground(background);
-				let signInZone : LinkZone = draw.current!.signInToPlay();
-				let zones = [signInZone];
+				draw.current!.signInToPlay();
 
-				addLink(signInZone, redirectSignInPage, zones, 0);
 			}
 		}
 
@@ -680,7 +673,7 @@ export default function Canvas()
 		{
 			try
 			{
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = axiosPrivate;
 				await axiosInstance.current!.get('/challenge/' + challengeId);
 			}
 			catch (error: any)
@@ -695,23 +688,24 @@ export default function Canvas()
 			setIsChallenger(false);
 		ctx.current = canvasRef.current.getContext("2d");
 		draw.current = new Draw(ctx.current);
-		if (getToken() == null)
+		let googleFont = draw.current!.initFont();
+		document.fonts.add(googleFont);
+		googleFont.load().then(() =>
 		{
-			signInToPlay();
-			return (false);
-		}
-		else
-		{
-			let googleFont = draw.current!.initFont();
-			document.fonts.add(googleFont);
-			googleFont.load().then(() => {
+			if (!token)
+			{
+				signInToPlay();
+				return (false);
+			}
+			else
+			{
 				if (challengeId ===  undefined)
 					menu();
 				else
 					initChallenge();
-			});
-			return (true);
-		}
+				return (true);
+			}
+		});
 		}
 		
 		pong();
@@ -721,8 +715,7 @@ export default function Canvas()
 				stopGame();
 			statusSocket.emit('ONLINE');
 		}
-
-	}, [challengeId, statusSocket, powerUp, stopGame]);
+	}, [challengeId, statusSocket, powerUp, stopGame, token]);
 
 	useEffect(() => {
 		if (socket.current != null)
@@ -735,6 +728,19 @@ export default function Canvas()
 		return (isChallenger ? <h4 id={style.challengeTitle}>Challenge</h4> : <></>);
 	}
 
+	const displayControls = () =>
+	{
+		return (token ? 
+				<div id={style.controlsContainer}>
+					<h4>Controls</h4>
+					<ul id="controls">
+						<li>Move up : <span>UP ARROW</span></li>
+						<li>Move down : <span>DOWN ARROW</span></li>
+						<li>Use power up : <span>SPACE</span></li>
+					</ul>
+				</div> : <></>);
+	}
+
 	const displayCanvas = () =>
 	{
 		if (challengeId === undefined || isChallenger)
@@ -743,14 +749,7 @@ export default function Canvas()
 			<>
 				{challengeTitle()}
 				<center><canvas id="canvas" style={{marginTop: 10}} width={size.current.width} height={size.current.height} ref={canvasRef}></canvas></center>
-				<div id={style.controlsContainer}>
-					<h4>Controls</h4>
-					<ul id="controls">
-						<li>Move up : <span>UP ARROW</span></li>
-						<li>Move down : <span>DOWN ARROW</span></li>
-						<li>Use power up : <span>SPACE</span></li>
-					</ul>
-				</div>
+				{displayControls()}
 			</>
 			);
 		}

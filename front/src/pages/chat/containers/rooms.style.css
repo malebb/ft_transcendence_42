@@ -104,7 +104,8 @@
 #creationPasswordInput
 {
 	position: relative;
-	width: 25px;
+	width: 37px;
+	height: 20px;
 	margin-left: 10px;
 	border: 1px black solid;
 	outline: none;
@@ -236,7 +237,8 @@ select:focus
 .joinPasswordInput
 {
 	position: relative;
-	width: 25px;
+	width: 35px;
+	height: 20px;
 	border: 1px black solid;
 	outline: none;
 	margin-right: 10px;

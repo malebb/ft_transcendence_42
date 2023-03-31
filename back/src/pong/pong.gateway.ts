@@ -14,10 +14,9 @@ import { Socket,
 import { Player } from "ft_transcendence"
 import { WsException } from '@nestjs/websockets';
 import jwt_decode from "jwt-decode";
-import { verify }  from 'jsonwebtoken';
-import { UseGuards } from '@nestjs/common';
-import { WsGuard } from '../auth/guard/ws.guard';
 import { ConfigService } from '@nestjs/config';
+import { getIdIfValid } from '../gatewayUtils/gatewayUtils';
+import { UserService } from '../user/user.service';
 
 type JwtDecoded = 
 {
@@ -39,7 +38,8 @@ interface PlayerConnected
 export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 {
 	constructor(private readonly pongService : PongService,
-			   private readonly config: ConfigService) {}
+			   private readonly config: ConfigService,
+			   private readonly userService: UserService) {}
 
 	playersConnected: PlayerConnected[] = [];
 
@@ -56,43 +56,32 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 		return (false);
 	}
 
-	checkCredentialsOnConnection(player: Socket)
+	async checkCredentialsOnConnection(player: Socket)
 	{
-		if (!Object.keys(player.handshake.auth).length)
-			player.emit('error', new WsException('Invalid credentials'));
-		else if (player.handshake.auth.token === undefined)
-			player.emit('error', new WsException('Invalid credentials'));
-		else
+		const id = await getIdIfValid(player, this.config.get('JWT_SECRET'), this.userService);
+
+		if (id)
 		{
-			try
+			if (this.isUserIdConnected(id))
+				player.emit('error', new WsException('Already connected'));
+			else
 			{
-				verify(player.handshake.auth.token, this.config.get('JWT_SECRET'));
-				const decoded: JwtDecoded = jwt_decode(player.handshake.auth.token)
-				const id = decoded.sub;
-				if (this.isUserIdConnected(id))
-					player.emit('error', new WsException('Already connected'));
-				else
-				{
-					if (player.handshake.query.spectator === 'false')
-						this.playersConnected.push({userId: id, socketId: player.id});
-					return (id);
-				}
-			}
-			catch (error: any)
-			{
-				console.log('error: ', error);
-				player.emit('error', new WsException('Invalid credentials'));
+				if (player.handshake.query.spectator === 'false')
+					this.playersConnected.push({userId: id, socketId: player.id});
+				return (id);
 			}
 		}
 		return (0);
 	}
 
-	handleConnection(player: Socket)
+	async handleConnection(player: Socket)
 	{
-		console.log('Player ' + player.id + " join");
-		const id = this.checkCredentialsOnConnection(player);
+		const id = await this.checkCredentialsOnConnection(player);
 		if (!id)
+		{
+			player.disconnect();
 			return ;
+		}
 		if (player.handshake.query.challenge === 'true')
 			this.pongService.challenge(this.server, player, JSON.parse(String(player.handshake.query.challengeId)),
 				JSON.parse(String(player.handshake.query.playerData)));
@@ -118,7 +107,6 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 		const playerIndex = this.getIndexWithSocketId(player.id);
 		if (playerIndex !== -1)
 			this.playersConnected.splice(playerIndex, 1);
-		console.log('Player ' + player.id + " left");
 	}
 
 	isUserIdConnectedWithSocketId(userId: number, socketId: string)
@@ -131,10 +119,13 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 		return (false);
 	}
 
-	checkCredentialsOnEvent(player: Socket, token: string)
+	checkCredentialsOnEvent(player: Socket, token: string | undefined)
 	{
 		if (token === undefined)
+		{
 			player.emit('error', new WsException('Invalid credentials'));
+			return (0);
+		}
 		try
 		{
 			const jwtDecoded: JwtDecoded = jwt_decode(token);
@@ -154,9 +145,8 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 	}
 
 
-	@UseGuards(WsGuard)
 	@SubscribeMessage('joinRoom')
-	joinRoom(@ConnectedSocket() player : Socket, @MessageBody() data: any, @GetUser() token: string)
+	joinRoom(@ConnectedSocket() player : Socket, @MessageBody() data: any, @GetUser() token: string | undefined)
 	{
 		const playerId: number = this.checkCredentialsOnEvent(player, token);
 		if (!playerId)
@@ -164,9 +154,8 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 		this.pongService.joinRoom(player, data.roomId, playerId, false);
     }
 
-	@UseGuards(WsGuard)
 	@SubscribeMessage('movePlayer')
-	movePlayer(@ConnectedSocket() player: Socket, @MessageBody() data : any, @GetUser() token: string)
+	movePlayer(@ConnectedSocket() player: Socket, @MessageBody() data : any, @GetUser() token: string | undefined)
 	{
 		const playerId: number = this.checkCredentialsOnEvent(player, token);
 		if (!playerId)
@@ -176,9 +165,8 @@ export class GatewayPong implements OnGatewayConnection, OnGatewayDisconnect
 			this.server.to(data.roomId).emit('movePlayer', JSON.stringify({player: playerMoved, position: data.position}));
   	}
 
-	@UseGuards(WsGuard)
 	@SubscribeMessage('speedPowerUp')
-	speedPowerUp(@ConnectedSocket() player: Socket, @MessageBody() data : any, @GetUser() token: string)
+	speedPowerUp(@ConnectedSocket() player: Socket, @MessageBody() data : any, @GetUser() token: string | undefined)
 	{
 		const playerId: number = this.checkCredentialsOnEvent(player, token);
 		if (!playerId)

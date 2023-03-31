@@ -1,32 +1,33 @@
 import {
   Controller,
   Get,
-  UseGuards,
-  Req,
-  Patch,
   Body,
+  Patch,
   Post,
   UseInterceptors,
   UploadedFile,
   Param,
   Res,
+  HttpException,
+  HttpStatus,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
   ParseIntPipe,
 } from '@nestjs/common';
-import { JwtGuard } from '../auth/guard';
 import { GetUser, Public } from '../auth/decorator';
 import { User } from '@prisma/client';
 import { EditUserDto } from './dto';
 import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { fileURLToPath } from 'url';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { extname, join } from 'path';
 import { imageFileFilter } from './user.upload.utils';
-import { FormDataRequest } from 'nestjs-form-data';
-import { stringify } from 'querystring';
-import { Friend, NeutralUser } from './types';
+import { NeutralUser } from './types';
 
+const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
+const IMG_REGEX = /^(image\/)(?:png|jpg|jpeg|gif|webp)$/;
 export const storage = {
   storage: diskStorage({
     destination: './uploads/profileimages',
@@ -38,6 +39,7 @@ export const storage = {
     },
   }),
   fileFilter: imageFileFilter,
+  limits: { fileSize: 1000000 },
 };
 //TODO everybody can accept and decline other user pendingrequest BIG PROBLEM
 // @UseGuards(JwtGuard)
@@ -51,22 +53,20 @@ export class UserController {
   }
 
   @Get('profile/:userid')
-  getUserProfile(@Param('userid') userid: string) {
-    return this.userService.getUserProfile(parseInt(userid));
+  getUserProfile(@Param('userid', ParseIntPipe) userid: number) {
+    return this.userService.getUserProfile(userid);
   }
 
-  @Post()
-  editUser(@GetUser() user: User, @Body() dto: EditUserDto) {
-    return this.userService.editUser(user.id, dto);
-  }
+  // @Post()
+  // editUser(@GetUser() user: User, @Body() dto: EditUserDto) {
+  //   return this.userService.editUser(user.id, dto);
+  // }
 
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('file', storage))
-  uploadImage(@UploadedFile() file, @GetUser() user: User): Object {
-    const ret_user = this.userService.uploadPicture(user.id, file.path);
-
-    return ret_user;
-  }
+  // @Post('upload')
+  // @UseInterceptors(FileInterceptor('file', storage))
+  // uploadImage(@UploadedFile() file, @GetUser() user: User): Promise<User> {
+  //   return this.userService.uploadPicture(user.id, file.path);
+  // }
 
   @Get('get-all-user')
   getAllUser(): Promise<NeutralUser[]> {
@@ -75,7 +75,7 @@ export class UserController {
 
   @Public()
   @Get('profile-image/:imagename')
-  findProfileImage(@Param('imagename') imagename, @Res() res): Object {
+  findProfileImage(@Param('imagename') imagename: string, @Res() res) {
     return res.sendFile(
       join(process.cwd(), 'uploads/profileimages/' + imagename),
     );
@@ -85,68 +85,64 @@ export class UserController {
   // @FormDataRequest()
   @UseInterceptors(FileInterceptor('file', storage))
   PatchProfile(
-    @UploadedFile() file,
     @GetUser() user: User,
-    @Body() dto: EditUserDto,
+    @UploadedFile()
+    file?: Express.Multer.File,
+    @Body() dto?: EditUserDto,
   ) {
-    let ret_pic;
-    let ret_login;
-    if (file !== undefined)
-      ret_pic = this.userService.uploadPicture(user.id, file.path);
-    if (dto.login !== undefined) {
-      ret_login = this.userService.editUsername(user.id, dto);
-      // if (ret_login == null) return 1;
+    if (file !== undefined) {
+      this.userService.uploadPicture(user.id, file.path);
     }
-    //this.userService.editUser(user.id, dto);
-    //if (ret_pic == null) return 2;
-    //return 0;
+    if (dto.login !== undefined) {
+      // if (!USER_REGEX.test(dto.login))
+      //   throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
+      this.userService.editUsername(user.id, dto);
+    }
   }
 
   @Get('send-friend-request/:userid')
   createFriendRequest(
     @GetUser('id') creatorId: number,
-    @Param('userid') receiverId,
+    @Param('userid', ParseIntPipe) receiverId: number,
   ): Promise<string> {
-    return this.userService.createFriendRequest(
-      creatorId,
-      parseInt(receiverId),
-    );
+    return this.userService.createFriendRequest(creatorId, receiverId);
   }
 
   @Get('accept-friend-request-by-userid/:userid')
   acceptFriendRequestByUserId(
     @GetUser('id') myId: number,
-    @Param('userid') userid,
+    @Param('userid', ParseIntPipe) userid: number,
   ) {
-    return this.userService.acceptFriendRequestByUserId(myId, parseInt(userid));
+    return this.userService.acceptFriendRequestByUserId(myId, userid);
   }
 
   @Get('accept-friend-request-by-reqid/:friendrequestid')
-  acceptFriendRequestByReqId(@Param('friendrequestid') requestid) {
-    return this.userService.acceptFriendRequestByReqId(parseInt(requestid));
+  acceptFriendRequestByReqId(
+    @Param('friendrequestid', ParseIntPipe) requestid: number,
+  ) {
+    return this.userService.acceptFriendRequestByReqId(requestid);
   }
 
   @Get('decline-friend-request/:friendrequestid')
-  declineFriendRequestByReqId(@Param('friendrequestid') requestid) {
-    return this.userService.declineFriendRequest(parseInt(requestid));
+  declineFriendRequestByReqId(
+    @Param('friendrequestid', ParseIntPipe) requestid: number,
+  ) {
+    return this.userService.declineFriendRequest(requestid);
   }
   @Get('decline-friend-request-by-userid/:userid')
   declineFriendRequestByUserId(
     @GetUser('id') myId: number,
-    @Param('userid') userid,
+    @Param('userid', ParseIntPipe) userid: number,
   ) {
-    return this.userService.declineFriendRequestByUserId(
-      myId,
-      parseInt(userid),
-    );
+    return this.userService.declineFriendRequestByUserId(myId, userid);
   }
 
   @Get('destroy-friend-request-by-userid/:userid')
   deleteFriendRequestByUserId(
     @GetUser('id') myId: number,
-    @Param('userid') userid,
+    @Param('userid', ParseIntPipe) userid: number,
   ) {
-    return this.userService.deleteFriendRequestByUserId(myId, parseInt(userid));
+    return this.userService.deleteFriendRequestByUserId(myId, userid);
   }
   @Get('friend-list')
   getFriendList(@GetUser('id') userId: number) {
@@ -176,20 +172,26 @@ export class UserController {
   }
 
   @Patch('block/:id')
-  async block(@Param('id', ParseIntPipe) idToBlock: number, @GetUser('id') userId: number)
-  {
-	  await this.userService.block(idToBlock, userId);
+  async block(
+    @Param('id', ParseIntPipe) idToBlock: number,
+    @GetUser('id') userId: number,
+  ) {
+    await this.userService.block(idToBlock, userId);
   }
 
   @Patch('unblock/:id')
-  async unblock(@Param('id', ParseIntPipe) idToBlock: number, @GetUser('id') userId: number)
-  {
-	  await this.userService.unblock(idToBlock, userId);
+  async unblock(
+    @Param('id', ParseIntPipe) idToBlock: number,
+    @GetUser('id') userId: number,
+  ) {
+    await this.userService.unblock(idToBlock, userId);
   }
 
   @Get('blocked/:id')
-  async getBlocked(@Param('id', ParseIntPipe) idBlocked: number, @GetUser('id') userId: number)
-  {
-	  return (await this.userService.getBlocked(idBlocked, userId));
+  async getBlocked(
+    @Param('id', ParseIntPipe) idBlocked: number,
+    @GetUser('id') userId: number,
+  ) {
+    return await this.userService.getBlocked(idBlocked, userId);
   }
 }

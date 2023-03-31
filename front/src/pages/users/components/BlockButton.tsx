@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AxiosInstance } from 'axios';
-import { axiosToken } from '../../../api/axios';
 import '../../../styles/BlockButton.css';
+import useAxiosPrivate from 'src/hooks/usePrivate';
 
 type BlockButtonProps =
 {
@@ -10,13 +10,14 @@ type BlockButtonProps =
 
 const BlockButton = (props: BlockButtonProps) =>
 {
+	const axiosPrivate = useAxiosPrivate();
 	const [blocked, setBlocked] = useState<boolean>(false);
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 
 
 	const updateBlockStatus = useCallback(async () =>
 	{
-		axiosInstance.current = await axiosToken()
+		axiosInstance.current = axiosPrivate
 		const userBlockedResponse = await axiosInstance.current.get('/users/blocked/' + props.userIdToBlock);
 		if (userBlockedResponse.data.length)
 			setBlocked(true);
@@ -33,12 +34,13 @@ const BlockButton = (props: BlockButtonProps) =>
 	{
 		try
 		{
-			axiosInstance.current = await axiosToken()
+			axiosInstance.current = axiosPrivate
 			if (!blocked)
 				axiosInstance.current = await axiosInstance.current.patch('/users/block/' + props.userIdToBlock);
 			else
 				axiosInstance.current = await axiosInstance.current.patch('/users/unblock/' + props.userIdToBlock);
 			await updateBlockStatus();
+			window.location.reload();
 		}
 		catch (error: any)
 		{

@@ -13,10 +13,11 @@ import '../../styles/signup.css'
 import Headers from "src/components/Headers";
 import { SocketContext } from '../../context/SocketContext';
 import { getToken } from '../../api/axios';
+import AuthContext from "src/context/TokenContext";
 
 const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,24}$/;
+const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%&*^()-_=]).{8,24}$/;
 const SIGNUP_PATH = "/auth/signup";
 
 const Signup = () => {
@@ -24,6 +25,7 @@ const Signup = () => {
   const emailRef = useRef<HTMLInputElement>(null);
   const errRef = useRef<HTMLParagraphElement>(null);
 
+  const {token, setToken, username, setUsername, userId, setUserId} = useContext(AuthContext);
   const [user, setUser] = useState("");
   const [validName, setValidName] = useState(false);
   const [userFocus, setUserFocus] = useState(false);
@@ -46,28 +48,22 @@ const Signup = () => {
 
   const snackBar = useSnackbar();
   useEffect(() => {
-    // userRef.current.focus();
+    emailRef.current!.focus();
   }, []);
 
   //TODO change userRef to user in the useeffect if not working
   useEffect(() => {
     const result = USER_REGEX.test(user);
-    console.log(result);
-    console.log(user);
     setValidName(result);
   }, [user]);
 
   useEffect(() => {
     const result = EMAIL_REGEX.test(email);
-    console.log(result);
-    console.log(email);
     setValidEmail(result);
   }, [email]);
 
   useEffect(() => {
     const result = PWD_REGEX.test(pwd);
-    console.log(result);
-    console.log(pwd);
     setValidPwd(result);
     const match = matchPwd === pwd;
     setValidMatch(match);
@@ -90,29 +86,25 @@ const Signup = () => {
       const response: AxiosResponse = await axiosMain.post(
         SIGNUP_PATH,
         { email: email, username: user, password: pwd },
-        {
-          headers: { "Content-Type": "application/json" },
-          //withCredentials: true
-        }
+        { withCredentials: true,  headers: {
+          "Content-Type": "application/json"
+        }}
       );
-      console.log(response.data);
       setSuccess(true);
-      // setToken(response.data.token);
-      sessionStorage.setItem("tokens", JSON.stringify(response.data.tokens));
-      sessionStorage.setItem("id", JSON.stringify(response.data.userId));
-	  socket.auth = {token: getToken().access_token}
+      setUsername(response.data.username!);
+      setUserId(response.data.userId!);
+      setToken(response.data.tokens!)
+      socket.auth = {token: response.data.tokens!.access_token}
 	  socket.connect();
-      console.log(response.data.access_token);
-      //console.log(token);
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");
       } else if (err.response?.status === 403) {
-        setErrMsg("Username Taken");
+        setErrMsg(err.response?.data?.message);
       } else {
         setErrMsg("Registration Failed");
       }
-      //errRef.current.focus();
+      errRef.current!.focus();
     }
   };
 
@@ -129,6 +121,7 @@ const Signup = () => {
       ) : (
         <>
         <Headers/>
+        <main>
         <section className="sign-section">
           <p
             ref={errRef}
@@ -267,7 +260,7 @@ const Signup = () => {
               <br />
             </p>
             <button
-              className="btn btn-transparent"
+              className="btn btn-transparent signin_btn"
               disabled={!validName || !validPwd || !validMatch ? true : false}
             >
               Sign up
@@ -275,11 +268,12 @@ const Signup = () => {
           </form>
           <div className="signup_div_signin">
             <p>Already have an account?</p>
-            <Link className="btn btn-transparent Signin-Link" to="/signin">
+            <Link className="Signup-Link" to="/signin">
               Sign in
             </Link>
           </div>
         </section>
+        </main>
         </>
       )}
     </>

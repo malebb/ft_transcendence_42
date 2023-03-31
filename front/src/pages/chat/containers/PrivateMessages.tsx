@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { axiosToken, getToken } from "src/api/axios";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Socket, io } from "socket.io-client";
 import { Message, MessageType, User } from "ft_transcendence";
 import { AxiosInstance, AxiosResponse } from "axios";
@@ -13,13 +12,12 @@ import "./message.style.css";
 import styleInput from "../inputs/InputButton.module.css";
 import { trimUsername } from "../../../utils/trim";
 import { printInfosBox } from "../../../utils/infosBox";
+import useAxiosPrivate from "src/hooks/usePrivate";
+import AuthContext from "src/context/TokenContext";
 
-type PrivateMessagesProps = {
-  userId: number;
-  userName: string;
-};
-
-function PrivateMessages({ id }: { id: string }) {
+function PrivateMessages() {
+  const { token } = useContext(AuthContext);
+  const axiosPrivate = useAxiosPrivate();
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const currentUser = useRef<User | null>(null);
   const friend = useRef<User | null>(null);
@@ -50,51 +48,30 @@ function PrivateMessages({ id }: { id: string }) {
     }
   }
 
-  // function adjustTextareaHeight() {
-  //   const tx = document.getElementsByTagName("textarea");
-  //   function onInput(this: HTMLTextAreaElement) {
-  //     this.style.height = "0px";
-  //     this.style.height = this.scrollHeight + "px";
-  //   }
-  //   for (let i = 0; i < tx.length; i++) {
-  //     if (tx[i].value == "") {
-  //       tx[i].setAttribute("style", "height:" + 20 + "px;overflow-y:hidden;");
-  //     } else {
-  //       tx[i].setAttribute(
-  //         "style",
-  //         "height:" + tx[i].scrollHeight + "px;overflow-y:hidden;"
-  //       );
-  //     }
-  //     tx[i].addEventListener("input", onInput, false);
-  //   }
-  // }
-
   useEffect(() => {
-    // adjustTextareaHeight();
     scrollToBottom();
   }, [stateMessages]);
 
-  const fetchChallenge = async () => {
-    axiosInstance.current = await axiosToken();
-    await axiosInstance
-      .current!.get("/challenge/myChallenges")
-      .then((response) => {
-        if (response.data) setChallenges(response);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  };
+	const fetchChallenge = async () =>
+	{
+		axiosInstance.current = axiosPrivate;
+		await axiosInstance.current!.get("/challenge/myChallenges").then((response) => {
+		if (response.data)
+			setChallenges(response);
+     		}).catch((e) => {
+               console.log('error: ', e);
+       	});
+	}
 
   useEffect(() => {
     const fetchData = async () => {
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = axiosPrivate;
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = axiosPrivate;
       await axiosInstance
-        .current!.get("/users/profile/" + friendId.userId)
+        .current!.get("/users/profile/" + friendId.paramUserId)
         .then((response) => {
           friend.current = response.data;
         });
@@ -107,7 +84,7 @@ function PrivateMessages({ id }: { id: string }) {
           forceNew: true,
           upgrade: false,
           auth: {
-            token: getToken().access_token,
+            token: token!.access_token,
           },
         });
         socket.current!.on("connect", async () => {
@@ -125,21 +102,19 @@ function PrivateMessages({ id }: { id: string }) {
           };
           joinRoom().then(function (data) {
             room.current = data;
-            const getAllMessages = async () => {
-              axiosInstance.current = await axiosToken();
-              await axiosInstance
-                .current!.get(
-                  "/message/private/" + JSON.stringify(room.current)
-                )
-                .then((response) => {
-                  setStateMessages(response.data);
-                })
-                .catch((e) => {
-                  console.log(e);
-                });
-            };
-            getAllMessages();
-            setInitSocket(true);
+          const getAllMessages = async () => {
+            axiosInstance.current = axiosPrivate;
+            await axiosInstance
+            .current!.get("/message/private/" + JSON.stringify(room.current))
+            .then((response) => {
+                setStateMessages(response.data);
+              })
+              .catch((e) => {
+                console.log('error: ', e);
+              });
+          };
+          getAllMessages()
+           	setInitSocket(true);
           });
 
           socket.current!.on(
@@ -158,13 +133,14 @@ function PrivateMessages({ id }: { id: string }) {
       };
     };
     initPrivateChat().catch(console.error);
-  }, [friendId.userId, id]);
+  }, [friendId.userId]);
 
   useEffect(() => {
     fetchChallenge();
-  }, []);
+  }, [friendId.userId]);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+
     event.preventDefault();
     if (!inputMessage?.length) return;
 
@@ -176,7 +152,6 @@ function PrivateMessages({ id }: { id: string }) {
       type: MessageType["STANDARD" as keyof typeof MessageType],
       challengeId: 0,
     };
-
     socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
       msg: newMessage,
       room: room.current,
@@ -265,8 +240,9 @@ function PrivateMessages({ id }: { id: string }) {
   };
 
   const createInvitation = async (member: User, powerUpMode: boolean) => {
+  console.log('member = ', member);
     try {
-      axiosInstance.current = await axiosToken();
+      axiosInstance.current = axiosPrivate;
       const challengeResponse = await axiosInstance.current.post(
         "/challenge/",
         { powerUpMode: powerUpMode, receiverId: member.id },
@@ -276,6 +252,7 @@ function PrivateMessages({ id }: { id: string }) {
           },
         }
       );
+	  console.log('challenge response = ', challengeResponse);
       socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
         msg: {
           user: currentUser.current,
@@ -289,7 +266,6 @@ function PrivateMessages({ id }: { id: string }) {
         receiverId: member.id,
         type: MessageType["INVITATION" as keyof typeof MessageType],
       });
-      socket.current!.disconnect();
       window.location.href =
         "http://localhost:3000/challenge/" + challengeResponse.data;
     } catch (error: any) {

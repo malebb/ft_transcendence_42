@@ -21,13 +21,15 @@ export default class PongController
 	constructor(private readonly pongService: PongService) {}
 
 	@Patch('skin')
-	updateSkin(@GetUser('id') userId: number, @Body() pongDto: PongDto)
+	updateSkin(@GetUser('id') userId: number,
+			   @Body() pongDto: PongDto)
 	{
 		this.pongService.updateSkin(userId, pongDto.skin);
 	}
 
 	@Patch('map')
-	updateMap(@GetUser('id') userId: number, @Body() pongDto: PongDto)
+	updateMap(@GetUser('id') userId: number,
+			  @Body() pongDto: PongDto)
 	{
 		this.pongService.updateMap(userId, pongDto.map);
 	}

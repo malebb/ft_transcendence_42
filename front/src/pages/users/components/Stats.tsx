@@ -1,12 +1,17 @@
 import { useParams } from "react-router-dom";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { AxiosInstance, AxiosResponse } from "axios";
-import { axiosToken } from "../../../api/axios";
-import StatsData from "../../../interfaces/StatsData";
+import  "../../../interfaces/StatsData";
 import "../../../styles/Stats.css";
+import AuthContext from "src/context/TokenContext";
+import useAxiosPrivate from "src/hooks/usePrivate";
+import StatsData from "../../../interfaces/StatsData";
 
 const Stats = () => {
-  const {userId} = useParams();
+
+  const axiosPrivate = useAxiosPrivate();
+  const { token , setToken } = useContext(AuthContext);
+  const {paramUserId} = useParams();
   
 const [victory, setVictory] = useState(0);
 const [defeat, setDefeat] = useState(0);
@@ -18,9 +23,9 @@ useEffect(() => {
     const initStats = async () => {
       try
       {
-        axiosInstance.current = await axiosToken();
-        let stats: AxiosResponse = await axiosInstance.current.get('/stats/' + userId);
-        let statsData: StatsData = stats.data
+        axiosInstance.current = axiosPrivate;
+        let stats: AxiosResponse = await axiosInstance.current.get('/stats/' + paramUserId);
+        let statsData: StatsData = stats.data;
 
         setVictory(statsData.victory);
         setDefeat(statsData.defeat);
@@ -34,7 +39,7 @@ useEffect(() => {
     }
     initStats();
 
-}, [userId]);
+}, [paramUserId]);
 return (
 <div>
   <div id="stats">

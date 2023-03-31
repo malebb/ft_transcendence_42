@@ -1,18 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useState, useEffect } from "react";
-import { axiosMain, axiosToken } from "../../../api/axios";
+import { axiosMain, axiosPrivate, axiosToken } from "../../../api/axios";
 import axios, { AxiosResponse } from "axios";
+import AuthContext from "src/context/TokenContext";
 
 const CODE_REGEX = /^[0-9]{6}$/;
 
 const Tfa = () => {
+  const {token, setToken, userId} = useContext(AuthContext);
   const [code, setCode] = useState("");
   const [validCode, setValidCode] = useState<boolean>(false);
 
   useEffect(() => {
     const result = CODE_REGEX.test(code);
-    console.log(result);
-    console.log(code);
     setValidCode(result);
   }, [code]);
 
@@ -20,21 +20,13 @@ const Tfa = () => {
     setCode(event.target.value);
   };
 
-  const getJWT = () => {
-    const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
-    return jwt["access_token"];
-  };
-
   const handleCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("here");
     const verif = (
-      await axiosMain.post(
+      await axiosPrivate.post(
         "/auth/verify2FA",
-        { code: code },
-        {
-          headers: { Authorization: "Bearer " + getJWT() },
-          //withCredentials: true
-        }
+        { code: code, userId: userId },
       )
     ).data;
     /*speakeasy.totp.verify({
@@ -42,7 +34,6 @@ const Tfa = () => {
       encoding: 'hex',
       token: code,
     }) */
-    console.log("verif code =======" + verif);
     //setVerified(verif);
   };
   return (

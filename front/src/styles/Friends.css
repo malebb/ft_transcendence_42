@@ -4,7 +4,58 @@ main {
   padding: 1rem;
 }
 
+.switch-label_container{
+  background-color: #23232e;
+  display: flex;
+  border-radius: 25px;
+  height: 40px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.switch-label_selected{
+  background-color: #fff;
+  border-radius: 28px;
+  height: 100%;
+  line-height: 30px;
+  width: 100%;
+  font-weight: 600;
+  color:#6281f7;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.switch-label_item{
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+  text-align: center;
+  color: #6281f7;
+  width: 100%;
+  cursor: pointer;
+}
+
+.container-user{
+  padding: 10px;
+  border-radius: 25px;
+  background-color: #23232e;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .link-user{
+  /* background-color: #29632b; */
+  width: 90%;
+  display: flex;
+  justify-content: safe;
+  align-items: center;
   color: white;
   text-decoration: none;
 }
@@ -164,4 +215,9 @@ main {
   margin-right: calc(-1 * calc(100% - 195px));
   padding: 30px;
   width: calc(100% - 195px);
+}
+
+.friendUsername
+{
+	margin-left: 20px;
 }

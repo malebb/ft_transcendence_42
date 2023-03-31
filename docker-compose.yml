@@ -1,0 +1,65 @@
+version: '3.8'
+services:
+
+  front:
+    build:
+      context: ./
+      dockerfile: ./front/Dockerfile
+    image: front-end
+    container_name: front-end
+    ports:
+      - 3000:3000
+    # volumes:
+    #   - front_volume:/app/
+  back:
+    build:
+      context: ./
+      dockerfile: ./back/Dockerfile
+    image: back-end
+    container_name: back-end
+    ports:
+      - 3333:3333
+    depends_on:
+      - postgres
+    environment:
+      - .env
+    # volumes:
+    #   - back_volume:/app/
+    # networks:
+    #   - intro_nest
+  postgres:
+    container_name: postgres
+    image: postgres
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      # networks:
+      #   - intro_nest
+      #  test-db:
+      #    image: postgres:13
+      #    ports:
+      #      - 5435:5432
+      #    environment:
+      #      POSTGRES_USER: postgres
+      #      POSTGRES_PASSWORD: 123
+      #      POSTGRES_DB: nest
+      #    networks:
+      #      - intro_nest
+      # networks:
+      #   intro_nest: bridge
+volumes:
+  back_volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/xaxa/trans/back
+      o: bind
+  front_volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/xaxa/trans/front
+      o: bind

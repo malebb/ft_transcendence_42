@@ -1,36 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import {AxiosHeaders} from "axios";
-import { AxiosResponse } from "axios";
-import { axiosAuthReq, axiosToken, HTTP_METHOD } from "../../api/axios";
 import Loading from "../Loading";
 import { useSnackbar } from "notistack";
+import useAxiosPrivate from "src/hooks/usePrivate";
+import AuthContext from "src/context/TokenContext";
 
 const AUTH_VERIF_PATH = "/auth/verify";
 
-async function verify() {
-  try {
-    const response: AxiosResponse = await (await axiosToken()).get(
-      "http://localhost:3333/auth/verify");
-    return response.data;
-  } catch (err: any) {
-    console.log("error");
-  }
-}
-
 const PrivateRoutes = () => {
+
   const [isAuth, setIsAuth] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const [errMsg, setErrMsg] = useState<string>("");
-  const [data, setData] = useState<boolean>();
+  const axiosPrivate = useAxiosPrivate();
 
+  const {token} = useContext(AuthContext)
   const snackBar = useSnackbar();
 
   useEffect(() => {
     const checkAuth = async () => {
-      const user = await axiosAuthReq(HTTP_METHOD.GET, AUTH_VERIF_PATH, {} as AxiosHeaders, {}, setErrMsg, setData);
-        if (user !== undefined) 
-          setIsAuth(user);
+
+      try{
+        const response = await axiosPrivate.get(AUTH_VERIF_PATH);
+
+        if (response !== undefined) 
+          setIsAuth(true);}
+          catch (err: any)
+          {
+            setErrMsg(err.response);
+            console.log('error: ', err.response);
+          }
       setIsChecking(false);
     };
     checkAuth();
@@ -40,15 +39,12 @@ const PrivateRoutes = () => {
     return <Loading />;
   }
 
-  console.log("err ==" + JSON.stringify(errMsg));
-  console.log("user ==" + JSON.stringify(data));
-
   if (errMsg === "")
   return isAuth ? <Outlet /> : <Navigate to="/signin" />;
   else
   return (
     <>
-    {snackBar.enqueueSnackbar('Oops something went wrong', {
+    {snackBar.enqueueSnackbar('Oops something went wrong private route', {
       variant: "error",
       anchorOrigin: {vertical: "bottom", horizontal: "right"}
     })}

@@ -1,18 +1,16 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { useRef, useEffect, useState } from "react";
-import { JwtGuard } from './auth/guard';
-import * as cors from 'cors';
+import * as cookieParser from 'cookie-parser';
 
-async function bootstrap()
-{
-	const app = await NestFactory.create(AppModule);
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule, {
+    cors: { credentials: true, origin: process.env.FRONT_URL },
+  });
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.use(cookieParser());
 
-	app.useGlobalPipes(new ValidationPipe({whitelist: true,}));
-	app.use(cors({origin: "*"}));
-
-	await app.listen(3333);
+  await app.listen(3333);
 }
 
 bootstrap();

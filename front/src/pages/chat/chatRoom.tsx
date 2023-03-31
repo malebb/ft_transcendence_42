@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import MessagesContainer from "./containers/Message";
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -13,10 +13,16 @@ import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import alertStyle from '../../styles/alertBox.module.css';
 import { trimUsername } from '../../utils/trim';
+import useAxiosPrivate from 'src/hooks/usePrivate';
 import { printInfosBox } from '../../utils/infosBox';
 import { Socket, io } from "socket.io-client";
+import AuthContext from 'src/context/TokenContext';
 
-const ChatRoomBase = () => {
+const ChatRoomBase = () =>
+{
+
+	const axiosPrivate = useAxiosPrivate();
+	const { token } = useContext(AuthContext);
 	const { roomName } = useParams();
 	const axiosInstance = useRef<AxiosInstance | null>(null);
 	const [roomStatus, setRoomStatus] = useState<RoomStatus | null>(null);
@@ -39,17 +45,20 @@ const ChatRoomBase = () => {
 	{
 		try
 		{
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			const room = await axiosInstance.current.get('/chatRoom/publicInfos/' + roomName);
 			if (room.data)
 			{
-				axiosInstance.current = await axiosToken();
 				const ban: AxiosResponse = await axiosInstance.current.get('/chatRoom/myBan/' + roomName);
 				if (ban.data.penalties.length)
 					setRoomStatus(RoomStatus["BANNED" as keyof typeof RoomStatus]);
+				// const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
+				// const user: AxiosResponse = await axiosInstance.current.get('/users/me');
+				// setCurrentUser(user.data);
+				if (!room.data)
+					setRoomStatus(RoomStatus["NOT_EXIST" as keyof typeof RoomStatus]);
 				else
 				{
-					axiosInstance.current = await axiosToken();
 					const member = await axiosInstance.current.get('/chatRoom/member/' + roomName);
 					if (!member.data.length)
 					{
@@ -75,11 +84,11 @@ const ChatRoomBase = () => {
 	{
 		try
 		{
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			const room = await axiosInstance.current.get('/chatRoom/publicInfos/' + roomName);
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			const user = await axiosInstance.current.get('/users/me');
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			const userMuted: AxiosResponse = await axiosInstance.current.get('/chatRoom/mutedMembers/' + roomName);
 
 			setOwner(room.data.owner);
@@ -114,7 +123,7 @@ const ChatRoomBase = () => {
 			roomStatusInterval.current = setInterval(async () => {
 				try
 				{
-					axiosInstance.current = await axiosToken();
+					axiosInstance.current = axiosPrivate;
 					const response: AxiosResponse = await axiosInstance.current.get('/chatRoom/member/' + roomName);
 					if (!response.data.length)
 					{
@@ -140,7 +149,9 @@ const ChatRoomBase = () => {
 		{
 			try
 			{
-				axiosInstance.current = await axiosToken();
+				// axiosInstance.current = axiosPrivate;
+				// const room: AxiosResponse = await axiosInstance.current.get('/chatRoom/' + roomName);
+				axiosInstance.current = axiosPrivate;
 				const user: AxiosResponse = await axiosInstance.current.get('/users/me/');
 				setCurrentUser(user.data);
 				updateMembersData();
@@ -176,7 +187,7 @@ const ChatRoomBase = () => {
 		}
 		try
 		{
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			await axiosInstance.current.post('/chatRoom/checkPassword/' + roomName, "password=" + password);
 			setPasswordInfo('The password is not new :');
 			document.getElementById(style.passwordInfo)!.style.color = 'red';
@@ -185,8 +196,9 @@ const ChatRoomBase = () => {
 		catch (error: any) { }
 		try
 		{
-			axiosInstance.current = await axiosToken();
-			await axiosInstance.current.patch('/chatRoom/password/' + roomName, "password=" + password);
+			axiosInstance.current = axiosPrivate;
+			await axiosInstance.current.patch('/chatRoom/password/' + roomName, {password: password},
+			{headers: {"Content-type": "application/json"}});
 			printInfosBox('Password updated successfully');
 			setPasswordInfo('Change the room password: ');
 			setBtnValue("Change password");
@@ -207,7 +219,7 @@ const ChatRoomBase = () => {
 		e.preventDefault();
 		try
 		{
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			await axiosInstance.current.patch('/chatRoom/removePassword/' + roomName);
 			document.getElementById(style.passwordInfo)!.style.color = 'white';
 			printInfosBox('Password has been removed successfully');
@@ -294,8 +306,7 @@ const ChatRoomBase = () => {
 	const initPasswordInfo = (room: AxiosResponse) =>
 	{
 		if (room.data.accessibility === 'PROTECTED' ||
-			(room.data.accessibility === 'PRIVATE'
-				&& room.data.password !== '')) {
+			room.data.accessibility === 'PRIVATE_PROTECTED') {
 			setPasswordInfo("Change the room password : ");
 			setBtnValue("Change");
 		}
@@ -310,7 +321,7 @@ const ChatRoomBase = () => {
 	{
 		try
 		{
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			await axiosInstance.current.patch('/chatRoom/makeOwner/' + roomName, { userId: member.id });
 			printInfosBox(member.username + ' is the new owner');
 			await updateMembersData();
@@ -341,7 +352,7 @@ const ChatRoomBase = () => {
 	{
 		try
 		{
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			await axiosInstance.current.patch('/chatRoom/makeAdmin/' + roomName, "userId=" + member.id);
 			printInfosBox(member.username + ' is now admin');
 			await updateMembersData();
@@ -382,7 +393,7 @@ const ChatRoomBase = () => {
 	{
 		try
 		{
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			await axiosInstance.current.patch('/chatRoom/removeAdmin/' + roomName, "userId=" + member.id);
 			printInfosBox(member.username + ' is no longer admin');
 			await updateMembersData();
@@ -411,19 +422,19 @@ const ChatRoomBase = () => {
 
 	const challenge = async (member: User, powerUpMode: boolean) =>
 	{
-		try
+      	socket.current = io("ws://localhost:3333/chat", {
+       		transports: ["websocket"],
+     		forceNew: true,
+       		upgrade: false,
+			auth: {
+				token: token!.access_token
+			}
+      	});
+      	socket.current!.on("connect", async () =>
 		{
-      		socket.current = io("ws://localhost:3333/chat", {
-        		transports: ["websocket"],
-     			forceNew: true,
-        		upgrade: false,
-				auth: {
-					token: getToken().access_token
-				}
-      		});
-      		socket.current!.on("connect", async () =>
+			try
 			{
-				axiosInstance.current = await axiosToken();
+				axiosInstance.current = axiosPrivate;
 				const challengeResponse = await axiosInstance.current.post('/challenge/', { powerUpMode: powerUpMode, receiverId: member.id },
 				{
 					headers:
@@ -454,7 +465,6 @@ const ChatRoomBase = () => {
 					socket.current!.disconnect();
 					window.location.href = 'http://localhost:3000/challenge/' + challengeResponse.data;
         		});
-			});
 			}
 			catch (error: any)
 			{
@@ -464,7 +474,8 @@ const ChatRoomBase = () => {
 					await updateMembersData();
 				}
 			}
-		}
+		});
+	}
 
 	const selectMode = (member: User) =>
 	{
@@ -508,7 +519,7 @@ const ChatRoomBase = () => {
 	{
 		try
 		{
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			await axiosInstance.current.patch('/chatRoom/kick/' + roomName, { userId: member.id });
 			printInfosBox(member.username + ' has been kicked');
 			await updateMembersData();
@@ -537,7 +548,7 @@ const ChatRoomBase = () => {
 	{
 		try
 		{
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			await axiosInstance.current.post('/chatRoom/penalty/' + roomName,
 				{
 					type: type,
@@ -687,7 +698,7 @@ const ChatRoomBase = () => {
 		e.preventDefault();
 		try
 		{
-			axiosInstance.current = await axiosToken();
+			axiosInstance.current = axiosPrivate;
 			await axiosInstance.current.patch('/chatRoom/leaveRoom/' + roomName);
 			window.location.href = 'http://localhost:3000/chat/';
 		}
@@ -719,7 +730,6 @@ const ChatRoomBase = () => {
 	{
 		if (roomStatus === 'JOINED')
 		{
-			console.log("JOINED");
 			return (
 				<>
 					{genTitle()}

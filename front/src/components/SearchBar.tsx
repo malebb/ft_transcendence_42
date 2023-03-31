@@ -1,7 +1,8 @@
 import { AxiosResponse } from "axios";
-import { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import { axiosToken } from "../api/axios";
+import AuthContext from "src/context/TokenContext";
+import useAxiosPrivate from "src/hooks/usePrivate";
 
 type NeutralUser = {
   id: number;
@@ -12,15 +13,15 @@ type NeutralUser = {
 };
 
 function SearchBar() {
+  const axiosPrivate = useAxiosPrivate();
+  const {token, setToken} = useContext(AuthContext);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<NeutralUser[]>([]);
   const [errMsg, setErrMsg] = useState("");
 
   const getUserProfile = async (): Promise<NeutralUser[]> => {
     try {
-      const response: AxiosResponse = await (
-        await axiosToken()
-      ).get("/users/get-all-user");
+      const response: AxiosResponse = await axiosPrivate.get("/users/get-all-user");
       return response.data;
     } catch (err: any) {
       console.log("error getme");

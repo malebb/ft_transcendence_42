@@ -54,7 +54,8 @@ export class ChatRoomService
 	{
 		if (name.length < 4 || name.length > 25)
 			return (false);
-		if (!/^[A-Za-z0-9 ]*$/.test(name))
+		if (!/^[A-Za-z0-9 ]*$/.test(name) || 
+		   !/[A-Za-z]+/.test(name))
 			return (false);
 		return (true);
 	}

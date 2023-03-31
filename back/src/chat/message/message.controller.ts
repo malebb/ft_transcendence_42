@@ -15,13 +15,7 @@ class MessageController {
 	@Get(':room')
 	async getAllMessagesByRoomName(@Param('room') room: string,
 								  @GetUser('id') userId: number) {
-		// console.log("controller = ", room);
 		return (await this.messageService.getAllMessagesByRoomName(room, userId));
-	}
-
-	@Delete('delete-messages')
-	async deleteAllMessagesByRoomName(room: string) {
-		return (await this.messageService.deleteAllMessagesByRoomName(room));
 	}
 
 	@Get('/private/:roomId')

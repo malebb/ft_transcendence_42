@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { axiosMain, axiosAuthReq, HTTP_METHOD } from "../../api/axios";
 import { AxiosHeaders, AxiosResponse } from "axios";
 import { useState, useEffect, useRef } from "react";
@@ -6,10 +6,20 @@ import { Switch } from "@mui/material";
 import '../../styles/User.css';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { SvgIcon } from "@mui/material";
+//var speakeasy = require('speakeasy');
+//var qrcode = require('qrcode');
+// import qrcode from 'qrcode';
+// import { createSecretKey } from 'crypto';
 import { useNavigate } from "react-router-dom";
 import Popup from "src/components/Popup";
 import Sidebar from "src/components/Sidebar";
 import Headers from "src/components/Headers";
+import AuthContext from "src/context/TokenContext";
+import useAxiosPrivate from "src/hooks/usePrivate";
+
+import styleSettings from "../../styles/settings.module.css"
+
+//var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_@.]{3,23}$/;
@@ -35,10 +45,8 @@ if (secret.otpauth_url !== undefined)
   var qrcode_img = qrcode.toDataURL(secret.otpauth_url, function(err: any, data: any){
   if (err) return err;
 })
-console.log(qrcode_img);*/
 // const getPic = async (jwt: string) => {
 //   try {
-//     console.log("jwt = " + jwt);
 //     const response: AxiosResponse = await axios.get(
 //       "http://localhost:3333/users/profile-image/media_16ad2258cac6171d66942b13b8cd4839f0b6be6f3.pnge5ac4441-06e8-4956-9e34-0941006e7bf8.png",
 //       {
@@ -47,10 +55,8 @@ console.log(qrcode_img);*/
 //         },
 //       }
 //     );
-//     console.log("getPic = " + response.data);
 //     return response.data;
 //   } catch (err: any) {
-//     console.log("error getPic");
 //     return null;
 //   }
 // };
@@ -83,10 +89,11 @@ console.log(qrcode_img);*/
         <img src="http://localhost:3333/users/profile-image/" alt='profile-picture'/>
         </form> */
 const User = () => {
+  const axiosPrivate = useAxiosPrivate();
+  const {username} = useContext(AuthContext);
   const [user, setUser] = useState<UserType>();
   const [validUser, setValidUser] = useState<boolean>(false);
   const [picture, setPicture] = useState("");
-  const [resp, setResp] = useState<UserType>();
 
   const [image, setImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -125,21 +132,17 @@ const User = () => {
 
   useEffect(() => {
     const result = CODE_REGEX.test(code);
-    console.log(result);
-    console.log(code);
     setValidCode(result);
   }, [code]);
-
-  const getJWT = () => {
-    const jwt = JSON.parse(sessionStorage.getItem("tokens") || "{}");
-    return jwt["access_token"];
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
+    if (selectedFile === undefined)
+      console.log("selectedFile is undef");
     if (selectedFile !== null) {
       console.log("good file");
+      console.log(selectedFile)
       formData.append("file", selectedFile);
     }
     if (Login !== user?.username) {
@@ -150,18 +153,14 @@ const User = () => {
       }
       formData.append("login", Login);
     }
-    //console.log("Form = " + formData.getAll("login"));
     try {
       // const response: AxiosResponse = await axiosAuthReq(HTTP_METHOD.POST, PATCH_PATH, formData, {} as AxiosHeaders, setErrMsg, set)
-      const response: AxiosResponse = await axiosMain.post(
+      console.log('formData == ' + JSON.stringify(formData.get('file')));
+      const response: AxiosResponse = await axiosPrivate.post(
         PATCH_PATH,
         formData,
-        {
-          headers: { Authorization: "Bearer " + getJWT() },
-          //withCredentials: true
-        }
+        {headers: {"Content-Type": "multipart/form-data"}}
       );
-      console.log(response.data);
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");
@@ -181,15 +180,7 @@ const User = () => {
     }
   };
 
-  const onCodeChange = (event: any) => {
-    setCode(event.target.value);
-  };
-
-
   const navigate = useNavigate();
-  const QrCodePage = () => {
-    navigate("/", { replace: true });
-  };
 
   useEffect(() => {
     setErrMsg("");
@@ -247,7 +238,6 @@ const User = () => {
     if (myRef.current)
       myRef.current.click();
   }
-  console.log(isTFA);
   return (
     <>
       <Sidebar />
@@ -312,17 +302,7 @@ const User = () => {
                   : (e: any) => navigate("/2factivate")
               }
             />
-            {isTFA && (
-              <button
-                onClick={(e: any) =>
-                  display2faModel(popupChangeContent, "/2fachange")
-                }
-              >
-                Change
-              </button>
-            )}
           </div>
-          <button className="del-acc-User fit-content">Delete Account</button>
           </section>
         </main>
       ) : (

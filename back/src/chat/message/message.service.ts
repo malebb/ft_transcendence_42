@@ -146,15 +146,6 @@ export class MessageService {
 		else
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
-/*
-  isBlocked(blocked: User[], userToCheck: User): boolean
-  {
-		for (let i = 0; i < blocked.length; ++i)
-		{
-			if 
-		}
-  }
-  */
 
   async getAllMessagesByRoomName(roomName: string, userId: number)
   {
@@ -218,18 +209,6 @@ export class MessageService {
 			}
 		}
 		return messages;
-  }
-
-  async deleteAllMessagesByRoomName(roomName: string) {
-    await this.prisma.message.deleteMany({
-      where: {
-        room: {
-          name: roomName,
-        },
-      },
-    });
-
-    return roomName;
   }
 
   async checkIfPrivateConvExist(userId1: number, userId2: number) {
