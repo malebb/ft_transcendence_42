@@ -264,6 +264,8 @@ export class ChatRoomService
 				}
 			}
 		})
+		if (!chatRoom)
+			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 		return (chatRoom.members);
 	}
 

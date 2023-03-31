@@ -132,7 +132,8 @@ const ChatRoomBase = () =>
 				}
 				catch (error: any)
 				{
-					console.log('error: ', error);
+					if (error.response.status !== 404)
+						console.log('error: ', error);
 				}
 			}, 2000)
 		}

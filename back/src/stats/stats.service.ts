@@ -213,7 +213,8 @@ export class StatsService {
 					}
 				}
   			});
-			return (user.stats);
+			if (user)
+				return (user.stats);
 		}
 	}
 }

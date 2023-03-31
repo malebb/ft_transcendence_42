@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { AxiosResponse, AxiosInstance, AxiosHeaders } from "axios";
 import { axiosAuthReq, HTTP_METHOD, axiosPrivate } from "../../api/axios";
 import "../../styles/UserProfile.css";
@@ -14,6 +14,7 @@ import AuthContext from "src/context/TokenContext";
 import Status from "../settings/components/Status";
 import PrivateMessages from "../chat/containers/PrivateMessages";
 import { User } from 'ft_transcendence';
+
 
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
 const GET_USER_PROFILE = "users/profile/";
@@ -59,6 +60,8 @@ const UserProfile = () => {
   const [popupContent, setPopupContent] = useState<string>("");
 
   const axiosInstance = useRef<AxiosInstance | null>(null);
+  const [isUser, setIsUser] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const popupTitle = "WARNING";
   const popupContentRemoveFriend =
@@ -155,6 +158,13 @@ const UserProfile = () => {
   // };
 //TODO change axiosAuthToken
   useEffect(() => {
+		if (!/^[0-9]*$/.test(paramUserId!))
+		{
+			navigate('/404');
+		}
+
+  }, [paramUserId, navigate])
+  useEffect(() => {
     const treatData = async () => {
       const profile = await axiosAuthReq(HTTP_METHOD.GET, GET_USER_PROFILE + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setUser);
       if (profile === undefined) return ;
@@ -195,7 +205,6 @@ const UserProfile = () => {
   const refuseRequest = async () => {
     try {
       const sendingReq: AxiosResponse = await axiosPrivate.get("users/decline-friend-request-by-userid/" + paramUserId);
-      console.log(JSON.stringify(sendingReq.data));
       setFriendStatus("declined");
       return sendingReq.data;
     } catch (err: any) {
@@ -213,7 +222,6 @@ const UserProfile = () => {
   const acceptRequest = async () => {
     try {
       const sendingReq: AxiosResponse = await axiosPrivate.get("users/accept-friend-request-by-userid/" + paramUserId);
-      console.log(JSON.stringify(sendingReq.data));
       setFriendStatus("accepted");
       return sendingReq.data;
     } catch (err: any) {
@@ -280,14 +288,17 @@ const UserProfile = () => {
 		 		setIsFriend(true);
 				return ;
 			}
+			let friendFound = false;
 			friendList.forEach((friend) => {
 	        if (friend.id === Number(paramUserId))
 			{
 				setIsFriend(true);
+				friendFound = true;
 				return ;
 			}
    	   		});
-			setIsFriend(false);
+			if (!friendFound)
+				setIsFriend(false);
 		}
 		catch (error: any)
 		{
@@ -295,6 +306,26 @@ const UserProfile = () => {
 		}
     };
     checkIfFriend();
+  }, [paramUserId]);
+
+  useEffect(() => {
+		const checkIfUserExist = async () =>
+		{
+			try
+			{
+				axiosInstance.current = axiosPrivate;
+				const user: AxiosResponse = (await axiosInstance.current.get('users/profile/' + paramUserId));
+				if (user.data)
+				{
+					setIsUser(true);
+				}
+			}
+			catch (error: any)
+			{
+				console.log('error :', error);
+			}
+		}
+		checkIfUserExist();
   }, [paramUserId]);
 
   function openMessage(): void {
@@ -338,6 +369,104 @@ const UserProfile = () => {
 			return (<></>);
 	}
 
+	function printProfile()
+	{
+		if (isUser)
+		{
+			return (
+			<>
+					<div className={"container"}>
+						<img
+							id="profilePicture"
+							className="profilePicture"
+							src={picture}
+							alt="profile_picture"
+						/>
+					<div id="divprofileName" className="divprofileName">
+						<p className="profileName">{user?.username?.slice(0, 15)}</p>
+						<Status id={Number(paramUserId)} />
+						<MessageSection />
+					</div>
+					<Popup
+						apparent={showConfirmation}
+						title={popupTitle}
+						content={popupContent}
+						handleTrue={(e: any) => deleteRequest(true)}
+						handleFalse={(e: any) => deleteRequest(false)}
+					/>
+						<div className="actionsOnUser">
+							<div className="profileFriendButton">
+							{friendStatus === "accepted" && (
+								<div className="cyan">
+									<button
+										className="profileButtonCancel btn btn-primary"
+										onClick={handleUnfriendClick}
+										type="button"
+										data-toggle="modal"
+										data-target="#exampleModalCenter"
+									>
+									Unfriend
+									</button>
+						</div>
+							)}
+							{friendStatus === "declined" && sendingStatus === "receiver" && (
+							<button
+								className="profileButtonAddFriend"
+								onClick={acceptRequest}
+							>
+								Add friend +
+							</button>
+							)}
+							{friendStatus === "pending" && sendingStatus === "receiver" && (
+							<>
+							<button
+								className="profileButtonAddFriend"
+								onClick={acceptRequest}
+							>
+							Accept req
+							</button>
+							<button className="profileButtonRefuse" onClick={refuseRequest}>
+								Reject Req
+							</button>
+							</>
+							)}
+					{friendStatus === "pending" && sendingStatus === "creator" && (
+							<div>
+							<button
+								id="profileButtonCancel"
+								className={"profileButtonCancel"}
+								onClick={handleUnWaitClick}
+							>
+								Cancel
+							</button>
+							</div>
+							)}
+					{friendStatus === "" && paramUserId !== userId?.toString() ? (
+							<button className="profileButtonAddFriend" onClick={AddFriend}>
+								Add friend +
+							</button>
+							) : (
+								<></>
+								)}
+					</div>
+					{(paramUserId !== userId?.toString()) ? <BlockButton userIdToBlock={Number(paramUserId)}/>: <></>}
+					</div>
+
+					</div>
+						<br />
+						<br />
+						<br />
+						<br />
+						<Stats />
+						<br />
+				<br />
+			{printAchievements()}
+		</>);
+	}
+	else
+		return (<p style={{textAlign: "center", marginTop: 70}}>This user does not exist</p>);
+	}
+
   return (
     <div>
       <Headers />
@@ -345,106 +474,7 @@ const UserProfile = () => {
       {errMsg}
 
       <main className="userProfile">
-        <div className={"container"}>
-          {/* <div className='divprofilePicture'> */}
-          <img
-            id="profilePicture"
-            className="profilePicture"
-            src={picture}
-            alt="profile_picture"
-          />
-		  <div id="divprofileName" className="divprofileName">
-		 	 <p className="profileName">{user?.username?.slice(0, 15)}</p>
-
-			 <Status id={Number(paramUserId)} />
-			 <MessageSection />
-          </div>
-          <Popup
-            apparent={showConfirmation}
-            title={popupTitle}
-            content={popupContent}
-            handleTrue={(e: any) => deleteRequest(true)}
-            handleFalse={(e: any) => deleteRequest(false)}
-          />
-		  <div className="actionsOnUser">
-          <div className="profileFriendButton">
-            {friendStatus === "accepted" && (
-              <div className="cyan">
-                <button
-                  className="profileButtonCancel btn btn-primary"
-                  onClick={handleUnfriendClick}
-                  type="button"
-                  data-toggle="modal"
-                  data-target="#exampleModalCenter"
-                >
-                  Unfriend
-                </button>
-                {/* /* (
-        <div className='profileConfirmPopup'>
-          <p className='popupText'>
-          Are you sure you want to remove this person from your friends list?
-            This action is final and you will not be able to recover it.
-          </p>
-          <button className='profileConfirmYes'onClick={(e:any) => deleteRequest(true)}>Unfriend</button>
-          <button className='profileConfirmNo'onClick={(e:any) => deleteRequest(false)}>Cancel</button>
-        </div>
-        )*/}
-              </div>
-            )}
-            {/* //  <button onClick={deleteRequest}>Unfriend</button>} */}
-            {friendStatus === "declined" && sendingStatus === "receiver" && (
-              <button
-                className="profileButtonAddFriend"
-                onClick={acceptRequest}
-              >
-                Add friend +
-              </button>
-            )}
-            {/* {friendStatus === "declined" && sendingStatus == "creator" && <button className='profileButtonWaiting' disabled>Not Accepted yet</button>} */}
-            {friendStatus === "pending" && sendingStatus === "receiver" && (
-              <>
-                <button
-                  className="profileButtonAddFriend"
-                  onClick={acceptRequest}
-                >
-                  Accept req
-                </button>
-                <button className="profileButtonRefuse" onClick={refuseRequest}>
-                  Reject Req
-                </button>
-              </>
-            )}
-            {friendStatus === "pending" && sendingStatus === "creator" && (
-              <div>
-                <button
-                  id="profileButtonCancel"
-                  className={"profileButtonCancel"}
-                  onClick={handleUnWaitClick}
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-            {friendStatus === "" && paramUserId !== userId?.toString() ? (
-              <button className="profileButtonAddFriend" onClick={AddFriend}>
-                Add friend +
-              </button>
-            ) : (
-              <></>
-            )}
-          </div>
-
-		{(paramUserId !== userId?.toString()) ? <BlockButton userIdToBlock={Number(paramUserId)}/>: <></>}
-		  </div>
-        </div>
-        <br />
-        <br />
-        <br />
-        <br />
-        <Stats />
-        <br />
-        <br />
-        {printAchievements()}
+		{printProfile()}
       </main>
     </div>
   );

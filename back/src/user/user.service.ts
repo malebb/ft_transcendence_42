@@ -412,6 +412,8 @@ export class UserService {
   }
 
   async getBlocked(idBlocked: number, userId: number) {
+	  if (!idBlocked || !userId)
+		  return ;
     const blocked = await this.prisma.user.findUnique({
       where: {
         id: userId,

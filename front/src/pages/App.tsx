@@ -121,7 +121,7 @@ function App() {
             <Route path="user/:paramUserId" element={<UserProfile />} />
             <Route path='/logout' element={<Logout/>} />
           </Route>
-          <Route element={<NotFound />}/>
+          <Route path="*" element={<NotFound />}/>
         </Routes>
       </BrowserRouter></SnackbarProvider>
 	  </SocketProvider>
