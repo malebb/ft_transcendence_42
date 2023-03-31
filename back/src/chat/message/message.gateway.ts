@@ -16,10 +16,8 @@ import { ChatRoomService } from '../chatRoom/chatRoom.service';
 import { UserService } from '../../user/user.service';
 // interfaces :
 import { ChatRoom, Message } from 'ft_transcendence';
-import { Logger, Body } from '@nestjs/common';
+import {  Body } from '@nestjs/common';
 import { getIdFromToken } from '../../gatewayUtils/gatewayUtils';
-import { UseGuards } from '@nestjs/common';
-import { WsGuard } from '../../auth/guard/ws.guard';
 import { ConfigService } from '@nestjs/config';
 import { getIdIfValid } from '../../gatewayUtils/gatewayUtils';
 
@@ -34,7 +32,7 @@ import { getIdIfValid } from '../../gatewayUtils/gatewayUtils';
 // permettent de connaitre l'etat de l'application
 // ou de faire des operations grace aux hooks
 export class MessageGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayConnection
 {
   // va bind l'application MessageService
   constructor(private messageService: MessageService,
@@ -57,6 +55,8 @@ export class MessageGateway
 
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
+	if (!room || !room.name)
+		return ;
     client.join(String(room?.name));
   }
 
@@ -97,15 +97,14 @@ export class MessageGateway
 
   @SubscribeMessage('JOIN_PRIVATE_ROOM')
   async joinPrivateRoom(client: Socket, data) {
+	  if (!data.senderId || !data.receiverId)
+		  return ;
       const privateRoom = await this.messageService.createPrivateRoom(
         data.senderId,
         data.receiverId,
       );
     client.join(privateRoom.name);
     client.emit("GET_ROOM", privateRoom);
-  }
-
-  handleDisconnect(client: Socket) {
   }
 }
 

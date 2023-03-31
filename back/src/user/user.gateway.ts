@@ -9,8 +9,6 @@ import { Socket, Server } from 'socket.io';
 import { UserService } from './user.service';
 import { getIdFromToken, isAuthEmpty, getIdIfValid } from '../gatewayUtils/gatewayUtils';
 import { GetUser } from '../auth/decorator';
-import { Activity } from '@prisma/client';
-import { Friend } from './types/friend.type';
 import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway({
@@ -26,28 +24,9 @@ export class UserGateway
 	constructor(private userService: UserService,
 			   private readonly config: ConfigService) { }
 	
-	clients: Socket[] = [];
 
 	@WebSocketServer()
 	server: Server;
-
-	async emitStatusToFriends(clientId: number, newStatus: Activity)
-	{
-		const friends: Friend[] = await this.userService.getFriends(clientId);
-		for (let i = 0; i < this.clients.length; ++i)
-		{
-			for (let j = 0; j < friends.length; ++j)
-			{
-				if (friends[j].id === getIdFromToken(this.clients[i].handshake.auth.token))
-				{
-					this.clients[i].emit('CHANGE_STATUS', {status: newStatus, id: clientId});
-					break ;
-				}
-			}
-			if (clientId  === getIdFromToken(this.clients[i].handshake.auth.token))
-				this.clients[i].emit('CHANGE_STATUS', {status: newStatus, id: clientId});
-		}
-	}
 
 	async handleConnection(client: Socket) {
 	  const id = await getIdIfValid(client, this.config.get('JWT_SECRET'), this.userService);
@@ -56,9 +35,9 @@ export class UserGateway
 		  client.disconnect();
 		  return ;
 	  }
-	  this.clients.push(client);
 		this.userService.setUserOnLineOffline(id, "ONLINE");
-		this.emitStatusToFriends(id, 'ONLINE');
+		this.userService.emitStatusToFriends(id, 'ONLINE');
+		this.userService.addUserToConnected(client);
 	}
 
 	@SubscribeMessage('IN_GAME')
@@ -69,7 +48,7 @@ export class UserGateway
 		const userId = getIdFromToken(token);
 		this.userService.setUserOnLineOffline(userId, "IN_GAME");
 		this.server.emit('CHANGE_STATUS', {status: 'IN_GAME', id: userId});
-		this.emitStatusToFriends(userId, 'IN_GAME');
+		this.userService.emitStatusToFriends(userId, 'IN_GAME');
 	}
 
 	@SubscribeMessage('ONLINE')
@@ -79,7 +58,7 @@ export class UserGateway
 			return ;
 		const userId = getIdFromToken(token);
 		this.userService.setUserOnLineOffline(userId, "ONLINE");
-		this.emitStatusToFriends(userId, 'ONLINE');
+		this.userService.emitStatusToFriends(userId, 'ONLINE');
 	}
 
 	@SubscribeMessage('OFFLINE')
@@ -89,36 +68,18 @@ export class UserGateway
 			return ;
 		const userId = getIdFromToken(token);
 		this.userService.setUserOnLineOffline(userId, "OFFLINE");
-		this.emitStatusToFriends(userId, 'OFFLINE');
-	}
-
-	isUserInAnotherSession(userId: number)
-	{
-		let countUserFound: number = 0;
-		for (let i = 0; i < this.clients.length; ++i)
-		{
-			if (userId === getIdFromToken(this.clients[i].handshake.auth.token))
-				countUserFound++;
-		}
-		return (countUserFound >= 2);
+		this.userService.emitStatusToFriends(userId, 'OFFLINE');
 	}
 
 	handleDisconnect(client: Socket) {
 		if (isAuthEmpty(client))
 			return ;
 		const userId = getIdFromToken(client.handshake.auth.token);
-		if (!this.isUserInAnotherSession(userId))
+		if (!this.userService.isUserInAnotherSession(userId))
 		{
 			this.userService.setUserOnLineOffline(userId, "OFFLINE");
-			this.emitStatusToFriends(userId, 'OFFLINE');
+			this.userService.emitStatusToFriends(userId, 'OFFLINE');
 		}
-		for (let i = 0; i < this.clients.length; ++i)
-		{
-			if (this.clients[i].id === client.id)
-			{
-				this.clients.splice(i, 1);
-				break ;
-			}
-		}
+		this.userService.removeUserFromConnected(client);
 	}
 }
