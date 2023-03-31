@@ -19,7 +19,7 @@ model User {
   status    Activity @default(OFFLINE)
   email     String   @unique
   hash      String
-  hashRt    String?
+  hashRt    String[]
 
   TFA            String?
   isTFA          Boolean @default(false)
