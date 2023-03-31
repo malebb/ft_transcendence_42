@@ -14,11 +14,26 @@ import {
 import { Stats } from './Stats';
 import { Customisation, Skins, Maps } from './Customisation';
 import { PrismaService } from '../prisma/prisma.service';
+import { WsException } from '@nestjs/websockets';
+import { ConfigService } from '@nestjs/config';
+import { getIdIfValid } from '../gatewayUtils/gatewayUtils';
+import jwt_decode from "jwt-decode";
 
 interface Challenger {
 	challengerId: string;
 	challengeId: number;
 	challenger: PlayerData;
+}
+
+type JwtDecoded = 
+{
+	sub: number
+}
+
+interface PlayerConnected
+{
+	userId: number;
+	socketId: string;
 }
 
 @Injectable()
@@ -29,10 +44,13 @@ export class PongService {
 		private readonly historyService: HistoryService,
 		private readonly userService: UserService,
 		private readonly challengeService: ChallengeService,
+		private readonly config: ConfigService,
 		private readonly prisma: PrismaService) { }
 
+	// gateways's checks : 
+	playersConnected: PlayerConnected[] = [];
 
-
+	// pong
 	queue: PlayerData[] = [];
 	powerUpQueue: PlayerData[] = [];
 	challengers: Challenger[] = [];
@@ -439,6 +457,8 @@ export class PongService {
 		return (false);
 	}
 
+	// update customisation
+
 	async updateSkin(userId: number, skin: string) {
 		if (Skins.includes(skin)) {
 			await this.prisma.user.update({
@@ -467,5 +487,116 @@ export class PongService {
 		}
 		else
 			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+	}
+
+	// gateway's checks
+
+	isUserIdConnected(userId: number)
+	{
+		for (let i = 0; i < this.playersConnected.length; ++i)
+		{
+			if (this.playersConnected[i].userId === userId)
+				return (true);
+		}
+		return (false);
+	}
+
+	async checkCredentialsOnConnection(player: Socket)
+	{
+		const id = await getIdIfValid(player, this.config.get('JWT_SECRET'), this.userService);
+
+		if (id)
+		{
+			if (this.isUserIdConnected(id))
+				player.emit('error', new WsException('Already connected'));
+			else
+			{
+				if (player.handshake.query.spectator === 'false')
+					this.playersConnected.push({userId: id, socketId: player.id});
+				return (id);
+			}
+		}
+		return (0);
+	}
+
+	isConnectionValid(player: Socket): boolean
+	{
+		if (player.handshake.query.challenge === 'true')
+		{
+			if (!player.handshake.query.challengeId)
+			{
+				player.disconnect();
+				return (false);
+			}
+		}
+		else if (player.handshake.query.spectator === 'false')
+		{
+			if (!player.handshake.query.playerData)
+			{
+				player.disconnect();
+				return (false);
+			}
+		}
+		else
+		{
+			if (!player.handshake.query.roomId)
+			{
+				player.disconnect();
+				return (false);
+			}
+		}
+		return (true);
+	}
+
+	getIndexWithSocketId(socketId: string)
+	{
+		for (let i = 0; i < this.playersConnected.length; ++i)
+		{
+			if (this.playersConnected[i].socketId === socketId)
+				return (i);
+		}
+		return (-1);
+	}
+
+	removeFromSocketConnected(player: Socket)
+	{
+		const playerIndex = this.getIndexWithSocketId(player.id);
+		if (playerIndex !== -1)
+			this.playersConnected.splice(playerIndex, 1);
+	}
+
+	isUserIdConnectedWithSocketId(userId: number, socketId: string)
+	{
+		for (let i = 0; i < this.playersConnected.length; ++i)
+		{
+			if (this.playersConnected[i].userId === userId && this.playersConnected[i].socketId === socketId)
+				return (true);
+		}
+		return (false);
+	}
+
+	checkCredentialsOnEvent(player: Socket, token: string | undefined)
+	{
+		if (token === undefined)
+		{
+			player.emit('error', new WsException('Invalid credentials'));
+			return (0);
+		}
+		try
+		{
+			const jwtDecoded: JwtDecoded = jwt_decode(token);
+			const id: number = jwtDecoded.sub;
+			if (!this.isUserIdConnectedWithSocketId(id, player.id))
+			{
+				player.emit('error', new WsException('Already connected'));
+				return (0);
+			}
+			return (id);
+		}
+		catch (error: any)
+		{
+			player.emit('error', new WsException('Invalid credentials'));
+		}
+		return (0);
 	}
 }
