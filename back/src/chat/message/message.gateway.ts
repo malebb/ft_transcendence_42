@@ -62,9 +62,12 @@ export class MessageGateway
 
   @SubscribeMessage('SEND_ROOM_MESSAGE')
   async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token: string | undefined) {
-	if (token === undefined)
+	if (token === undefined || !message || !message.room || !message.room.name)
 		return ;
 	const id = getIdFromToken(token);
+	const room = await this.chatRoomService.getChatRoom(message.room.name);
+	if (!room || !this.chatRoomService.isMember(room.members, id))
+		return ;
 	try
 	{
 	    await this.messageService.createMessage(message, message?.room?.name, id);
