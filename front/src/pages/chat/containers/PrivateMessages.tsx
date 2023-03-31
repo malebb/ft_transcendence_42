@@ -10,20 +10,16 @@ import alertStyle from "../../../styles/alertBox.module.css";
 
 import style from "../../../styles/private.message.module.css";
 import "./message.style.css";
+import styleInput from "../inputs/InputButton.module.css";
 import { trimUsername } from "../../../utils/trim";
 import { printInfosBox } from "../../../utils/infosBox";
 
-type PrivateMessagesProps =
-{
-	userId: number;
+type PrivateMessagesProps = {
+  userId: number;
   userName: string;
-}
-
+};
 
 function PrivateMessages({ id }: { id: string }) {
-
-  console.log("Private Message = ", {id});
-
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
   const currentUser = useRef<User | null>(null);
   const friend = useRef<User | null>(null);
@@ -48,7 +44,33 @@ function PrivateMessages({ id }: { id: string }) {
     });
   };
 
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      handleSubmit(event as unknown as React.FormEvent<HTMLFormElement>);
+    }
+  }
+
+  // function adjustTextareaHeight() {
+  //   const tx = document.getElementsByTagName("textarea");
+  //   function onInput(this: HTMLTextAreaElement) {
+  //     this.style.height = "0px";
+  //     this.style.height = this.scrollHeight + "px";
+  //   }
+  //   for (let i = 0; i < tx.length; i++) {
+  //     if (tx[i].value == "") {
+  //       tx[i].setAttribute("style", "height:" + 20 + "px;overflow-y:hidden;");
+  //     } else {
+  //       tx[i].setAttribute(
+  //         "style",
+  //         "height:" + tx[i].scrollHeight + "px;overflow-y:hidden;"
+  //       );
+  //     }
+  //     tx[i].addEventListener("input", onInput, false);
+  //   }
+  // }
+
   useEffect(() => {
+    // adjustTextareaHeight();
     scrollToBottom();
   }, [stateMessages]);
 
@@ -143,7 +165,6 @@ function PrivateMessages({ id }: { id: string }) {
   }, []);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
-
     event.preventDefault();
     if (!inputMessage?.length) return;
 
@@ -163,7 +184,7 @@ function PrivateMessages({ id }: { id: string }) {
       receiverId: friend.current!.id,
     });
     setStateMessages([...stateMessages, newMessage]);
-    (event.target as HTMLFormElement).reset();
+    setInputMessage("");
   }
 
   const GenMessages = () => {
@@ -191,31 +212,37 @@ function PrivateMessages({ id }: { id: string }) {
       if (!isCurrentUser) {
         return (
           <>
-            <div className="chat-receiver">
-              <span>{newMessage?.user?.username + " : "}</span>
-              <textarea >{newMessage.message}</textarea>
-              {newMessage.type === "INVITATION" &&
-              !isChallengeFinished(newMessage.challengeId) ? (
-                <button
-                  className={style.invitationBtn}
-                  onClick={() => goToInvitation(newMessage.challengeId)}
-                >
-                  join
-                </button>
-              ) : (
-                <></>
-              )}
+            <div className="chat-container-receiver">
+              <div className="chat-text-container-receiver">
+                <span className="chatUsername">
+                  {newMessage?.user?.username}
+                </span>
+                <div className="dot">{":"}</div>
+                <p className="chat-text">{newMessage.message}</p>
+                {newMessage.type === "INVITATION" &&
+                !isChallengeFinished(newMessage.challengeId) ? (
+                  <button
+                    className={style.invitationBtn}
+                    onClick={() => goToInvitation(newMessage.challengeId)}
+                  >
+                    join
+                  </button>
+                ) : (
+                  <></>
+                )}
+              </div>
+              <span className="date">{genDate(newMessage)}</span>
             </div>
-            <span className="date">{genDate(newMessage)}</span>
           </>
         );
       }
       return (
-        <div className="chat-sender">
+        <div className="chat-container-sender">
           <span className="date">{genDate(newMessage)}</span>
-          <div className="chat-username">
-            <span>{newMessage?.user?.username + " : "}</span>
-            <span>{newMessage.message}</span>
+          <div className="chat-text-container-sender">
+            <span className="chatUsername">{newMessage?.user?.username}</span>
+            <div className="dot">{":"}</div>
+            <p className="chat-text">{newMessage.message}</p>
           </div>
         </div>
       );
@@ -321,14 +348,15 @@ function PrivateMessages({ id }: { id: string }) {
         </div>
 
         <form id="myForm" onSubmit={handleSubmit} className={style.sendInput}>
-          <input
+          <textarea
             name="messageInput"
-            // placeholder="Write here..."
+            placeholder="Write here..."
             autoComplete="off"
+            value={inputMessage}
             onChange={(event) => setInputMessage(event.target.value)}
-          >
-		  </input>
-
+            onKeyDown={handleKeyDown}
+            className={styleInput.textarea}
+          ></textarea>
           <button type="submit">SEND</button>
           <img
             className={style.challengeLogo}

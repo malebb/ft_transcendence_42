@@ -32,9 +32,7 @@ function MessagesContainer() {
     const tx = document.getElementsByTagName("textarea");
     function onInput(this: HTMLTextAreaElement) {
       this.style.height = "0px";
-      // this.style.width = "0px";
       this.style.height = this.scrollHeight + "px";
-      // this.style.width = this.scrollWidth + "px";
     }
     for (let i = 0; i < tx.length; i++) {
       if (tx[i].value == "") {
