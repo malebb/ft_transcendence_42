@@ -42,7 +42,6 @@ export const AuthProvider = ({ children }: { children: any }) => {
       setUserId(response.data.userId)
       }catch(err: any)
       {
-        console.log(err)
       }
     }
 
