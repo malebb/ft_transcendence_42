@@ -17,6 +17,7 @@ import useAxiosPrivate from 'src/hooks/usePrivate';
 import { printInfosBox } from '../../utils/infosBox';
 import { Socket, io } from "socket.io-client";
 import AuthContext from 'src/context/TokenContext';
+
 const ChatRoomBase = () =>
 {
 
@@ -305,8 +306,7 @@ const ChatRoomBase = () =>
 	const initPasswordInfo = (room: AxiosResponse) =>
 	{
 		if (room.data.accessibility === 'PROTECTED' ||
-			(room.data.accessibility === 'PRIVATE'
-				&& room.data.password !== '')) {
+			room.data.accessibility === 'PRIVATE_PROTECTED') {
 			setPasswordInfo("Change the room password : ");
 			setBtnValue("Change");
 		}
@@ -422,17 +422,17 @@ const ChatRoomBase = () =>
 
 	const challenge = async (member: User, powerUpMode: boolean) =>
 	{
-		try
+      	socket.current = io("ws://localhost:3333/chat", {
+       		transports: ["websocket"],
+     		forceNew: true,
+       		upgrade: false,
+			auth: {
+				token: token!.access_token
+			}
+      	});
+      	socket.current!.on("connect", async () =>
 		{
-      		socket.current = io("ws://localhost:3333/chat", {
-        		transports: ["websocket"],
-     			forceNew: true,
-        		upgrade: false,
-				auth: {
-					token: token!.access_token
-				}
-      		});
-      		socket.current!.on("connect", async () =>
+			try
 			{
 				axiosInstance.current = axiosPrivate;
 				const challengeResponse = await axiosInstance.current.post('/challenge/', { powerUpMode: powerUpMode, receiverId: member.id },
@@ -465,7 +465,6 @@ const ChatRoomBase = () =>
 					socket.current!.disconnect();
 					window.location.href = 'http://localhost:3000/challenge/' + challengeResponse.data;
         		});
-			});
 			}
 			catch (error: any)
 			{
@@ -475,7 +474,8 @@ const ChatRoomBase = () =>
 					await updateMembersData();
 				}
 			}
-		}
+		});
+	}
 
 	const selectMode = (member: User) =>
 	{

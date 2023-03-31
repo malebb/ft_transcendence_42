@@ -16,6 +16,9 @@ import Sidebar from "src/components/Sidebar";
 import Headers from "src/components/Headers";
 import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";
+
+import styleSettings from "../../styles/settings.module.css"
+
 //var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
@@ -299,17 +302,7 @@ const User = () => {
                   : (e: any) => navigate("/2factivate")
               }
             />
-            {isTFA && (
-              <button
-                onClick={(e: any) =>
-                  display2faModel(popupChangeContent, "/2fachange")
-                }
-              >
-                Change
-              </button>
-            )}
           </div>
-          <button className="del-acc-User fit-content">Delete Account</button>
           </section>
         </main>
       ) : (

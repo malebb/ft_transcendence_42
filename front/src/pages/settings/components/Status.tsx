@@ -12,7 +12,9 @@ import { FriendType } from "../../friends/Friends";
 function Status({ id }: { id: number }) {
 	const axiosPrivate = useAxiosPrivate();
   const axiosInstance = useRef<AxiosInstance | null>(null);
-  const [userStatus, setUserStatus] = useState<Activity>(Activity["OFFLINE" as keyof typeof Activity]);
+  const [userStatus, setUserStatus] = useState<Activity>(
+    Activity["OFFLINE" as keyof typeof Activity]
+  );
   const currentUser = useRef<boolean>(false);
   const socket = useContext(SocketContext);
   const statusTimeout =  useRef<ReturnType<typeof setTimeout>>();
@@ -79,12 +81,14 @@ function Status({ id }: { id: number }) {
 				{
 					clearTimeout(statusTimeout.current);
 					statusTimeout.current = setTimeout(async () => {
+
+      					axiosInstance.current = axiosPrivate;
 	    				await axiosInstance.current!.get("/users/profile/" + id).then((response) =>
 						{
 							if (response.data.status !== userStatus)
 								setUserStatus(response.data.status);
     					});
-					}, 5000)
+					}, 1000)
 				}
 			});
 		}

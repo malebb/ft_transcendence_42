@@ -1,5 +1,4 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { axiosToken, getToken } from "src/api/axios";
 import { Socket, io } from "socket.io-client";
 import { Message, MessageType, User } from "ft_transcendence";
 import { AxiosInstance, AxiosResponse } from "axios";
@@ -10,6 +9,7 @@ import alertStyle from "../../../styles/alertBox.module.css";
 
 import style from "../../../styles/private.message.module.css";
 import "./message.style.css";
+import styleInput from "../inputs/InputButton.module.css";
 import { trimUsername } from "../../../utils/trim";
 import { printInfosBox } from "../../../utils/infosBox";
 import useAxiosPrivate from "src/hooks/usePrivate";
@@ -26,9 +26,10 @@ function PrivateMessages() {
   const socket = useRef<Socket | null>(null);
   const friendId = useParams();
   const [inputMessage, setInputMessage] = useState("");
-  let newMessage: Message;
   const [initSocket, setInitSocket] = useState<boolean>(false);
   const [challenges, setChallenges] = useState<AxiosResponse | null>(null);
+  let newMessage: Message;
+  const containerRef = useRef(null);
 
   function closeMessage(): void {
     document.getElementById("myForm")!.style.display = "none";
@@ -41,13 +42,19 @@ function PrivateMessages() {
     });
   };
 
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      handleSubmit(event as unknown as React.FormEvent<HTMLFormElement>);
+    }
+  }
+
   useEffect(() => {
     scrollToBottom();
   }, [stateMessages]);
 
 	const fetchChallenge = async () =>
 	{
-		axiosInstance.current = await axiosPrivate;
+		axiosInstance.current = axiosPrivate;
 		await axiosInstance.current!.get("/challenge/myChallenges").then((response) => {
 		if (response.data)
 			setChallenges(response);
@@ -58,11 +65,11 @@ function PrivateMessages() {
 
   useEffect(() => {
     const fetchData = async () => {
-      axiosInstance.current = await axiosPrivate;
+      axiosInstance.current = axiosPrivate;
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-      axiosInstance.current = await axiosPrivate;
+      axiosInstance.current = axiosPrivate;
       await axiosInstance
         .current!.get("/users/profile/" + friendId.paramUserId)
         .then((response) => {
@@ -96,7 +103,7 @@ function PrivateMessages() {
           joinRoom().then(function (data) {
             room.current = data;
           const getAllMessages = async () => {
-            axiosInstance.current = await axiosPrivate;
+            axiosInstance.current = axiosPrivate;
             await axiosInstance
             .current!.get("/message/private/" + JSON.stringify(room.current))
             .then((response) => {
@@ -132,7 +139,7 @@ function PrivateMessages() {
     fetchChallenge();
   }, [friendId.userId]);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 
     event.preventDefault();
     if (!inputMessage?.length) return;
@@ -145,7 +152,6 @@ function PrivateMessages() {
       type: MessageType["STANDARD" as keyof typeof MessageType],
       challengeId: 0,
     };
-
     socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
       msg: newMessage,
       room: room.current,
@@ -153,7 +159,7 @@ function PrivateMessages() {
       receiverId: friend.current!.id,
     });
     setStateMessages([...stateMessages, newMessage]);
-    (event.target as HTMLFormElement).reset();
+    setInputMessage("");
   }
 
   const GenMessages = () => {
@@ -181,31 +187,37 @@ function PrivateMessages() {
       if (!isCurrentUser) {
         return (
           <>
-            <div className="chat-receiver">
-              <span>{newMessage?.user?.username + " : "}</span>
-              <span>{newMessage.message}</span>
-              {newMessage.type === "INVITATION" &&
-              !isChallengeFinished(newMessage.challengeId) ? (
-                <button
-                  className={style.invitationBtn}
-                  onClick={() => goToInvitation(newMessage.challengeId)}
-                >
-                  join
-                </button>
-              ) : (
-                <></>
-              )}
+            <div className="chat-container-receiver">
+              <div className="chat-text-container-receiver">
+                <span className="chatUsername">
+                  {newMessage?.user?.username}
+                </span>
+                <div className="dot">{":"}</div>
+                <p className="chat-text">{newMessage.message}</p>
+                {newMessage.type === "INVITATION" &&
+                !isChallengeFinished(newMessage.challengeId) ? (
+                  <button
+                    className={style.invitationBtn}
+                    onClick={() => goToInvitation(newMessage.challengeId)}
+                  >
+                    join
+                  </button>
+                ) : (
+                  <></>
+                )}
+              </div>
+              <span className="date">{genDate(newMessage)}</span>
             </div>
-            <span className="date">{genDate(newMessage)}</span>
           </>
         );
       }
       return (
-        <div className="chat-sender">
+        <div className="chat-container-sender">
           <span className="date">{genDate(newMessage)}</span>
-          <div className="chat-username">
-            <span>{newMessage?.user?.username + " : "}</span>
-            <span>{newMessage.message}</span>
+          <div className="chat-text-container-sender">
+            <span className="chatUsername">{newMessage?.user?.username}</span>
+            <div className="dot">{":"}</div>
+            <p className="chat-text">{newMessage.message}</p>
           </div>
         </div>
       );
@@ -228,8 +240,9 @@ function PrivateMessages() {
   };
 
   const createInvitation = async (member: User, powerUpMode: boolean) => {
+  console.log('member = ', member);
     try {
-      axiosInstance.current = await axiosPrivate;
+      axiosInstance.current = axiosPrivate;
       const challengeResponse = await axiosInstance.current.post(
         "/challenge/",
         { powerUpMode: powerUpMode, receiverId: member.id },
@@ -239,6 +252,7 @@ function PrivateMessages() {
           },
         }
       );
+	  console.log('challenge response = ', challengeResponse);
       socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
         msg: {
           user: currentUser.current,
@@ -252,7 +266,6 @@ function PrivateMessages() {
         receiverId: member.id,
         type: MessageType["INVITATION" as keyof typeof MessageType],
       });
-      socket.current!.disconnect();
       window.location.href =
         "http://localhost:3000/challenge/" + challengeResponse.data;
     } catch (error: any) {
@@ -311,12 +324,15 @@ function PrivateMessages() {
         </div>
 
         <form id="myForm" onSubmit={handleSubmit} className={style.sendInput}>
-          <input
+          <textarea
             name="messageInput"
             placeholder="Write here..."
             autoComplete="off"
+            value={inputMessage}
             onChange={(event) => setInputMessage(event.target.value)}
-          />
+            onKeyDown={handleKeyDown}
+            className={styleInput.textarea}
+          ></textarea>
           <button type="submit">SEND</button>
           <img
             className={style.challengeLogo}

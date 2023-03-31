@@ -28,7 +28,6 @@ function Main() {
           </video>
         ) : (
           <>
-      <p>{token?.access_token}</p>
           <Canvas />
           </>
         )}
