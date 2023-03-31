@@ -15,7 +15,7 @@ import { printInfosBox } from "../../../utils/infosBox";
 import useAxiosPrivate from "src/hooks/usePrivate";
 import AuthContext from "src/context/TokenContext";
 
-function PrivateMessages({id} : {id: string}) {
+function PrivateMessages() {
   const { token } = useContext(AuthContext);
   const axiosPrivate = useAxiosPrivate();
   const [stateMessages, setStateMessages] = useState<Message[]>([]);
@@ -133,7 +133,7 @@ function PrivateMessages({id} : {id: string}) {
       };
     };
     initPrivateChat().catch(console.error);
-  }, [friendId.userId, id]);
+  }, [friendId.userId]);
 
   useEffect(() => {
     fetchChallenge();
