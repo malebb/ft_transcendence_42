@@ -23,7 +23,7 @@ CREATE TABLE "users" (
     "status" "Activity" NOT NULL DEFAULT 'OFFLINE',
     "email" TEXT NOT NULL,
     "hash" TEXT NOT NULL,
-    "hashRt" TEXT,
+    "hashRt" TEXT[],
     "TFA" TEXT,
     "isTFA" BOOLEAN NOT NULL DEFAULT false,
     "firstName" TEXT,

@@ -14,7 +14,6 @@ type NeutralUser = {
 
 function SearchBar() {
   const axiosPrivate = useAxiosPrivate();
-  const {token, setToken} = useContext(AuthContext);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<NeutralUser[]>([]);
   const [errMsg, setErrMsg] = useState("");

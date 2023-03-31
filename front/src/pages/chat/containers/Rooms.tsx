@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useContext } from "react";
+import { useState, useRef, useEffect } from "react";
 import InputButton from "../inputs/InputButton";
 import { accessibilitiesForCreation } from "../utils/RoomAccessibilities";
 import { AxiosInstance, AxiosResponse } from 'axios';
@@ -7,7 +7,6 @@ import './rooms.style.css';
 import { ChatRoomFilter } from '../utils/ChatRoomFilter';
 import { formatRemainTime } from '../utils/Penalty';
 import { trimUsername } from '../../../utils/trim';
-import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";
 
 function Rooms()

@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import MessagesContainer from "./containers/Message";
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { axiosToken, getToken } from '../../api/axios';
 import { AxiosInstance, AxiosResponse } from 'axios';
 import style from "./ChatRoom.module.css"
 import Headers from 'src/components/Headers';
@@ -78,7 +77,7 @@ const ChatRoomBase = () =>
 		{
 			console.log('error (update room status): ', error);
 		}
-	}, [roomName]);
+	}, [roomName, axiosPrivate]);
 
 	const updateMembersData = useCallback(async () =>
 	{
@@ -113,7 +112,7 @@ const ChatRoomBase = () =>
 			else
 				console.log('error (update members list data) :', error);
 		}
-	}, [updateRoomStatus, roomName]);
+	}, [updateRoomStatus, roomName, axiosPrivate]);
 
 	useEffect(() => 
 	{
@@ -133,7 +132,8 @@ const ChatRoomBase = () =>
 				}
 				catch (error: any)
 				{
-					console.log('error: ', error);
+					if (error.response.status !== 404)
+						console.log('error: ', error);
 				}
 			}, 2000)
 		}
@@ -141,7 +141,7 @@ const ChatRoomBase = () =>
 		return () => {
 				clearInterval(roomStatusInterval.current!);
 		}
-	}, [updateRoomStatus, roomName]);
+	}, [updateRoomStatus, roomName, axiosPrivate]);
 
 	useEffect(() =>
 	{
@@ -162,7 +162,7 @@ const ChatRoomBase = () =>
 			}
 		}
 		checkIfOwner();
-	}, [roomName, updateMembersData]);
+	}, [roomName, updateMembersData, axiosPrivate]);
 
 	const genTitle = () =>
 	{

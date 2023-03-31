@@ -1,10 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import Nav from "./Nav";
 import Log from "./Log";
 import HeadersTitle from "./HeadersTitle";
 import "../styles/Headers.css";
 import AuthContext from "src/context/TokenContext";
-import { SettingsRemote } from "@mui/icons-material";
 
 const Headers = () => {
   const context =  useContext(AuthContext);

@@ -3,7 +3,6 @@ import { AxiosInstance } from "axios";
 
 import { AxiosResponse } from "axios";
 import styleStatus from "../../../styles/status.module.css";
-import styleMessage from "../../../styles/private.message.module.css";
 import { SocketContext } from '../../../context/SocketContext';
 import { Activity } from 'ft_transcendence';
 import useAxiosPrivate from "src/hooks/usePrivate";
@@ -53,7 +52,7 @@ function Status({ id }: { id: number }) {
 			}
 		};
     	checkIfFriend();
-	}, [id]);
+	}, [id, axiosPrivate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,7 +69,7 @@ function Status({ id }: { id: number }) {
       });
     };
     fetchData().catch(console.error);
-  }, [id]);
+  }, [id, axiosPrivate]);
 
 	useEffect(() => {
 		const initSocket = async () =>
@@ -93,7 +92,7 @@ function Status({ id }: { id: number }) {
 			});
 		}
 		initSocket();
-	}, [id, userStatus, socket]);
+	}, [id, userStatus, socket, axiosPrivate]);
 
   const GenStatus = () => {
 

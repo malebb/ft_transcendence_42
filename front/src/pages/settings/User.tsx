@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { axiosMain, axiosAuthReq, HTTP_METHOD } from "../../api/axios";
+import { axiosAuthReq, HTTP_METHOD } from "../../api/axios";
 import { AxiosHeaders, AxiosResponse } from "axios";
 import { useState, useEffect, useRef } from "react";
 import { Switch } from "@mui/material";
@@ -90,7 +90,6 @@ if (secret.otpauth_url !== undefined)
         </form> */
 const User = () => {
   const axiosPrivate = useAxiosPrivate();
-  const {username} = useContext(AuthContext);
   const [user, setUser] = useState<UserType>();
   const [validUser, setValidUser] = useState<boolean>(false);
   const [picture, setPicture] = useState("");

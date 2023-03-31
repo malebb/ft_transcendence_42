@@ -72,7 +72,7 @@ function MessagesContainer() {
         });
     };
     fetchData().catch(console.error);
-  }, [roomId]);
+  }, [roomId, axiosPrivate]);
 
   useEffect(() => {
     socket.current = io("ws://localhost:3333/chat", {
@@ -88,7 +88,7 @@ function MessagesContainer() {
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
       });
-      await socket.current!.on("ROOM_MESSAGE", async (message: Message) => {
+      socket.current!.on("ROOM_MESSAGE", async (message: Message) => {
         const blocked: AxiosResponse = await axiosInstance.current!.get(
           "/users/blocked/" + message.user.id
         );
@@ -97,7 +97,7 @@ function MessagesContainer() {
           if (message.user.id === currentUser.current!.id) setMuteTimeLeft("");
         }
       });
-      await socket.current!.on("MUTE", async (mute) => {
+      socket.current!.on("MUTE", async (mute) => {
         setMuteTimeLeft(
           "You are muted (" + formatRemainTime(mute.penalties) + ")"
         );
@@ -107,7 +107,7 @@ function MessagesContainer() {
         socket.current?.disconnect();
       };
     });
-  }, []);
+  }, [token]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -129,7 +129,9 @@ function MessagesContainer() {
       challengeId: 0,
     };
 
-    await socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
+    if (muteTimeLeft === "") {
+      socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
+    }
     setInputMessage("");
   }
 

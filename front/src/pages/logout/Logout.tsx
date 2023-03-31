@@ -1,13 +1,11 @@
 import { AxiosResponse } from 'axios';
 import React, { useContext, useEffect, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import Loading from '../Loading';
 import { useSnackbar } from 'notistack';
 import useAxiosPrivate from 'src/hooks/usePrivate';
-import Cookies from 'js-cookie';
 import AuthContext from 'src/context/TokenContext';
 import { SocketContext } from '../../context/SocketContext';
-import { axiosPrivate } from 'src/api/axios';
 
 
 const LOGOUT_PATH = "auth/logout";
@@ -39,7 +37,7 @@ const Logout = () => {
         setIsLoading(false);
       };
       logout();
-    }, [socket]);
+    }, [socket, axiosPrivate, context]);
     if (isLoading)
         return <Loading/>
   return errMsg ?

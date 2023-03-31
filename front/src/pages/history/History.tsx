@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef, useContext } from "react";
-import { AxiosInstance, AxiosResponse } from "axios";
+import { useEffect, useState, useRef } from "react";
+import { AxiosResponse } from "axios";
 import "../../styles/history.css";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
@@ -17,7 +17,6 @@ const History = () =>
 	const axiosPrivate = useAxiosPrivate();
 	const [sorted, setSorted] = useState<boolean>(false);
 	const historyElem = useRef<HistoryElem[]>([]);
-	// const axiosInstance = useRef<AxiosInstance | null>(null);
 
 	const printHistory = () =>
 	{
@@ -87,7 +86,7 @@ const History = () =>
 			}
 		};
 		initHistory();
-	}, []);
+	}, [axiosPrivate]);
 	return (
 	<>
         <Headers/>

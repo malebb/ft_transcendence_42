@@ -220,7 +220,7 @@ const Games = () =>
 				socket.current!.disconnect();
 			}
 		}
-	}, [gameId]);
+	}, [gameId, axiosPrivate, token]);
 
 	if (!gameId) {
 		return (

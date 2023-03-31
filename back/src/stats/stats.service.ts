@@ -166,7 +166,8 @@ export class StatsService {
     try {
       const friends = await this.userService.getFriends(userId);
 
-      if (userStatsId === userId || this.isFriend(friends, userStatsId)) {
+      if (userStatsId === userId ||
+		  this.isFriend(friends, userStatsId)) {
         const userFriend = await this.prisma.user.findUnique({
           where: {
             id: userStatsId,

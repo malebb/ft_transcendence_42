@@ -84,6 +84,11 @@ export class MessageGateway
   @SubscribeMessage('SEND_PRIVATE_ROOM_MESSAGE')
   async receivePrivateMessage(client: Socket, data)
   {
+	  if (!data.room || !data.room.id || !data.msg ||
+		  !data.msg.message || !data.senderId ||
+			  !data.receiverId || !data.msg.type
+				  || !data.room.name)
+		  return ;
    await this.messageService.updatePrivateConv(data.room.id, data.msg.message, data.senderId, data.receiverId, data.msg.type, data.msg.challengeId);
    	const blocked = await this.userService.getBlocked(data.senderId, data.receiverId);
 	if (!blocked.length)

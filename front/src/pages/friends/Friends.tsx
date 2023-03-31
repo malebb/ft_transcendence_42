@@ -1,16 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
-import { AxiosHeaders, AxiosResponse } from "axios";
-import axios from "axios";
-import { getToken, axiosMain, axiosToken, HTTP_METHOD, axiosAuthReq } from "../../api/axios";
+import React, { useEffect, useState } from "react";
+import { AxiosHeaders } from "axios";
+import {  HTTP_METHOD, axiosAuthReq } from "../../api/axios";
 import { Link } from "react-router-dom";
 import Popup from "src/components/Popup";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Headers";
 import "../../styles/Friends.css";
 import { GET_PROFILE_PICTURE, validURL } from "src/api/utils";
-import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";
-import { setEmitFlags } from "typescript";
 import Status from '../settings/components/Status';
 
 const FRIEND_LIST_PATH = "/users/friend-list";
@@ -46,7 +43,6 @@ enum StatusEnum {
 
 const Friends = () => {
   const axiosPrivate = useAxiosPrivate();
-  const {token, setToken} = useContext(AuthContext);
   const [renderType, setRenderType] = useState<number>(StatusEnum.FRIEND);
   const [friendArray, setFriendArray] = useState<FriendType[]>();
   const [recvArray, setRecvArray] = useState<NeutralUser[]>();
@@ -59,9 +55,6 @@ const Friends = () => {
   const popupTitle = "WARNING";
   const popupContentRemoveFriend =
     "Are you sure you want to remove this person from your friends list? This action is final and you will not be able to recover it.";
-  const popupContentRemoveWait =
-    "Are you sure you want to remove this person from your waiting list? This action is final and you will not be able to recover it.";
-
 
   const handleUnfriendClick = (): void => 
   {
@@ -69,11 +62,11 @@ const Friends = () => {
     setPopupContent(popupContentRemoveFriend);
     setList(0);
   }
-  const handleUnWaitClick = (): void => {
-    setShowConfirmation(true);
-    setPopupContent(popupContentRemoveWait);
-    setList(1);
-  };
+//  const handleUnWaitClick = (): void => {
+  //  setShowConfirmation(true);
+//    setPopupContent(popupContentRemoveWait);
+//    setList(1);
+//  };
 
   const getRecvArray = async () => {
     await axiosAuthReq(HTTP_METHOD.GET, RECV_LIST_PATH, {} as AxiosHeaders, {}, setErrMsg, setRecvArray);
