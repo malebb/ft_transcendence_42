@@ -180,6 +180,10 @@ const UserProfile = () => {
     treatData();
   }, [paramUserId]);
 
+  useEffect(() => {
+    console.log(errMsg);
+  }, [errMsg])
+
   const deleteRequest = async (confirmed: boolean): Promise<void> => {
     if (confirmed) {
       try {
@@ -356,7 +360,7 @@ const UserProfile = () => {
 		{
 		 return (
 		 <>
-			 <img className="openMsgbutton" onClick={openMessage} src="http://localhost:3000/images/msgLogo.png"/>
+			 <img className="openMsgbutton" onClick={openMessage} src="http://localhost:3000/images/msgLogo.png" draggable={false} />
 				 <div className="pop_up">
 					 <div className="arrow_down"></div>
 		 			<p>Click here & let's chat !</p>

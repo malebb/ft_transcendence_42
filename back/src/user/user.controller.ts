@@ -118,16 +118,18 @@ export class UserController {
 
   @Get('accept-friend-request-by-reqid/:friendrequestid')
   acceptFriendRequestByReqId(
+    @GetUser('id') myId: number,
     @Param('friendrequestid', ParseIntPipe) requestid: number,
   ) {
-    return this.userService.acceptFriendRequestByReqId(requestid);
+    return this.userService.acceptFriendRequestByReqId(requestid, myId);
   }
 
   @Get('decline-friend-request/:friendrequestid')
   declineFriendRequestByReqId(
+    @GetUser('id') myId: number,
     @Param('friendrequestid', ParseIntPipe) requestid: number,
   ) {
-    return this.userService.declineFriendRequest(requestid);
+    return this.userService.declineFriendRequest(requestid, myId);
   }
   @Get('decline-friend-request-by-userid/:userid')
   declineFriendRequestByUserId(

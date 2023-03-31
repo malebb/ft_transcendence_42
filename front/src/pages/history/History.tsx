@@ -91,9 +91,9 @@ const History = () =>
 	<>
         <Headers/>
         <Sidebar/>
-		<div id="history">
+		<main id="history">
 		{printHistory()}
-		</div>
+		</main>
 	</>
 	);
 }

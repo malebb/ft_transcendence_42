@@ -193,7 +193,7 @@ export class AuthService {
           id: userId,
         },
         data: {
-          hashRt: rthash,
+          hashRt: { push: rthash },
         },
       });
     } catch (error) {
@@ -250,16 +250,25 @@ export class AuthService {
     }
   }
 
-  async logout(userId: number) {
-    await this.prismaService.user.updateMany({
+  async logout(userId: number, rt: string) {
+    const { hashRt } = await this.prismaService.user.findUnique({
       where: {
         id: userId,
-        hashRt: {
-          not: null,
-        },
+      },
+      select: {
+        hashRt: true,
+      },
+    });
+
+    const to_del = hashRt.filter((id) => argon.verify(id, rt));
+    await this.prismaService.user.update({
+      where: {
+        id: userId,
       },
       data: {
-        hashRt: null,
+        hashRt: {
+          set: hashRt.filter((id) => id !== to_del[0]),
+        },
       },
     });
   }
@@ -273,7 +282,10 @@ export class AuthService {
     if (!user || !user.hashRt) {
       throw new ForbiddenException('Incorrect User');
     }
-    const rtMatches = await argon.verify(user.hashRt, rt);
+    const rtMatches =
+      user.hashRt.filter(function (val) {
+        return argon.verify(val, rt);
+      }).length > 0;
     if (!rtMatches) {
       throw new ForbiddenException('ACESS DENIED');
     }
