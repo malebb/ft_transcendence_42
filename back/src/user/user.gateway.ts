@@ -92,12 +92,26 @@ export class UserGateway
 		this.emitStatusToFriends(userId, 'OFFLINE');
 	}
 
+	isUserInAnotherSession(userId: number)
+	{
+		let countUserFound: number = 0;
+		for (let i = 0; i < this.clients.length; ++i)
+		{
+			if (userId === getIdFromToken(this.clients[i].handshake.auth.token))
+				countUserFound++;
+		}
+		return (countUserFound >= 2);
+	}
+
 	handleDisconnect(client: Socket) {
 		if (isAuthEmpty(client))
 			return ;
 		const userId = getIdFromToken(client.handshake.auth.token);
-		this.userService.setUserOnLineOffline(userId, "OFFLINE");
-		this.emitStatusToFriends(userId, 'OFFLINE');
+		if (!this.isUserInAnotherSession(userId))
+		{
+			this.userService.setUserOnLineOffline(userId, "OFFLINE");
+			this.emitStatusToFriends(userId, 'OFFLINE');
+		}
 		for (let i = 0; i < this.clients.length; ++i)
 		{
 			if (this.clients[i].id === client.id)
