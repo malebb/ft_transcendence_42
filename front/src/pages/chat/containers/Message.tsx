@@ -112,10 +112,7 @@ function MessagesContainer() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (muteTimeLeft != "") {
-      setInputMessage("");
-      return;
-    }
+    setInputMessage("");
 
     if (!inputMessage?.length) return;
 
@@ -128,10 +125,7 @@ function MessagesContainer() {
       type: MessageType["STANDARD" as keyof typeof MessageType],
       challengeId: 0,
     };
-
-    if (muteTimeLeft === "") {
-      socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
-    }
+    socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
     setInputMessage("");
   }
 
