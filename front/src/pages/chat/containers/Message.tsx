@@ -29,19 +29,24 @@ function MessagesContainer() {
   };
 
   function adjustTextareaHeight() {
-	const tx = document.getElementsByTagName("textarea");
-	function onInput(this: HTMLTextAreaElement) {
-		this.style.height = "0px";
-		this.style.height = (this.scrollHeight) + "px";
-	  }
-	for (let i = 0; i < tx.length; i++) {
-		if (tx[i].value == '') {
-		  tx[i].setAttribute("style", "height:" + 20 + "px;overflow-y:hidden;");
-		} else {
-		  tx[i].setAttribute("style", "height:" + (tx[i].scrollHeight) + "px;overflow-y:hidden;");
-		}
-		tx[i].addEventListener("input", onInput, false);
-	  }
+    const tx = document.getElementsByTagName("textarea");
+    function onInput(this: HTMLTextAreaElement) {
+      this.style.height = "0px";
+      // this.style.width = "0px";
+      this.style.height = this.scrollHeight + "px";
+      // this.style.width = this.scrollWidth + "px";
+    }
+    for (let i = 0; i < tx.length; i++) {
+      if (tx[i].value == "") {
+        tx[i].setAttribute("style", "height:" + 20 + "px;overflow-y:hidden;");
+      } else {
+        tx[i].setAttribute(
+          "style",
+          "height:" + tx[i].scrollHeight + "px;overflow-y:hidden;"
+        );
+      }
+      tx[i].addEventListener("input", onInput, false);
+    }
   }
 
   useEffect(() => {
@@ -87,8 +92,7 @@ function MessagesContainer() {
         );
         if (!blocked.data.length) {
           setStateMessages((stateMessages) => [...stateMessages, message]);
-          if (message.user.id === currentUser.current!.id)
-            setMuteTimeLeft("");
+          if (message.user.id === currentUser.current!.id) setMuteTimeLeft("");
         }
       });
       await socket.current!.on("MUTE", async (mute) => {
@@ -101,16 +105,14 @@ function MessagesContainer() {
         socket.current?.disconnect();
       };
     });
-
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-
     event.preventDefault();
 
     if (muteTimeLeft != "") {
       setInputMessage("");
-        return;
+      return;
     }
 
     if (!inputMessage?.length) return;
@@ -136,7 +138,7 @@ function MessagesContainer() {
   }
 
   useEffect(() => {
-	adjustTextareaHeight();
+    adjustTextareaHeight();
     scrollToBottom();
   }, [stateMessages]);
 
@@ -152,33 +154,28 @@ function MessagesContainer() {
       if (!isCurrentUser) {
         return (
           <>
-            {" "}
-            <div className="chat-receiver">
-              {/* <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username}</Link> : </span> */}
-              {/* <span>{newMessage.message}</span> */}
-              <span>
+            <div className="chat-container-receiver">
+              <div className="chat-text-container-receiver">
                 <a className="a" href={"/user/" + newMessage.user.id}>
-                  {" "}
                   {newMessage?.user?.username}
                 </a>
-              </span>
-              <span>{" : " + newMessage.message}</span>
+                <div className="dot">{":"}</div>
+                <p className="chat-text">{newMessage.message}</p>
+              </div>
+              <span className="date">{genDate(newMessage)}</span>
             </div>
-            <span className="date">{genDate(newMessage)}</span>
           </>
         );
       }
       return (
         <>
-          <div className="chat-sender">
+          <div className="chat-container-sender">
             <span className="date">{genDate(newMessage)}</span>
-			  {/* <label className="textareaContainer"> */}
-            <div className="textareaContainer" >
-              {/* <span><Link className="msgProfileLink" to={`/user/${newMessage.user.id}`}>{newMessage?.user?.username }</Link> : </span> */}
-              <span className="chatUsername" >{newMessage?.user?.username + " : "}</span>
-              <textarea rows={1} className="textareaSender" defaultValue={newMessage.message}></textarea>
-			</div>
-			  {/* </label> */}
+            <div className="chat-text-container-sender">
+              <span className="chatUsername">{newMessage?.user?.username}</span>
+              <div className="dot">{":"}</div>
+              <p className="chat-text">{newMessage.message}</p>
+            </div>
           </div>
         </>
       );
@@ -209,14 +206,14 @@ function MessagesContainer() {
           </div>
           <p className="muteMsg">{muteTimeLeft}</p>
           <form id="myForm" onSubmit={handleSubmit} className={style.sendInput}>
-              <textarea
+            <textarea
               name="messageInput"
               placeholder="Tell us what you are thinking"
               autoComplete="off"
               value={inputMessage}
               onChange={(event) => setInputMessage(event.target.value)}
-			  onKeyDown={handleKeyDown}
-			  className={style.textarea}
+              onKeyDown={handleKeyDown}
+              className={style.textarea}
             ></textarea>
             <button type="submit">SEND</button>
           </form>
