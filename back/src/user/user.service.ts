@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EditUserDto } from './dto';
 import * as fs from 'fs';
@@ -103,6 +109,7 @@ export class UserService {
       },
     });
     if (!user) return;
+    // throw new NotFoundException('User profile ' + userId + ' Not Found');
     return this.mapUserToNeutralUser(user);
   }
   async editUser(userId: number, dto: EditUserDto) {
@@ -205,7 +212,8 @@ export class UserService {
         id: receiverId,
       },
     });
-    if (!user) return 'error';
+    if (!user)
+      throw new ForbiddenException('User ' + creatorId + ' forbidden action');
     let request = await this.prisma.friendRequest.findFirst({
       where: {
         creatorId: creatorId,
@@ -228,7 +236,8 @@ export class UserService {
     creatorId: number,
     receiverId: number,
   ): Promise<string> {
-    if (creatorId == receiverId) return;
+    if (creatorId == receiverId)
+      throw new ForbiddenException('User ' + creatorId + ' forbidden action');
     const status = await this.alreadyRequested(creatorId, receiverId);
     if (status === '') {
       const newreq = await this.prisma.friendRequest.create({
@@ -245,7 +254,7 @@ export class UserService {
 
   async acceptFriendRequestByUserId(myId: number, userId: number) {
     if (myId == userId) return;
-    return await this.prisma.friendRequest.updateMany({
+    const user = await this.prisma.friendRequest.updateMany({
       where: {
         receiverId: myId,
         creatorId: userId,
@@ -254,31 +263,42 @@ export class UserService {
         status: 'accepted',
       },
     });
+    if (user.count == 0)
+      throw new ForbiddenException('User ' + myId + ' forbidden action');
+    return user;
   }
-  async acceptFriendRequestByReqId(requestId: number) {
-    await this.prisma.friendRequest.update({
+  async acceptFriendRequestByReqId(requestId: number, myId: number) {
+    const user = await this.prisma.friendRequest.updateMany({
       where: {
         id: requestId,
+        receiverId: myId,
       },
       data: {
         status: 'accepted',
       },
     });
+    if (user.count == 0)
+      throw new ForbiddenException('User ' + myId + ' forbidden action');
+    return user;
   }
 
-  async declineFriendRequest(requestId: number) {
-    await this.prisma.friendRequest.update({
+  async declineFriendRequest(requestId: number, myId: number) {
+    const user = await this.prisma.friendRequest.updateMany({
       where: {
         id: requestId,
+        receiverId: myId,
       },
       data: {
         status: 'declined',
       },
     });
+    if (user.count == 0)
+      throw new ForbiddenException('User ' + myId + ' forbidden action');
+    return user;
   }
   async declineFriendRequestByUserId(myId: number, userId: number) {
     if (myId == userId) return;
-    return await this.prisma.friendRequest.updateMany({
+    const user = await this.prisma.friendRequest.updateMany({
       where: {
         receiverId: myId,
         creatorId: userId,
@@ -287,6 +307,9 @@ export class UserService {
         status: 'declined',
       },
     });
+    if (user.count == 0)
+      throw new ForbiddenException('User ' + myId + ' forbidden action');
+    return user;
   }
   async deleteFriendRequestByUserId(myId: number, userId: number) {
     if (myId == userId) return;
@@ -304,12 +327,10 @@ export class UserService {
     });
     if (ret.count === 1 && ret2.count === 0) return ret;
     else if (ret.count === 0 && ret2.count === 1) return ret2;
-    else
-      throw new HttpException('Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    else throw new ForbiddenException('User ' + myId + ' forbidden action');
   }
 
   async getRecvPendingRequest(userId: number): Promise<NeutralUser[]> {
-    //TODO maybe create a particular mapping to remove email from not friend user
     const waitingArray: NeutralUser[] = [];
     const recv_request = await this.prisma.friendRequest.findMany({
       where: {
@@ -330,7 +351,6 @@ export class UserService {
     return waitingArray;
   }
   async getCreatedPendingRequest(userId: number): Promise<NeutralUser[]> {
-    //TODO maybe create a particular mapping to remove email from not friend user
     const pendingArray: NeutralUser[] = [];
     const crea_request = await this.prisma.friendRequest.findMany({
       where: {

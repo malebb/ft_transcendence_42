@@ -157,7 +157,7 @@ const UserProfile = () => {
   useEffect(() => {
     const treatData = async () => {
       const profile = await axiosAuthReq(HTTP_METHOD.GET, GET_USER_PROFILE + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setUser);
-      console.log(profile);
+      console.log('profile = ' + profile);
       if (profile === undefined) return ;
       if (profile !== undefined){
         if (validURL(profile.profilePicture)) setPicture(profile.profilePicture);
@@ -170,6 +170,10 @@ const UserProfile = () => {
     };
     treatData();
   }, [paramUserId]);
+
+  useEffect(() => {
+    console.log(errMsg);
+  }, [errMsg])
 
   const deleteRequest = async (confirmed: boolean): Promise<void> => {
     if (confirmed) {
@@ -326,7 +330,7 @@ const UserProfile = () => {
 		{
 		 return (
 		 <>
-			 <img className="openMsgbutton" onClick={openMessage} src="http://localhost:3000/images/msgLogo.png"/>
+			 <img className="openMsgbutton" onClick={openMessage} src="http://localhost:3000/images/msgLogo.png" draggable={false} />
 				 <div className="pop_up">
 					 <div className="arrow_down"></div>
 		 			<p>Click here & let's chat !</p>
@@ -353,6 +357,7 @@ const UserProfile = () => {
             className="profilePicture"
             src={picture}
             alt="profile_picture"
+            draggable={false}
           />
 		  <div id="divprofileName" className="divprofileName">
 		 	 <p className="profileName">{user?.username?.slice(0, 15)}</p>

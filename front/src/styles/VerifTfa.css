@@ -119,22 +119,22 @@ form .indicator {
 .submit:focus ~ .indicator {
     --i: 7;
 }
-#n1:focus ~ .indicator {
+#n0:focus ~ .indicator {
     --i: 1;
 }
-#n2:focus ~ .indicator {
+#n1:focus ~ .indicator {
     --i: 2;
 }
-#n3:focus ~ .indicator {
+#n2:focus ~ .indicator {
     --i: 3;
 }
-#n4:focus ~ .indicator {
+#n3:focus ~ .indicator {
     --i: 4;
 }
-#n5:focus ~ .indicator {
+#n4:focus ~ .indicator {
     --i: 5;
 }
-#n6:focus ~ .indicator {
+#n5:focus ~ .indicator {
     --i: 6;
 }
 #submitted:checked ~ form {

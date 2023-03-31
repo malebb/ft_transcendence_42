@@ -97,10 +97,11 @@ export class AuthController {
 
   @Post('logout')
   logout(
-    @GetUser('sub') userId: number,
+    @GetUser('id') userId: number,
+    @Req() req: Request, //refreshToken(@Req() req: Request)
     @Res({ passthrough: true }) res: Response,
   ) {
-    const ret = this.authService.logout(userId);
+    const ret = this.authService.logout(userId, req.cookies['rt_token']);
     res.clearCookie('rt_token');
     return ret;
   }
