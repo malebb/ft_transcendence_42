@@ -23,7 +23,7 @@ const BlockButton = (props: BlockButtonProps) =>
 			setBlocked(true);
 		else
 			setBlocked(false);
-	}, [props.userIdToBlock]);
+	}, [props.userIdToBlock, axiosPrivate]);
 
 	useEffect(() =>
 	{

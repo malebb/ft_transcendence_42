@@ -9,7 +9,6 @@ import VerifTfa from "src/pages/settings/components/VerifTfa";
 import { ResponseInterface, SignInterface } from "src/interfaces/Sign";
 import Headers from "src/components/Headers";
 import { SocketContext } from '../../../context/SocketContext';
-import { getToken } from '../../../api/axios';
 import AuthContext from "src/context/TokenContext";
 
 
@@ -18,7 +17,7 @@ const CALLBACK_PATH = "/auth/signin/42login/callback";
 //TODO IF NO CODE
 const Callback = () => {
 
-  const {token, setToken, username, setUsername, userId, setUserId} = useContext(AuthContext);
+  const { setToken, username, setUsername, setUserId} = useContext(AuthContext);
   const [errMsg, setErrMsg] = useState("");
   // const [username, setUsername] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);

@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import "../styles/App.css";
-import { Route, Routes, BrowserRouter, useNavigate } from "react-router-dom";
-import AuthContext, { AuthProvider } from "../context/TokenContext";
+import { Route, Routes, BrowserRouter } from "react-router-dom";
+import AuthContext  from "../context/TokenContext";
 import Main from "./home/Main";
 import Signin from "./signin/signin";
 import Signup from "./signup/signup";

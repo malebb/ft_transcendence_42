@@ -1,9 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import Loading from "../Loading";
 import { useSnackbar } from "notistack";
 import useAxiosPrivate from "src/hooks/usePrivate";
-import AuthContext from "src/context/TokenContext";
 
 const AUTH_VERIF_PATH = "/auth/verify";
 
@@ -14,7 +13,6 @@ const PrivateRoutes = () => {
   const [errMsg, setErrMsg] = useState<string>("");
   const axiosPrivate = useAxiosPrivate();
 
-  const {token} = useContext(AuthContext)
   const snackBar = useSnackbar();
 
   useEffect(() => {
@@ -33,7 +31,7 @@ const PrivateRoutes = () => {
       setIsChecking(false);
     };
     checkAuth();
-  }, []);
+  }, [axiosPrivate]);
 
   if (isChecking) {
     return <Loading />;

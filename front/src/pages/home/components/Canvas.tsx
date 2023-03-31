@@ -4,7 +4,7 @@ import { io, Socket } from "socket.io-client";
 import { Ball, Room, Player, PlayerData, User } from "ft_transcendence";
 import LinkZone from "src/interfaces/LinkZone";
 import { AxiosInstance, AxiosResponse } from 'axios';
-import { useParams, useNavigate, Link} from 'react-router-dom';
+import { useParams , Link} from 'react-router-dom';
 import { CANVAS_FONT, FONT_COLOR } from "src/classes/Draw";
 import style from 'src/styles/canvas.module.css';
 import { trimUsername } from "src/utils/trim";
@@ -38,7 +38,6 @@ export default function Canvas()
 	const speedPowerUp						= useRef<HTMLImageElement | null>(null);
 	const powerUpMode						= useRef<boolean>(false);
 	const axiosInstance						= useRef<AxiosInstance | null>(null);
-	const navigate 							= useRef(useNavigate());
 	const {challengeId}						= useParams()
 	const [isChallenger, setIsChallenger]	= useState(true);
 	const statusSocket = useContext(SocketContext);
@@ -715,7 +714,7 @@ export default function Canvas()
 				stopGame();
 			statusSocket.emit('ONLINE');
 		}
-	}, [challengeId, statusSocket, powerUp, stopGame, token]);
+	}, [challengeId, statusSocket, powerUp, stopGame, token, axiosPrivate]);
 
 	useEffect(() => {
 		if (socket.current != null)

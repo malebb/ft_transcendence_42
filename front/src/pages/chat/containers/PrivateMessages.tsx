@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState, useCallback } from "react";
 import { Socket, io } from "socket.io-client";
 import { Message, MessageType, User } from "ft_transcendence";
 import { AxiosInstance, AxiosResponse } from "axios";
@@ -44,7 +44,7 @@ function PrivateMessages() {
     scrollToBottom();
   }, [stateMessages]);
 
-	const fetchChallenge = async () =>
+	const fetchChallenge = useCallback(async () =>
 	{
 		axiosInstance.current = axiosPrivate;
 		await axiosInstance.current!.get("/challenge/myChallenges").then((response) => {
@@ -53,7 +53,7 @@ function PrivateMessages() {
      		}).catch((e) => {
                console.log('error: ', e);
        	});
-	}
+	}, [axiosPrivate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -125,11 +125,11 @@ function PrivateMessages() {
       };
     };
     initPrivateChat().catch(console.error);
-  }, [friendId.userId]);
+  }, [friendId.paramUserId, axiosPrivate, fetchChallenge, token]);
 
   useEffect(() => {
     fetchChallenge();
-  }, [friendId.userId]);
+  }, [friendId.userId, fetchChallenge]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 

@@ -1,16 +1,14 @@
 import { useParams } from "react-router-dom";
-import { useRef, useState, useEffect, useContext } from "react";
+import { useRef, useState, useEffect } from "react";
 import { AxiosInstance, AxiosResponse } from "axios";
 import  "../../../interfaces/StatsData";
 import "../../../styles/Stats.css";
-import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";
 import StatsData from "../../../interfaces/StatsData";
 
 const Stats = () => {
 
   const axiosPrivate = useAxiosPrivate();
-  const { token , setToken } = useContext(AuthContext);
   const {paramUserId} = useParams();
   
 const [victory, setVictory] = useState(0);
@@ -39,7 +37,7 @@ useEffect(() => {
     }
     initStats();
 
-}, [paramUserId]);
+}, [paramUserId, axiosPrivate]);
 return (
 <div>
   <div id="stats">

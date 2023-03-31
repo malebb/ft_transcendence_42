@@ -59,7 +59,7 @@ function MessagesContainer() {
         });
     };
     fetchData().catch(console.error);
-  }, [roomId]);
+  }, [roomId, axiosPrivate]);
 
   useEffect(() => {
     ScrollToBottom();
@@ -100,7 +100,7 @@ function MessagesContainer() {
         socket.current?.disconnect();
       };
     });
-  }, []);
+  }, [token]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 
@@ -117,7 +117,7 @@ function MessagesContainer() {
       challengeId: 0,
     };
 
-    if (muteTimeLeft == "") {
+    if (muteTimeLeft === "") {
       socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
       setStateMessages([...stateMessages, newMessage]);
     }

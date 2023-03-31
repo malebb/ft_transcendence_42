@@ -46,7 +46,7 @@ const UserProfile = () => {
   
   const { paramUserId } = useParams();
 
-  const { token , setToken, userId } = useContext(AuthContext);
+  const { userId } = useContext(AuthContext);
   const [user, setUser] = useState<NeutralUser>();
   const [picture, setPicture] = useState("");
   const [friendStatus, setFriendStatus] = useState<string>("");

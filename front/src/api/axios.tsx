@@ -1,6 +1,5 @@
 import axios, { AxiosHeaders, AxiosResponse } from "axios";
-import { Dispatch, SetStateAction, useContext } from "react";
-import AuthContext from "src/context/TokenContext";
+import { Dispatch, SetStateAction } from "react";
 import { TokensInterface } from "src/interfaces/Sign";
 import Cookies from 'js-cookie';
 

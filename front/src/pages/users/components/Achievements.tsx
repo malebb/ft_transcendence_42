@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useRef, useState, useEffect, useContext } from "react";
+import { useRef, useState, useEffect } from "react";
 import { AxiosInstance, AxiosResponse } from "axios";
 import StatsData from "../../../interfaces/StatsData";
 import {
@@ -130,7 +130,7 @@ const Achievements = () =>
 		}
 		initAchievements();
 
-	}, [paramUserId]);
+	}, [paramUserId, axiosPrivate]);
 	return (
 		<div>
 			<h2 id="achievementsTitle">Achievements</h2>

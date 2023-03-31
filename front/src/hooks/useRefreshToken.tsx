@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { axiosMain } from 'src/api/axios';
 import { SignInterface } from 'src/interfaces/Sign';
 import useAuth from './useAuth';
