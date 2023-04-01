@@ -353,7 +353,8 @@ const ChatRoomBase = () =>
 		try
 		{
 			axiosInstance.current = axiosPrivate;
-			await axiosInstance.current.patch('/chatRoom/makeAdmin/' + roomName, "userId=" + member.id);
+			await axiosInstance.current.patch('/chatRoom/makeAdmin/' + roomName, {userId: member.id},
+			{headers: {"Content-type": "application/json"}});
 			printInfosBox(member.username + ' is now admin');
 			await updateMembersData();
 		}
@@ -394,7 +395,8 @@ const ChatRoomBase = () =>
 		try
 		{
 			axiosInstance.current = axiosPrivate;
-			await axiosInstance.current.patch('/chatRoom/removeAdmin/' + roomName, "userId=" + member.id);
+			await axiosInstance.current.patch('/chatRoom/removeAdmin/' + roomName, {userId: member.id},
+			{headers: {"Content-type": "application/json"}});
 			printInfosBox(member.username + ' is no longer admin');
 			await updateMembersData();
 		}
