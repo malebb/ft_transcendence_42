@@ -16,7 +16,7 @@ const CALLBACK_PATH = "/auth/signin/42login/callback";
 
 const Callback = () => {
 
-  const { setToken, username, setUsername, setUserId} = useContext(AuthContext);
+  const { setToken, setUsername, setUserId} = useContext(AuthContext);
   const [errMsg, setErrMsg] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isTfa, setIsTfa] = useState<boolean>(false);
@@ -33,8 +33,9 @@ const Callback = () => {
   const snackBar = useSnackbar();
   const query = useQuery();
   useEffect(() => {
-    const code = query.get("code") || "";
+	
     const callback42 = async () => {
+    	const code = query.get("code") || "";
       try {
         const response: AxiosResponse = await axiosMain.post<SignInterface>(CALLBACK_PATH, {
           code: code,
@@ -75,7 +76,8 @@ const Callback = () => {
       setIsLoading(false);
     };
     callback42();
-  }, [query, setToken, setUserId, setUsername, socket]);
+// eslint-disable-next-line
+  }, [setToken, setUserId, setUsername, socket, snackBar]);
 
   useEffect(() => {
     if (TfaSuccess)
@@ -91,7 +93,7 @@ const Callback = () => {
                 anchorOrigin: { vertical: "bottom", horizontal: "right" },
               })
     }
-  }, [TfaSuccess, resp.id, resp.tokens, resp.username, socket, setToken, setUsername, setUserId])
+  }, [TfaSuccess, resp.id, resp.tokens, resp.username, socket, setToken, setUsername, setUserId, snackBar])
 
   useEffect(() => {
     if (errMsg === 'Invalid Credentials')
@@ -106,7 +108,7 @@ const Callback = () => {
       variant: "error",
       anchorOrigin: { vertical: "bottom", horizontal: "right" },
     })}
-  }, [errMsg])
+  }, [errMsg, snackBar])
 
   if (isLoading) return <Loading />;
   return (
@@ -118,7 +120,7 @@ const Callback = () => {
         <main>
           {(isTfa && resp.id !== undefined) && <VerifTfa setTfaSuccess={setTfaSuccess} userId={resp.id} />}
           {(TfaDone || !isTfa) && (
-              <Navigate to={"/"} />
+              <Navigate to={"/user"} />
           )}
         </main>
       )}

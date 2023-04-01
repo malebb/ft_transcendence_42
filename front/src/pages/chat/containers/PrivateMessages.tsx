@@ -251,7 +251,6 @@ function PrivateMessages() {
           },
         }
       );
-	  console.log('challenge response = ', challengeResponse);
       socket.current!.emit("SEND_PRIVATE_ROOM_MESSAGE", {
         msg: {
           user: currentUser.current,

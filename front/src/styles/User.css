@@ -115,7 +115,8 @@
   
   .settings-User { grid-area: settings-User; }
   
-  .tfa-User { grid-area: tfa-User; }
+  .tfa-User { 
+  grid-area: tfa-User; }
   
   .del-acc-User { grid-area: del-acc-User; } */
   .errMsg{

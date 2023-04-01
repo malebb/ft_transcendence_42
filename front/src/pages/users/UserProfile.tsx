@@ -174,7 +174,7 @@ const UserProfile = () => {
           setPicture(
             GET_PROFILE_PICTURE + profile.profilePicture.split("/")[2]
           );
-        await axiosAuthReq(HTTP_METHOD.GET, GET_STATUS_PATH + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setFriendStatus);
+       	 await axiosAuthReq(HTTP_METHOD.GET, GET_STATUS_PATH + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setFriendStatus);
       }
     };
     treatData();

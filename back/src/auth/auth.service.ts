@@ -152,7 +152,6 @@ export class AuthService {
             username: login,
           },
         });
-        console.log(already_use);
         if (already_use) {
           user_inc++;
           login = getprofile.data['login'] + user_inc.toString();

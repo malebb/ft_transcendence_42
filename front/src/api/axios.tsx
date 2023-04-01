@@ -103,31 +103,7 @@ export async function axiosToken(token: TokensInterface, setToken: React.Dispatc
       headers: { Authorization: `Bearer ${token.access_token}` },
   });
 }
-// export async function axiosToken() {
-  // const date = new Date();
-  // const token = JSON.parse(localStorage.getItem("tokens")!);
-  // const time = token["expireIn"];
-  // const crea_time = new Date(token["crea_time"]);
-  // if (date.getTime() >= crea_time.getTime() + (time - 10) * 1000) {
-    // const new_jwt: AxiosResponse = await axiosMain.post(
-      // "/auth/refresh",
-      // {},
-      // {
-        // headers: {
-          // Authorization: getRefreshHeader(),
-        // },
-      // }
-    // );
-    // localStorage.setItem("tokens", JSON.stringify(new_jwt.data));
-  // }
-// 
-  // return axios.create({
-    // baseURL,
-    // headers: { Authorization: getAuthorizationHeader() },
-  // });
-// 
-// }
-//TODO check AxiosInstance
+
   export async function axiosAuthReq<Type>(method: number, path: string, headers: AxiosHeaders, body: Object, setErrorMsg: Dispatch<SetStateAction<string>>, setData : Dispatch<SetStateAction<Type>>) : Promise<Type | undefined>{
     try{
       if (method === HTTP_METHOD.POST)
@@ -165,11 +141,6 @@ export async function axiosToken(token: TokensInterface, setToken: React.Dispatc
     }
   }
     
-    // axiosAuthReq<UserType | undefined>(HTTP_METHOD.GET,
-    //     "http://localhost:3333/users/me",
-    //     {} as AxiosHeaders, {},setErrMsg, setResp);
-
-
   export async function axiosReq<Type>(method: number, path: string, headers: AxiosHeaders, body: Object, setErrorMsg: Dispatch<SetStateAction<string>>, setData : Dispatch<SetStateAction<Type>>) : Promise<Type | undefined>{
     try{
       if (method === HTTP_METHOD.POST)

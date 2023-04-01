@@ -35,7 +35,6 @@ main {
 
 .cyan {
   display: flex;
-  background-color: cyan;
 }
 
 .container {
@@ -200,7 +199,7 @@ main {
 
 div.pop_up {
   margin-left: 20px;
-  width: 100px;
+  width: 110px;
   height: 50px;
   background-color: #3795f6;
   border-radius: 5px;
@@ -210,6 +209,7 @@ div.pop_up p {
   position: relative;
   bottom: 25px;
   text-align: center;
+  width: 110px;
   color: #fff;
 }
 

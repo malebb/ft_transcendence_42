@@ -10,7 +10,7 @@ const CODE_REGEX = /^[0-9]{6}$/;
 const SetTfa = () => {
   const snackBar = useSnackbar();
   const axiosPrivate = useAxiosPrivate();
-  const {userId} = useContext(AuthContext);
+  const { userId } = useContext(AuthContext);
   const [TfaQrcode, setTfaQrcode] = useState("");
 
   const [badAttempt, setBadAttempt] = useState<boolean>(false);
@@ -22,113 +22,147 @@ const SetTfa = () => {
   useEffect(() => {
     const createQrCode = async () => {
       setTfaQrcode(
-        (
-          await axiosPrivate.get("/auth/create2FA")
-        ).data
+        (await axiosPrivate.get("/auth/create2FA")).data
         //qrcode.toDataURL(secret.otpauth_url,{type: "image/jpeg"}/*, function(err: any, data: any){
       );
     };
-    createQrCode();
+    createQrCode().catch(console.error);
   }, [axiosPrivate]);
 
   function timeout(delay: number) {
-    return new Promise( res => setTimeout(res, delay) );
-}
+    return new Promise((res) => setTimeout(res, delay));
+  }
   useEffect(() => {
-    async function checkBadAttempt()
-    {
-    if(badAttempt)
-    {
-      await timeout(700);
-      setBadAttempt(false);
-    }}
+    async function checkBadAttempt() {
+      if (badAttempt) {
+        await timeout(700);
+        setBadAttempt(false);
+      }
+    }
 
     checkBadAttempt();
-  }, [badAttempt])
+  }, [badAttempt]);
 
   const handleCodeSubmit = async (e: any) => {
     e.preventDefault();
-    try{
-    const verif = (
-      await axiosPrivate.post(
-        "/auth/verify2FA",
-        { code: cells.join(''), userId: userId },
-      )
-    ).data;
-    if (verif === true) {
+    try {
+      const verif = (
+        await axiosPrivate.post("/auth/verify2FA", {
+          code: cells.join(""),
+          userId: userId,
+        })
+      ).data;
+      if (verif === true) {
         await axiosPrivate.get("/auth/set2FA");
         navigate("/user");
-    } else setBadAttempt(true);
-  }
-  catch(err: any)
-  {
-    snackBar.enqueueSnackbar('Oops something went wrong', {
-      variant: "error",
-      anchorOrigin: {vertical: "bottom", horizontal: "right"}
-    });
-    return <Navigate to='/user' />
-  }
+      } else setBadAttempt(true);
+    } catch (err: any) {
+      snackBar.enqueueSnackbar("Oops something went wrong", {
+        variant: "error",
+        anchorOrigin: { vertical: "bottom", horizontal: "right" },
+      });
+      return <Navigate to="/user" />;
+    }
   };
 
   useEffect(() => {
-    console.log(cells);
-    if (cells.every(cell => (cell >= '0' && cell <= '9')) && CODE_REGEX.test(cells.join('')))
+    if (
+      cells.every((cell) => cell >= "0" && cell <= "9") &&
+      CODE_REGEX.test(cells.join(""))
+    )
       setDisablePush(false);
-    else
-      setDisablePush(true);
-  }, [cells])
+    else setDisablePush(true);
+  }, [cells]);
 
   useEffect(() => {
-    if (!disablePush)
-    {
+    if (!disablePush) {
       const nextSibiling = document.getElementById(`n6`);
-      if(nextSibiling !== null){
+      if (nextSibiling !== null) {
         nextSibiling.focus();
       }
     }
-  }, [disablePush])
+  }, [disablePush]);
 
-  const handleNextInput = (e : React.ChangeEvent<HTMLInputElement>, indexToUpdate: number) => {
-    console.log(indexToUpdate);
+  const handleNextInput = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    indexToUpdate: number
+  ) => {
     e.preventDefault();
-    if (Object.keys(e.target.value).length > 1)
-    {
-      if(e.target.value[0] !== e.target.placeholder)
-        (e.target.value = e.target.value[0]);
-      else
-        (e.target.value = e.target.value[1]);
+    if (Object.keys(e.target.value).length > 1) {
+      if (e.target.value[0] !== e.target.placeholder)
+        e.target.value = e.target.value[0];
+      else e.target.value = e.target.value[1];
     }
-      setCells((prevCells) => 
-        prevCells.map((cell, idx) =>
+    setCells((prevCells) =>
+      prevCells.map((cell, idx) =>
         idx === indexToUpdate ? e.target.value : cell
       )
+    );
+    if (e.target.value !== "") {
+      const fieldName = e.target.id.split("n")[1];
+      const nextSibiling = document.getElementById(
+        `n${parseInt(fieldName) + 1}`
       );
-    if (e.target.value !== "")
-    {
-    const fieldName = e.target.id.split('n')[1];
-    const nextSibiling = document.getElementById(`n${parseInt(fieldName) + 1}`);
-    if(nextSibiling !== null){
+      if (nextSibiling !== null) {
         nextSibiling.focus();
-    }}
+      }
+    }
     e.target.placeholder = e.target.value;
   };
+
+  function preventNonNumericalInput(e: React.KeyboardEvent<HTMLInputElement>) {
+    const charStr = e.key;
+
+    if (
+      !charStr.match(/^[0-9]+$/) &&
+      (e.key.length > 1 || e.key.charCodeAt(0) < 48 || e.key.charCodeAt(0) > 57)
+    )
+      e.preventDefault();
+  }
+
   return (
     <>
-    <div className="tfa_container">
-      <img className="tfa_qrcode" alt="2FA_QRCode" src={TfaQrcode} />
-        <input className="tfa_checkbox" id="submitted" type="checkbox" tabIndex={-1}/>
+      <div className="tfa_container">
+        <img className="tfa_qrcode" alt="2FA_QRCode" src={TfaQrcode} />
+        <input
+          className="tfa_checkbox"
+          id="submitted"
+          type="checkbox"
+          tabIndex={-1}
+        />
 
-<form className={badAttempt? "tfa-form bad_attempt" : "tfa-form"} onSubmit={handleCodeSubmit}>
+        <form
+          className={badAttempt ? "tfa-form bad_attempt" : "tfa-form"}
+          onSubmit={handleCodeSubmit}
+        >
+          {cells.map((cell, idx) => (
+            <input
+              key={idx}
+              className="tfa-number-input"
+              type="number"
+              min="0"
+              max="9"
+              maxLength={1}
+              onKeyDown={(e) => preventNonNumericalInput(e)}
+              placeholder=" "
+              id={"n" + idx}
+              name={"n" + idx}
+              onChange={(e) => {
+                handleNextInput(e, idx);
+              }}
+            />
+          ))}
+          <button
+            className="submit"
+            itemType="button"
+            tabIndex={1}
+            id="n6"
+            disabled={disablePush}
+          ></button>
 
-      {cells.map((cell, idx) => (
-        <input key={idx} className="tfa-number-input" type="number" min="0" max="9" maxLength={1} placeholder=" "  id={'n' + idx} name={'n' + idx} onChange={(e) => {handleNextInput(e, idx)}}/>
-      ))}
-	<button className="submit" itemType="button" tabIndex={1}  id="n6" disabled={disablePush}></button>
-
-	<span className="indicator"></span>
-
-</form>
-    </div>
+          <span className="indicator"></span>
+        </form>
+      </div>
     </>
   );
 };

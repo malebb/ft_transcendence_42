@@ -38,7 +38,7 @@ function MessagesContainer() {
     }
     for (let i = 0; i < tx.length; i++) {
       if (tx[i].value === "") {
-        tx[i].setAttribute("style", "height:" + 20 + "px;overflow-y:hidden;");
+        tx[i].setAttribute("style", "height:" + 25 + "px;overflow-y:hidden;");
       } else {
         tx[i].setAttribute(
           "style",
@@ -55,21 +55,21 @@ function MessagesContainer() {
       axiosInstance.current = axiosPrivate;
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
-      });
+      }).catch(console.error);
       axiosInstance.current = axiosPrivate;
       await axiosInstance
         .current!.get("/chatRoom/publicInfos/" + roomId.roomName)
         .then((response) => {
           currentRoom.current = response.data;
           socket.current?.emit("JOIN_ROOM", currentRoom.current);
-        });
+        }).catch(console.error);
       axiosInstance.current = axiosPrivate;
       await axiosInstance
         .current!.get("/message/" + currentRoom.current?.name)
         .then((response) => {
           setStateMessages(response.data);
           scrollToBottom();
-        });
+        }).catch(console.error);
     };
     fetchData().catch(console.error);
   }, [roomId, axiosPrivate]);
@@ -87,15 +87,22 @@ function MessagesContainer() {
     socket.current.on("connect", async () => {
       await axiosInstance.current!.get("/users/me").then((response) => {
         currentUser.current = response.data;
-      });
+      }).catch(console.error);
       socket.current!.on("ROOM_MESSAGE", async (message: Message) => {
-        const blocked: AxiosResponse = await axiosInstance.current!.get(
+		try
+		{
+        	const blocked: AxiosResponse = await axiosInstance.current!.get(
           "/users/blocked/" + message.user.id
-        );
-        if (!blocked.data.length) {
-          setStateMessages((stateMessages) => [...stateMessages, message]);
-          if (message.user.id === currentUser.current!.id) setMuteTimeLeft("");
-        }
+        	);
+        	if (!blocked.data.length) {
+   	    	   	setStateMessages((stateMessages) => [...stateMessages, message]);
+   	    		if (message.user.id === currentUser.current!.id) setMuteTimeLeft("");
+	    	}
+		}
+		catch (error: any)
+		{
+			console.log('error: ', error)
+		}
       });
       socket.current!.on("MUTE", async (mute) => {
         setMuteTimeLeft(

@@ -202,7 +202,6 @@ const User = () => {
             </form>
           </section>
           <section className="section-settings-User">
-            <h1 className="settings-User">SETTINGS</h1>
             <div className="tfa-User">
             <label>Activate Google Authentificator 2FA</label>
             {/* <input type={'checkbox'} checked={isTFA} onChange={printQrCode}/> */}

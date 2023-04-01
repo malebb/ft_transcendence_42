@@ -9,7 +9,9 @@
 {
 	color: white;
 	text-align: center;
-	margin: 10px;
+	margin: 0px;
+	padding: 10px;
+	padding-top: 20px;
 }
 
 #homeBtn
