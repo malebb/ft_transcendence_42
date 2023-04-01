@@ -4,6 +4,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthDto, SignupDto } from './dto';
@@ -76,7 +77,6 @@ export class AuthService {
         username: user.username,
       };
     } catch (error) {
-      console.log(error.meta.target);
       if (error.code == 'P2002') {
         throw new ForbiddenException(error.meta.target + ' Already Taken');
       }
@@ -119,17 +119,8 @@ export class AuthService {
     res.redirect(redirect_uri);
   }
 
-  /* async get42AT(code)
-    {
-        const client_id = this.config.get('OAUTH_CLIENT_UID');
-        const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
-        const response: AxiosResponse = await axios.post('https://api.intra.42.fr/oauth/token', {grant_type: GRANT_TYPE,client_id: client_id, client_secret: client_secret, code: code, redirect_uri: REDIRECT_URI},);
-        return response;
-    }*/
   // TODO SECURE
   async callback42(code: CallbackDto): Promise<SignInterface> {
-    //TODO may change || "" by so;ething more accurate
-    //const response : AxiosResponse = await this.get42AT(code);
     try {
       const client_id = this.config.get('OAUTH_CLIENT_UID');
       const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
@@ -143,7 +134,6 @@ export class AuthService {
           redirect_uri: REDIRECT_URI,
         },
       );
-      //if(response.status !== 200)//TODO protect depending on response status
 
       const getprofile: AxiosResponse = await axios.get(
         'https://api.intra.42.fr/v2/me',
@@ -158,6 +148,22 @@ export class AuthService {
           id42: id42,
         },
       });
+      let already_use;
+      let login = getprofile.data['login'];
+      let user_inc = 1;
+      do {
+        already_use = await this.prismaService.user.findUnique({
+          where: {
+            username: login,
+          },
+        });
+        console.log(already_use);
+        if (already_use) {
+          user_inc++;
+          login = getprofile.data['login'] + user_inc.toString();
+        }
+      } while (already_use);
+      // login = getprofile + user_inc.toString();
       if (!user) {
         user = await this.prismaService.user.create({
           data: {
@@ -165,7 +171,7 @@ export class AuthService {
             hash: '',
             profilePicture: getprofile.data.image.versions.small,
             id42: id42,
-            username: getprofile.data['login'],
+            username: login,
             stats: {
               create: {},
             },
@@ -181,7 +187,10 @@ export class AuthService {
         username: user.username,
       };
     } catch (error) {
-      console.log();
+      if (error.code === 'P2002' && error.meta.target[0] === 'email') {
+        throw new ForbiddenException('42 Email already taken');
+      }
+      throw new InternalServerErrorException('Error connecting 42 api');
     }
   }
 
@@ -224,7 +233,6 @@ export class AuthService {
         expireIn: JWT_TOKEN_EXPIRE_TIME,
       };
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -245,7 +253,6 @@ export class AuthService {
         expireIn: JWT_TOKEN_EXPIRE_TIME,
       };
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -260,17 +267,26 @@ export class AuthService {
       },
     });
 
-    const to_del = hashRt.filter((id) => argon.verify(id, rt));
-    await this.prismaService.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        hashRt: {
-          set: hashRt.filter((id) => id !== to_del[0]),
-        },
-      },
-    });
+    console.log('refresh to del  = ' + rt);
+    if (rt) {
+      const to_del = hashRt.filter((id) => {
+        console.log('hash = ' + id);
+        argon.verify(id, rt);
+      });
+
+      if (to_del[0]) {
+        await this.prismaService.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            hashRt: {
+              set: hashRt.filter((id) => id !== to_del[0]),
+            },
+          },
+        });
+      }
+    }
   }
 
   async refreshToken(userId: number, rt: string): Promise<RefreshInterface> {

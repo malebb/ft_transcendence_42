@@ -135,7 +135,10 @@ const Signin = () => {
       context.setToken(response.data.tokens!)
       socket.auth = {token: response.data.tokens!.access_token}
       socket.connect();
-      console.log('my socket = ', socket);
+      snackBar.enqueueSnackbar("Hello, " + response.data.username!, {
+                variant: "success",
+                anchorOrigin: { vertical: "bottom", horizontal: "right" },
+              })
       }
       else {
         setResp((prev) => ({...prev, id: response.data.userId}))
@@ -164,6 +167,11 @@ const Signin = () => {
       context.setToken(resp.tokens!)
       socket.auth = {token: resp.tokens!.access_token}
       socket.connect();
+      snackBar.enqueueSnackbar("Hello, " + resp.username!, {
+                variant: "success",
+                anchorOrigin: { vertical: "bottom", horizontal: "right" },
+              })
+
     }
 
   }, [TfaSuccess, context, socket, resp])
@@ -199,13 +207,7 @@ button img{position: relative;
         <main>
           {(isTfa && resp.id !== undefined)&& <VerifTfa setTfaSuccess={setTfaSuccess} userId={resp.id}/>}
           {(TfaSuccess || !isTfa) &&(
-            <>
-              {snackBar.enqueueSnackbar("Hello, " + name, {
-                variant: "success",
-                anchorOrigin: { vertical: "bottom", horizontal: "right" },
-              })}
               <Navigate to={"/"}/>
-            </>
           )}
         </main>
       ) : (

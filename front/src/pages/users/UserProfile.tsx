@@ -180,10 +180,6 @@ const UserProfile = () => {
     treatData();
   }, [paramUserId]);
 
-  useEffect(() => {
-    console.log(errMsg);
-  }, [errMsg])
-
   const deleteRequest = async (confirmed: boolean): Promise<void> => {
     if (confirmed) {
       try {

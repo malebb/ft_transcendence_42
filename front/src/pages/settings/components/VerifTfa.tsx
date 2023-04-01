@@ -47,13 +47,10 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
     };
   }catch(err)
   {
-    return (
-    <>
-    {snackBar.enqueueSnackbar('Oops something went wrong', {
+    snackBar.enqueueSnackbar('Oops something went wrong', {
       variant: "error",
       anchorOrigin: {vertical: "bottom", horizontal: "right"}
-    })}
-</>)
+    })
   }
   };
 

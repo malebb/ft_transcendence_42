@@ -73,9 +73,10 @@ const User = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
-    if (selectedFile !== null) {
+
+    if (selectedFile !== null && selectedFile !== undefined)
+
       formData.append("file", selectedFile);
-    }
     if (Login !== user?.username) {
       const v1 = USER_REGEX.test(Login);
       if (!v1) {
@@ -98,7 +99,6 @@ const User = () => {
       } else {
         setErrMsg("Registration Failed");
       }
-      //errRef.current.focus();
     }
   };
 
@@ -162,9 +162,9 @@ const User = () => {
         handleTrue={() => navigate(pathConfirm)}
         handleFalse={() => setModelDisplay(false)}
       />
-      <h1>{errMsg}</h1>
       {validUser ? (
         <main className="grid-container-User">
+          <p className="errMsg">{errMsg}</p>
           <section className="section-modif-User">
             <div className="profilePicture-User">
             <img

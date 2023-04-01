@@ -95,7 +95,11 @@ const Signup = () => {
       setUserId(response.data.userId!);
       setToken(response.data.tokens!)
       socket.auth = {token: response.data.tokens!.access_token}
-	  socket.connect();
+	    socket.connect();
+      snackBar.enqueueSnackbar("Hello, " + response.data.username!, {
+                variant: "success",
+                anchorOrigin: { vertical: "bottom", horizontal: "right" },
+              })
     } catch (err: any) {
       if (!err?.response) {
         setErrMsg("No Server Response");
@@ -111,13 +115,7 @@ const Signup = () => {
   return (
     <>
       {success ? (
-            <>
-              {snackBar.enqueueSnackbar("Success, welcome " + user, {
-                variant: "success",
-                anchorOrigin: { vertical: "bottom", horizontal: "right" },
-              })}
               <Navigate to={"/"}/>
-            </>
       ) : (
         <>
         <Headers/>

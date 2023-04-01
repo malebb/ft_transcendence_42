@@ -22,13 +22,11 @@ const Logout = () => {
     useEffect(() => {
       const logout = async () => {
         try {
-          const response: AxiosResponse = await axiosPrivate.post(LOGOUT_PATH);
+          await axiosPrivate.post(LOGOUT_PATH);
           socket.disconnect();
-            console.log(42);
-            console.log(response);
-            context.setToken(undefined);
-            context.setUserId(undefined);
-            context.setUsername(undefined);
+          context.setToken(undefined);
+          context.setUserId(undefined);
+          context.setUsername(undefined);
         }
       catch (err: any) {
           setErrMsg("Oops something went wrong !");
@@ -38,24 +36,25 @@ const Logout = () => {
       };
       logout();
     }, [socket, axiosPrivate, context]);
-    if (isLoading)
-        return <Loading/>
-  return errMsg ?
-    <>
-    {snackBar.enqueueSnackbar('Oops something went wrong during logout', {
-      variant: "error",
-      anchorOrigin: {vertical: "bottom", horizontal: "right"}
-    })}
-  <Navigate to='/' />
-</>
- : 
-    <>
-    {snackBar.enqueueSnackbar('See you soon :(', {
-      variant: "success",
-      anchorOrigin: {vertical: "bottom", horizontal: "right"}
-    })}
-  <Navigate to='/' />
-  </>
+
+    useEffect(() => {
+      if (errMsg)
+      {
+        snackBar.enqueueSnackbar('Oops something went wrong during logout', {
+        variant: "error",
+        anchorOrigin: {vertical: "bottom", horizontal: "right"}
+      })}
+      else
+      {
+        snackBar.enqueueSnackbar('See you soon :(', {
+        variant: "success",
+        anchorOrigin: {vertical: "bottom", horizontal: "right"}
+      })}
+    }, [errMsg])
+
+  if (isLoading)
+    return <Loading/>
+  return <Navigate to='/' />
 }
 
 export default Logout;

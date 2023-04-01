@@ -38,7 +38,7 @@ function MessagesContainer() {
     }
     for (let i = 0; i < tx.length; i++) {
       if (tx[i].value === "") {
-        tx[i].setAttribute("style", "height:" + 20 + "px;overflow-y:hidden;");
+        tx[i].setAttribute("style", "height:" + 25 + "px;overflow-y:hidden;");
       } else {
         tx[i].setAttribute(
           "style",
