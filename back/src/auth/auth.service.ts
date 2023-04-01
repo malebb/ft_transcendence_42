@@ -248,17 +248,26 @@ export class AuthService {
       },
     });
 
-    const to_del = hashRt.filter((id) => argon.verify(id, rt));
-    await this.prismaService.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        hashRt: {
-          set: hashRt.filter((id) => id !== to_del[0]),
-        },
-      },
-    });
+    console.log('refresh to del  = ' + rt);
+    if (rt) {
+      const to_del = hashRt.filter((id) => {
+        console.log('hash = ' + id);
+        argon.verify(id, rt);
+      });
+
+      if (to_del[0]) {
+        await this.prismaService.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            hashRt: {
+              set: hashRt.filter((id) => id !== to_del[0]),
+            },
+          },
+        });
+      }
+    }
   }
 
   async refreshToken(userId: number, rt: string): Promise<RefreshInterface> {

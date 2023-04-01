@@ -9,15 +9,17 @@ const useAxiosPrivate = () => {
     const context = useAuth();
     const navigate = useNavigate();
 
-        function doesHttpOnlyCookieExist(cookiename: string) {
-            var d = new Date();
-            d.setTime(d.getTime() + (1000));
-            var expires = "expires=" + d.toUTCString();
+    //     function doesHttpOnlyCookieExist(cookiename: string) {
+    //         var d = new Date();
+    //         d.setTime(d.getTime() + (1000));
+    //         var expires = "expires=" + d.toUTCString();
           
-            document.cookie = cookiename + "=new_value;path=/;samesite=none;secure;" + expires;
-            return document.cookie.indexOf(cookiename + '=') === -1;
-        }
+    //         document.cookie = cookiename + "=new_value;path=/;samesite=none;secure;" + expires;
+    //         return document.cookie.indexOf(cookiename + '=') === -1;
+    //     }
     // useEffect(() => {
+        
+    //     console.log('does the token exist == ' + doesHttpOnlyCookieExist('rt_token'))
         
     //     if (!doesHttpOnlyCookieExist('rt_token'))
     //     {
@@ -41,7 +43,7 @@ const useAxiosPrivate = () => {
             response => response,
             async (error) => {
                 const prevRequest = error?.config;
-                if ((error?.response?.status === 401 && doesHttpOnlyCookieExist('rt_token')) && !prevRequest?.sent) {
+                if (error?.response?.status === 401 && !prevRequest?.sent) {
                     prevRequest.sent = true;
                     const newAccessToken = await refresh();
                     prevRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;

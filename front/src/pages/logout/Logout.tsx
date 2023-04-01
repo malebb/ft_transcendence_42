@@ -24,9 +24,9 @@ const Logout = () => {
         try {
           await axiosPrivate.post(LOGOUT_PATH);
           socket.disconnect();
-            // context.setToken(undefined);
-            // context.setUserId(undefined);
-            // context.setUsername(undefined);
+          context.setToken(undefined);
+          context.setUserId(undefined);
+          context.setUsername(undefined);
         }
       catch (err: any) {
           setErrMsg("Oops something went wrong !");
