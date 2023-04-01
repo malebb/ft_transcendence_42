@@ -9,41 +9,25 @@ const useAxiosPrivate = () => {
     const context = useAuth();
     const navigate = useNavigate();
 
-    useEffect(() => {
         function doesHttpOnlyCookieExist(cookiename: string) {
             var d = new Date();
             d.setTime(d.getTime() + (1000));
             var expires = "expires=" + d.toUTCString();
           
-            document.cookie = cookiename + "=new_value;path=/;" + expires;
+            document.cookie = cookiename + "=new_value;path=/;samesite=none;secure;" + expires;
             return document.cookie.indexOf(cookiename + '=') === -1;
         }
+    // useEffect(() => {
         
-        if (!doesHttpOnlyCookieExist('rt_token'))
-        {
-            context.setToken(undefined);
-            context.setUserId(undefined);
-            context.setUsername(undefined);
-            navigate("/")
-        }}, []);
-    useEffect(() => {
-        // function doesHttpOnlyCookieExist(cookiename: string) {
-        //     var d = new Date();
-        //     d.setTime(d.getTime() + (1000));
-        //     var expires = "expires=" + d.toUTCString();
-          
-        //     document.cookie = cookiename + "=new_value;path=/;" + expires;
-        //     return document.cookie.indexOf(cookiename + '=') === -1;
-        // }
-        
-        // if (!doesHttpOnlyCookieExist('rt_token'))
-        // {
-        //     context.setToken(undefined);
-        //     context.setUserId(undefined);
-        //     context.setUsername(undefined);
-        //     navigate("/")
-        // }
+    //     if (!doesHttpOnlyCookieExist('rt_token'))
+    //     {
+    //         context.setToken(undefined);
+    //         context.setUserId(undefined);
+    //         context.setUsername(undefined);
+    //         navigate("/")
+    //     }}, []);
 
+    useEffect(() => {
         const requestIntercept = axiosPrivate.interceptors.request.use(
             (config) => {
                 if (!config.headers['Authorization']) {
@@ -57,7 +41,7 @@ const useAxiosPrivate = () => {
             response => response,
             async (error) => {
                 const prevRequest = error?.config;
-                if (error?.response?.status === 401 && !prevRequest?.sent) {
+                if ((error?.response?.status === 401 && doesHttpOnlyCookieExist('rt_token')) && !prevRequest?.sent) {
                     prevRequest.sent = true;
                     const newAccessToken = await refresh();
                     prevRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;

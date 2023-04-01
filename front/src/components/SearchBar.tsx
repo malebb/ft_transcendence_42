@@ -23,7 +23,6 @@ function SearchBar() {
       const response: AxiosResponse = await axiosPrivate.get("/users/get-all-user");
       return response.data;
     } catch (err: any) {
-      console.log("error getme");
       if (!err?.response) {
         setErrMsg("No Server Response");
       } else if (err.response?.status === 403) {

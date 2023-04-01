@@ -35,59 +35,9 @@ type UserType = {
   id: number;
   isTFA: boolean;
 };
-//TODO add snack bar on update success, modif tfa success, delete success and fail
+
 //TODO gerer les pb de meme username etc
-/*const secret = speakhexgenerateSecret({
-  name: "broMagicBasketIsSuchAMovie"
-})
 
-if (secret.otpauth_url !== undefined)
-  var qrcode_img = qrcode.toDataURL(secret.otpauth_url, function(err: any, data: any){
-  if (err) return err;
-})
-// const getPic = async (jwt: string) => {
-//   try {
-//     const response: AxiosResponse = await axios.get(
-//       "http://localhost:3333/users/profile-image/media_16ad2258cac6171d66942b13b8cd4839f0b6be6f3.pnge5ac4441-06e8-4956-9e34-0941006e7bf8.png",
-//       {
-//         headers: {
-//           Authorization: "Bearer " + jwt,
-//         },
-//       }
-//     );
-//     return response.data;
-//   } catch (err: any) {
-//     return null;
-//   }
-// };
-// function validURL(str: string) {
-//   var pattern = new RegExp(
-//     "^(https?:\\/\\/)?" + // protocol
-//       "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
-//       "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
-//       "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
-//       "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
-//       "(\\#[-a-z\\d_]*)?$",
-//     "i"
-//   ); // fragment locator
-//   return !!pattern.test(str);
-// }
-
-/*<form onSubmit={handleSubmit}>
-        <label htmlFor='username'>
-          Username:
-        </label>
-        <input
-          type="text"
-          id='username'
-          ref={userRef}
-          autoComplete='off'
-          onChange={(e) =>setUserChange(e.target.value)}
-          required
-          TODO complete the input attribute
-        />
-        <img src="http://localhost:3333/users/profile-image/" alt='profile-picture'/>
-        </form> */
 const User = () => {
   const axiosPrivate = useAxiosPrivate();
   const [user, setUser] = useState<UserType>();
@@ -137,13 +87,8 @@ const User = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
-    if (selectedFile === undefined)
-      console.log("selectedFile is undef");
-    if (selectedFile !== null) {
-      console.log("good file");
-      console.log(selectedFile)
+    if (selectedFile !== null && selectedFile !== undefined)
       formData.append("file", selectedFile);
-    }
     if (Login !== user?.username) {
       const v1 = USER_REGEX.test(Login);
       if (!v1) {
@@ -153,9 +98,7 @@ const User = () => {
       formData.append("login", Login);
     }
     try {
-      // const response: AxiosResponse = await axiosAuthReq(HTTP_METHOD.POST, PATCH_PATH, formData, {} as AxiosHeaders, setErrMsg, set)
-      console.log('formData == ' + JSON.stringify(formData.get('file')));
-      const response: AxiosResponse = await axiosPrivate.post(
+      await axiosPrivate.post(
         PATCH_PATH,
         formData,
         {headers: {"Content-Type": "multipart/form-data"}}
@@ -168,7 +111,6 @@ const User = () => {
       } else {
         setErrMsg("Registration Failed");
       }
-      //errRef.current.focus();
     }
   };
 
@@ -184,22 +126,6 @@ const User = () => {
   useEffect(() => {
     setErrMsg("");
   }, []);
-
-  /*{boolQrcode ? (
-        <>
-          <img src={TfaQrcode}/>
-          <form onSubmit={handleCodeSubmit}>
-            <label htmlFor="avatar">2FA:</label>
-            <input type='text' placeholder='Enter the 6 figures code' onChange={onCodeChange}/>
-            <button disabled={!validCode ? true : false}>Activate 2FA</button>
-          </form>
-          <p>{verified ? "true" : "false"}</p>
-        </>
-        ):(
-        <>
-        </>
-        )
-        }*/
 
   useEffect(() => {
     const result = USER_REGEX.test(Login);
@@ -248,9 +174,9 @@ const User = () => {
         handleTrue={(e: any) => navigate(pathConfirm)}
         handleFalse={(e: any) => setModelDisplay(false)}
       />
-      <h1>{errMsg}</h1>
       {validUser ? (
         <main className="grid-container-User">
+          <p className="errMsg">{errMsg}</p>
           <section className="section-modif-User">
             <div className="profilePicture-User">
             <img

@@ -23,90 +23,23 @@ import Logout from "./logout/Logout";
 import { SocketProvider } from '../context/SocketContext';
 import Challenge from './challenge/Challenge';
 
-/*<Route element={<PrivateRoutes /> } ></Route>
-        </Route>*/
-      //   const useBeforeRender = (callback: any, deps: any) => {
-      //     const [isRun, setIsRun] = useState(false);
-      
-      //     if (!isRun) {
-      //         callback();
-      //         setIsRun(true);
-      //     }
-      
-      //     useEffect(() => () => setIsRun(false), deps);
-      // };
-// const REFRESH_PATH = 'auth/refresh'
-
 function App() {
 
   const {token} = useContext(AuthContext);
-  // const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  // useEffect(() => {
-  //   let isMount = true;
-  //   const controller = new AbortController();
-
-  //   const checkRTCookie = async() => {
-  //     try{
-  //     const response : AxiosResponse = await axiosMain.post<SignInterface>(REFRESH_PATH, { signal: controller.signal});
-  //     console.log('App checkAuth == ' + JSON.stringify(response.data))
-  //     // setUsername(response.data.username!);
-  //     // setUserId(response.data.id);
-  //     if (isMount)
-  //     {
-  //     setToken(response.data.tokens)
-  //     setUsername(response.data.username)
-  //     setUserId(response.data.userId)
-  //     }
-  //     }catch(err: any)
-  //     {
-  //       console.log(err)
-  //     }
-  //   }
-    
-  //   checkRTCookie();
-  //   return () => {
-  //     isMount = false;
-  //     controller.abort();
-  //   } 
-  // }, [])
-  // useEffect(() => {
-  //   const checkRTCookie = async() => {
-  //     try{
-  //     const response : AxiosResponse = await axiosMain.post(REFRESH_PATH);
-  //     console.log('App checkAuth == ' + JSON.stringify(response.data))
-  //     setUsername(response.data.username!);
-  //     setUserId(response.data.id);
-  //     setToken(response.data.tokens!)
-  //     }catch(err: any)
-  //     {
-  //       console.log(err)
-  //     }
-
-  //   }
-  //   checkRTCookie();
-  //   // setIsLoading(false);
-  // }, [])
-
-  // if (token?.access_token === undefined)
-  //   return (<>
-  //     {"tok == " + token?.access_token}
-  //   <Loading/>
-  //   </>)
   return (
-    // <AuthProvider>
 	<SocketProvider token={token}>
       <SnackbarProvider maxSnack={4}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Main />} />
-          <Route element={<NotAuthRoutes />}>
+          {/* <Route element={<NotAuthRoutes />}> */}
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
           <Route
             path="/auth/signin/42login/callback"
             element={<Callback />}
-          /></Route>
+          />
+          {/* </Route> */}
           <Route element={<PrivateRoutes />}>
             <Route path="/user" element={<User />} />
             <Route path="/history" element={<History />} />
@@ -117,7 +50,6 @@ function App() {
             <Route path="/chat/room/:roomName" element={<ChatRoomBase />} />
             <Route path="/2factivate" element={<SetTfa />} />
             <Route path="/2fadelete" element={<DeleteTfa />} />
-            {/* <Route path="/2faverif" element={<VerifTfa setTfaSuccess={}/>} /> */}
             <Route path="user/:paramUserId" element={<UserProfile />} />
             <Route path='/logout' element={<Logout/>} />
           </Route>
@@ -125,7 +57,6 @@ function App() {
         </Routes>
       </BrowserRouter></SnackbarProvider>
 	  </SocketProvider>
-    // {/* // </AuthProvider> */}
   );
 }
 

@@ -28,16 +28,18 @@ const PrivateRoutes = () => {
     checkAuth();
   }, []);
 
+
+  useEffect(() => {
+    if (isAuth) snackBar.enqueueSnackbar('Oops something went wrong', {
+      variant: "error",
+      anchorOrigin: {vertical: "bottom", horizontal: "right"}
+    });
+  }, [isAuth]);
+
   if (isChecking) return <Loading />;
 
   return isAuth ? 
-    <>
-    {snackBar.enqueueSnackbar('Oops something went wrong', {
-      variant: "error",
-      anchorOrigin: {vertical: "bottom", horizontal: "right"}
-    })}
   <Navigate to='/' />
-</>
  : <Outlet />;
 };
 
