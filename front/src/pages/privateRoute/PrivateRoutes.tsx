@@ -26,12 +26,22 @@ const PrivateRoutes = () => {
           catch (err: any)
           {
             setErrMsg(err.response);
-            console.log('error: ', err.response);
           }
       setIsChecking(false);
     };
     checkAuth();
   }, [axiosPrivate]);
+
+
+  useEffect(() => {
+    if (errMsg !== "")
+    {
+      snackBar.enqueueSnackbar('Oops something went wrong', {
+      variant: "error",
+      anchorOrigin: {vertical: "bottom", horizontal: "right"}
+      });
+    }
+  }, [errMsg]);
 
   if (isChecking) {
     return <Loading />;
@@ -40,15 +50,7 @@ const PrivateRoutes = () => {
   if (errMsg === "")
   return isAuth ? <Outlet /> : <Navigate to="/signin" />;
   else
-  return (
-    <>
-    {snackBar.enqueueSnackbar('Oops something went wrong private route', {
-      variant: "error",
-      anchorOrigin: {vertical: "bottom", horizontal: "right"}
-    })}
-  <Navigate to='/' />
-</>
-  )
+  return <Navigate to='/' />
 };
 
 export default PrivateRoutes;

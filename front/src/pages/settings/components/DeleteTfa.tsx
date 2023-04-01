@@ -51,15 +51,11 @@ const DeleteTfa = () => {
   }
   catch(err: any)
   {
-    return (
-    <>
-    {snackBar.enqueueSnackbar('Oops something went wrong', {
+    snackBar.enqueueSnackbar('Oops something went wrong', {
       variant: "error",
       anchorOrigin: {vertical: "bottom", horizontal: "right"}
-    })}
-  <Navigate to='/user' />
-</>
-    )
+    });
+    return <Navigate to='/user' />
   }
   };
 

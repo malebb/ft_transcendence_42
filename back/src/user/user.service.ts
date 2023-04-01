@@ -1,9 +1,10 @@
 import {
+  BadRequestException,
   ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
-  NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EditUserDto } from './dto';
@@ -12,6 +13,7 @@ import { Friend, NeutralUser } from './types';
 import { User, Activity } from '@prisma/client';
 import { Socket } from 'socket.io';
 import { getIdFromToken, isAuthEmpty, getIdIfValid } from '../gatewayUtils/gatewayUtils';
+
 
 const DEFAULT_IMG = 'uploads/profileimages/default_profile_picture.png';
 
@@ -143,55 +145,65 @@ export class UserService {
   }
 
   async editUsername(userId: number, dto: EditUserDto) {
-    // try {
-    const user = await this.prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        username: dto.login,
-      },
-    });
+    try {
+      const already_use = await this.prisma.user.findUnique({
+        where: {
+          username: dto.login,
+        },
+      });
+      console.log(already_use);
+      if (already_use) throw new ForbiddenException();
+      const user = await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          username: dto.login,
+        },
+      });
 
-    delete user.hash;
-    return user;
-    // } catch (err: any) {
-    // return null;
-    // }
+      delete user.hash;
+      return user;
+    } catch (error: any) {
+      if (error instanceof ForbiddenException) throw error;
+      else
+        throw new InternalServerErrorException(
+          'Internal Eroor trying to update login',
+        );
+    }
   }
 
-  //TODO maybe delete the old profile picture
   async uploadPicture(userId: number, imagePath: string) {
-    // try {
-    const img_to_del = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-    const user = await this.prisma.user.update({
-      data: {
-        profilePicture: imagePath,
-      },
-      where: {
-        id: userId,
-      },
-    });
-    if (
-      img_to_del.profilePicture !== user.profilePicture &&
-      img_to_del.profilePicture !== DEFAULT_IMG
-    ) {
-      await fs.unlink(img_to_del.profilePicture, (err) => {
-        if (err) {
-          console.error(err);
-          return err;
-        }
+    try {
+      const img_to_del = await this.prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
       });
+      const user = await this.prisma.user.update({
+        data: {
+          profilePicture: imagePath,
+        },
+        where: {
+          id: userId,
+        },
+      });
+      if (
+        img_to_del.profilePicture !== user.profilePicture &&
+        img_to_del.profilePicture !== DEFAULT_IMG
+      ) {
+        await fs.unlink(img_to_del.profilePicture, (err) => {
+          if (err) {
+            console.error(err);
+            return err;
+          }
+        });
+      }
+      delete user.hash;
+      return user;
+    } catch (err: any) {
+      throw new InternalServerErrorException('Error patching picture');
     }
-    delete user.hash;
-    return user;
-    // } catch (err: any) {
-    //   return null;
-    // }
   }
 
   async getCustomisation(userId: number) {
@@ -436,8 +448,7 @@ export class UserService {
   }
 
   async getBlocked(idBlocked: number, userId: number) {
-	  if (!idBlocked || !userId)
-		  return ;
+    if (!idBlocked || !userId) return;
     const blocked = await this.prisma.user.findUnique({
       where: {
         id: userId,

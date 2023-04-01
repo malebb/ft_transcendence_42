@@ -62,34 +62,16 @@ const Friends = () => {
     setPopupContent(popupContentRemoveFriend);
     setList(0);
   }
-//  const handleUnWaitClick = (): void => {
-  //  setShowConfirmation(true);
-//    setPopupContent(popupContentRemoveWait);
-//    setList(1);
-//  };
 
   const getRecvArray = async () => {
     await axiosAuthReq(HTTP_METHOD.GET, RECV_LIST_PATH, {} as AxiosHeaders, {}, setErrMsg, setRecvArray);
-    // const response: AxiosResponse = await (
-    //   await axiosToken(token!, setToken)
-    // ).get(RECV_LIST_PATH);
-    // setRecvArray(response.data);
   };
 
   const getSendArray = async () => {
     await axiosAuthReq(HTTP_METHOD.GET, SEND_LIST_PATH, {} as AxiosHeaders, {}, setErrMsg, setSendArray);
-    // const response: AxiosResponse = await (
-    //   await axiosToken(token!, setToken)
-    // ).get(SEND_LIST_PATH);
-    // setSendArray(response.data);
   };
   const getFriendArray = async () => {
     await axiosAuthReq(HTTP_METHOD.GET, FRIEND_LIST_PATH, {} as AxiosHeaders, {}, setErrMsg, setFriendArray);
-    // const response: AxiosResponse = await (
-    //   await axiosToken(token!, setToken)
-    // ).get(FRIEND_LIST_PATH);
-    // setFriendArray(response.data);
-    // console.log(JSON.stringify(friendArray));
   };
 
   useEffect(() => {
@@ -102,7 +84,6 @@ const Friends = () => {
   }, [renderType]);
 
   const acceptRequestWrap = async (friendId: number) => {
-    // acceptRequest(friendId, token!, setToken);
   try {
     await axiosPrivate.get("users/accept-friend-request-by-userid/" + friendId);
     if (recvArray)
@@ -119,6 +100,7 @@ const Friends = () => {
     }
   }
   };
+
   const refuseRequestWrap = async (friendId: number) => {
   try {
     await axiosPrivate.get("users/decline-friend-request-by-userid/" + friendId);
@@ -135,6 +117,7 @@ const Friends = () => {
     }
   }
   };
+
   const deleteRequestWrap = async (
     friendId: number,
     array: number,
@@ -233,29 +216,6 @@ const Friends = () => {
                     </Link>
                     <button className="profileButtonCancel" onClick={handleUnfriendClick}>Unfriend</button>
                   </div>
-                    {/* {showConfirmation && (
-                      <div>
-                        <p>
-                          Are you sure you want to remove this person from your
-                          friends list? This action is final and you will not be
-                          able to recover it.
-                        </p>
-                        <button
-                          onClick={(e: any) =>
-                            deleteRequestWrap(friend.id, 0, true)
-                          }
-                        >
-                          Unfriend
-                        </button>
-                        <button
-                          onClick={(e: any) =>
-                            deleteRequestWrap(friend.id, 0, false)
-                          }
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )} */}
                   </div>
                 );
               })}
@@ -263,42 +223,19 @@ const Friends = () => {
             <ul className={renderType === StatusEnum.SEND ? "show": "hiden"}>
               {sendArray?.map((friend: NeutralUser) => {
                 return (
-                  <div key={friend.id}>
+                  <div className="container-user" key={friend.id}>
                     <Link className="link-user" to={"/user/" + friend.id}>
                         {
                           <img
                           alt="profile_picture"
                           id="profilePicture"
-                          className="profilePicture"
+                          className="profilePicture-small"
                           src={handleSrcNeutral(friend)}
                         />
                         }
-                      {friend.username}
+                      <p className="friendUsername">{friend.username}</p>
                       </Link>
                     <button className="profileButtonCancel" onClick={handleUnfriendClick}>Cancel</button>
-                    {/* {showConfirmation && (
-                      <div>
-                        <p>
-                          Are you sure you want to remove this person from your
-                          waiting list? This action is final and you will not be
-                          able to recover it.
-                        </p>
-                        <button
-                          onClick={(e: any) =>
-                            deleteRequestWrap(friend.id, 1, true)
-                          }
-                        >
-                          Yes
-                        </button>
-                        <button
-                          onClick={(e: any) =>
-                            deleteRequestWrap(friend.id, 1, false)
-                          }
-                        >
-                          No
-                        </button>
-                      </div>
-                    )} */}
                   </div>
                 );
               })}
@@ -306,15 +243,15 @@ const Friends = () => {
             <ul className={renderType === StatusEnum.RECV ? "show": "hiden"}>
               {recvArray?.map((friend: NeutralUser) => {
                 return (
-                  <div key={friend.id}>
+                  <div className="container-user" key={friend.id}>
                     <Link className="link-user" to={"/user/" + friend.id}>
                         {<img
                         alt="profile_picture"
                           id="profilePicture"
-                          className="profilePicture"
+                          className="profilePicture-small"
                           src={handleSrcNeutral(friend)}
                         />}
-                      {friend.username}
+                      <p className="friendUsername">{friend.username}</p>
                       </Link>
                     <button className="profileButtonAddFriend" onClick={(e: any) => acceptRequestWrap(friend.id)}>
                       Accept

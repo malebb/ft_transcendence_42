@@ -118,6 +118,9 @@
   .tfa-User { grid-area: tfa-User; }
   
   .del-acc-User { grid-area: del-acc-User; } */
+  .errMsg{
+    color: white;
+  }
   .container {  display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;

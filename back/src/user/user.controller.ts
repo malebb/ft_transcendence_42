@@ -84,19 +84,21 @@ export class UserController {
   @Post('patchme')
   // @FormDataRequest()
   @UseInterceptors(FileInterceptor('file', storage))
-  PatchProfile(
+  async PatchProfile(
     @GetUser() user: User,
     @UploadedFile()
     file?: Express.Multer.File,
     @Body() dto?: EditUserDto,
   ) {
-    if (file !== undefined) {
-      this.userService.uploadPicture(user.id, file.path);
-    }
-    if (dto.login !== undefined) {
-      // if (!USER_REGEX.test(dto.login))
-      //   throw new HttpException('Invalid Input', HttpStatus.FORBIDDEN);
-      this.userService.editUsername(user.id, dto);
+    try {
+      if (file !== undefined) {
+        await this.userService.uploadPicture(user.id, file.path);
+      }
+      if (dto.login !== undefined) {
+        await this.userService.editUsername(user.id, dto);
+      }
+    } catch (err) {
+      throw err;
     }
   }
 
