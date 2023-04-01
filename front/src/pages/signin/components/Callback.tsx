@@ -76,6 +76,7 @@ const Callback = () => {
       setIsLoading(false);
     };
     callback42();
+// eslint-disable-next-line
   }, [setToken, setUserId, setUsername, socket, snackBar]);
 
   useEffect(() => {
