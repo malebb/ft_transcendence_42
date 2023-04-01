@@ -16,7 +16,7 @@ const CALLBACK_PATH = "/auth/signin/42login/callback";
 
 const Callback = () => {
 
-  const { setToken, username, setUsername, setUserId} = useContext(AuthContext);
+  const { setToken, setUsername, setUserId} = useContext(AuthContext);
   const [errMsg, setErrMsg] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isTfa, setIsTfa] = useState<boolean>(false);
@@ -75,7 +75,7 @@ const Callback = () => {
       setIsLoading(false);
     };
     callback42();
-  }, [query, setToken, setUserId, setUsername, socket]);
+  }, [query, setToken, setUserId, setUsername, socket, snackBar]);
 
   useEffect(() => {
     if (TfaSuccess)
@@ -91,7 +91,7 @@ const Callback = () => {
                 anchorOrigin: { vertical: "bottom", horizontal: "right" },
               })
     }
-  }, [TfaSuccess, resp.id, resp.tokens, resp.username, socket, setToken, setUsername, setUserId])
+  }, [TfaSuccess, resp.id, resp.tokens, resp.username, socket, setToken, setUsername, setUserId, snackBar])
 
   useEffect(() => {
     if (errMsg === 'Invalid Credentials')
@@ -106,7 +106,7 @@ const Callback = () => {
       variant: "error",
       anchorOrigin: { vertical: "bottom", horizontal: "right" },
     })}
-  }, [errMsg])
+  }, [errMsg, snackBar])
 
   if (isLoading) return <Loading />;
   return (

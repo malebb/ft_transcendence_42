@@ -1,5 +1,4 @@
-import { AxiosResponse } from 'axios';
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom';
 import Loading from '../Loading';
 import { useSnackbar } from 'notistack';
@@ -50,7 +49,7 @@ const Logout = () => {
         variant: "success",
         anchorOrigin: {vertical: "bottom", horizontal: "right"}
       })}
-    }, [errMsg])
+    }, [errMsg, snackBar])
 
   if (isLoading)
     return <Loading/>

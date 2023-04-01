@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import "../styles/App.css";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
 import AuthContext  from "../context/TokenContext";
@@ -17,7 +17,6 @@ import Chat from "./chat/chat";
 import ChatRoomBase from "./chat/chatRoom";
 import PrivateRoutes from "./privateRoute/PrivateRoutes";
 import { SnackbarProvider } from "notistack";
-import NotAuthRoutes from "./privateRoute/NotAuthRoutes";
 import NotFound from "./error/NotFound";
 import Logout from "./logout/Logout";
 import { SocketProvider } from '../context/SocketContext';

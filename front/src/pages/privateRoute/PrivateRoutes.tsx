@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import Loading from "../Loading";
 import { useSnackbar } from "notistack";
@@ -41,7 +41,7 @@ const PrivateRoutes = () => {
       anchorOrigin: {vertical: "bottom", horizontal: "right"}
       });
     }
-  }, [errMsg]);
+  }, [errMsg, snackBar]);
 
   if (isChecking) {
     return <Loading />;

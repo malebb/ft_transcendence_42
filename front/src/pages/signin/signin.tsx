@@ -1,4 +1,3 @@
-import React from "react";
 import "../../styles/signin.css";
 import { useRef, useState, useEffect, useContext } from "react";
 import {
@@ -57,8 +56,6 @@ const Signin = () => {
 
   const [pwd, setPwd] = useState("");
   const [validPwd, setValidPwd] = useState(false);
-
-  const [name, setName] = useState<string>("");
 
   const [isTfa, setIsTfa] = useState<boolean>(false);
   const [TfaSuccess, setTfaSuccess] = useState<boolean>(false);
@@ -125,7 +122,6 @@ const Signin = () => {
       console.log(response.data);
       // setToken(response.data.token);
       setIsTfa(response.data.isTfa);
-      setName(response.data.username);
       if (response.data.isTfa === false)
       {
       // localStoVrage.setItem("tokens", JSON.stringify(response.data.tokens));
@@ -174,7 +170,7 @@ const Signin = () => {
 
     }
 
-  }, [TfaSuccess, context, socket, resp])
+  }, [TfaSuccess, context, socket, resp, snackBar])
 
   const CSS = `<style>
   button {
