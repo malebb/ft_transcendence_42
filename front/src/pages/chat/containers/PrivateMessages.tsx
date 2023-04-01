@@ -29,7 +29,6 @@ function PrivateMessages() {
   const [initSocket, setInitSocket] = useState<boolean>(false);
   const [challenges, setChallenges] = useState<AxiosResponse | null>(null);
   let newMessage: Message;
-  const containerRef = useRef(null);
 
   function closeMessage(): void {
     document.getElementById("myForm")!.style.display = "none";
@@ -269,7 +268,7 @@ function PrivateMessages() {
       window.location.href =
         "http://localhost:3000/challenge/" + challengeResponse.data;
     } catch (error: any) {
-      if (error.response.status === 403) {
+      if (error.response && error.response.status === 403) {
         printInfosBox("You are already playing in another game");
       }
     }

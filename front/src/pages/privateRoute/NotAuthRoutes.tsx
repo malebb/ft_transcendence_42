@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { AxiosHeaders} from "axios";
 import { axiosAuthReq, HTTP_METHOD } from "../../api/axios";
@@ -20,13 +19,21 @@ const PrivateRoutes = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+	try
+	{
       const user = await axiosAuthReq(HTTP_METHOD.GET, AUTH_VERIF_PATH, {} as AxiosHeaders, {}, setErrMsg, setData);
         if (user !== undefined) 
           setIsAuth(user);
       setIsChecking(false);
+	}
+	catch (error: any)
+	{
+		console.log('error: ', errMsg);
+		console.log('error: ', data);
+	}
     };
     checkAuth();
-  }, []);
+  }, [errMsg, data]);
 
   if (isChecking) return <Loading />;
 

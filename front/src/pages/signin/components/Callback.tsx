@@ -72,7 +72,7 @@ const Callback = () => {
       setIsLoading(false);
     };
     callback42();
-  }, []);
+  }, [query, setToken, setUserId, setUsername, socket]);
 
   useEffect(() => {
     if (TfaSuccess)
@@ -86,7 +86,7 @@ const Callback = () => {
 	  	socket.connect();
       setTfaDone(true);
     }
-  }, [TfaSuccess])
+  }, [TfaSuccess, resp.id, resp.tokens, resp.username, socket, setToken, setUsername, setUserId])
 
   if (isLoading) return <Loading />;
   return (

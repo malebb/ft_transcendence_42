@@ -1,7 +1,6 @@
 import { AxiosResponse } from "axios";
-import React, { useContext, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";
 
 type NeutralUser = {
@@ -23,7 +22,6 @@ function SearchBar() {
       const response: AxiosResponse = await axiosPrivate.get("/users/get-all-user");
       return response.data;
     } catch (err: any) {
-      console.log("error getme");
       if (!err?.response) {
         setErrMsg("No Server Response");
       } else if (err.response?.status === 403) {
@@ -31,6 +29,7 @@ function SearchBar() {
       } else {
         setErrMsg("Unauthorized");
       }
+	console.log('error: ', errMsg);
       return [] as NeutralUser[];
     }
   };

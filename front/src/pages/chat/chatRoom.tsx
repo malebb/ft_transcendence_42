@@ -107,7 +107,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			if (error.response.status === 403)
+			if (error.response && error.response.status === 403)
 				updateRoomStatus();
 			else
 				console.log('error (update members list data) :', error);
@@ -132,7 +132,7 @@ const ChatRoomBase = () =>
 				}
 				catch (error: any)
 				{
-					if (error.response.status !== 404)
+					if (error.response && error.response.status !== 404)
 						console.log('error: ', error);
 				}
 			}, 2000)
@@ -207,7 +207,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			if (error.response.status === 403)
+			if (error.response && error.response.status === 403)
 				printInfosBox('You can not change the password');
 
 			console.log('error (changing password)', error);
@@ -229,7 +229,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			if (error.response.status === 403)
+			if (error.response && error.response.status === 403)
 				printInfosBox('You can not remove the password');
 			else
 				console.log("error (remove password) :", error);
@@ -328,7 +328,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			if (error.response.status === 403)
+			if (error.response && error.response.status === 403)
 			{
 				printInfosBox('You can not make ' + member.username + " owner");
 				await updateMembersData();
@@ -360,7 +360,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			if (error.response.status === 403)
+			if (error.response && error.response.status === 403)
 			{
 				printInfosBox('You can not make ' + member.username + " admin");
 				await updateMembersData();
@@ -402,7 +402,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			if (error.response.status === 403)
+			if (error.response && error.response.status === 403)
 			{
 				printInfosBox('You can not remove admin role from ' + member.username);
 				await updateMembersData();
@@ -470,7 +470,7 @@ const ChatRoomBase = () =>
 			}
 			catch (error: any)
 			{
-				if (error.response.status === 403)
+				if (error.response && error.response.status === 403)
 				{
 					printInfosBox('You are already playing in another game');
 					await updateMembersData();
@@ -528,7 +528,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			if (error.response.status === 403) {
+			if (error.response && error.response.status === 403) {
 				printInfosBox('You can not kick ' + member.username);
 				await updateMembersData();
 			}
@@ -577,7 +577,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			if (error.response.status === 403)
+			if (error.response && error.response.status === 403)
 			{
 				switch (type) {
 					case 'BAN':
@@ -706,7 +706,7 @@ const ChatRoomBase = () =>
 		}
 		catch (error: any)
 		{
-			if (error.response.status === 403)
+			if (error.response && error.response.status === 403)
 			{
 				printInfosBox('You can not leave the room');
 				await updateMembersData();

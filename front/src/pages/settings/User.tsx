@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import React  from "react";
 import { axiosAuthReq, HTTP_METHOD } from "../../api/axios";
-import { AxiosHeaders, AxiosResponse } from "axios";
+import { AxiosHeaders } from "axios";
 import { useState, useEffect, useRef } from "react";
 import { Switch } from "@mui/material";
 import '../../styles/User.css';
@@ -14,16 +14,13 @@ import { useNavigate } from "react-router-dom";
 import Popup from "src/components/Popup";
 import Sidebar from "src/components/Sidebar";
 import Headers from "src/components/Headers";
-import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";
 
-import styleSettings from "../../styles/settings.module.css"
 
 //var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_@.]{3,23}$/;
-const CODE_REGEX = /^[0-9]{6}$/;
 const PATCH_PATH = "/users/patchme";
 const DEFAULT_IMG = "default_profile_picture.png";
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
@@ -35,59 +32,7 @@ type UserType = {
   id: number;
   isTFA: boolean;
 };
-//TODO add snack bar on update success, modif tfa success, delete success and fail
-//TODO gerer les pb de meme username etc
-/*const secret = speakhexgenerateSecret({
-  name: "broMagicBasketIsSuchAMovie"
-})
 
-if (secret.otpauth_url !== undefined)
-  var qrcode_img = qrcode.toDataURL(secret.otpauth_url, function(err: any, data: any){
-  if (err) return err;
-})
-// const getPic = async (jwt: string) => {
-//   try {
-//     const response: AxiosResponse = await axios.get(
-//       "http://localhost:3333/users/profile-image/media_16ad2258cac6171d66942b13b8cd4839f0b6be6f3.pnge5ac4441-06e8-4956-9e34-0941006e7bf8.png",
-//       {
-//         headers: {
-//           Authorization: "Bearer " + jwt,
-//         },
-//       }
-//     );
-//     return response.data;
-//   } catch (err: any) {
-//     return null;
-//   }
-// };
-// function validURL(str: string) {
-//   var pattern = new RegExp(
-//     "^(https?:\\/\\/)?" + // protocol
-//       "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
-//       "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
-//       "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
-//       "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
-//       "(\\#[-a-z\\d_]*)?$",
-//     "i"
-//   ); // fragment locator
-//   return !!pattern.test(str);
-// }
-
-/*<form onSubmit={handleSubmit}>
-        <label htmlFor='username'>
-          Username:
-        </label>
-        <input
-          type="text"
-          id='username'
-          ref={userRef}
-          autoComplete='off'
-          onChange={(e) =>setUserChange(e.target.value)}
-          required
-          TODO complete the input attribute
-        />
-        <img src="http://localhost:3333/users/profile-image/" alt='profile-picture'/>
-        </form> */
 const User = () => {
   const axiosPrivate = useAxiosPrivate();
   const [user, setUser] = useState<UserType>();
@@ -98,8 +43,6 @@ const User = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isTFA, setIsTFA] = useState<boolean>(false);
 
-  const [code, setCode] = useState("");
-  const [validCode, setValidCode] = useState<boolean>(false);
   const [modelDisplay, setModelDisplay] = useState<boolean>(false);
   const [modelContent, setModelContent] = useState<string>("");
   const [pathConfirm, setPathConfirm] = useState<string>("");
@@ -112,8 +55,6 @@ const User = () => {
   const myRef = useRef<HTMLInputElement>(null);
 
   const popupTitle = "WARNING";
-  const popupChangeContent =
-    "Are you sure you want to change your 2FA code ? This action is final and after validating the process you want be able to use it anymore";
   const popupDeleteContent =
     "Are you sure you want to delete your 2FA code ? This action is final and after validating the process you want be able to use it anymore";
   function validURL(str: string) {
@@ -129,19 +70,10 @@ const User = () => {
     return !!pattern.test(str);
   }
 
-  useEffect(() => {
-    const result = CODE_REGEX.test(code);
-    setValidCode(result);
-  }, [code]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
-    if (selectedFile === undefined)
-      console.log("selectedFile is undef");
     if (selectedFile !== null) {
-      console.log("good file");
-      console.log(selectedFile)
       formData.append("file", selectedFile);
     }
     if (Login !== user?.username) {
@@ -153,9 +85,7 @@ const User = () => {
       formData.append("login", Login);
     }
     try {
-      // const response: AxiosResponse = await axiosAuthReq(HTTP_METHOD.POST, PATCH_PATH, formData, {} as AxiosHeaders, setErrMsg, set)
-      console.log('formData == ' + JSON.stringify(formData.get('file')));
-      const response: AxiosResponse = await axiosPrivate.post(
+      await axiosPrivate.post(
         PATCH_PATH,
         formData,
         {headers: {"Content-Type": "multipart/form-data"}}
@@ -185,22 +115,6 @@ const User = () => {
     setErrMsg("");
   }, []);
 
-  /*{boolQrcode ? (
-        <>
-          <img src={TfaQrcode}/>
-          <form onSubmit={handleCodeSubmit}>
-            <label htmlFor="avatar">2FA:</label>
-            <input type='text' placeholder='Enter the 6 figures code' onChange={onCodeChange}/>
-            <button disabled={!validCode ? true : false}>Activate 2FA</button>
-          </form>
-          <p>{verified ? "true" : "false"}</p>
-        </>
-        ):(
-        <>
-        </>
-        )
-        }*/
-
   useEffect(() => {
     const result = USER_REGEX.test(Login);
     setValidLogin(result);
@@ -225,7 +139,7 @@ const User = () => {
       }
     };
     getProfile();
-  }, []);
+  }, [picture]);
 
   const display2faModel = (content: string, path: string) => {
     setModelContent(content);
@@ -233,7 +147,7 @@ const User = () => {
     setModelDisplay(true);
   };
 
-  const redirectClick = (e : React.MouseEvent<HTMLElement>) => {
+  const redirectClick = () => {
     if (myRef.current)
       myRef.current.click();
   }
@@ -245,8 +159,8 @@ const User = () => {
         apparent={modelDisplay}
         title={popupTitle}
         content={modelContent}
-        handleTrue={(e: any) => navigate(pathConfirm)}
-        handleFalse={(e: any) => setModelDisplay(false)}
+        handleTrue={() => navigate(pathConfirm)}
+        handleFalse={() => setModelDisplay(false)}
       />
       <h1>{errMsg}</h1>
       {validUser ? (
@@ -296,9 +210,9 @@ const User = () => {
               checked={isTFA}
               onChange={
                 isTFA
-                  ? (e: any) =>
+                  ? () =>
                       display2faModel(popupDeleteContent, "/2fadelete")
-                  : (e: any) => navigate("/2factivate")
+                  : () => navigate("/2factivate")
               }
             />
           </div>

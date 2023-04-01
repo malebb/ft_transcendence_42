@@ -37,7 +37,7 @@ function MessagesContainer() {
       this.style.height = this.scrollHeight + "px";
     }
     for (let i = 0; i < tx.length; i++) {
-      if (tx[i].value == "") {
+      if (tx[i].value === "") {
         tx[i].setAttribute("style", "height:" + 20 + "px;overflow-y:hidden;");
       } else {
         tx[i].setAttribute(

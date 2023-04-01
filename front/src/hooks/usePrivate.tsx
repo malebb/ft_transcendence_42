@@ -25,7 +25,7 @@ const useAxiosPrivate = () => {
             context.setUserId(undefined);
             context.setUsername(undefined);
             navigate("/")
-        }}, []);
+        }}, [context, navigate]);
     useEffect(() => {
         // function doesHttpOnlyCookieExist(cookiename: string) {
         //     var d = new Date();
