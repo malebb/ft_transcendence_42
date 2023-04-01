@@ -110,12 +110,14 @@ const SetTfa = () => {
     e.target.placeholder = e.target.value;
   };
 
-  function preventNonNumericalInput(e: any) {
-    e = e || window.event;
-    var charCode = typeof e.which == "undefined" ? e.keyCode : e.which;
-    var charStr = String.fromCharCode(charCode);
+  function preventNonNumericalInput(e: React.KeyboardEvent<HTMLInputElement>) {
+    const charStr = e.key;
 
-    if (!charStr.match(/^[0-9]+$/)) e.preventDefault();
+    if (
+      !charStr.match(/^[0-9]+$/) &&
+      (e.key.length > 1 || e.key.charCodeAt(0) < 48 || e.key.charCodeAt(0) > 57)
+    )
+      e.preventDefault();
   }
 
   return (
@@ -141,7 +143,7 @@ const SetTfa = () => {
               min="0"
               max="9"
               maxLength={1}
-              onKeyDown={preventNonNumericalInput}
+              onKeyDown={(e) => preventNonNumericalInput(e)}
               placeholder=" "
               id={"n" + idx}
               name={"n" + idx}
