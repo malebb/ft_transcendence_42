@@ -13,6 +13,8 @@ COPY ./front/package.json ./
 RUN npm install;
 RUN npm install ../app-lib;
 
+RUN npm install -g serve
+
 # CMD ["yarn", "install"]
-CMD ["npm", "run", "build"]
+CMD npm run build ; serve -s build
 # CMD [ "tail", "-f", "/dev/null" ]
