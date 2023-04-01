@@ -33,8 +33,9 @@ const Callback = () => {
   const snackBar = useSnackbar();
   const query = useQuery();
   useEffect(() => {
-    const code = query.get("code") || "";
+	
     const callback42 = async () => {
+    	const code = query.get("code") || "";
       try {
         const response: AxiosResponse = await axiosMain.post<SignInterface>(CALLBACK_PATH, {
           code: code,
@@ -75,7 +76,7 @@ const Callback = () => {
       setIsLoading(false);
     };
     callback42();
-  }, [query, setToken, setUserId, setUsername, socket, snackBar]);
+  }, [setToken, setUserId, setUsername, socket, snackBar]);
 
   useEffect(() => {
     if (TfaSuccess)
