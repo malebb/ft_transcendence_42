@@ -37,7 +37,7 @@ function MessagesContainer() {
       this.style.height = this.scrollHeight + "px";
     }
     for (let i = 0; i < tx.length; i++) {
-      if (tx[i].value == "") {
+      if (tx[i].value === "") {
         tx[i].setAttribute("style", "height:" + 20 + "px;overflow-y:hidden;");
       } else {
         tx[i].setAttribute(
@@ -112,10 +112,7 @@ function MessagesContainer() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (muteTimeLeft != "") {
-      setInputMessage("");
-      return;
-    }
+    setInputMessage("");
 
     if (!inputMessage?.length) return;
 
@@ -128,10 +125,7 @@ function MessagesContainer() {
       type: MessageType["STANDARD" as keyof typeof MessageType],
       challengeId: 0,
     };
-
-    if (muteTimeLeft === "") {
-      socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
-    }
+    socket.current!.emit("SEND_ROOM_MESSAGE", newMessage);
     setInputMessage("");
   }
 

@@ -16,10 +16,8 @@ import { ChatRoomService } from '../chatRoom/chatRoom.service';
 import { UserService } from '../../user/user.service';
 // interfaces :
 import { ChatRoom, Message } from 'ft_transcendence';
-import { Logger, Body } from '@nestjs/common';
+import {  Body } from '@nestjs/common';
 import { getIdFromToken } from '../../gatewayUtils/gatewayUtils';
-import { UseGuards } from '@nestjs/common';
-import { WsGuard } from '../../auth/guard/ws.guard';
 import { ConfigService } from '@nestjs/config';
 import { getIdIfValid } from '../../gatewayUtils/gatewayUtils';
 
@@ -34,7 +32,7 @@ import { getIdIfValid } from '../../gatewayUtils/gatewayUtils';
 // permettent de connaitre l'etat de l'application
 // ou de faire des operations grace aux hooks
 export class MessageGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayConnection
 {
   // va bind l'application MessageService
   constructor(private messageService: MessageService,
@@ -57,27 +55,29 @@ export class MessageGateway
 
   @SubscribeMessage('JOIN_ROOM')
   joinRoom(client: Socket, room: ChatRoom) {
+	if (!room || !room.name)
+		return ;
     client.join(String(room?.name));
   }
 
   @SubscribeMessage('SEND_ROOM_MESSAGE')
   async sendMessage(@ConnectedSocket() client: Socket, @Body() message: Message, @GetUser('') token: string | undefined) {
-	if (token === undefined)
+	if (token === undefined || !message || !message.room || !message.room.name)
 		return ;
 	const id = getIdFromToken(token);
-  const mute1 = await this.chatRoomService.myMute(message!.room!.name, id);
-  if (mute1.penalties.length)
-    client.emit('MUTE', mute1);
+	const room = await this.chatRoomService.getChatRoom(message.room.name);
+	if (!room || !this.chatRoomService.isMember(room.members, id))
+		return ;
 	try
 	{
-    await this.messageService.createMessage(message, message?.room?.name, id);
-    this.server.to(message.room?.name).emit('ROOM_MESSAGE', message);
+	    await this.messageService.createMessage(message, message?.room?.name, id);
+  		this.server.to(message.room?.name).emit('ROOM_MESSAGE', message);
 	}
 	catch (error: any)
 	{
-    const mute = await this.chatRoomService.myMute(message!.room!.name, id);
-    if (mute.penalties.length)
-	   	client.emit('MUTE', mute);
+   	 	const mute = await this.chatRoomService.myMute(message!.room!.name, id);
+    	if (mute.penalties.length)
+		   	client.emit('MUTE', mute);
 	}
   }
 
@@ -97,15 +97,14 @@ export class MessageGateway
 
   @SubscribeMessage('JOIN_PRIVATE_ROOM')
   async joinPrivateRoom(client: Socket, data) {
+	  if (!data.senderId || !data.receiverId)
+		  return ;
       const privateRoom = await this.messageService.createPrivateRoom(
         data.senderId,
         data.receiverId,
       );
     client.join(privateRoom.name);
     client.emit("GET_ROOM", privateRoom);
-  }
-
-  handleDisconnect(client: Socket) {
   }
 }
 

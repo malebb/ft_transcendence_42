@@ -1,6 +1,5 @@
-import React, { Dispatch, SetStateAction, useContext, useRef } from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import useAxiosPrivate from "src/hooks/usePrivate";
 import { useSnackbar } from "notistack";
 

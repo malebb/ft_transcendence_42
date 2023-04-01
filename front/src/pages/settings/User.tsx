@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import React  from "react";
 import { axiosAuthReq, HTTP_METHOD } from "../../api/axios";
-import { AxiosHeaders, AxiosResponse } from "axios";
+import { AxiosHeaders } from "axios";
 import { useState, useEffect, useRef } from "react";
 import { Switch } from "@mui/material";
 import '../../styles/User.css';
@@ -14,16 +14,13 @@ import { useNavigate } from "react-router-dom";
 import Popup from "src/components/Popup";
 import Sidebar from "src/components/Sidebar";
 import Headers from "src/components/Headers";
-import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";
 
-import styleSettings from "../../styles/settings.module.css"
 
 //var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_@.]{3,23}$/;
-const CODE_REGEX = /^[0-9]{6}$/;
 const PATCH_PATH = "/users/patchme";
 const DEFAULT_IMG = "default_profile_picture.png";
 const GET_PROFILE_PICTURE = "http://localhost:3333/users/profile-image/";
@@ -36,8 +33,6 @@ type UserType = {
   isTFA: boolean;
 };
 
-//TODO gerer les pb de meme username etc
-
 const User = () => {
   const axiosPrivate = useAxiosPrivate();
   const [user, setUser] = useState<UserType>();
@@ -48,8 +43,6 @@ const User = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isTFA, setIsTFA] = useState<boolean>(false);
 
-  const [code, setCode] = useState("");
-  const [validCode, setValidCode] = useState<boolean>(false);
   const [modelDisplay, setModelDisplay] = useState<boolean>(false);
   const [modelContent, setModelContent] = useState<string>("");
   const [pathConfirm, setPathConfirm] = useState<string>("");
@@ -62,8 +55,6 @@ const User = () => {
   const myRef = useRef<HTMLInputElement>(null);
 
   const popupTitle = "WARNING";
-  const popupChangeContent =
-    "Are you sure you want to change your 2FA code ? This action is final and after validating the process you want be able to use it anymore";
   const popupDeleteContent =
     "Are you sure you want to delete your 2FA code ? This action is final and after validating the process you want be able to use it anymore";
   function validURL(str: string) {
@@ -79,15 +70,12 @@ const User = () => {
     return !!pattern.test(str);
   }
 
-  useEffect(() => {
-    const result = CODE_REGEX.test(code);
-    setValidCode(result);
-  }, [code]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
+
     if (selectedFile !== null && selectedFile !== undefined)
+
       formData.append("file", selectedFile);
     if (Login !== user?.username) {
       const v1 = USER_REGEX.test(Login);
@@ -151,7 +139,7 @@ const User = () => {
       }
     };
     getProfile();
-  }, []);
+  }, [picture]);
 
   const display2faModel = (content: string, path: string) => {
     setModelContent(content);
@@ -159,7 +147,7 @@ const User = () => {
     setModelDisplay(true);
   };
 
-  const redirectClick = (e : React.MouseEvent<HTMLElement>) => {
+  const redirectClick = () => {
     if (myRef.current)
       myRef.current.click();
   }
@@ -171,8 +159,8 @@ const User = () => {
         apparent={modelDisplay}
         title={popupTitle}
         content={modelContent}
-        handleTrue={(e: any) => navigate(pathConfirm)}
-        handleFalse={(e: any) => setModelDisplay(false)}
+        handleTrue={() => navigate(pathConfirm)}
+        handleFalse={() => setModelDisplay(false)}
       />
       {validUser ? (
         <main className="grid-container-User">
@@ -222,9 +210,9 @@ const User = () => {
               checked={isTFA}
               onChange={
                 isTFA
-                  ? (e: any) =>
+                  ? () =>
                       display2faModel(popupDeleteContent, "/2fadelete")
-                  : (e: any) => navigate("/2factivate")
+                  : () => navigate("/2factivate")
               }
             />
           </div>

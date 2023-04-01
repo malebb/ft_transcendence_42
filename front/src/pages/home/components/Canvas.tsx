@@ -454,7 +454,7 @@ export default function Canvas()
 			}
 			catch (error: any)
 			{
-				if (error.response.status === 404)
+				if (error.response && error.response.status === 404)
 					redirectAfterChallenge();
 			}
 		}
@@ -677,7 +677,7 @@ export default function Canvas()
 			}
 			catch (error: any)
 			{
-				if (error.response.status === 404)
+				if (error.response && error.response.status === 404)
 					redirectAfterChallenge();
 				else
 					setIsChallenger(false);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useRef, useContext, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AxiosResponse, AxiosInstance, AxiosHeaders } from "axios";
 import { axiosAuthReq, HTTP_METHOD, axiosPrivate } from "../../api/axios";
@@ -102,7 +102,7 @@ const UserProfile = () => {
     }
   };
 
-  const AddFriend = async (e: any) => {
+  const AddFriend = async () => {
     const newstatus = await AddFriendReq();
     setFriendStatus(newstatus);
   };
@@ -183,7 +183,7 @@ const UserProfile = () => {
   const deleteRequest = async (confirmed: boolean): Promise<void> => {
     if (confirmed) {
       try {
-        const sendingReq: AxiosResponse = await axiosPrivate.get("users/destroy-friend-request-by-userid/" + paramUserId);
+        await axiosPrivate.get("users/destroy-friend-request-by-userid/" + paramUserId);
         setFriendStatus("");
         setShowConfirmation(false);
         //return sendingReq.data;
@@ -236,7 +236,7 @@ const UserProfile = () => {
       return "" as string;
     }
   };
-  const getReqSendingStatus = async (): Promise<string> => {
+  const getReqSendingStatus = useCallback(async (): Promise<string> => {
     try {
       const sendingReq: AxiosResponse = await axiosPrivate.get(CHECK_SENDER_PATH + paramUserId);
       return sendingReq.data;
@@ -251,11 +251,12 @@ const UserProfile = () => {
       }
       return "" as string;
     }
-  };
-  const getSendingStatus = async () => {
+  }, [paramUserId]);
+
+  const getSendingStatus = useCallback(async () => {
     const senderStatus = await getReqSendingStatus();
     setSendingStatus(senderStatus);
-  };
+  }, [getReqSendingStatus]);
 
   useEffect(() => {
     if (friendStatus === "pending") {
@@ -263,7 +264,7 @@ const UserProfile = () => {
     } else if (friendStatus === "declined") {
       getSendingStatus();
     } else setSendingStatus("");
-  }, [friendStatus]);
+  }, [friendStatus, getSendingStatus]);
 
   function printAchievements() {
     return isFriend ? (
@@ -350,13 +351,13 @@ const UserProfile = () => {
 				catch (error: any) { console.log('error: ', error)}
 			}
 			initCurrentUser();
-		}, [paramUserId]);
+		}, []);
 
 		if (currentUser && currentUser.id !== Number(paramUserId))
 		{
 		 return (
 		 <>
-			 <img className="openMsgbutton" onClick={openMessage} src="http://localhost:3000/images/msgLogo.png" draggable={false} />
+			 <img className="openMsgbutton" onClick={openMessage} src="http://localhost:3000/images/msgLogo.png" draggable={false} alt="openMessage" />
 				 <div className="pop_up">
 					 <div className="arrow_down"></div>
 		 			<p>Click here & let's chat !</p>
@@ -391,8 +392,8 @@ const UserProfile = () => {
 						apparent={showConfirmation}
 						title={popupTitle}
 						content={popupContent}
-						handleTrue={(e: any) => deleteRequest(true)}
-						handleFalse={(e: any) => deleteRequest(false)}
+						handleTrue={() => deleteRequest(true)}
+						handleFalse={() => deleteRequest(false)}
 					/>
 						<div className="actionsOnUser">
 							<div className="profileFriendButton">

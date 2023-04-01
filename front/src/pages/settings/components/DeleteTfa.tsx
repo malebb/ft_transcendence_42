@@ -1,7 +1,5 @@
 import React, { useContext } from "react";
 import { useState, useEffect } from "react";
-import { axiosMain, axiosToken } from "src/api/axios";
-import axios, { AxiosResponse } from "axios";
 import { Navigate, useNavigate } from "react-router-dom";
 import useAxiosPrivate from "src/hooks/usePrivate";
 import { useSnackbar } from "notistack";

@@ -10,13 +10,19 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { EditUserDto } from './dto';
 import * as fs from 'fs';
 import { Friend, NeutralUser } from './types';
-import { User, Activity, Prisma } from '@prisma/client';
+import { User, Activity } from '@prisma/client';
+import { Socket } from 'socket.io';
+import { getIdFromToken, isAuthEmpty, getIdIfValid } from '../gatewayUtils/gatewayUtils';
+
 
 const DEFAULT_IMG = 'uploads/profileimages/default_profile_picture.png';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
+
+	// user gateway: 
+	clients: Socket[] = [];
 
   mapArrayUserToNeutralUser(user: User[]): NeutralUser[] {
     const ret = user.map(
@@ -472,4 +478,52 @@ export class UserService {
     });
     return blocked.blockedByYou;
   }
+
+  // user status
+
+	async emitStatusToFriends(clientId: number, newStatus: Activity)
+	{
+		const friends: Friend[] = await this.getFriends(clientId);
+		for (let i = 0; i < this.clients.length; ++i)
+		{
+			for (let j = 0; j < friends.length; ++j)
+			{
+				if (friends[j].id === getIdFromToken(this.clients[i].handshake.auth.token))
+				{
+					this.clients[i].emit('CHANGE_STATUS', {status: newStatus, id: clientId});
+					break ;
+				}
+			}
+			if (clientId  === getIdFromToken(this.clients[i].handshake.auth.token))
+				this.clients[i].emit('CHANGE_STATUS', {status: newStatus, id: clientId});
+		}
+	}
+
+	isUserInAnotherSession(userId: number)
+	{
+		let countUserFound: number = 0;
+		for (let i = 0; i < this.clients.length; ++i)
+		{
+			if (userId === getIdFromToken(this.clients[i].handshake.auth.token))
+				countUserFound++;
+		}
+		return (countUserFound >= 2);
+	}
+
+	removeUserFromConnected(client: Socket)
+	{
+		for (let i = 0; i < this.clients.length; ++i)
+		{
+			if (this.clients[i].id === client.id)
+			{
+				this.clients.splice(i, 1);
+				break ;
+			}
+		}
+	}
+
+	addUserToConnected(client: Socket)
+	{
+	  this.clients.push(client);
+	}
 }

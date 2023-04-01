@@ -75,7 +75,7 @@ const Callback = () => {
       setIsLoading(false);
     };
     callback42();
-  }, []);
+  }, [query, setToken, setUserId, setUsername, socket]);
 
   useEffect(() => {
     if (TfaSuccess)
@@ -91,7 +91,7 @@ const Callback = () => {
                 anchorOrigin: { vertical: "bottom", horizontal: "right" },
               })
     }
-  }, [TfaSuccess])
+  }, [TfaSuccess, resp.id, resp.tokens, resp.username, socket, setToken, setUsername, setUserId])
 
   useEffect(() => {
     if (errMsg === 'Invalid Credentials')

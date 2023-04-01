@@ -9,27 +9,6 @@ const useAxiosPrivate = () => {
     const context = useAuth();
     const navigate = useNavigate();
 
-    //     function doesHttpOnlyCookieExist(cookiename: string) {
-    //         var d = new Date();
-    //         d.setTime(d.getTime() + (1000));
-    //         var expires = "expires=" + d.toUTCString();
-          
-    //         document.cookie = cookiename + "=new_value;path=/;samesite=none;secure;" + expires;
-    //         return document.cookie.indexOf(cookiename + '=') === -1;
-    //     }
-
-    // useEffect(() => {
-        
-    //     console.log('does the token exist == ' + doesHttpOnlyCookieExist('rt_token'))
-        
-    //     if (!d('rt_token'))
-    //     {
-    //         context.setToken(undefined);
-    //         context.setUserId(undefined);
-    //         context.setUsername(undefined);
-    //         navigate("/")
-    //     }}, []);
-
     useEffect(() => {
         const requestIntercept = axiosPrivate.interceptors.request.use(
             (config) => {

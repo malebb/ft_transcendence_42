@@ -79,7 +79,8 @@
     "timers-browserify": "^2.0.12",
     "typeorm": "^0.3.12",
     "util": "^0.12.5",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "yarn": "^1.22.19"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

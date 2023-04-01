@@ -54,17 +54,14 @@ const Signin = () => {
   });
   const [email, setEmail] = useState("");
   const [validEmail, setValidEmail] = useState(false);
-  const [emailFocus, setEmailFocus] = useState(false);
 
   const [pwd, setPwd] = useState("");
   const [validPwd, setValidPwd] = useState(false);
-  const [pwdFocus, setPwdFocus] = useState(false);
 
   const [name, setName] = useState<string>("");
 
   const [isTfa, setIsTfa] = useState<boolean>(false);
   const [TfaSuccess, setTfaSuccess] = useState<boolean>(false);
-  const [TfaDone, setTfaDone] = useState<boolean>(false);
 
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
@@ -102,7 +99,7 @@ const Signin = () => {
   // );
   // }*/
 
-  const handle42Button = (e : any) => {
+  const handle42Button = () => {
     window.location.href =
         "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code";
     }
@@ -170,14 +167,16 @@ const Signin = () => {
       context.setToken(resp.tokens!)
       socket.auth = {token: resp.tokens!.access_token}
       socket.connect();
+
       setTfaDone(true);
       snackBar.enqueueSnackbar("Hello, " + resp.username!, {
                 variant: "success",
                 anchorOrigin: { vertical: "bottom", horizontal: "right" },
               })
+
     }
 
-  }, [TfaSuccess])
+  }, [TfaSuccess, context, socket, resp])
 
   const CSS = `<style>
   button {
@@ -245,8 +244,6 @@ button img{position: relative;
               required
               aria-invalid={validEmail ? "false" : "true"}
               aria-describedby="uidnote"
-              onFocus={() => setEmailFocus(true)}
-              onBlur={() => setEmailFocus(false)}
             />
 
             <label htmlFor="password" className="hide">
@@ -267,8 +264,6 @@ button img{position: relative;
               required
               aria-invalid={validPwd ? "false" : "true"}
               aria-describedby="pwdnote"
-              onFocus={() => setPwdFocus(true)}
-              onBlur={() => setPwdFocus(false)}
             />
 
             <button className="btn btn-transparent signin_btn" disabled={!validEmail || !validPwd ? true : false}>
@@ -306,11 +301,3 @@ button img{position: relative;
 };
 
 export default Signin;
-function setUsername(arg0: any) {
-  throw new Error("Function not implemented.");
-}
-
-function setUserId(id: any) {
-  throw new Error("Function not implemented.");
-}
-

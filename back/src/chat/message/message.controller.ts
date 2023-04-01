@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Delete, ParseIntPipe} from '@nestjs/common';
+import { Controller, Get, Post, Param } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { Message } from 'ft_transcendence';
 import { GetUser } from '../../auth/decorator';
@@ -8,7 +8,8 @@ class MessageController {
 	constructor(private messageService: MessageService) { }
 
 	@Post('create-message')
-	async createMessageByRoomName(@Param() message: Message, room: string, @GetUser('id') id: number) {
+	async createMessageByRoomName(@Param() message: Message, room: string,
+								  @GetUser('id') id: number) {
 		return (await this.messageService.createMessage(message, room, id));
 	}
 

@@ -1,7 +1,6 @@
 import { AxiosResponse } from "axios";
-import React, { useContext, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";
 
 type NeutralUser = {
@@ -30,6 +29,7 @@ function SearchBar() {
       } else {
         setErrMsg("Unauthorized");
       }
+	console.log('error: ', errMsg);
       return [] as NeutralUser[];
     }
   };

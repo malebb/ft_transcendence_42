@@ -293,7 +293,7 @@ function Rooms()
 			}
 			catch (error: any)
 			{
-				if (error.response.status === 403)
+				if (error.response && error.response.status === 403)
 				{
 					setInfoPassword('Wrong password');
 					setRoomPassword('');
@@ -362,7 +362,7 @@ function Rooms()
 						}
 						catch (error: any)
 						{
-							if (error.response.status === 403)
+							if (error.response && error.response.status === 403)
 							{
 								setTimeBannedRemain(formatRemainTime(ban.data.penalties));
 								banned = true;
