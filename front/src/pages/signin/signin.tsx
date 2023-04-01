@@ -167,8 +167,6 @@ const Signin = () => {
       context.setToken(resp.tokens!)
       socket.auth = {token: resp.tokens!.access_token}
       socket.connect();
-
-      setTfaDone(true);
       snackBar.enqueueSnackbar("Hello, " + resp.username!, {
                 variant: "success",
                 anchorOrigin: { vertical: "bottom", horizontal: "right" },
