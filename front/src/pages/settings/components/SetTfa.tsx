@@ -28,7 +28,7 @@ const SetTfa = () => {
         //qrcode.toDataURL(secret.otpauth_url,{type: "image/jpeg"}/*, function(err: any, data: any){
       );
     };
-    createQrCode();
+    createQrCode().catch(console.error);
   }, [axiosPrivate]);
 
   function timeout(delay: number) {
