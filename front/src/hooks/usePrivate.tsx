@@ -11,8 +11,13 @@ const useAxiosPrivate = () => {
 
     useEffect(() => {
         const requestIntercept = axiosPrivate.interceptors.request.use(
-            (config) => {
-                if (!config.headers['Authorization']) {
+            async (config) => {
+                if (context.token === undefined)
+                {
+                    const newAccessToken = await refresh();
+                    config.headers['Authorization'] = `Bearer ${newAccessToken}`;
+                }
+                else if (!config.headers['Authorization']) {
                     config.headers['Authorization'] = `Bearer ${context.token?.access_token}`;
                 }
                 return config;

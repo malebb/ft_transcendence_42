@@ -241,7 +241,6 @@ const UserProfile = () => {
       const sendingReq: AxiosResponse = await axiosPrivate.get(CHECK_SENDER_PATH + paramUserId);
       return sendingReq.data;
     } catch (err: any) {
-      console.log("error getme");
       if (!err?.response) {
         setErrMsg("No Server Response");
       } else if (err.response?.status === 403) {

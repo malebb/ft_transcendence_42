@@ -4,15 +4,15 @@ FROM node:latest
 WORKDIR /app
 
 # COPY ./front ./
-COPY ../lib ../app-lib
-
+COPY ../app-lib ../app-lib
+COPY ./front/package.json ./
 # RUN npm install;
 # RUN npm install ../lib;
 
 # CMD ["npm", "run", "start:dev"]
-# RUN yarn install;
-RUN yarn add ../app-lib;
+RUN npm install;
+RUN npm install ../app-lib;
 
-CMD ["yarn", "install"]
-ENTRYPOINT ["yarn", "start"]
+# CMD ["yarn", "install"]
+CMD ["npm", "run", "build"]
 # CMD [ "tail", "-f", "/dev/null" ]

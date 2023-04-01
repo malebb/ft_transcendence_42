@@ -25,6 +25,7 @@ services:
       - .env
     volumes:
       - ./back:/app/
+    restart: always
     # networks:
     #   - intro_nest
   postgres:

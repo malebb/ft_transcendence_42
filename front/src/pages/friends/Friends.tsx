@@ -165,16 +165,6 @@ const Friends = () => {
     setRenderType(parseInt(e.target.id.split('_')[1]));
   }
 
-  useEffect(() => {}, [friendArray, recvArray, sendArray]);
-
-  useEffect(() => {
-    getFriendArray();
-    getRecvArray();
-    getSendArray();
-  }, []);
-
-
-
   return (
     <>
       <Headers />

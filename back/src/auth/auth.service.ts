@@ -9,16 +9,10 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthDto, SignupDto } from './dto';
 import * as argon from 'argon2';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { access } from 'fs';
-import { Tokens } from './types';
-import { PaperProps, useRadioGroup } from '@mui/material';
-import { use } from 'passport';
 import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
-import { connected } from 'process';
 import { Response } from 'express';
 import axios, { AxiosResponse } from 'axios';
 import { RefreshInterface, SignInterface } from './interfaces';
@@ -125,16 +119,17 @@ export class AuthService {
       const client_id = this.config.get('OAUTH_CLIENT_UID');
       const client_secret = this.config.get('OAUTH_CLIENT_SECRET');
       const response: AxiosResponse = await axios.post(
-        'https://api.intra.42.fr/oauth/token',
-        {
-          grant_type: GRANT_TYPE,
-          client_id: client_id,
-          client_secret: client_secret,
-          code: code.code,
-          redirect_uri: REDIRECT_URI,
-        },
+        `https://api.intra.42.fr/oauth/token?grant_type=${GRANT_TYPE}&client_id=${client_id}&client_secret=${client_secret}&code=${code.code}&redirect_uri=${REDIRECT_URI};`,
+        // {
+        //   grant_type: GRANT_TYPE,
+        //   client_id: client_id,
+        //   client_secret: client_secret,
+        //   code: code.code,
+        //   redirect_uri: REDIRECT_URI,
+        // },
       );
 
+      console.log('access_token' + response.data.access_token);
       const getprofile: AxiosResponse = await axios.get(
         'https://api.intra.42.fr/v2/me',
         {
@@ -187,6 +182,7 @@ export class AuthService {
         username: user.username,
       };
     } catch (error) {
+      console.log(error);
       if (error.code === 'P2002' && error.meta.target[0] === 'email') {
         throw new ForbiddenException('42 Email already taken');
       }
@@ -267,10 +263,8 @@ export class AuthService {
       },
     });
 
-    console.log('refresh to del  = ' + rt);
     if (rt) {
       const to_del = hashRt.filter((id) => {
-        console.log('hash = ' + id);
         argon.verify(id, rt);
       });
 

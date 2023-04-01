@@ -23,9 +23,11 @@ FROM node:latest
 
 WORKDIR /app
 
-COPY ../lib ../app-lib
+COPY ../app-lib ../app-lib
+COPY ./back/package.json ./
 # COPY ../.env ./
-RUN yarn add ../app-lib;
+RUN npm install ../app-lib;
+RUN npm install;
 # COPY ./back/node_modules ./node_modules
 # COPY ./back/package*.json ./
 # COPY ./back/dist ./dist
@@ -33,5 +35,4 @@ RUN yarn add ../app-lib;
 
 EXPOSE 3000
 
-CMD [ "yarn", "install"]
-ENTRYPOINT [ "yarn", "start:migrate:prod"]
+CMD [ "npm", "run", "start:deploy"]
