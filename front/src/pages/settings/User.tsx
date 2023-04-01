@@ -3,8 +3,8 @@ import { axiosMain, axiosAuthReq, HTTP_METHOD } from "../../api/axios";
 import { AxiosHeaders, AxiosResponse } from "axios";
 import { useState, useEffect, useRef } from "react";
 import { Switch } from "@mui/material";
-import '../../styles/User.css';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
+import "../../styles/User.css";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { SvgIcon } from "@mui/material";
 //var speakeasy = require('speakeasy');
 //var qrcode = require('qrcode');
@@ -17,7 +17,7 @@ import Headers from "src/components/Headers";
 import AuthContext from "src/context/TokenContext";
 import useAxiosPrivate from "src/hooks/usePrivate";
 
-import styleSettings from "../../styles/settings.module.css"
+import styleSettings from "../../styles/settings.module.css";
 
 //var qrcode = require('qrcode');
 window.Buffer = window.Buffer || require("buffer").Buffer;
@@ -90,7 +90,7 @@ if (secret.otpauth_url !== undefined)
         </form> */
 const User = () => {
   const axiosPrivate = useAxiosPrivate();
-  const {username} = useContext(AuthContext);
+  const { username } = useContext(AuthContext);
   const [user, setUser] = useState<UserType>();
   const [validUser, setValidUser] = useState<boolean>(false);
   const [picture, setPicture] = useState("");
@@ -138,11 +138,10 @@ const User = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
-    if (selectedFile === undefined)
-      console.log("selectedFile is undef");
+    if (selectedFile === undefined) console.log("selectedFile is undef");
     if (selectedFile !== null) {
       console.log("good file");
-      console.log(selectedFile)
+      console.log(selectedFile);
       formData.append("file", selectedFile);
     }
     if (Login !== user?.username) {
@@ -155,11 +154,11 @@ const User = () => {
     }
     try {
       // const response: AxiosResponse = await axiosAuthReq(HTTP_METHOD.POST, PATCH_PATH, formData, {} as AxiosHeaders, setErrMsg, set)
-      console.log('formData == ' + JSON.stringify(formData.get('file')));
+      console.log("formData == " + JSON.stringify(formData.get("file")));
       const response: AxiosResponse = await axiosPrivate.post(
         PATCH_PATH,
         formData,
-        {headers: {"Content-Type": "multipart/form-data"}}
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
     } catch (err: any) {
       if (!err?.response) {
@@ -210,9 +209,15 @@ const User = () => {
   useEffect(() => {
     setValidUser(false);
     const getProfile = async () => {
-      const profile = await axiosAuthReq(HTTP_METHOD.GET, GETME_PATH, {} as AxiosHeaders, {}, setErrMsg, setUser);
-      if(profile !== undefined)
-      {
+      const profile = await axiosAuthReq(
+        HTTP_METHOD.GET,
+        GETME_PATH,
+        {} as AxiosHeaders,
+        {},
+        setErrMsg,
+        setUser
+      );
+      if (profile !== undefined) {
         setValidUser(true);
         if (validURL(profile.profilePicture))
           setPicture(profile.profilePicture);
@@ -234,11 +239,9 @@ const User = () => {
     setModelDisplay(true);
   };
 
-  const redirectClick = (e : React.MouseEvent<HTMLElement>) => {
-    if (myRef.current)
-      myRef.current.click();
-  }
-
+  const redirectClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (myRef.current) myRef.current.click();
+  };
 
   return (
     <>
@@ -253,120 +256,212 @@ const User = () => {
       />
       <h1>{errMsg}</h1>
       {validUser ? (
-//         <>
-//         <h1 className="settings-User">SETTINGS</h1>
-//         <main className="grid-container-User">
-//           <section className="section-modif-User">
-//             <div className="profilePicture-User">
-//             <img
-//               src={image ? image : picture}
-//               className="picture-User"
-//               alt="profile_picture"
-//             />
-//                 <button className="show button-changePicture reverse-btn btn-file" onClick={redirectClick}>
-//                 <SvgIcon component={UploadFileIcon}/>
-// </button>
-// </div>
-//             <form className="form-User display-flex-column" onSubmit={handleSubmit}>
-//               <label className="hiden" htmlFor="avatar">
-//                 <p className="display-none">Choose a profile picture:</p>
-//                 <input
-//                   type="file"
-//                   onChange={onImageChange}
-//                   className="display-none"
-//                   id="avatar"
-//                   name="avatar"
-//                   ref={myRef}
-//                   accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-//                 />
-//               </label>
-//               <input
-//                 type={"text"}
-//                 className="name-field-User"
-//                 id="username"
-//                 value={Login}
-//                 autoComplete="off"
-//                 onChange={(e) => setLogin(e.target.value)}
-//                 required
-//               />
-//               <button className={validLogin? "save-btn-User btn-transparent fit-content save-btn-valid-User" : "save-btn-User btn-transparent fit-content save-btn-unvalid-User "} disabled={!validLogin ? true : false}>Save</button>
-//             </form>
-//           </section>
-//           <section className="section-settings-User">
-//             <div className="tfa-User">
-//             <label>Activate Google Authentificator 2FA</label>
-//             {/* <input type={'checkbox'} checked={isTFA} onChange={printQrCode}/> */}
-//             <Switch
-//               checked={isTFA}
-//               onChange={
-//                 isTFA
-//                   ? (e: any) =>
-//                       display2faModel(popupDeleteContent, "/2fadelete")
-//                   : (e: any) => navigate("/2factivate")
-//               }
-//             />
-//           </div>
-//           </section>
-//         </main>
-//         </>
-<>
-
-  <div className={styleSettings.marginContentsSetting}>
-	<div className={styleSettings.allContents}>
-<h1 className={styleSettings.title}>SETTINGS</h1>
-	<img
-	  src={image ? image : picture}
-	  className={styleSettings.picture}
-	  alt="profile_picture"
-	/>
-		<button className={styleSettings.changePicture} onClick={redirectClick}>
-		<SvgIcon component={UploadFileIcon}/>
+        <main className="grid-container-User">
+          <section className="section-modif-User">
+            <div className="profilePicture-User">
+            <img
+              src={image ? image : picture}
+              className="picture-User"
+              alt="profile_picture"
+            />
+                <button className="show button-changePicture reverse-btn btn-file" onClick={redirectClick}>
+                <SvgIcon component={UploadFileIcon}/>
 </button>
-	<form  onSubmit={handleSubmit}>
-	  <label  htmlFor="avatar">
-		<p >Choose a profile picture:</p>
-		<input
-		  type="file"
-		  onChange={onImageChange}
-		  className="display-none"
-		  id="avatar"
-		  name="avatar"
-		  ref={myRef}
-		  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-		/>
-	  </label>
-	  <input
-		type={"text"}
-		className="name-field-User"
-		id="username"
-		value={Login}
-		autoComplete="off"
-		onChange={(e) => setLogin(e.target.value)}
-		required
-	  />
-	  <button className={validLogin? "save-btn-User btn-transparent fit-content save-btn-valid-User" : "save-btn-User btn-transparent fit-content save-btn-unvalid-User "} disabled={!validLogin ? true : false}>Save</button>
-	</form>
-	<div >
-	<label>Activate Google Authentificator 2FA</label>
-	<Switch
-	  checked={isTFA}
-	  onChange={
-		isTFA
-		  ? (e: any) =>
-			  display2faModel(popupDeleteContent, "/2fadelete")
-		  : (e: any) => navigate("/2factivate")
-	  }
-	/>
-  </div>
-  </div>
-  </div>
-</>
-
+</div>
+            <form className="form-User display-flex-column" onSubmit={handleSubmit}>
+              <label className="hiden" htmlFor="avatar">
+                <p className="display-none">Choose a profile picture:</p>
+                <input
+                  type="file"
+                  onChange={onImageChange}
+                  className="display-none"
+                  id="avatar"
+                  name="avatar"
+                  ref={myRef}
+                  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+                />
+              </label>
+              <input
+                type={"text"}
+                className="name-field-User"
+                id="username"
+                value={Login}
+                autoComplete="off"
+                onChange={(e) => setLogin(e.target.value)}
+                required
+              />
+              <button className={validLogin? "save-btn-User btn-transparent fit-content save-btn-valid-User" : "save-btn-User btn-transparent fit-content save-btn-unvalid-User "} disabled={!validLogin ? true : false}>Save</button>
+            </form>
+          </section>
+          <section className="section-settings-User">
+            <h1 className="settings-User">SETTINGS</h1>
+            <div className="tfa-User">
+            <label>Activate Google Authentificator 2FA</label>
+            {/* <input type={'checkbox'} checked={isTFA} onChange={printQrCode}/> */}
+            <Switch
+              checked={isTFA}
+              onChange={
+                isTFA
+                  ? (e: any) =>
+                      display2faModel(popupDeleteContent, "/2fadelete")
+                  : (e: any) => navigate("/2factivate")
+              }
+            />
+          </div>
+          </section>
+        </main>
       ) : (
         <main></main>
       )}
     </>
   );
+
+
+  // return (
+  //   <>
+  //     <Sidebar />
+  //     <Headers />
+  //     <Popup
+  //       apparent={modelDisplay}
+  //       title={popupTitle}
+  //       content={modelContent}
+  //       handleTrue={(e: any) => navigate(pathConfirm)}
+  //       handleFalse={(e: any) => setModelDisplay(false)}
+  //     />
+  //     <h1>{errMsg}</h1>
+  //     {validUser ? (
+  //               <>
+  //               <h1 className="settings-User">SETTINGS</h1>
+  //               <main className="grid-container-User">
+  //                 <section className="section-modif-User">
+  //                   <div className="profilePicture-User">
+  //                   <img
+  //                     src={image ? image : picture}
+  //                     className="picture-User"
+  //                     alt="profile_picture"
+  //                   />
+  //                       <button className="show button-changePicture reverse-btn btn-file" onClick={redirectClick}>
+  //                       <SvgIcon component={UploadFileIcon}/>
+  //       </button>
+  //       </div>
+  //                   <form className="form-User display-flex-column" onSubmit={handleSubmit}>
+  //                     <label className="hiden" htmlFor="avatar">
+  //                       <p className="display-none">Choose a profile picture:</p>
+  //                       <input
+  //                         type="file"
+  //                         onChange={onImageChange}
+  //                         className="display-none"
+  //                         id="avatar"
+  //                         name="avatar"
+  //                         ref={myRef}
+  //                         accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+  //                       />
+  //                     </label>
+  //                     <input
+  //                       type={"text"}
+  //                       className="name-field-User"
+  //                       id="username"
+  //                       value={Login}
+  //                       autoComplete="off"
+  //                       onChange={(e) => setLogin(e.target.value)}
+  //                       required
+  //                     />
+  //                     <button className={validLogin? "save-btn-User btn-transparent fit-content save-btn-valid-User" : "save-btn-User btn-transparent fit-content save-btn-unvalid-User "} disabled={!validLogin ? true : false}>Save</button>
+  //                   </form>
+  //                 </section>
+  //                 <section className="section-settings-User">
+  //                   <div className="tfa-User">
+  //                   <label>Activate Google Authentificator 2FA</label>
+  //                   <Switch
+  //                     checked={isTFA}
+  //                     onChange={
+  //                       isTFA
+  //                         ? (e: any) =>
+  //                             display2faModel(popupDeleteContent, "/2fadelete")
+  //                         : (e: any) => navigate("/2factivate")
+  //                     }
+  //                   />
+  //                 </div>
+  //                 </section>
+  //               </main>
+  //               </>
+        // <>
+        //   <div className={styleSettings.marginContentsSetting}>
+        //     <div className={styleSettings.allContents}>
+        //       <h1 className={styleSettings.title}>SETTINGS</h1>
+        //       <img
+        //         src={image ? image : picture}
+        //         className={styleSettings.picture}
+        //         alt="profile_picture"
+        //       />
+        //       <div className={styleSettings.positionChangePicture}>
+        //       <button
+        //         className={styleSettings.changePicture}
+        //         onClick={redirectClick}
+        //       >
+        //         <SvgIcon component={UploadFileIcon} />
+        //       </button>
+        //       <form onSubmit={handleSubmit}>
+        //         <label htmlFor="avatar">
+        //           <input
+        //             type="file"
+        //             onChange={onImageChange}
+        //             className="display-none"
+        //             id="avatar"
+        //             name="avatar"
+        //             ref={myRef}
+        //             accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+        //           />
+        //         </label>
+        //         </form>
+        //         </div>
+        //         <div className={styleSettings.infoProfilPic}>
+        //           <div className={styleSettings.pop_up}>
+        //             <div className={styleSettings.arrow_down}></div>
+        //             <p>Click here to change your profil picture</p>
+        //           </div>
+        //         </div>
+        //         <form onSubmit={handleSubmit}>
+        //         <input
+        //           type={"text"}
+        //           className="name-field-User"
+        //           id="username"
+        //           value={Login}
+        //           autoComplete="off"
+        //           onChange={(e) => setLogin(e.target.value)}
+        //           required
+        //         />
+        //         <button
+        //           className={
+        //             validLogin
+        //               ? "save-btn-User btn-transparent fit-content save-btn-valid-User"
+        //               : "save-btn-User btn-transparent fit-content save-btn-unvalid-User "
+        //           }
+        //           disabled={!validLogin ? true : false}
+        //         >
+        //           Save
+        //         </button>
+        //       </form>
+        //       <div>
+        //         <label>Activate Google Authentificator 2FA</label>
+        //         <Switch
+        //           checked={isTFA}
+        //           onChange={
+        //             isTFA
+        //               ? (e: any) =>
+        //                   display2faModel(popupDeleteContent, "/2fadelete")
+        //               : (e: any) => navigate("/2factivate")
+        //           }
+        //         />
+        //       </div>
+        //     </div>
+        //   </div>
+        // </>
+  //     ) : (
+  //       <main></main>
+  //     )}
+  //   </>
+  // );
 };
 
 export default User;

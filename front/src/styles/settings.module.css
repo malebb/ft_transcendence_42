@@ -32,6 +32,13 @@
 	vertical-align: middle;
 }
 
+.positionChangePicture {
+	position: relative;
+	float: right;
+	right: 400px;
+	top: 28px;
+}
+
 .changePicture {
 	background-color: #3ba340;
 	width: -moz-fit-content;
@@ -40,9 +47,6 @@
 	border-style: none;
 	border-radius: 40px;
 	margin: 0 auto;
-	position: relative;
-	left: 50px;
-	top: 4px;
 }
 
 .changePicture:hover {
@@ -54,18 +58,51 @@
 	opacity: 0.3;
 }
 
+.profilePicture-User {
+	grid-area: profilePicture-User;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: 1.5fr 0.5fr;
+	gap: 0px 0px;
+	grid-auto-flow: row;
+	grid-template-areas:
+		" . "
+		"btn-file";
+	grid-area: profilePicture-User;
+	/* width: 10em; */
+	/* height: 10em; */
+}
 
-  .profilePicture-User {
-    grid-area: profilePicture-User;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1.5fr 0.5fr;
-    gap: 0px 0px;
-    grid-auto-flow: row;
-    grid-template-areas:
-      " . "
-      "btn-file";
-    grid-area: profilePicture-User;
-    /* width: 10em; */
-    /* height: 10em; */
-  }
+/* infos profil pic */
+
+.infoProfilPic {
+	position: relative;
+	float: right;
+	right: 225px;
+	top: 14px;
+}
+
+div.pop_up {
+	margin-left: 20px;
+	width: 110px;
+	height: 70px;
+	background-color: #3795f6;
+	border-radius: 5px;
+}
+
+div.pop_up p {
+	position: relative;
+	bottom: 25px;
+	text-align: center;
+	color: #fff;
+}
+
+div.arrow_down {
+	position: relative;
+	top: 19px;
+	right: 8px;
+	width: 0;
+	border-top: 15px solid transparent;
+	border-bottom: 15px solid transparent;
+	border-right: 15px solid #3795f6;
+}
