@@ -118,7 +118,7 @@ const Callback = () => {
         <main>
           {(isTfa && resp.id !== undefined) && <VerifTfa setTfaSuccess={setTfaSuccess} userId={resp.id} />}
           {(TfaDone || !isTfa) && (
-              <Navigate to={"/"} />
+              <Navigate to={"/user"} />
           )}
         </main>
       )}

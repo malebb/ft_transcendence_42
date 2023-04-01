@@ -119,7 +119,6 @@ const Signin = () => {
           "Content-Type": "application/json"
         }}
       );
-      console.log(response.data);
       // setToken(response.data.token);
       setIsTfa(response.data.isTfa);
       if (response.data.isTfa === false)
