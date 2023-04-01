@@ -148,6 +148,22 @@ export class AuthService {
           id42: id42,
         },
       });
+      let already_use;
+      let login = getprofile.data['login'];
+      let user_inc = 1;
+      do {
+        already_use = await this.prismaService.user.findUnique({
+          where: {
+            username: login,
+          },
+        });
+        console.log(already_use);
+        if (already_use) {
+          user_inc++;
+          login = getprofile.data['login'] + user_inc.toString();
+        }
+      } while (already_use);
+      // login = getprofile + user_inc.toString();
       if (!user) {
         user = await this.prismaService.user.create({
           data: {
@@ -155,7 +171,7 @@ export class AuthService {
             hash: '',
             profilePicture: getprofile.data.image.versions.small,
             id42: id42,
-            username: getprofile.data['login'],
+            username: login,
             stats: {
               create: {},
             },
@@ -171,6 +187,9 @@ export class AuthService {
         username: user.username,
       };
     } catch (error) {
+      if (error.code === 'P2002' && error.meta.target[0] === 'email') {
+        throw new ForbiddenException('42 Email already taken');
+      }
       throw new InternalServerErrorException('Error connecting 42 api');
     }
   }

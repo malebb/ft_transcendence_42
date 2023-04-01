@@ -88,10 +88,7 @@ export class AuthController {
       });
       return token;
     } catch (err) {
-      throw new HttpException(
-        'Error Connecting with 42 api',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw err;
     }
   }
 

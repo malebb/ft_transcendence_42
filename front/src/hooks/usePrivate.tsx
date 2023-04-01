@@ -17,11 +17,12 @@ const useAxiosPrivate = () => {
     //         document.cookie = cookiename + "=new_value;path=/;samesite=none;secure;" + expires;
     //         return document.cookie.indexOf(cookiename + '=') === -1;
     //     }
+
     // useEffect(() => {
         
     //     console.log('does the token exist == ' + doesHttpOnlyCookieExist('rt_token'))
         
-    //     if (!doesHttpOnlyCookieExist('rt_token'))
+    //     if (!d('rt_token'))
     //     {
     //         context.setToken(undefined);
     //         context.setUserId(undefined);

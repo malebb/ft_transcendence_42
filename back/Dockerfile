@@ -24,13 +24,14 @@ FROM node:latest
 WORKDIR /app
 
 COPY ../lib ../app-lib
-COPY ../.env ./
+# COPY ../.env ./
 RUN yarn add ../app-lib;
-COPY ./back/node_modules ./node_modules
-COPY ./back/package*.json ./
-COPY ./back/dist ./dist
-COPY ./back/prisma ./prisma
+# COPY ./back/node_modules ./node_modules
+# COPY ./back/package*.json ./
+# COPY ./back/dist ./dist
+# COPY ./back/prisma ./prisma
 
 EXPOSE 3000
 
-CMD [ "yarn", "start:migrate:prod"]
+CMD [ "yarn", "install"]
+ENTRYPOINT [ "yarn", "start:migrate:prod"]

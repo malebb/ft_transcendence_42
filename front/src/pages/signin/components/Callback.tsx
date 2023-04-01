@@ -66,6 +66,7 @@ const Callback = () => {
         if (!err?.response) {
           setErrMsg("No Server Response");
         } else if (err.response?.status === 403) {
+
           setErrMsg("Invalid Credentials");
         } else {
           setErrMsg("Registration Failed");
@@ -93,7 +94,13 @@ const Callback = () => {
   }, [TfaSuccess])
 
   useEffect(() => {
-    if (errMsg)
+    if (errMsg === 'Invalid Credentials')
+    {
+      snackBar.enqueueSnackbar("42 Email already used on an other account :(", {
+      variant: "error",
+      anchorOrigin: { vertical: "bottom", horizontal: "right" },
+    })}
+    else if (errMsg)
     {
       snackBar.enqueueSnackbar("Oops something went wrong", {
       variant: "error",
