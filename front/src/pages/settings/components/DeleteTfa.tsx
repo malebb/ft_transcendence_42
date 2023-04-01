@@ -60,7 +60,6 @@ const DeleteTfa = () => {
   };
 
   useEffect(() => {
-    console.log(cells);
     if (cells.every(cell => (cell >= '0' && cell <= '9')) && CODE_REGEX.test(cells.join('')))
       setDisablePush(false);
     else
@@ -78,7 +77,6 @@ const DeleteTfa = () => {
   }, [disablePush])
 
   const handleNextInput = (e : React.ChangeEvent<HTMLInputElement>, indexToUpdate: number) => {
-    console.log(indexToUpdate);
     e.preventDefault();
     if (Object.keys(e.target.value).length > 1)
     {

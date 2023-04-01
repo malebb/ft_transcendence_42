@@ -151,7 +151,6 @@ export class UserService {
           username: dto.login,
         },
       });
-      console.log(already_use);
       if (already_use) throw new ForbiddenException();
       const user = await this.prisma.user.update({
         where: {

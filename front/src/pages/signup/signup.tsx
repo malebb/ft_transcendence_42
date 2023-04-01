@@ -115,7 +115,7 @@ const Signup = () => {
   return (
     <>
       {success ? (
-              <Navigate to={"/"}/>
+              <Navigate to={"/user"}/>
       ) : (
         <>
         <Headers/>

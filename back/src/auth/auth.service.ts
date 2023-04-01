@@ -157,7 +157,6 @@ export class AuthService {
             username: login,
           },
         });
-        console.log(already_use);
         if (already_use) {
           user_inc++;
           login = getprofile.data['login'] + user_inc.toString();
@@ -267,10 +266,8 @@ export class AuthService {
       },
     });
 
-    console.log('refresh to del  = ' + rt);
     if (rt) {
       const to_del = hashRt.filter((id) => {
-        console.log('hash = ' + id);
         argon.verify(id, rt);
       });
 

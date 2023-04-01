@@ -55,7 +55,6 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
   };
 
   useEffect(() => {
-    console.log(cells);
     if (cells.every(cell => (cell >= '0' && cell <= '9')) && CODE_REGEX.test(cells.join('')))
       setDisablePush(false);
     else
