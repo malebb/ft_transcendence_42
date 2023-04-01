@@ -22,7 +22,7 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
   useEffect(() => {
     async function checkBadAttempt()
     {
-    if(badAttempt)
+    if(badAttempt) 
     {
       await timeout(700);
       setBadAttempt(false);
@@ -73,8 +73,8 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
   }, [disablePush])
 
   const handleNextInput = (e : React.ChangeEvent<HTMLInputElement>, indexToUpdate: number) => {
-    console.log(indexToUpdate);
     e.preventDefault();
+
     if (Object.keys(e.target.value).length > 1)
     {
       if(e.target.value[0] !== e.target.placeholder)
@@ -86,7 +86,7 @@ const VerifTfa = ({setTfaSuccess, userId} : {setTfaSuccess : Dispatch<SetStateAc
         prevCells.map((cell, idx) =>
         idx === indexToUpdate ? e.target.value : cell
       )
-      );
+    );
     if (e.target.value !== "")
     {
     const fieldName = e.target.id.split('n')[1];
