@@ -19,7 +19,6 @@ const PrivateRoutes = () => {
     const checkAuth = async () => {
 
       try{
-        console.log('ici commence le private routes');
         const response = await axiosPrivate.get(AUTH_VERIF_PATH);
 
         if (response !== undefined) 
