@@ -106,57 +106,6 @@ const UserProfile = () => {
     setFriendStatus(newstatus);
   };
 
-  // const getUserProfile = async () => {
-  //   try {
-  //     const token = getToken();
-  //     const response: AxiosResponse = axiosPrivate).get(
-  //       "users/profile/" + paramUserId,
-  //       {
-  //         headers: {
-  //           Authorization: "Bearer " + token["access_token"],
-  //         },
-  //       }
-  //     );
-  //     return response.data;
-  //   } catch (err: any) {
-  //     console.log("error getme");
-  //     if (!err?.response) {
-  //       setErrMsg("No Server Response");
-  //     } else if (err.response?.status === 403) {
-  //       setErrMsg("Invalid Credentials");
-  //     } else {
-  //       setErrMsg("Unauthorized");
-  //     }
-  //     return {} as NeutralUser;
-  //   }
-  // };
-
-  // const checkIsFriend = async (id: number) => {
-  //   try {
-  //     const token = getToken();
-  //     const response: AxiosResponse = axiosPrivate).get(
-  //       GET_STATUS_PATH + id.toString(),
-  //       {
-  //         headers: {
-  //           Authorization: "Bearer " + token["access_token"],
-  //         },
-  //       }
-  //     );
-  //     return response.data;
-  //   } catch (err: any) {
-  //     console.log("error getme");
-  //     if (!err?.response) {
-  //       setErrMsg("No Server Response");
-  //     } else if (err.response?.status === 403) {
-  //       setErrMsg("Invalid Credentials");
-  //     } else {
-  //       setErrMsg("Unauthorized");
-  //     }
-  //     return "" as string;
-  //   }
-  // };
-//TODO change axiosAuthToken
-
   useEffect(() => {
     const treatData = async () => {
 	try
