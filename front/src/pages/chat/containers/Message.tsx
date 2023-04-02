@@ -1,15 +1,15 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { AxiosInstance, AxiosResponse } from "axios";
 import { useParams } from "react-router-dom";
-import { ChatRoom } from "ft_transcendence";
 import { Socket, io } from "socket.io-client";
-import { User, Message, MessageType } from "ft_transcendence";
+import { User, Message, MessageType, ChatRoom } from "ft_transcendence";
 import { formatRemainTime } from "../utils/Penalty";
 
 import "./message.style.css";
 import style from "../inputs/InputButton.module.css"
 import useAxiosPrivate from "src/hooks/usePrivate";
 import AuthContext from "src/context/TokenContext";
+import { trimUsername } from "src/utils/trim";
 function MessagesContainer() { 
   const axiosPrivate = useAxiosPrivate();
   const {token} = useContext(AuthContext);
@@ -162,7 +162,7 @@ function MessagesContainer() {
             <div className="chat-container-receiver">
               <div className="chat-text-container-receiver">
                 <a className="a" href={"/user/" + newMessage.user.id}>
-                  {newMessage?.user?.username}
+                  {trimUsername(newMessage?.user?.username, 10)}
                 </a>
                 <div className="dot">{":"}</div>
                 <p className="chat-text">{newMessage.message}</p>
@@ -177,7 +177,7 @@ function MessagesContainer() {
           <div className="chat-container-sender">
             <span className="date">{genDate(newMessage)}</span>
             <div className="chat-text-container-sender">
-              <span className="chatUsername">{newMessage?.user?.username}</span>
+              <span className="chatUsername">{trimUsername(newMessage?.user?.username, 10)}</span>
               <div className="dot">{":"}</div>
               <p className="chat-text">{newMessage.message}</p>
             </div>

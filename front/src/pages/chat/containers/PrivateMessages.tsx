@@ -51,16 +51,17 @@ function PrivateMessages() {
     scrollToBottom();
   }, [stateMessages]);
 
-	const fetchChallenge = useCallback(async () =>
-	{
-		axiosInstance.current = axiosPrivate;
-		await axiosInstance.current!.get("/challenge/myChallenges").then((response) => {
-		if (response.data)
-			setChallenges(response);
-     		}).catch((e) => {
-               console.log('error: ', e);
-       	});
-	}, [axiosPrivate]);
+  const fetchChallenge = useCallback(async () => {
+    axiosInstance.current = axiosPrivate;
+    await axiosInstance
+      .current!.get("/challenge/myChallenges")
+      .then((response) => {
+        if (response.data) setChallenges(response);
+      })
+      .catch((e) => {
+        console.log("error: ", e);
+      });
+  }, [axiosPrivate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,19 +102,21 @@ function PrivateMessages() {
           };
           joinRoom().then(function (data) {
             room.current = data;
-          const getAllMessages = async () => {
-            axiosInstance.current = axiosPrivate;
-            await axiosInstance
-            .current!.get("/message/private/" + JSON.stringify(room.current))
-            .then((response) => {
-                setStateMessages(response.data);
-              })
-              .catch((e) => {
-                console.log('error: ', e);
-              });
-          };
-          getAllMessages()
-           	setInitSocket(true);
+            const getAllMessages = async () => {
+              axiosInstance.current = axiosPrivate;
+              await axiosInstance
+                .current!.get(
+                  "/message/private/" + JSON.stringify(room.current)
+                )
+                .then((response) => {
+                  setStateMessages(response.data);
+                })
+                .catch((e) => {
+                  console.log("error: ", e);
+                });
+            };
+            getAllMessages();
+            setInitSocket(true);
           });
 
           socket.current!.on(
@@ -139,7 +142,6 @@ function PrivateMessages() {
   }, [friendId.userId, fetchChallenge]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-
     event.preventDefault();
     if (!inputMessage?.length) return;
 
@@ -189,7 +191,7 @@ function PrivateMessages() {
             <div className="chat-container-receiver">
               <div className="chat-text-container-receiver">
                 <span className="chatUsername">
-                  {newMessage?.user?.username}
+                  {trimUsername(newMessage?.user?.username, 8)}
                 </span>
                 <div className="dot">{":"}</div>
                 <p className="chat-text">{newMessage.message}</p>
@@ -214,7 +216,9 @@ function PrivateMessages() {
         <div className="chat-container-sender">
           <span className="date">{genDate(newMessage)}</span>
           <div className="chat-text-container-sender">
-            <span className="chatUsername">{newMessage?.user?.username}</span>
+            <span className="chatUsername">
+              {trimUsername(newMessage?.user?.username, 8)}
+            </span>
             <div className="dot">{":"}</div>
             <p className="chat-text">{newMessage.message}</p>
           </div>
