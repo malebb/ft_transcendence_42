@@ -241,11 +241,6 @@ const ChatRoomBase = () =>
 		e.preventDefault();
 		if (regexPassword.current.test(e.currentTarget.value) && e.currentTarget.value.length <= 4)
 			setPassword(e.currentTarget.value);
-		if (!regexPassword.current.test(e.currentTarget.value))
-		{
-			setPasswordInfo('only digits :');
-			document.getElementById(style.passwordInfo)!.style.color = 'red';
-		}
 	}
 
 	const passwordSection = () =>
@@ -257,7 +252,7 @@ const ChatRoomBase = () =>
 						<label id={style.passwordInfo}>{passwordInfo}</label>
 						<input type="password"
 							onChange={updatePassword}
-							autoComplete="on"
+							autoComplete="off"
 							value={password}
 							className={style.passwordInput}
 						/>
@@ -675,7 +670,7 @@ const ChatRoomBase = () =>
 									style.currentMember} key={member.id}>
 									<div id={style.nameAndRole}>
 										<a className={style.link_user} href={"/user/" + member.id} >
-											{trimUsername(member.username, 16)}
+											{trimUsername(member.username, 13)}
 										</a>
 										{printRole(member)}
 									</div>

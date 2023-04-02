@@ -64,9 +64,9 @@ const UserProfile = () => {
 
   const popupTitle = "WARNING";
   const popupContentRemoveFriend =
-    "Are you sure you want to remove this person from your friends list? This action is final and you will not be able to recover it.";
+    "Are you sure you want to remove this person from your friends list?";
   const popupContentRemoveWait =
-    "Are you sure you want to remove this person from your waiting list? This action is final and you will not be able to recover it.";
+    "Are you sure you want to remove this person from your waiting list?";
   // const userSessionId = userId!;
 
   const handleUnfriendClick = (): void => {
