@@ -336,7 +336,7 @@ function Rooms()
 							joinRoom(chatRoom.name);
 				}
 				return (	<>
-								<p className="owner">Owner : {trimUsername(chatRoom.owner.username, 15)}</p>
+								<p className="owner">Owner : {trimUsername(chatRoom.owner.username, 13)}</p>
 								{accessibilityLogo(chatRoom.accessibility)}
 							</>
 						);
@@ -392,7 +392,7 @@ function Rooms()
 					chatRoomsList.map((chatRoom) => {
 						return (
 							<li className="chatRoom" key={chatRoom.name} onClick={() => updateSelectChatRoom(chatRoom.name)}>
-								<h3 className="roomTitleNotJoined">{chatRoom.name}</h3>
+								<h3 className="roomTitleNotJoined">{trimUsername(chatRoom.name, 15)}</h3>
 						<div className="roomInfo">
 								{printRoomInfo(chatRoom)}
 						</div>

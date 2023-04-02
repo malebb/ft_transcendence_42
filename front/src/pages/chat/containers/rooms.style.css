@@ -212,6 +212,7 @@ select:focus
 {
 	margin: 0px;
 	width: 180px;
+	white-space: nowrap;
 }
 
 .lock
