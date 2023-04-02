@@ -454,8 +454,7 @@ export default function Canvas()
 			}
 			catch (error: any)
 			{
-				if (error.response && error.response.status === 404)
-					redirectAfterChallenge();
+				console.log('error:', error);
 			}
 		}
 
@@ -677,10 +676,7 @@ export default function Canvas()
 			}
 			catch (error: any)
 			{
-				if (error.response && error.response.status === 404)
-					redirectAfterChallenge();
-				else
-					setIsChallenger(false);
+				setIsChallenger(false);
 			}
 		}
 		else

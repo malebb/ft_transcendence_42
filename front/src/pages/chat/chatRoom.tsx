@@ -238,6 +238,7 @@ const ChatRoomBase = () =>
 
 	const updatePassword = (e: React.FormEvent<HTMLInputElement>) =>
 	{
+		e.preventDefault();
 		if (regexPassword.current.test(e.currentTarget.value) && e.currentTarget.value.length <= 4)
 			setPassword(e.currentTarget.value);
 		if (!regexPassword.current.test(e.currentTarget.value))
