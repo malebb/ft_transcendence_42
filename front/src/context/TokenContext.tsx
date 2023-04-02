@@ -1,7 +1,5 @@
-import { AxiosResponse } from "axios";
-import React, { createContext, useState, useEffect } from "react";
-import { axiosMain } from "src/api/axios";
-import { SignInterface, TokensInterface } from "src/interfaces/Sign";
+import React, { createContext, useState } from "react";
+import { TokensInterface } from "src/interfaces/Sign";
 
 type AuthContextType = {
   token: TokensInterface | undefined | null;
@@ -21,33 +19,12 @@ const iAuthContextState = {
   setUserId: () => {},
 };
 
-const REFRESH_PATH = 'auth/refresh'
-
 const AuthContext = createContext<AuthContextType>(iAuthContextState);
 
 export const AuthProvider = ({ children }: { children: any }) => {
   const [token, setToken] = useState<TokensInterface>();
   const [username, setUsername] = useState<string>();
   const [userId, setUserId] = useState<number>();
-
-  const checkRTCookie = async() => {
-
-      try{
-        // await refresh();
-      const response : AxiosResponse = await axiosMain.post<SignInterface>(REFRESH_PATH);
-      // setUsername(response.data.username!);
-      // setUserId(response.data.id);
-      setToken(response.data.tokens)
-      setUsername(response.data.username)
-      setUserId(response.data.userId)
-      }catch(err: any)
-      {
-      }
-    }
-
-  useEffect(() => {
-    checkRTCookie();
-  }, [])
 
   return (
     <AuthContext.Provider
