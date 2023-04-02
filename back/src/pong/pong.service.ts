@@ -77,7 +77,6 @@ export class PongService {
 					await this.challengeService.deleteChallenge(this.challengers[i].challengeId, this.challengers[i].challenger.userId);
 				}
 				catch (error: any) {
-					console.log('error (delete challenge) :', error);
 				}
 				this.challengers.splice(i, 1);
 			}
@@ -150,7 +149,6 @@ export class PongService {
 			this.gameService.addGame(roomId, leftPlayer.userId, rightPlayer.userId);
 		}
 		catch (error: any) {
-			console.log('error (add game to spectate) :', error);
 		}
 		return (
 			{
@@ -229,7 +227,6 @@ export class PongService {
 					this.gameService.removeGame(roomToLeave);
 				}
 				catch (error: any) {
-					console.log('error (remove game to spectate) :', error);
 				}
 				player.to(roomToLeave).emit("opponentDisconnection");
 				this.rooms[roomToLeave].playerGoneCount++;
@@ -392,7 +389,6 @@ export class PongService {
 								server.to(roomId).emit('endGame', scorer);
 							}
 							catch (error: any) {
-								console.log('error (updating history / stats / achievements) :', error);
 							}
 						}
 					}
@@ -411,7 +407,6 @@ export class PongService {
 								server.to(roomId).emit('endGame', scorer);
 							}
 							catch (error: any) {
-								console.log('error (updating history / stats / achievements) :', error);
 							}
 						}
 					}

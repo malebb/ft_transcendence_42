@@ -180,7 +180,6 @@ export class AuthService {
         username: user.username,
       };
     } catch (error) {
-      console.log(error);
       if (error.code === 'P2002' && error.meta.target[0] === 'email') {
         throw new ForbiddenException('42 Email already taken');
       }
