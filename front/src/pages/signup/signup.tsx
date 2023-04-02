@@ -13,9 +13,7 @@ import '../../styles/signup.css'
 import Headers from "src/components/Headers";
 import { SocketContext } from '../../context/SocketContext';
 import AuthContext from "src/context/TokenContext";
-// eslint-disable-next-line
 const EMAIL_REGEX = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-// eslint-disable-next-line
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%&*^()-_=]).{8,24}$/;
 const SIGNUP_PATH = "/auth/signup";

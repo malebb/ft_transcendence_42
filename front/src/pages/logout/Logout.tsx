@@ -34,7 +34,6 @@ const Logout = () => {
         setIsLoading(false);
       };
       logout();
-// eslint-disable-next-line
     }, []);
 
     useEffect(() => {

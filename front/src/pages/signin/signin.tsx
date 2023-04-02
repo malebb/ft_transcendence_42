@@ -85,20 +85,11 @@ const Signin = () => {
     setErrMsg("");
   }, [email, pwd]);
 
-  /*const Login42 = async () => {
-      /*const response: AxiosResponse = await axiosMain.get('https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code',
-        {
-          headers: {'Access-Control-Allow-Origin': '*',
-          /*'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-          'Access-Control-Allow-Credentials': 'true'*/
-  // }
-  // }
-  // );
-  // }*/
-
   const handle42Button = () => {
-    window.location.href =
-        "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code";
+	const redirect42 = process.env.OAUTH_REDIRECT_URI;
+	console.log(process.env.PATH);
+	if (redirect42)
+    	window.location.href = redirect42;
     }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -264,11 +255,6 @@ button img{position: relative;
             </button>
           </form>
           <div>
-            {/* <button
-              className="btn btn-transparent"
-              type="button"
-              onClick={handle42Button}
-            > */}
               <input type="image"
                 draggable='false'
                 className="ft_button"
@@ -277,8 +263,6 @@ button img{position: relative;
                 src="https://upload.wikimedia.org/wikipedia/commons/8/8d/42_Logo.svg"
                 width="60"
               />
-              {/* <a href='https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-ecce62647daf96b7bacb9e099841e3bf1c1cd04a5c5a259d4e5ff2b983d248b2&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fsignin%2F42login%2Fcallback&response_type=code'>LOGIN AS STUDENT</a> */}
-            {/* </button> */}
           </div>
           <div className="signup_div_signin">
             <p>Don't have an account?</p>
