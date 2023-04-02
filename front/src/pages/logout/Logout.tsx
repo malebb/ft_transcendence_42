@@ -34,7 +34,8 @@ const Logout = () => {
         setIsLoading(false);
       };
       logout();
-    }, [socket, axiosPrivate, context]);
+// eslint-disable-next-line
+    }, []);
 
     useEffect(() => {
       if (errMsg)

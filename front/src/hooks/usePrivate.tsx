@@ -10,6 +10,7 @@ const useAxiosPrivate = () => {
     useEffect(() => {
         const requestIntercept = axiosPrivate.interceptors.request.use(
             async (config) => {
+                console.log(config.url);
                 if (context.token === undefined)
                 {
                     const newAccessToken = await refresh();
