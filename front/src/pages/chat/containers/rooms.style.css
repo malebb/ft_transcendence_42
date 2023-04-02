@@ -163,7 +163,7 @@ select:focus
 {
 	position: static;;
    width: 280px;
-	height: 87px;
+	height: 100px;
    background-color: var(--tertiary);
    border: 1px, solid;
    border-radius: 5px;

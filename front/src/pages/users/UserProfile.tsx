@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useContext, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { AxiosResponse, AxiosInstance, AxiosHeaders } from "axios";
 import { axiosAuthReq, HTTP_METHOD, axiosPrivate } from "../../api/axios";
 import "../../styles/UserProfile.css";
@@ -61,7 +61,6 @@ const UserProfile = () => {
 
   const axiosInstance = useRef<AxiosInstance | null>(null);
   const [isUser, setIsUser] = useState<boolean>(false);
-  const navigate = useNavigate();
 
   const popupTitle = "WARNING";
   const popupContentRemoveFriend =
@@ -157,15 +156,11 @@ const UserProfile = () => {
   //   }
   // };
 //TODO change axiosAuthToken
-  useEffect(() => {
-		if (!/^[0-9]*$/.test(paramUserId!))
-		{
-			navigate('/404');
-		}
 
-  }, [paramUserId, navigate])
   useEffect(() => {
     const treatData = async () => {
+	try
+	{
       const profile = await axiosAuthReq(HTTP_METHOD.GET, GET_USER_PROFILE + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setUser);
       if (profile === undefined) return ;
       if (profile !== undefined){
@@ -176,8 +171,15 @@ const UserProfile = () => {
           );
        	 await axiosAuthReq(HTTP_METHOD.GET, GET_STATUS_PATH + paramUserId, {} as AxiosHeaders, {}, setErrMsg, setFriendStatus);
       }
+	}
+		catch (error: any)
+	{
+		console.log('error: ', error);	
+	}
     };
-    treatData();
+		if (/^[0-9]*$/.test(paramUserId!))
+ 		   treatData()
+
   }, [paramUserId]);
 
   const deleteRequest = async (confirmed: boolean): Promise<void> => {
@@ -325,7 +327,8 @@ const UserProfile = () => {
 				console.log('error :', error);
 			}
 		}
-		checkIfUserExist();
+		if (/^[0-9]*$/.test(paramUserId!))
+			checkIfUserExist();
   }, [paramUserId]);
 
   function openMessage(): void {
@@ -343,13 +346,14 @@ const UserProfile = () => {
 			{
 				try
 				{
-				axiosInstance.current = axiosPrivate;
-				const response: AxiosResponse = await axiosInstance.current.get('/users/me');
-				setCurrentUser(response.data);
+					axiosInstance.current = axiosPrivate;
+					const response: AxiosResponse = await axiosInstance.current.get('/users/me');
+					setCurrentUser(response.data);
 				}
 				catch (error: any) { console.log('error: ', error)}
 			}
-			initCurrentUser();
+			if (/^[0-9]*$/.test(paramUserId!))
+				initCurrentUser();
 		}, []);
 
 		if (currentUser && currentUser.id !== Number(paramUserId))

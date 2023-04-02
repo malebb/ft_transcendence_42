@@ -105,7 +105,7 @@ const Achievements = () => {
   	useEffect(() => {
 		if (!/^[0-9]*$/.test(paramUserId!))
 		{
-			navigate('/404');
+			navigate(-1);
 		}
 
   	}, [paramUserId, navigate])

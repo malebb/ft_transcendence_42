@@ -129,7 +129,6 @@ export class AuthService {
         // },
       );
 
-      console.log('access_token' + response.data.access_token);
       const getprofile: AxiosResponse = await axios.get(
         'https://api.intra.42.fr/v2/me',
         {

@@ -239,7 +239,6 @@ function PrivateMessages() {
   };
 
   const createInvitation = async (member: User, powerUpMode: boolean) => {
-  console.log('member = ', member);
     try {
       axiosInstance.current = axiosPrivate;
       const challengeResponse = await axiosInstance.current.post(

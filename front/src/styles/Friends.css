@@ -70,7 +70,8 @@ main {
   background-color: #c07622;
   border: none;
   padding: 5px 10px 5px 10px;
-  border-radius: 5px;
+  border-radius: 7px;
+  height: 20px;
 }
 .profileButtonCancel:hover {
   box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
